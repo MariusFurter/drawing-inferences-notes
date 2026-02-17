@@ -13,3 +13,6 @@ __pycache__/
 /.quarto/
 
 **/*.quarto_ipynb
+
+# Old drawing inference
+_old_material/

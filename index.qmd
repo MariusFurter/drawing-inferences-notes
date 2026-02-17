@@ -1,24 +1,119 @@
 # Preface {.unnumbered}
 
-This book is about drawing inference — using data, models, and computation to reason under uncertainty.
+Welcome to **Drawing Inferences** − a course on model-based reasoning! This course aims to teach statistical modeling in an intuitive and accessible manner. Our approach will be...
 
-## How to use this book
+1. **Principled** — We build strong foundations. We motivate every step. We value conceptual clarity over computational efficiency.
+2. **Code-based** — We write code instead of formulas. We run simulations instead of calculating.
+3. **Compositional** — We build models out of simple parts. We refine our models by tinkering.
+4. **Visual** — We draw model structure. We give visual proofs. We plot results.
 
-Chapters combine mathematical exposition with runnable Python code. You can toggle code visibility using the **Code** button on any code block.
+In jargon, we will build *(causal) probabilistic graphical models* and solve them using *probabilistic programming*.
 
-```{python}
-#| label: fig-welcome
-#| fig-cap: "A simple plot to verify the setup works."
+## Introduction
 
-import numpy as np
-import matplotlib.pyplot as plt
+Life confronts us with fundamental questions on a daily basis:
 
-x = np.linspace(0, 2 * np.pi, 200)
-y = np.sin(x)
+1. What's happening? (Perception)
+2. Why is it happening? (Explanation)
+3. What should we do about it? (Action)
 
-plt.plot(x, y)
-plt.xlabel("x")
-plt.ylabel("sin(x)")
-plt.title("Hello, Quarto!")
-plt.show()
+This course is about finding explanations and choosing actions in situations we don't fully understand. We will do so by building probability models and drawing inferences from them.
+
+Models serve as explanations for what we are observing. They also predict likely outcomes of our actions and tell us what additional information is worth acquiring. Modeling is especially useful when situations are complex, the outcomes of decisions particularly important, or when we want to convince others of our conclusions.
+
+We will value models whose parts have clear interpretations and encode domain knowledge. This allows us to extract more information with less training data. Generally, our techniques will work well for datasets with $10$ to $10^4$ datapoints. We will also leverage deep learning and machine learning heuristics to solve our probability models more efficiently.
+
+## Contents
+
+The course is structured into seasons of episodes. The contents intersect and unify the following areas:
+
+1. Bayesian statistics
+2. Causal modeling
+3. Probabilistic machine learning
+4. Decision theory
+
+Most of the material can be found in the following books, although without explicit use of probabilistic programming:
+
+1. [Statistical rethinking (Richard McElreath)](https://xcelab.net/rm/statistical-rethinking/)
+2. Artificial intelligence: a modern approach (Russel & Norvig)
+3. [Probabilistic machine learning 1 & 2 (Kevin Murphy)](https://probml.github.io/pml-book/)
+4. [Pattern recognition and machine learning (Christopher Bishop)](https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/)
+5. [Bayesian data analysis (Gelman, Carlin, Stern, Dunson, Vehtari, Rubin)](http://www.stat.columbia.edu/~gelman/book/)
+6. [Causality (Judea Pearl)](http://bayes.cs.ucla.edu/BOOK-2K/)
+7. [Algorithms for decision making (Kochenderfer, Wheeler, Wray)](https://algorithmsbook.com)
+
+## Prerequisites
+
+The only prerequisite is some familiarity with programming (in any language). We will be coding in [Python](https://www.python.org) and [Julia](https://julialang.org). All of the syntax will be introduced along the way.
+
+## Guiding principles
+
+Learning statistics can be a bumpy ride. To make things smoother, we will stick to the following values.
+
+::: {.callout-tip}
+## Principled
+We build strong foundations. We motivate every step. We value conceptual clarity over computational efficiency.
+:::
+
+Statistics and machine learning is often presented as a collection of disparate techniques. This apparent lack of unity impedes understanding. In contrast, we will derive everything from solid foundations.
+
+::: {.callout-tip}
+## Code-based
+We write code instead of formulas. We run simulations instead of calculating.
+:::
+
+Mathematical prerequisites exclude many people who could benefit from modeling. We will avoid most math by focusing on coding and simulation.
+
+::: {.callout-tip}
+## Compositional
+We build models out of simple parts. We refine our models by tinkering.
+:::
+
+We will decompose complex models into manageable parts. This reduces modeling to understanding:
+
+1. Simple components
+2. Patterns of interconnection
+3. Methods for solving the resulting program
+
+Most of the course will involve learning new components, patterns for combining them, and increasingly sophisticated methods for performing inference.
+
+::: {.callout-tip}
+## Visual
+We draw model structure. We give visual proofs. We plot results.
+:::
+
+We will learn a powerful visual language for drawing models, based on [string diagrams](https://en.wikipedia.org/wiki/String_diagram). This language will allow us to reason about models in the form of visual proofs.
+
+```{mermaid}
+stateDiagram-v2
+    direction LR
+
+    classDef circ fill:#555,stroke:#555,color:#555,font-size:0px,min-width:0px,padding:0px
+
+
+    i1:::circ --> A
+    i2:::circ --> A
+    A --> B : d
+    A --> m:::circ
+    m --> B
+    m --> C
+    C --> B
+    m --> D
+    B --> o1:::circ
+    B --> o2:::circ
+
 ```
+
+## Jargon and attribution
+
+There is a plethora of unenlightening nomenclature associated with any technical field. Statistical modeling is no exception. For the sake of clear exposition, I will only use technical terms where I think appropriate. To compensate, some episodes will include a *further reading* section that attempts to connect to the literature.
+
+This brings me to the attribution of ideas. In general, you may assume that none of the ideas presented here are original. The theory of probabilistic graphical models and Monte Carlo sampling is well known. For general theory, I will refer to textbook accounts where one can find references to primary sources. In cases where I'm drawing from a specific paper or line of research, I will include citations. If you feel like your research is being used without proper attribution, please reach out to me.
+
+## How you can support the course
+
+The concepts I'm sharing here are some of the most interesting and useful ones I know. I feel that many people could benefit greatly from learning about them. If you find the course useful and feel the same way, I encourage you to spread the word. You can support me by:
+
+- Telling your friends
+- Sharing / linking the course on social media
+- Liking and subscribing on YouTube

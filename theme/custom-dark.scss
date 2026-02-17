@@ -1,0 +1,22 @@
+/*-- scss:defaults --*/
+
+// Fonts — Poppins for headings (matching old Obsidian theme)
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+// Brand colors from old Style Guide
+$red:       #ff7577;
+$blue:      #76a5db;
+$seaweed:   #87d6c5;
+
+// Theme colors
+$primary:       $red;
+$link-color:    $blue;
+$body-color:    #EEEEEE;
+$body-bg:       #1e1e1e;
+
+// Fonts
+$font-size-base:    0.9rem; // relative size
+$headings-font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+
