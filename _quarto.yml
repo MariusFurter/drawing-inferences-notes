@@ -6,13 +6,14 @@ book:
   title: "Drawing Inferences"
   author: "Marius Furter"
   date: today
-  sidebar:
-    logo: images/drawing-inferences-logo.png
-    tools: []
   navbar:
     background: none
     title: " "
     search: true
+  sidebar:
+    logo: images/drawing-inferences-logo.png
+    tools: []
+  reader-mode: true
   chapters:
     - index.qmd
     - chapters/intro.qmd
