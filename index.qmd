@@ -84,24 +84,10 @@ We draw model structure. We give visual proofs. We plot results.
 
 We will learn a powerful visual language for drawing models, based on [string diagrams](https://en.wikipedia.org/wiki/String_diagram). This language will allow us to reason about models in the form of visual proofs.
 
-```{mermaid}
-stateDiagram-v2
-    direction LR
-
-    classDef circ fill:#555,stroke:#555,color:#555,font-size:0px,min-width:0px,padding:0px
-
-
-    i1:::circ --> A
-    i2:::circ --> A
-    A --> B : d
-    A --> m:::circ
-    m --> B
-    m --> C
-    C --> B
-    m --> D
-    B --> o1:::circ
-    B --> o2:::circ
-
+``` {.tikz file="index/fire-alarm.tikz"}
+%%| label: fire-alarm
+%%| fig-cap: A string diagram representing a causal model for a fire alarm.
+%%| height: 100
 ```
 
 ## Jargon and attribution
@@ -115,5 +101,4 @@ This brings me to the attribution of ideas. In general, you may assume that none
 The concepts I'm sharing here are some of the most interesting and useful ones I know. I feel that many people could benefit greatly from learning about them. If you find the course useful and feel the same way, I encourage you to spread the word. You can support me by:
 
 - Telling your friends
-- Sharing / linking the course on social media
-- Liking and subscribing on YouTube
+- Sharing / linking the course

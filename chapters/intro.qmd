@@ -1,1 +1,130 @@
 # Introduction
+
+## The guessing game
+
+Let's play a game. I'm carrying a mystery object on me. Your goal is to guess what it is. I will reveal that the object can be described by three properties — its *material*, *shape*, and *weight*:
+
+| Property | Possible values |
+|----------|----------------|
+| Material ($M$) | rubber, gold |
+| Shape ($S$) | sphere, ring |
+| Weight ($W$) | 1g, 10g, 100g |
+
+Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it's more likely that the object is made of rubber than gold, because rubber is more common in everyday objects. You might also believe that if the object is a sphere, its more likely to be made of rubber. 
+
+I could quantify you relative belief in option $x$ vs. $y$ by by asking you how much you are willing to bet that $x$ is the true state rather than $y$. For instance, if you are indifferent between betting on $x$ and betting on $y$, then you believe they are equally likely. If you are willing to bet \$2 on $x$ to win \$1 if you're right, then you believe $x$ is twice as likely as $y$. 
+
+Now suppose you've chosen a combination of properties. I will reveal a clue.
+
+**Clue 1: The object is a ring.**
+
+What changes? If you previously bet on a sphere, you should switch — spheres have been ruled out. But if you already bet on a ring, should you change anything? How would confirming that the object is a ring change your beliefs about the remaining properties?
+
+Let's reveal another clue.
+
+**Clue 2: The object weighs 10g.**
+
+Now we can eliminate all objects that don't weigh 10g. We're left with just 2 possibilities: a rubber ring weighing 10g, or a gold ring weighing 10g. Which one seems more likely?
+
+Notice what we did: we started with a list of all possible objects and a belief about how likely each one was. Then, as we received new information, we *eliminated* the possibilities that were incompatible with the clues and *redistributed* our belief among the survivors. This process of updating beliefs in light of new evidence is called **conditioning on observed data**. It is the central operation in probabilistic reasoning.
+
+## Probability as counting
+
+Let's formalize this. Our starting point is a finite set $\Omega$ of *possible world states*. 
+
+[Logical operations are set operations.]
+
+For any subset $E \subseteq \Omega$, we define the **probability of $E$** to be the fraction of states in $E$:
+$$
+p(E) := \frac{|E|}{|\Omega|},
+$$
+where $|E|$ denotes the number of elements in $E$.
+
+This definition satisfies two basic properties:
+
+1. **Extremes.** The empty set has probability zero, and the full set has probability one: $p(\emptyset) = 0$ and $p(\Omega) = 1.$
+
+2. **Additivity.** If $E_1$ and $E_2$ have no elements in common, then $p(E_1 \cup E_2) = p(E_1) + p(E_2).$
+
+From additivity, it follows that the probability of $E$ *not* happening is $p(E^\text{c}) = 1 - p(E)$. Also, since any set is the union of its individual elements, we get $p(E) = \sum_{e \in E} p(\{e\})$. In other words, the probability of any event is determined by the probabilities of individual states.
+
+## Conditioning
+
+The key operation in our guessing game was eliminating impossible states. Suppose we learn that the true state lies in some subset $F \subseteq \Omega$. For instance, $F$ might be the set of all ring-objects. How should we update our beliefs?
+
+States outside $F$ are now impossible, so they should receive probability zero. Among the states inside $F$, we have no new reason to prefer one over another, so their relative likelihood should remain unchanged. Hence, we *restrict* our attention to $F$ by replacing $\Omega$ with $F$. Similarly, each event $E \subseteq \Omega$ should be replaced by $E \cap F$ to remove any impossible states. Applying the definition of probability to the new sample space $F$ gives:
+$$
+p(E \mid F) := \frac{|E \cap F|}{|F|} = \frac{p(E \cap F)}{p(F)}.
+$$
+
+This is called **conditioning** on $F$. The expression $p(E \mid F)$ is **the conditional probability of $E$ given $F$"**.
+
+By rearranging the definition, we can express the joint probability $p(E \cap F)$ in terms of the conditional probability:
+$$
+p(E \cap F) = p(E \mid F) \, p(F).
+$$
+We will see a more general version of this identity later once we have better notation.
+
+## Random variables
+
+So far we have been talking about subsets of $\Omega$. In practice, we usually care about specific *properties* of the world. For instance, "the object is a ring" picks out all states $\omega \in \Omega$ for which the shape of $\omega$ is a ring. We can capture this with a **random variable** — a function that extracts a property from a world state.
+
+Formally, a random variable $X : \Omega \to \mathcal{X}$ maps each state $\omega$ to a value $X(\omega)$ in some set $\mathcal{X}$. In the guessing game, the shape variable $S : \Omega \to \{\text{sphere}, \text{ring}\}$ maps each object to its shape. Similarly, $M$ extracts material and $W$ extracts weight.
+
+The probability that $X$ takes a particular value $x$ is
+
+$$
+p(X = x) := p(\{\omega \in \Omega : X(\omega) = x\}).
+$$
+
+This is just our earlier definition applied to the subset of states where $X$ equals $x$. When the meaning is clear from context, we write $p(x)$ instead of $p(X = x)$ and call this the **distribution** of $X$.
+
+We can also talk about the *joint distribution* of two random variables $X$ and $Y$:
+
+$$
+p(x, y) := p(X = x \text{ and } Y = y).
+$$
+
+This tells us the probability of each combination of values. For instance, $p(\text{gold}, \text{ring})$ is the probability that the object is both gold and a ring.
+
+In this notation, conditioning becomes particularly clean. The conditional probability of $X = x$ given $Y = y$ is
+
+$$
+p(x \mid y) = \frac{p(x, y)}{p(y)}.
+$$
+
+## Bayes' rule
+
+The definition of conditioning hides a remarkably useful symmetry. By writing the joint probability two ways — once conditioning on $x$ and once on $y$ — we get
+
+$$
+p(x, y) = p(x \mid y) \, p(y) = p(y \mid x) \, p(x).
+$$
+
+Dividing through by $p(y)$ yields **Bayes' rule**:
+
+$$
+p(x \mid y) = \frac{p(y \mid x) \, p(x)}{p(y)}.
+$$
+
+Why is this useful? Often we want $p(x \mid y)$ — the probability of some hidden quantity $x$ given observed data $y$ — but it's easier to specify the relationship in the other direction: how likely is the data $y$ if the hidden state were $x$? Bayes' rule lets us flip the conditioning direction.
+
+The denominator $p(y)$ can be computed by summing the joint distribution over all possible values of $x$. This is the **marginalization** identity:
+
+$$
+p(y) = \sum_{x \in \mathcal{X}} p(x, y) = \sum_{x \in \mathcal{X}} p(y \mid x) \, p(x).
+$$
+
+Notice that $p(x \mid y) \propto p(x, y)$ when viewed as a function of $x$ for a fixed $y$ — the denominator $p(y)$ is the same for every $x$. This means we can compute $p(x \mid y)$ in two steps: first compute the unnormalized values $p(x, y)$ for each $x$, then divide by their sum to make them add up to one. This "compute then normalize" strategy is a recurring pattern in probabilistic inference.
+
+## Bayesian inference
+
+We can now describe the general recipe for reasoning under uncertainty.
+
+**Step 1: Build a generative model.** Specify a joint distribution $p(x, y)$ that describes how the world could generate both the hidden quantities $x$ and the observable data $y$. This is called a *generative model* because it tells a story about how the data came to be. In the guessing game, the generative model simply lists all 12 possible objects with equal probability — it's a model of how the mystery object could have been chosen.
+
+**Step 2: Condition on observed data.** Once we observe $y$, compute the *posterior distribution* $p(x \mid y)$ using Bayes' rule. This tells us what we should believe about $x$ in light of the evidence $y$.
+
+That's it. Bayesian inference is the process of building a generative model and then conditioning it on observed data to update our beliefs. Everything that follows in this course — from simple coin flips to complex causal models — is an instance of this pattern.
+
+The hard part, and the interesting part, is building good generative models. A generative model encodes our assumptions about the world: what variables are involved, how they relate to each other, and what values are possible. The richer and more faithful the model, the more informative the inference. In the coming chapters, we will learn to build generative models by composing simple probabilistic building blocks.

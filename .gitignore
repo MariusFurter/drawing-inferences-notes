@@ -1,6 +1,7 @@
 # Quarto build output
 _book/
 _freeze/
+*_files/
 
 # Python
 __pycache__/
@@ -14,5 +15,5 @@ __pycache__/
 
 **/*.quarto_ipynb
 
-# Old drawing inference
-_old_material/
+# hidden
+_hidden/
