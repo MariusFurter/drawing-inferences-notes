@@ -1,0 +1,24 @@
+# Preface {.unnumbered}
+
+This book is about drawing inference — using data, models, and computation to reason under uncertainty.
+
+## How to use this book
+
+Chapters combine mathematical exposition with runnable Python code. You can toggle code visibility using the **Code** button on any code block.
+
+```{python}
+#| label: fig-welcome
+#| fig-cap: "A simple plot to verify the setup works."
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.linspace(0, 2 * np.pi, 200)
+y = np.sin(x)
+
+plt.plot(x, y)
+plt.xlabel("x")
+plt.ylabel("sin(x)")
+plt.title("Hello, Quarto!")
+plt.show()
+```

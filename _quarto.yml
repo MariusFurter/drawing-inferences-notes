@@ -1,0 +1,25 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "Drawing Inferences"
+  author: "Marius Furter"
+  date: today
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+    code-fold: true
+    toc: true
+    number-sections: true
+    math: true
+
+execute:
+  freeze: auto
