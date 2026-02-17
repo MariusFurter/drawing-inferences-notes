@@ -1,3 +1,10 @@
+::: {.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+$$
+:::
+
 # Introduction
 
 Let's play a game. I'm carrying a mystery object on me. Your goal is to guess what it is. I will reveal that the object can be described by three properties — its *material*, *shape*, and *weight*:
@@ -54,13 +61,7 @@ $$
 p(E \mid F) := \frac{p(E \cap F)}{p(F)}.
 $$
 
-This process is called **conditioning** on $F$. The expression $p(E \mid F)$ is **the conditional probability of $E$ given $F$"**.
-
-By rearranging the definition, we can express the joint probability $p(E \cap F)$ in terms of the conditional probability:
-$$
-p(E \cap F) = p(E \mid F) \, p(F).
-$$
-We will see a more general version of this identity later once we have better notation.
+This process is called **conditioning** on $F$. The expression $p(E \mid F)$ is **the conditional probability of $E$ given $F$**.
 
 ### Random variables
 
@@ -74,7 +75,9 @@ $$
 
 This is called the **distribution** of $X$. It is just our earlier definition applied to the subset of states where $X$ equals $x$. When it is clear from context, we write $p(x)$ instead of $p(X = x)$ following the convention of writing uppercase letters for random variables the corresponding lowercase letters for their values.
 
-Every event $E$ can be thought of as a random variable $E : \Omega \to \{0, 1\}$ that maps each state $\omega$ to 1 if $\omega \in E$, and 0 otherwise. Hence the random variable notation includes the event notation as a special case.
+Every event $E$ can be thought of as a random variable $E : \Omega \to \{0, 1\}$ that maps each state $\omega$ to 1 if $\omega \in E$, and 0 otherwise. Hence the random variables include events as a special case.
+
+### Joint distributions
 
 We write the **joint distribution** of two random variables $X$ and $Y$ as:
 
@@ -90,12 +93,31 @@ $$
 p(x \mid y) = \frac{p(x, y)}{p(y)}.
 $$
 
-We can now also state the **chain rule** in general form:
+Rearranging the above gives us the **chain rule** for two variables:
 $$
-p(x, y \mid z) = p(x \mid y, z) \, p(y \mid z).
+p(x, y) = p(x \mid y) \, p(y).
 $$
 
-Here $Z = z$ can be any fixed background condition, including the empty condition. Any identity that holds without conditioning also holds given $Z = z$ since $p(- \mid z)$ is a probability measure.
+By applying the chain rule to the probability measure $p(- \mid z)$, we get a more general version of the chain rule that holds given any background condition $Z = z$:
+$$
+p(x, y \mid z) = p(x \mid y, z) \,p(y \mid z).
+$$
+
+As a general rule, any identity that holds without conditioning also holds given $Z = z$.
+
+### Conditional independence
+Two random variables $X$ and $Y$ are **conditionally independent given $Z$** if 
+$$
+p(x \mid y , z) = p(x \mid z).
+$$
+
+This means that once we know $Z$, learning $Y$ doesn't change our beliefs about $X$. In this case, the chain rule simplifies to
+
+$$ 
+p(x, y \mid z) = p(x \mid z) \, p(y \mid z).
+$$
+
+Conditional independence is a powerful simplifying assumption that allows us to break down complex joint distributions into simpler pieces.
 
 ### Bayes' rule
 The joint distribution of random variables $H$ and $D$ satisfies $p(h, d) = p(d, h)$ since intersections are symmetric $A \cap B = B \cap A$. Applying this and the chain rule to the definition of conditional probability gives **Bayes' rule**:
@@ -128,5 +150,132 @@ We can now describe the general recipe for reasoning under uncertainty.
 That's it, at least in principle. Bayesian inference is the process of building a generative model and then conditioning it on observed data to update our beliefs. Everything that follows in this course is an instance of this simple pattern. In this course we will learn powerful techniques for building generative models and computing posterior distributions. The challenge is that the more complex our model, the harder it is to compute the posterior distribution. Hence, as the course progresses we will learn increasingly sophisticated inference techniques.
 
 ## Graphical models
+We will now describe a convenient way to build and reason about generative models using a graphical language. This will allow us to visually manipulate complex models without having to resort to tedious algebraic calculations. At the end of the section, we will be able to interpret the following diagram as a generative model for a fire alarm:
+
+``` {.tikz file="index/fire-alarm.tikz"}
+%%| label: fire-alarm
+%%| fig-cap: A string diagram representing a causal model for a fire alarm.
+%%| height: 7em
+```
+
+### Kernels
+The basic building blocks of our models are called kernels. 
+
+::: {#def-discrete-kernel}
+Let $X$ and $Y$ be finite sets. A **discrete kernel** $f : X \kernel Y$ assigns each $x \in X$ and $y \in Y$ a non-negative real number $f(y \mid x)$. We call $f$ a **probability kernel** if it is normalized: $\sum_{y \in Y} f(y \mid x) = 1$ for every $x \in X$.
+:::
+
+As the notation suggests, we think of a probability kernel $f : X \kernel Y$ as specifying the conditional distribution $p(y \mid x)$ of $Y$ given $X$. Another perspective is to see $f$ as a **random function**: given input $x$, $f$ *randomly* selects an output $y$ according to the probabilities $f(y \mid x)$. A key feature of the definition is that the probability of $y$ depends *only* on the input $x$. In other words, once we know $x$, the output $y$ is independent of any other variable $w$:
+$$
+f(y \mid x) = p(y \mid x) = p(y \mid x, w).
+$$
+
+Unnormalized kernels arise in many contexts, including conditioning. For general kernels it is possible that $\sum_{y \in Y} f(y \mid x) = 0$ for some input $x$. In this case it assigns zero likelihood to every outcome and thus acts like a partial function that produces no output.
+
+We represent a kernel $f : X \kernel Y$ as a box with an input wire $X$ and an output wire $Y$:
+
+``` {.tikz file="intro/single-kernel.tikz"}
+%%| label: Kernel
+%%| fig-cap: A kernel $f : X \kernel Y$.
+%%| height: 3em
+```
+
+#### Sequential composition {.unnumbered}
+
+Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ to get a new kernel $g \then f : X \kernel Z$. This is called the **sequential composition** of $f$ and $g$. The symbol $\then$ is pronounced "then" since the input $x$ is processed first by $f$, then by $g$.
+
+``` {.tikz file="intro/sequential-composite-kernel.tikz"}
+%%| label: Sequential composite kernel
+%%| fig-cap: Sequential composition of kernels $f : X \kernel Y$ and $g : Y \kernel Z$.
+%%| height: 3em
+```
+
+The question is how to compute the composite kernel $g \then f$ from $f$ and $g$. Note that interpreting $f$ and $g$ as conditional distributions, the chain rule and conditional independence gives:
+
+$$
+\begin{aligned}
+    p(z \mid x) &= \sum_{y \in Y} p(z,y \mid x) =  \sum_{y \in Y} p(z \mid y, x) \, p(y \mid x) \\
+    &= \sum_{y \in Y} p(z \mid y) \, p(y \mid x) = \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
+\end{aligned}
+$$
+
+We take this as the definition of the composite kernel.
+
+::: {#def-sequential-composite-kernel}
+The **sequential composition** of kernels $f : X \kernel Y$ and $g : Y \kernel Z$ is the kernel $g \then f : X \kernel Z$ defined by
+$$
+(g \then f)(z \mid x) := \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
+$$
+:::
+
+#### Parallel composition {.unnumbered}
+
+Next, we can place two kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ side by side to get a new kernel $f_1 \otimes f_2 : X_1 \times X_2 \kernel Y_1 \times Y_2$. This is called the **parallel composition** of $f_1$ and $f_2$.
+
+``` {.tikz file="intro/parallel-composite-kernel.tikz"}
+%%| label: Parallel composite kernel
+%%| fig-cap: Parallel composition of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$.
+%%| height: 5.5em
+```
+
+Intuitively, the parallel composition $f_1 \otimes f_2$ represents the joint behavior of two independent processes. Interpreting $f_1$ and $f_2$ as independent conditional distributions, we have:
+$$
+p(y_1, y_2 \mid x_1, x_2) 
+= p(y_1 \mid y_2, x_1, x_2) \, p(y_2 \mid x_1, x_2)
+= p(y_1 \mid x_1) \, p(y_2 \mid x_2).
+$$
+
+We use this as the definition of the parallel composite kernel.
+
+::: {#def-parallel-composite-kernel}
+Given finite sets $X_1$ and $X_2$, we define their product
+$$
+    X_1 \otimes X_2 := X_1 \times X_2 = \{(x_1,x_2) \mid x_1 \in X_1 \text{ and } x_2 \in X_2\}
+$$
+to be the Cartesian product of sets. 
+The **parallel composition** of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ is the kernel $f_1 \otimes f_2 : X_1 \times X_2 \kernel Y_1 \times Y_2$ defined by
+$$
+(f_1 \otimes f_2)(y_1, y_2 \mid x_1, x_2) := f_1(y_1 \mid x_1   ) \, f_2(y_2 \mid x_2).
+$$
+::: 
+
+#### Bundling wires {.unnumbered}
+
+``` {.tikz file="intro/bundle.tikz"}
+%%| label: Multi-input multi-output kernel
+%%| fig-cap: A kernel $f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2$.
+%%| height: 4em
+```
+
+
+``` {.tikz file="intro/measure.tikz"}
+%%| label: A kernel representing a measure
+%%| fig-cap: A kernel $m : I \kernel X$ represents a measure on $X$.
+%%| height: 3em
+```
+
+[Add other options, will need to add equalities to tikz figures to render correctly.]
+
+#### Crossing wires {.unnumbered}
+
+
+
+#### Copying and deleting {.unnumbered}
+
+
+### Model building
+
+[Example of fire alarm model]
+
+### Evaluating models
+
+[Explain parsing rules.]
+
 
 ## Probabilistic programming
+
+[Sampling from probability kernels]
+
+[Explain how to interpret kernels as probabilistic program. Also, why it is sound.]
+
+
