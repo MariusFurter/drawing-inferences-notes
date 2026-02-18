@@ -9,11 +9,15 @@ $$
 
 Let's play a game. I'm carrying a mystery object on me. Your goal is to guess what it is. I will reveal that the object can be described by three properties — its *material*, *shape*, and *weight*:
 
+:::{.half-width}
+
 | Property | Possible values |
 |----------|----------------|
-| Material ($M$) | rubber, gold |
-| Shape ($S$) | sphere, ring |
-| Weight ($W$) | 1g, 10g, 100g |
+| Material | {rubber, gold} |
+| Shape    | {sphere, ring} |
+| Weight   | {1g, 10g, 100g} |
+
+:::
 
 Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it's more likely that the object is made of rubber than gold, because rubber is more common in everyday objects. You might also believe that if the object is a sphere, its more likely to be made of rubber. 
 
@@ -33,7 +37,7 @@ Now we can eliminate all objects that don't weigh 10g. We're left with just 2 po
 
 Notice what we did: we started with a list of all possible objects and a belief about how likely each one was. Then, as we received new information, we *eliminated* the possibilities that were incompatible with the clues and *redistributed* our belief among the survivors. This process of updating beliefs in light of new evidence is called **conditioning on observed data**. It is the central operation in probabilistic reasoning.
 
-## Probability
+## Probability basics
 Let's formalize our reasoning in the guessing game. We start with a finite set $\Omega$ of **possible world states**. For the guessing game, $\Omega$ could be the set of all 12 possible combinations of material, shape, and weight. The important thing is that $\Omega$ includes all the distinctions we care about.
 
 We call any subset $E \subseteq \Omega$ an **event**. An event picks out those world states in which some property holds. For instance, in the guessing game, the event "the object is a ring" is the set of all states $\omega \in \Omega$ where the shape is a ring. 
@@ -44,7 +48,7 @@ Logical operations on events correspond to set operations:
 - **or**: The event "$E_1$ or $E_2$" corresponds to the union $E_1 \cup E_2$ — the states where at least one holds.
 - **not**: The event "not $E$" corresponds to the complement $E^\text{c} = \Omega \setminus E$ — the states where $E$ fails to hold.
 
-We assign every subset $E \subseteq \Omega$ a number $p(E)$ that captures how likely we think $E$. If our assignment satisfies the following two properties, we call it a **probability measure** on $\Omega$:
+We assign every subset $E \subseteq \Omega$ a number $p(E)$ that captures how likely we think $E$ is. If our assignment satisfies the following two properties, we call it a **probability measure** on $\Omega$:
 
 1. **Normalization.** $p(\emptyset) = 0$ and $p(\Omega) = 1.$ We could choose a different scale, but this is the most convenient one. 
 
@@ -56,7 +60,7 @@ From additivity, it follows that the probability of $E$ *not* happening is $p(E^
 
 The key operation in our guessing game was eliminating impossible states. Suppose we learn that the true state lies in some subset $F \subseteq \Omega$. For instance, $F$ might be the set of all ring-objects. How should we update our probabilities?
 
-States outside $F$ are now impossible, so they should receive probability zero. Among the states inside $F$, we have no new reason to prefer one over another, so their relative likelihood should remain unchanged. Hence, we simply replace each event $E \subseteq \Omega$ by $E \cap F$ to remove any impossible states. Finally, we need to *renormalize* by $p(F)$, so that theses new probabilities take values between 0 and 1.
+States outside $F$ are now impossible, so they should receive probability zero. Among the states inside $F$, we have no new reason to prefer one over another, so their relative likelihood should remain unchanged. Hence, we simply replace each event $E \subseteq \Omega$ by $E \cap F$ to remove any impossible states. Finally, we need to *renormalize* by $p(F)$, so that these new probabilities take values between 0 and 1.
 $$
 p(E \mid F) := \frac{p(E \cap F)}{p(F)}.
 $$
@@ -73,7 +77,7 @@ $$
 p(X = x) := p(\{\omega \in \Omega : X(\omega) = x\}).
 $$
 
-This is called the **distribution** of $X$. It is just our earlier definition applied to the subset of states where $X$ equals $x$. When it is clear from context, we write $p(x)$ instead of $p(X = x)$ following the convention of writing uppercase letters for random variables the corresponding lowercase letters for their values.
+This is called the **distribution** of $X$. It is just our earlier definition applied to the subset of states where $X$ equals $x$. When it is clear from context, we write $p(x)$ instead of $p(X = x)$ following the convention of writing uppercase letters for random variables and the corresponding lowercase letters for their values.
 
 Every event $E$ can be thought of as a random variable $E : \Omega \to \{0, 1\}$ that maps each state $\omega$ to 1 if $\omega \in E$, and 0 otherwise. Hence the random variables include events as a special case.
 
@@ -105,39 +109,6 @@ $$
 
 As a general rule, any identity that holds without conditioning also holds given $Z = z$.
 
-### Conditional independence
-Two random variables $X$ and $Y$ are **conditionally independent given $Z$** if 
-$$
-p(x \mid y , z) = p(x \mid z).
-$$
-
-This means that once we know $Z$, learning $Y$ doesn't change our beliefs about $X$. In this case, the chain rule simplifies to
-
-$$ 
-p(x, y \mid z) = p(x \mid z) \, p(y \mid z).
-$$
-
-Conditional independence is a powerful simplifying assumption that allows us to break down complex joint distributions into simpler pieces.
-
-### Bayes' rule
-The joint distribution of random variables $H$ and $D$ satisfies $p(h, d) = p(d, h)$ since intersections are symmetric $A \cap B = B \cap A$. Applying this and the chain rule to the definition of conditional probability gives **Bayes' rule**:
-$$
-p(h \mid d) = \frac{p(h, d)}{p(d)} = \frac{p(d, h)}{p(d)} = \frac{p(d \mid h) \, p(h)}{p(d)}.
-$$
-
-Why is this useful? Often we want $p(h \mid d)$ — the probability of some hidden quantity $h$ given observable data $d$ — but it's easier to specify the relationship in the other direction: how likely is the data $d$ if the hidden state were $h$? Bayes' rule lets us flip the direction of conditioning.
-
-In Bayesian terminology, $p(h)$ is called the **prior distribution** — our beliefs about $h$ before seeing any data. The term $p(d \mid h)$ is called the **likelihood** — how likely we would be to see the data if $h$ were true. The denominator $p(d)$ is called the **evidence** — how likely we are to see the data under any possible hidden state. Finally, $p(h \mid d)$ is called the **posterior distribution** — our updated beliefs about $h$ after seeing the data.
-
-The denominator $p(d)$ is often unknown but can be computed by summing the joint distribution over all possible values of $d$. This is the **marginalization** identity:
-
-$$
-p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \, p(h).
-$$
-
-It holds since $\{\omega : D(\omega) = d\}$ can be written as a union $\bigcup_{h \in \mathcal{H}} \{\omega : H(\omega) = h, D(\omega) = d\}$ of mutually exclusive events.
-
-Notice that $p(h \mid d) \propto p(h, d)$ when viewed as a function of $h$ for a fixed $d$ — the denominator $p(d)$ is the same for every $h$. This means we can compute $p(h \mid d)$ in two steps: first compute the unnormalized values $p(h, d)$ for each $h$, then divide by their sum to make them add up to one. This "compute then normalize" strategy is a recurring pattern in probabilistic inference.
 
 ### Bayesian inference
 
@@ -147,135 +118,262 @@ We can now describe the general recipe for reasoning under uncertainty.
 
 **Step 2: Condition on observed data.** Once we observe $y$, compute the **posterior distribution** $p(x \mid y)$ by conditioning. This tells us what we should believe about $x$ in light of the evidence $y$.
 
-That's it, at least in principle. Bayesian inference is the process of building a generative model and then conditioning it on observed data to update our beliefs. Everything that follows in this course is an instance of this simple pattern. In this course we will learn powerful techniques for building generative models and computing posterior distributions. The challenge is that the more complex our model, the harder it is to compute the posterior distribution. Hence, as the course progresses we will learn increasingly sophisticated inference techniques.
+That's it, at least in principle. Bayesian inference is the process of building a generative model and then conditioning it on observed data to update our beliefs. Everything that follows in this course is an instance of this simple pattern. The challenge lies in carrying out each step: as our models grow more complex, both specifying the joint distribution and computing the posterior become harder. The rest of this section introduces two tools that help: **conditional independence** simplifies the task of building joint distributions (Step 1), and **Bayes' rule** provides a way to compute the posterior when the model is specified in a particular direction (Step 2).
 
-## Graphical models
-We will now describe a convenient way to build and reason about generative models using a graphical language. This will allow us to visually manipulate complex models without having to resort to tedious algebraic calculations. At the end of the section, we will be able to interpret the following diagram as a generative model for a fire alarm:
+### Conditional independence
 
-``` {.tikz file="index/fire-alarm.tikz"}
-%%| label: fire-alarm
-%%| fig-cap: A string diagram representing a causal model for a fire alarm.
-%%| height: 7em
-```
+When building a generative model, we need to specify the joint distribution over all variables of interest. For many variables, this quickly becomes intractable — a joint distribution over $n$ binary variables has $2^n - 1$ free parameters. Conditional independence provides a way to factor the joint into manageable pieces.
 
-### Kernels
-The basic building blocks of our models are called kernels. 
-
-::: {#def-discrete-kernel}
-Let $X$ and $Y$ be finite sets. A **discrete kernel** $f : X \kernel Y$ assigns each $x \in X$ and $y \in Y$ a non-negative real number $f(y \mid x)$. We call $f$ a **probability kernel** if it is normalized: $\sum_{y \in Y} f(y \mid x) = 1$ for every $x \in X$.
-:::
-
-As the notation suggests, we think of a probability kernel $f : X \kernel Y$ as specifying the conditional distribution $p(y \mid x)$ of $Y$ given $X$. Another perspective is to see $f$ as a **random function**: given input $x$, $f$ *randomly* selects an output $y$ according to the probabilities $f(y \mid x)$. A key feature of the definition is that the probability of $y$ depends *only* on the input $x$. In other words, once we know $x$, the output $y$ is independent of any other variable $w$:
+Two random variables $X$ and $Y$ are **conditionally independent given $Z$** if 
 $$
-f(y \mid x) = p(y \mid x) = p(y \mid x, w).
+p(x \mid y , z) = p(x \mid z).
 $$
 
-Unnormalized kernels arise in many contexts, including conditioning. For general kernels it is possible that $\sum_{y \in Y} f(y \mid x) = 0$ for some input $x$. In this case it assigns zero likelihood to every outcome and thus acts like a partial function that produces no output.
+This means that once we know $Z$, learning $Y$ gives no additional information about $X$. In this case, the chain rule simplifies to
 
-We represent a kernel $f : X \kernel Y$ as a box with an input wire $X$ and an output wire $Y$:
-
-``` {.tikz file="intro/single-kernel.tikz"}
-%%| label: Kernel
-%%| fig-cap: A kernel $f : X \kernel Y$.
-%%| height: 3em
-```
-
-#### Sequential composition {.unnumbered}
-
-Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ to get a new kernel $g \then f : X \kernel Z$. This is called the **sequential composition** of $f$ and $g$. The symbol $\then$ is pronounced "then" since the input $x$ is processed first by $f$, then by $g$.
-
-``` {.tikz file="intro/sequential-composite-kernel.tikz"}
-%%| label: Sequential composite kernel
-%%| fig-cap: Sequential composition of kernels $f : X \kernel Y$ and $g : Y \kernel Z$.
-%%| height: 3em
-```
-
-The question is how to compute the composite kernel $g \then f$ from $f$ and $g$. Note that interpreting $f$ and $g$ as conditional distributions, the chain rule and conditional independence gives:
-
-$$
-\begin{aligned}
-    p(z \mid x) &= \sum_{y \in Y} p(z,y \mid x) =  \sum_{y \in Y} p(z \mid y, x) \, p(y \mid x) \\
-    &= \sum_{y \in Y} p(z \mid y) \, p(y \mid x) = \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
-\end{aligned}
+$$ 
+p(x, y \mid z) = p(x \mid z) \, p(y \mid z).
 $$
 
-We take this as the definition of the composite kernel.
+Conditional independence assumptions allow us to decompose a complex joint distribution into a product of simpler conditional distributions — each of which may involve only a few variables. This decomposition is the key to building tractable generative models, and we will see many examples throughout the course.
 
-::: {#def-sequential-composite-kernel}
-The **sequential composition** of kernels $f : X \kernel Y$ and $g : Y \kernel Z$ is the kernel $g \then f : X \kernel Z$ defined by
+### Bayes' rule
+
+Once we have a joint distribution, we need to condition it on the observed data. Sometimes the conditional $p(x \mid y)$ we want is not directly available from the way we built the model. For instance, a generative model typically specifies how data $d$ arises from a hidden state $h$ — i.e., $p(d \mid h)$ — but we want the reverse: $p(h \mid d)$. Bayes' rule lets us flip the direction of conditioning.
+
+Since the joint distribution is symmetric — $p(h, d) = p(d, h)$ — applying the chain rule gives **Bayes' rule**:
 $$
-(g \then f)(z \mid x) := \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
-$$
-:::
-
-#### Parallel composition {.unnumbered}
-
-Next, we can place two kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ side by side to get a new kernel $f_1 \otimes f_2 : X_1 \times X_2 \kernel Y_1 \times Y_2$. This is called the **parallel composition** of $f_1$ and $f_2$.
-
-``` {.tikz file="intro/parallel-composite-kernel.tikz"}
-%%| label: Parallel composite kernel
-%%| fig-cap: Parallel composition of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$.
-%%| height: 5.5em
-```
-
-Intuitively, the parallel composition $f_1 \otimes f_2$ represents the joint behavior of two independent processes. Interpreting $f_1$ and $f_2$ as independent conditional distributions, we have:
-$$
-p(y_1, y_2 \mid x_1, x_2) 
-= p(y_1 \mid y_2, x_1, x_2) \, p(y_2 \mid x_1, x_2)
-= p(y_1 \mid x_1) \, p(y_2 \mid x_2).
+p(h \mid d) = \frac{p(h, d)}{p(d)} = \frac{p(d \mid h) \, p(h)}{p(d)}.
 $$
 
-We use this as the definition of the parallel composite kernel.
+In Bayesian terminology, $p(h)$ is called the **prior distribution** — our beliefs about $h$ before seeing any data. The term $p(d \mid h)$ is called the **likelihood** — how likely we would be to see the data if $h$ were true. The denominator $p(d)$ is called the **evidence** — the total probability of seeing the data under any possible hidden state. Finally, $p(h \mid d)$ is called the **posterior distribution** — our updated beliefs about $h$ after seeing the data.
 
-::: {#def-parallel-composite-kernel}
-Given finite sets $X_1$ and $X_2$, we define their product
+The denominator $p(d)$ is often not directly available but can be computed by summing the joint distribution over all possible values of $h$. This is the **marginalization** identity:
+
 $$
-    X_1 \otimes X_2 := X_1 \times X_2 = \{(x_1,x_2) \mid x_1 \in X_1 \text{ and } x_2 \in X_2\}
+p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \, p(h).
 $$
-to be the Cartesian product of sets. 
-The **parallel composition** of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ is the kernel $f_1 \otimes f_2 : X_1 \times X_2 \kernel Y_1 \times Y_2$ defined by
-$$
-(f_1 \otimes f_2)(y_1, y_2 \mid x_1, x_2) := f_1(y_1 \mid x_1   ) \, f_2(y_2 \mid x_2).
-$$
-::: 
 
-#### Bundling wires {.unnumbered}
+It holds since $\{\omega : D(\omega) = d\}$ can be written as a union $\bigcup_{h \in \mathcal{H}} \{\omega : H(\omega) = h, D(\omega) = d\}$ of mutually exclusive events.
 
-``` {.tikz file="intro/bundle.tikz"}
-%%| label: Multi-input multi-output kernel
-%%| fig-cap: A kernel $f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2$.
-%%| height: 4em
-```
+Notice that $p(h \mid d) \propto p(h, d)$ when viewed as a function of $h$ for a fixed $d$ — the denominator $p(d)$ is the same for every $h$. This means we can compute $p(h \mid d)$ in two steps: first compute the unnormalized values $p(h, d)$ for each $h$, then divide by their sum to normalize. This "compute then normalize" strategy is a recurring pattern in probabilistic inference.
 
-
-``` {.tikz file="intro/measure.tikz"}
-%%| label: A kernel representing a measure
-%%| fig-cap: A kernel $m : I \kernel X$ represents a measure on $X$.
-%%| height: 3em
-```
-
-[Add other options, will need to add equalities to tikz figures to render correctly.]
-
-#### Crossing wires {.unnumbered}
-
-
-
-#### Copying and deleting {.unnumbered}
-
-
-### Model building
-
-[Example of fire alarm model]
-
-### Evaluating models
-
-[Explain parsing rules.]
+## String diagrams
 
 
 ## Probabilistic programming
 
-[Sampling from probability kernels]
+A **probabilistic program** is an ordinary program augmented with two key operations: drawing random values and conditioning on observed data. We specify a generative model as executable code, then use an inference algorithm to compute the posterior. We will illustrate this with a classic example from medical genetics: computing the risk of a genetic disorder based on a family tree.
 
-[Explain how to interpret kernels as probabilistic program. Also, why it is sound.]
+### Laws of heredity
 
+Human DNA is organized into 23 pairs of chromosomes. The 23rd pair determines sex: females have two X chromosomes (XX), while males have one X and one Y (XY). A child inherits one chromosome from each parent's pair as follows:
+
+- A mother (XX) passes one of her X chromosomes to her child (whether son or daughter) with equal probability.
+- A father (XY) passes his X chromosome to his daughters and his Y chromosome to his sons.
+
+Some genetic disorders are **X-linked**, meaning the relevant gene is located on the X chromosome. If the disorder is **recessive**, a female with one affected X and one normal X will typically not show symptoms. Such a female is called a **carrier**. A male, however, has only one X chromosome; if it carries the affected gene, he will manifest the disorder.
+
+In our scenario, we are tracking a rare X-linked recessive trait. We denote the normal allele by $X$ and the affected allele by $x$.
+
+- A male is affected if his genotype is $xY$, and unaffected if $XY$.
+- A female is a carrier if her genotype is $Xx$ (or $xX$). She would be affected if her genotype were $xx$, but this is extremely unlikely given the rarity of the disorder.
+
+### Problem: Twins and uncles
+
+Consider a woman, II2, who is pregnant with twin boys (III2 and III3). We want to know the probability that one or both of her unborn sons will be affected by the disorder. (We use standard pedigree notation: Roman numerals indicate generation and Arabic numerals indicate position within a generation.)
+
+![Pedigree](../images/intro/pedigree.jpg){height=15em fig-alt="A family tree with three generations."}
+
+Here is the evidence we have:
+
+1.  **Family History:** II2 has two affected uncles (I3 and I4) and an affected brother (II1).
+2.  **Previous Children:** II2 already has one son (III1) who is unaffected.
+3.  **Twins:** II2 is currently pregnant with male twins. The zygosity (identical vs. fraternal) is unknown. 
+    - **Monozygotic (MZ)** twins split from a single fertilized egg and share 100% of their genes. If one inherits the affected X, so does the other.
+    - **Dizygotic (DZ)** twins come from separate eggs and share 50% of their genes on average, like ordinary siblings. Their inheritance of the maternal X is independent.
+    - In the general population, the ratio of MZ to DZ is roughly 1:2. However, **among same-sex twins**, the ratio is approximately **1:1** because half of DZ twins are opposite-sex pairs, while all MZ twins are same-sex. Since we know the twins are both male, we assign equal probability to them being MZ or DZ.
+
+Because II2 has affected male relatives on her mother's side (uncles and brother), there is a significant chance her mother (I2) was a carrier. If I2 was a carrier, II2 might have inherited the affected gene, making her a carrier too. However, the fact that II2 has already had a healthy son (III1) provides evidence *against* her being a carrier. The question is how to balance these conflicting pieces of information to predict the status of the twins.
+
+We will build a generative model of this family tree and use conditioning to compute the probability in question.
+
+### Building a generative model
+
+#### Define variables {.unnumbered}
+
+The first step is to decide what variables to include. First, we note that I2 must be a carrier ($xX$) since her son II1 is affected, and she herself is unaffected. Hence, it is sufficient to model only II2 and her descendants III1–3. We do not need to model the older males (I3, I4, II1) or the fathers — their observed status is already captured by the inference that I2 is a carrier, and the fathers are assumed unaffected. 
+
+#### Draw a string diagram {.unnumbered}
+
+We next draw the structure of the generative model as a string diagram. The diagram should reflect the causal structure of the family tree and the laws of heredity.
+
+``` {.tikz file="intro/family-tree.tikz"}
+%%| label: family-tree
+%%| fig-cap: A string diagram representing a generative model for the family tree.
+%%| height: 6em
+```
+
+The boxes represent the processes that generate the genotypes of each person. Box $m$ generates the mother, box $s$ her son, and box $t$ the twins together.
+
+#### Specify boxes {.unnumbered}
+
+To proceed, we need to specify the precise process implemented by each box. For instance, the box $s$ determines the genotype of son III1 given the genotype of mother II2. Since we know that the father of III1 is unaffected, we have
+
+1. If II2 is $xX$, then III1 is $xY$ with probability $1/2$, or $XY$ with probability $1/2$.
+2. If II2 is $XX$, then III1 is $XY$ with probability $1$.
+
+In probability notation, we could write these facts as 
+$$
+\begin{aligned}
+&p(\mathsf{III1} = xY \mid \mathsf{II2} = xX) = 1/2,  \quad
+&p(\mathsf{III1} = XY \mid \mathsf{II2} = xX) = 1/2, \\
+&p(\mathsf{III1} = XY \mid \mathsf{II2} = XX) = 1, \quad
+&p(\mathsf{III1} = xY \mid \mathsf{II2} = XX) = 0.
+\end{aligned}
+$$
+
+In this simple case, it is possible to specify the conditional probabilities for each box, then apply the rules of probability to get the posterior distribution of interest. However, even for this simple problem this is quite tedious (try it!). In the next chapter, we will learn how to organize this computation using the string diagram.
+
+For now, we will approximate the solution by sampling from a probabilistic program that implements the generative model. This approach more clearly describes the generative process, and sampling-based methods will still work when our models become more complex and contain continuous variables. Each box in the diagram corresponds to a block of code that samples from the appropriate conditional distribution.
+
+### Rejection sampling
+
+The idea is to write a program that randomly simulates the process of generating the family tree according to the laws of heredity.  We can then run this program many times to get a large sample of possible family trees, and use this sample to estimate the probability that one or both twins are affected. The following Python code implements the generative process described by the string diagram:
+
+```{python}
+# | label: family-program
+# | fig-cap: A Python program that simulates the family tree.
+# | code-fold: false
+import random
+
+
+def family():
+    # (m) Generate II2
+    II2 = random.choice(["xX", "XX"])
+
+    # (s) Generate son III1
+    if II2 == "xX":
+        III1 = random.choice(["xY", "XY"])
+    elif II2 == "XX":
+        III1 = "XY"
+
+    # (t) Generate twins
+    is_MZ = random.choice([True, False])
+
+    if is_MZ:
+        # monozygotic twins
+        if II2 == "xX":
+            III2 = III3 = random.choice(["xY", "XY"])
+        elif II2 == "XX":
+            III2 = III3 = "XY"
+    else:
+        # dizygotic twins
+        if II2 == "xX":
+            III2 = random.choice(["xY", "XY"])
+            III3 = random.choice(["xY", "XY"])
+        elif II2 == "XX":
+            III2 = III3 = "XY"
+
+    return II2, III1, III2, III3
+```
+
+Sampling from `family()` gives us random draws from the prior joint distribution $p(\mathsf{II2},\mathsf{III1},\mathsf{III2},\mathsf{III3})$. We can estimate the probability of any event by counting the fraction of samples that satisfy the event. For example, to estimate $p(\mathsf{III1} = XY)$, we simply count the fraction of samples where III1 is unaffected. 
+ 
+To estimate conditional probabilities, we first filter the samples to only include those where the condition holds. The surviving samples are then draws from the conditional distribution — this is called **rejection sampling** because we *reject* (discard) all samples that are incompatible with the observed data and keep only the survivors. For instance, to estimate $p(\mathsf{III2} = \mathsf{III3} = xY \mid \mathsf{III1} = XY)$, we first select only those samples where III1 is unaffected, then count the fraction of those where both twins are affected.
+
+The following code implements this idea to estimate the probabilities of interest. Instead of gathering all samples in memory, we can simply keep track of the relevant counts as we go.
+
+```{python}
+N = 100_000
+random.seed(42)
+
+III3_unaffected = 0
+at_least_one_twin_affected = 0
+both_twins_affected = 0
+
+for i in range(N):
+
+    # Simulate a family tree
+    II2, III1, III2, III3 = family()
+
+    # Condition on III1 = XY (unaffected son)
+    if III1 == "XY":
+        III3_unaffected += 1
+        if III2 == "xY" or III3 == "xY":
+            at_least_one_twin_affected += 1
+        if III2 == "xY" and III3 == "xY":
+            both_twins_affected += 1
+
+print(
+    f"At least one twin affected: {at_least_one_twin_affected / III3_unaffected:.4f}",
+    f"\nBoth twins affected: {both_twins_affected / III3_unaffected:.4f}",
+)
+```
+
+We see that the results are close to the exact values $5/24 \approx 0.208$ and $1/8 = 0.125$, which can be obtained by direct calculation.
+
+### Vectorization
+
+To leverage modern hardware like GPUs, probabilistic programming often relies on **vectorized operations**. Instead of running the simulation in a loop $N$ times, we generate $N$ samples in parallel using tensors. We encode genotypes as binary values: 0 for unaffected ($XX$ or $XY$) and 1 for carrier or affected ($xX$ or $xY$). Here is the same model implemented using PyTorch:
+
+```{python}
+# | code-fold: false
+# | label: family-program-vectorized
+# | fig-cap: A vectorized implementation of the family tree simulation using PyTorch.
+import torch
+from torch.distributions import Bernoulli
+
+def family_v(N):
+    # (m) Generate II2
+    II2 = Bernoulli(torch.tensor(0.5)).sample((N,))
+
+    # (s) Generate son III1
+    III1 = Bernoulli(0.5 * II2).sample()
+
+    # (t) Generate twins
+    is_MZ = Bernoulli(torch.tensor(0.5)).sample((N,))
+    p_inherit = 0.5 * II2
+    III2 = Bernoulli(p_inherit).sample()
+    III3 = torch.where(is_MZ == 1, III2, Bernoulli(p_inherit).sample())
+
+    return II2, III1, III2, III3
+```
+
+This time we generate all $N$ samples at once. The resulting tensors have shape $(N,)$, where each entry corresponds to a different simulated family tree. We can then apply the same filtering and counting logic as before, but now using vectorized operations instead of loops.
+
+```{python}
+N = 100_000
+torch.manual_seed(42)
+
+# Generate samples (N-length vectors)
+II2, III1, III2, III3 = family_v(N)
+
+# Condition: Select indices where III1 is unaffected (0)
+mask = (III1 == 0).bool()
+
+# Filter samples
+III2_cond = III2[mask]
+III3_cond = III3[mask]
+
+# Compute stats on filtered samples
+# We first compute a 0-1 vector indicating the event
+# then take the mean to get fraction of samples satisfying the event.
+at_least_one = ((III2_cond == 1) | (III3_cond == 1)).float().mean()
+both = ((III2_cond == 1) & (III3_cond == 1)).float().mean()
+
+print(f"At least one twin affected: {at_least_one:.4f}")
+print(f"Both twins affected: {both:.4f}")
+```
+
+### Limitations
+
+While simple rejection sampling is intuitive, it faces a major hurdle: **conditioning on rare events**. If the observed data has a very low probability of occurring under our model (e.g. < 0.1%), we would have to discard most of our samples (e.g. 99.9% of samples). This is extremely inefficient. More advanced inference algorithms---such as **Importance Sampling**, **Markov Chain Monte Carlo (MCMC)**, and **Variational Inference**---address this by attempting to sample more directly from the high-probability regions of the posterior distribution, rather than blindly simulating from the prior.
+
+Another challenge is **implementation overhead**. As you can imagine, directly implementing vectorized code gets complicated very quickly, even for this simple approach to sampling. This is where **probabilistic programming languages (PPLs)** come in. They provide high-level abstractions that allow us to write code in a more intuitive way, close to the mathematical definition, while automatically handling the complex inference algorithms under the hood. We will learn to use several of these frameworks throughout the course.
+
+Despite the variety of algorithms, the usage pattern remains largely the same: we define a generative model, condition it on data, and receive a collection of samples from the posterior distribution. We then use these samples to estimate quantities of interest---like the probability of the twins being affected---by computing simple averages.
+
+### WeightedSampling.torch implementation
+We conclude by demonstrating how this problem can be implemented using the `WeightedSampling.torch` library. 
 
