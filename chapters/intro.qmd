@@ -180,6 +180,8 @@ Boxes can have any number of input and output wires. We think of boxes with no i
 %%| height: 2.5em
 ```
 
+String diagrams encode the structure of our model and make is easy to see which variables depend on each other. We will see in the next chapter how to read off conditional independence assumptions from the diagram, and how to use it to organize calculations.
+
 A key feature of string diagrams is that only their connectivity matters for determining their meaning. For instance, the following diagrams are considered the same:
 
 ```{.tikz file="intro/deformations.tikz"}
@@ -440,3 +442,4 @@ Despite the variety of algorithms, the usage pattern remains largely the same: w
 ### WeightedSampling.torch implementation
 We conclude by demonstrating how this problem can be implemented using the `WeightedSampling.torch` library. 
 
+## Exercises

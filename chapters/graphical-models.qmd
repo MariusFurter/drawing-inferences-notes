@@ -1,5 +1,5 @@
 # Graphical models
-We will now describe a convenient way to build and reason about generative models using a graphical language. This will allow us to visually manipulate complex models without having to resort to tedious algebraic calculations. At the end of the section, we will be able to interpret the following diagram as a generative model for a fire alarm:
+We will now describe graphical modeling with string diagrams in detail. This will allow us to visually manipulate complex models without having to resort to tedious algebraic calculations. At the end of the section, we will be able to interpret the following diagram as a probability distribution and tell which variables are conditionally independent of each other. Moreover, you will understand how to sample from this distribution by implementing a probabilistic program according to the structure of the diagram.
 
 ``` {.tikz file="index/fire-alarm.tikz"}
 %%| label: fire-alarm
@@ -115,6 +115,9 @@ $$
 ## Model building
 
 [Example of fire alarm model]
+
+## Reading off conditional independences
+
 
 ## Exact evaluation
 
