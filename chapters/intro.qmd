@@ -463,6 +463,3 @@ While simple rejection sampling is intuitive, it faces a major hurdle: **conditi
 Another challenge is **implementation overhead**. As you can imagine, directly implementing vectorized code gets complicated very quickly, even for this simple approach to sampling. This is where **probabilistic programming languages (PPLs)** come in. They provide high-level abstractions that allow us to write code in a more intuitive way, close to the mathematical definition, while automatically handling the complex inference algorithms under the hood. We will learn to use several of these frameworks throughout the course.
 
 Despite the variety of algorithms, the usage pattern remains largely the same: we define a generative model, condition it on data, and receive a collection of samples from the posterior distribution. We then use these samples to estimate quantities of interest---like the probability of the twins being affected---by computing simple averages.
-
-### WeightedSampling.torch implementation
-We conclude by demonstrating how this problem can be implemented using the `WeightedSampling.torch` library. 

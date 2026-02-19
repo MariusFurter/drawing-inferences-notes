@@ -6,7 +6,6 @@ book:
   title: "Drawing Inferences"
   author: "Marius Furter"
   date: today
-  #site-url: https://drawinginferences.com
   # navbar:
   #   background: none
   #   title: " "
@@ -53,6 +52,8 @@ format:
   html:
     theme:
       light: [cosmo, theme/custom-light.scss]
+    html-math-method: mathjax
+    include-in-header: theme/mathjax-config.html
     code-fold: true
     toc: true
     number-sections: true

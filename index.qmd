@@ -21,11 +21,11 @@ This course is about finding explanations and choosing actions in situations we 
 
 Models serve as explanations for what we are observing. They also predict likely outcomes of our actions and tell us what additional information is worth acquiring. Modeling is especially useful when situations are complex, the outcomes of decisions particularly important, or when we want to convince others of our conclusions.
 
-We will value models whose parts have clear interpretations and encode domain knowledge. This allows us to extract more information with less training data. Generally, our techniques will work well for datasets with $10$ to $10^4$ datapoints. We will also leverage deep learning and machine learning heuristics to solve our probability models more efficiently.
+We will value models whose parts have clear interpretations and encode domain knowledge. This allows us to extract more information with less training data. Generally, our techniques will work well for datasets with $10$ to $10^4$ datapoints.
 
 ## Contents
 
-The course is structured into seasons of episodes. The contents intersect and unify the following areas:
+The contents pf the course intersect and unify the following areas:
 
 1. Bayesian statistics
 2. Causal modeling
@@ -44,7 +44,7 @@ Most of the material can be found in the following books, although without expli
 
 ## Prerequisites
 
-The only prerequisite is some familiarity with programming (in any language). We will be coding in [Python](https://www.python.org) and [Julia](https://julialang.org). All of the syntax will be introduced along the way.
+The only prerequisite is some familiarity with programming (in any language). We will be coding in [Python](https://www.python.org). All of the syntax will be introduced along the way.
 
 ## Guiding principles
 
@@ -82,7 +82,7 @@ Most of the course will involve learning new components, patterns for combining 
 We draw model structure. We give visual proofs. We plot results.
 :::
 
-We will learn a powerful visual language for drawing models, based on [string diagrams](https://en.wikipedia.org/wiki/String_diagram). This language will allow us to reason about models in the form of visual proofs.
+We will learn a powerful visual language for drawing models, based on string diagrams. This language will allow us to reason about models in the form of visual proofs.
 
 ``` {.tikz file="index/fire-alarm.tikz"}
 %%| label: fire-alarm
@@ -92,7 +92,7 @@ We will learn a powerful visual language for drawing models, based on [string di
 
 ## Jargon and attribution
 
-There is a plethora of unenlightening nomenclature associated with any technical field. Statistical modeling is no exception. For the sake of clear exposition, I will only use technical terms where I think appropriate. To compensate, some episodes will include a *further reading* section that attempts to connect to the literature.
+There is a plethora of unenlightening nomenclature associated with any technical field. Statistical modeling is no exception. For the sake of clear exposition, I will only use technical terms where I think they are useful. To compensate, some episodes will include a *further reading* section that attempts to connect to the literature.
 
 This brings me to the attribution of ideas. In general, you may assume that none of the ideas presented here are original. The theory of probabilistic graphical models and Monte Carlo sampling is well known. For general theory, I will refer to textbook accounts where one can find references to primary sources. In cases where I'm drawing from a specific paper or line of research, I will include citations. If you feel like your research is being used without proper attribution, please reach out to me.
 
