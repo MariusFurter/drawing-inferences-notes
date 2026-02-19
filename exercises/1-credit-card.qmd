@@ -27,7 +27,7 @@ Think about how credit card fraud works causally. Which variables influence whic
 
 **Task:** Draw a **string diagram** for this system using the notation from the course notes: boxes for processes and wires for variables. Wires carry information from left to right. The outputs of the diagram should be the observable variables $L$, $H$, $U$, and $A$. No box should appear to the left of its inputs.
 
-*Hint:* Start by identifying which variables are generated independently (these are generators with no input wires) and which causally depend on others. For the dependent variables, think about what directly influences them. Remember that one variables might depend on several others. Draw the boxes separately first, then decide how to arrange them on the page to respect the left-to-right flow.
+*Hint:* Start by identifying which variables are generated independently (these are generators with no input wires) and which causally depend on others. For the dependent variables, think about what directly influences them. Remember that one variable might depend on several others. Draw the boxes separately first, then decide how to arrange them on the page to respect the left-to-right flow.
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
@@ -38,7 +38,7 @@ Here is one reasonable string diagram for this system (other choices are possibl
 %%| height: 8em
 ```
 
-We have chosen to model $F$ and $T$ as independent generators, since whether a transaction is fraudulent does not directly cause the cardholder to be traveling, and vice versa. The observable $H$ depends only on $F$, since traveling would not cause me to shop at a high-risk merchant. The observables $L$ and $A$ depend on both $F$ and $T$, since both fraud and travel can cause unusual locations and amounts. We have chosen $U$ to depend on $F$ and $L$ since fraud might take place at unusual times, while being in a different time-zone will also cause me to shop at odd hours. Importantly, $U$ only depends on $T$ via $L$. In other words, I will only show at odd hours while traveling if I'm in a different time-zone.
+We have chosen to model $F$ and $T$ as independent generators, since whether a transaction is fraudulent does not directly cause the cardholder to be traveling, and vice versa. The observable $H$ depends only on $F$, since traveling would not cause me to shop at a high-risk merchant. The observables $L$ and $A$ depend on both $F$ and $T$, since both fraud and travel can cause unusual locations and amounts. We have chosen $U$ to depend on $F$ and $L$ since fraud might take place at unusual times, while being in a different time-zone will also cause me to shop at odd hours. Importantly, $U$ only depends on $T$ via $L$. In other words, I will only shop at odd hours while traveling if I'm in a different time-zone.
 
 :::
 
@@ -60,17 +60,17 @@ For rejection sampling (Task 3), you will need to generate millions of samples e
 :::
 
 ::: {.callout-note title="Hint: Base Python Alternative"}
-If you prefer not to use PyTorch, you can use `if`/`else` with [`random.binomialvariate`](https://docs.python.org/3/library/random.html#random.binomialvariate) from base Python. The logic is the same, but you will need a loop to generate multiple samples, which will be much slower.
+If you prefer not to use PyTorch, you can use `if`/`else` with the [`random`](https://docs.python.org/3/library/random.html) module from base Python (e.g., `random.random() < p`). The logic is the same, but you will need a loop to generate multiple samples, which will be much slower.
 :::
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
-We write a generative function for each box, using arithmetic to compute the conditional probability before sampling with [`torch.distributions.Bernoulli`](https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli). Since the inputs are 0/1 values, we can express the conditional probabilities as arithmetic expressions that work on both scalars and tensors. To sample a single value, call with `N=1`; to sample a batch of `N` values at once, pass a larger `N`. Alternatively, you could use `if`/`else` with [`random.binomialvariate`](https://docs.python.org/3/library/random.html#random.binomialvariate) from base Python — the logic is the same, just less compact and not vectorized.
+We write a generative function for each box, using arithmetic to compute the conditional probability before sampling with [`torch.distributions.Bernoulli`](https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli). Since the inputs are 0/1 values, we can express the conditional probabilities as arithmetic expressions that work on both scalars and tensors. To sample a single value, call with `N=1`; to sample a batch of `N` values at once, pass a larger `N`. Alternatively, you could use `if`/`else` with the [`random`](https://docs.python.org/3/library/random.html) module from base Python — the logic is the same, just less compact and not vectorized.
 
-**Generators $f$ and $t$.** We choose a fraud rate of 0.088% based on [this report](https://www.ecb.europa.eu/pub/pdf/cardfraud/ecb.cardfraudreport202110~cac4c418e8.en.pdf) by the European Central Bank. The same report puts the cross-border rate at 11%.
+**Generators $f$ and $t$.** We choose a fraud rate of 0.088% based on [this 2021 report](https://www.ecb.europa.eu/pub/pdf/cardfraud/ecb.cardfraudreport202110~cac4c418e8.en.pdf) by the European Central Bank. The same report puts the cross-border rate at 11%.
 
 ```{python}
-#| code-fold: false
+# | code-fold: false
 import torch
 from torch.distributions import Bernoulli
 
@@ -81,19 +81,30 @@ def gen_T(N):
     return Bernoulli(0.11).sample((N,))
 ```
 
-**Location anomaly $l(F, T)$.** The ECB report finds that 65% of fraudulent transactions are cross-border. For legitimate transactions, we assume a location anomaly occurs exactly when the cardholder is traveling. Note that for functions with arguments, we do not need to pass the shape parameter `N` since `torch.distributions` automatically broadcast to the size of the input variables.
+**Location anomaly $l(F, T)$.** Both fraud and travel can independently cause a location anomaly. We use a noisy-OR to combine them: fraud triggers an anomaly with probability 0.65 (the cross-border fraud rate from the ECB report), while traveling abroad guarantees one. The anomaly occurs unless *both* causes fail to fire. This gives the following conditional probabilities:
+
+::: {.half-width}
+| $F$ | $T$ | $p(L = 1)$ |
+|-----|-----|-------------|
+| 0   | 0   | 0           |
+| 0   | 1   | 1.0         |
+| 1   | 0   | 0.65        |
+| 1   | 1   | 1.0         |
+:::
+
+Note that for functions with arguments, we do not need to pass the shape parameter `N` since `torch.distributions` automatically broadcast to the size of the input variables.
 
 ```{python}
-#| code-fold: false
+# | code-fold: false
 def gen_L(F, T):
-    p = F * 0.65 + (1 - F) * T
+    p = 1 - (1 - 0.65 * F) * (1 - T)
     return Bernoulli(p).sample()
 ```
 
 **High-risk merchant $h(F)$.** We assume 80% of fraudulent transactions target high-risk merchants (jewelry, electronics), compared to 5% for legitimate ones.
 
 ```{python}
-#| code-fold: false
+# | code-fold: false
 def gen_H(F):
     p = F * 0.80 + (1 - F) * 0.05
     return Bernoulli(p).sample()
@@ -102,7 +113,7 @@ def gen_H(F):
 **Large amount $a(F, T)$.** We assume 15% of fraudulent transactions involve unusually large amounts. For legitimate transactions, the rate is 20% when traveling (more expensive purchases abroad) and 10% otherwise.
 
 ```{python}
-#| code-fold: false
+# | code-fold: false
 def gen_A(F, T):
     p = F * 0.15 + (1 - F) * (T * 0.20 + (1 - T) * 0.10)
     return Bernoulli(p).sample()
@@ -111,7 +122,7 @@ def gen_A(F, T):
 **Unusual time $u(F, L)$.** We assume 80% of fraudulent transactions happen at unusual times. For legitimate transactions, being in a different time zone (captured by $L$) raises the rate to 40%, while the baseline is 5%.
 
 ```{python}
-#| code-fold: false
+# | code-fold: false
 def gen_U(F, L):
     p = F * 0.80 + (1 - F) * (L * 0.40 + (1 - L) * 0.05)
     return Bernoulli(p).sample()
@@ -125,7 +136,7 @@ Whichever option you choose, you should end up with a separate function for each
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
-It is now simple to combine the boxes into a single function. Note how the variable-passing logic follows the structure of the string diagram.
+It is now simple to combine the boxes into a single function. Note how the variable-passing logic follows the structure of the string diagram. The `transaction()` function returns all six variables, including the hidden ones $F$ and $T$. The corresponding string diagram therefore has six output wires, not just the four observable ones from Task 1.
 
 ```{python}
 # | code-fold: false
@@ -152,10 +163,10 @@ Use rejection sampling to estimate the posterior probability of fraud given the 
 * **Scenario B (Explaining Away):** Same observations as Scenario A, but we also learn the user is traveling.
   * Evidence: $L = 1, \, U = 1, \, H = 0, \, A = 0, \, T = 1$.
 
-* **Scenario C (The Perfect Storm):** Multiple strong indicators of fraud, no travel.
-  * Evidence: $L = 1, \, U = 1, \, H = 1, \, A = 1, \, T = 0$.
+* **Scenario C:** Multiple strong indicators of fraud.
+  * Evidence: $L = 1, \, U = 1, \, H = 1, \, A = 1$.
 
-*Discussion:* Compare the acceptance rates across the three scenarios. What happens to efficiency as you condition on more variables? Relate your observations to the limitations of rejection sampling discussed in the course notes.
+*Discussion:* Compare the acceptance rates across the three scenarios. Can you explain the trends? Relate your observations to the limitations of rejection sampling discussed in the course notes.
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
@@ -202,6 +213,8 @@ def rejection_sample(evidence, targets, N):
     return estimate, acceptance_rate
 ```
 
+For comparison, recall that the base level of fraud was 0.088%.
+
 **Scenario A (The False Alarm):** A location anomaly and unusual time are observed, but nothing else suspicious.
 
 ```{python}
@@ -213,7 +226,7 @@ est, rate = rejection_sample(
     targets={"F": 1},
     N=N,
 )
-print(f"P(F=1 | L=1, U=1, H=0, A=0) = {est:.4f}, acceptance rate = {rate:.2e}")
+print(f"P(F=1 | L=1, U=1, H=0, A=0) = {100*est:.4f}%, acceptance rate = {rate:.2e}")
 ```
 
 **Scenario B (Explaining Away):** Same observations as Scenario A, but we also learn the user is traveling.
@@ -224,18 +237,20 @@ est, rate = rejection_sample(
     targets={"F": 1},
     N=N,
 )
-print(f"P(F=1 | L=1, U=1, H=0, A=0, T=1) = {est:.4f}, acceptance rate = {rate:.2e}")
+print(f"P(F=1 | L=1, U=1, H=0, A=0, T=1) = {100*est:.4f}%, acceptance rate = {rate:.2e}")
 ```
 
-**Scenario C (The Perfect Storm):** Multiple strong indicators of fraud, no travel.
+**Scenario C:** Multiple strong indicators of fraud.
 
 ```{python}
 est, rate = rejection_sample(
-    evidence={"L": 1, "U": 1, "H": 1, "A": 1, "T": 0},
+    evidence={"L": 1, "U": 1, "H": 1, "A": 1},
     targets={"F": 1},
     N=N,
 )
-print(f"P(F=1 | L=1, U=1, H=1, A=1, T=0) = {est:.4f}, acceptance rate = {rate:.2e}")
+print(
+    f"P(F=1 | L=1, U=1, H=1, A=1) = {100*est:.4f}%, acceptance rate = {rate:.2e}"
+)
 ```
 
 :::
@@ -255,7 +270,7 @@ from statistics import mean, stdev
 scenarios = {
     "A": {"L": 1, "U": 1, "H": 0, "A": 0},
     "B": {"L": 1, "U": 1, "H": 0, "A": 0, "T": 1},
-    "C": {"L": 1, "U": 1, "H": 1, "A": 1, "T": 0},
+    "C": {"L": 1, "U": 1, "H": 1, "A": 1},
 }
 
 N = 1_000_000

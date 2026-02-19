@@ -7,7 +7,7 @@ $$
 
 # Introduction
 
-Let's play a game. I'm carrying a mystery object on me. Your goal is to guess what it is. I will reveal that the object can be described by three properties — its *material*, *shape*, and *weight*:
+Let's play a game. I'm carrying a mystery object. Your goal is to guess what it is. I will reveal that the object can be described by three properties — its *material*, *shape*, and *weight*:
 
 :::{.half-width}
 
@@ -19,9 +19,9 @@ Let's play a game. I'm carrying a mystery object on me. Your goal is to guess wh
 
 :::
 
-Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it's more likely that the object is made of rubber than gold, because rubber is more common in everyday objects. You might also believe that if the object is a sphere, its more likely to be made of rubber. 
+Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it's more likely that the object is made of rubber than gold, because rubber is more common in everyday objects. You might also believe that if the object is a sphere, it's more likely to be made of rubber. 
 
-I could quantify you relative belief in option $x$ vs. $y$ by by asking you how much you are willing to bet that $x$ is the true state rather than $y$. For instance, if you are indifferent between betting on $x$ and betting on $y$, then you believe they are equally likely. If you are willing to bet \$2 on $x$ to win \$1 if you're right, then you believe $x$ is twice as likely as $y$. 
+How strongly do you favor $x$ over $y$? One way to measure this: ask yourself what odds you would offer. If you would bet \$2 on $x$ against \$1 on $y$, then you believe $x$ is twice as likely.
 
 Now suppose you've chosen a combination of properties. I will reveal a clue.
 
@@ -60,7 +60,7 @@ From additivity, it follows that the probability of $E$ *not* happening is $p(E^
 
 The key operation in our guessing game was eliminating impossible states. Suppose we learn that the true state lies in some subset $F \subseteq \Omega$. For instance, $F$ might be the set of all ring-objects. How should we update our probabilities?
 
-States outside $F$ are now impossible, so they should receive probability zero. Among the states inside $F$, we have no new reason to prefer one over another, so their relative likelihood should remain unchanged. Hence, we simply replace each event $E \subseteq \Omega$ by $E \cap F$ to remove any impossible states. Finally, we need to *renormalize* by $p(F)$, so that these new probabilities take values between 0 and 1.
+States outside $F$ are now impossible, so they should receive probability zero. Among the states inside $F$, we have no new reason to prefer one over another, so their relative likelihood should remain unchanged. Hence, we simply replace each event $E \subseteq \Omega$ by $E \cap F$ to remove any impossible states. Finally, we need to divide by $p(F)$ to *renormalize*, so that these new probabilities take values between 0 and 1.
 $$
 p(E \mid F) := \frac{p(E \cap F)}{p(F)}.
 $$
@@ -114,7 +114,7 @@ As a general rule, any identity that holds without conditioning also holds given
 
 We can now describe the general recipe for reasoning under uncertainty.
 
-**Step 1: Build a generative model.** Specify a joint distribution $p(x, y)$ that describes all quantities of interest - both hidden and observable. This is called a **generative model** because it tells a story about how the data came to be. In the guessing game, the generative model must specify $p(m,s,w)$, the probability of each combination of material, shape, and weight. Often the chain rule is used to break down the joint distribution into simpler pieces.
+**Step 1: Build a generative model.** Specify a joint distribution $p(x, y)$ that describes all quantities of interest — both hidden and observable. This is called a **generative model** because it tells a story about how the data came to be. In the guessing game, the generative model must specify $p(m,s,w)$, the probability of each combination of material, shape, and weight. Often the chain rule is used to break down the joint distribution into simpler pieces.
 
 **Step 2: Condition on observed data.** Once we observe $y$, compute the **posterior distribution** $p(x \mid y)$ by conditioning. This tells us what we should believe about $x$ in light of the evidence $y$.
 
@@ -148,7 +148,7 @@ $$
 p(h \mid d) = \frac{p(h, d)}{p(d)} = \frac{p(d \mid h) \, p(h)}{p(d)}.
 $$
 
-In Bayesian terminology, $p(h)$ is called the **prior distribution** — our beliefs about $h$ before seeing any data. The term $p(d \mid h)$ is called the **likelihood** — how likely we would be to see the data if $h$ were true. The denominator $p(d)$ is called the **evidence** — the total probability of seeing the data under any possible hidden state. Finally, $p(h \mid d)$ is called the **posterior distribution** — our updated beliefs about $h$ after seeing the data.
+In Bayesian terminology, $p(h)$ is called the **prior distribution** — our beliefs about $h$ before seeing any data. The term $p(d \mid h)$ is called the **likelihood** — how likely we would be to see the data if $h$ were true. The denominator $p(d)$ is called the **evidence** — the total probability of the observed data. Finally, $p(h \mid d)$ is called the **posterior distribution** — our updated beliefs about $h$ after seeing the data.
 
 The denominator $p(d)$ is often not directly available but can be computed by summing the joint distribution over all possible values of $h$. This is the **marginalization** identity:
 
@@ -162,7 +162,7 @@ Notice that $p(h \mid d) \propto p(h, d)$ when viewed as a function of $h$ for a
 
 ## String diagrams
 
-We will now describe a convenient way to build and reason about generative models using **string diagrams**. This will allow us to visually manipulate complex models without having to resort to tedious algebraic calculations. Two examples of string diagrams are shown below. The one on the left is represents a typical causal model. The one on the right illustrates other syntactic possibilities.
+We will now describe a convenient way to build and reason about generative models using **string diagrams**. This lets us manipulate complex models visually, without tedious algebra. Two examples of string diagrams are shown below. The one on the left represents a typical causal model. The one on the right illustrates other syntactic possibilities.
 
 ``` {.tikz file="intro/string-diagrams.tikz"}
 %%| label: string-diagrams
@@ -170,9 +170,9 @@ We will now describe a convenient way to build and reason about generative model
 %%| height: 7.5em
 ```
 
-String diagrams consist of boxes that are connected by wires. You can imagine information flowing through the wires from left to right. The diagram can have incoming and outgoing wires that are not connected to any boxes. The boxes represent processes that transform information. You can think of them as random functions that take an input and produce an output according to some distribution. In the next chapter, we will make this interpretation precise.
+String diagrams consist of boxes that are connected by wires. You can imagine information flowing through the wires from left to right. Diagrams are *open*: they can have input wires entering from the left and output wires leaving on the right. The boxes represent processes that transform information. You can think of them as random functions that take an input and produce an output according to some distribution. In the next chapter, we will make this interpretation precise.
 
-Boxes can have any number of input and output wires. We think of boxes with no inputs as **generators** and boxes with no outputs as **evaluators**. Wires are allowed to cross. The point where this happens is called a **swap**. Moreover, the black **copy** and **delete** nodes allow us to split and terminate wires. You should think of copy nodes a perfectly duplicating the information in the wire, while delete nodes throw the information away. Here is a summary of the visual elements used to construct string diagrams:
+Boxes can have any number of input and output wires. We think of boxes with no inputs as **generators** and boxes with no outputs as **evaluators**. Wires are allowed to cross. The point where this happens is called a **swap**. Moreover, the black **copy** and **delete** nodes allow us to split and terminate wires. You should think of copy nodes as perfectly duplicating the information in the wire, while delete nodes throw the information away. Here is a summary of the visual elements used to construct string diagrams:
 
 ``` {.tikz file="intro/string-diagram-elements.tikz"}
 %%| label: string-diagram-elements
@@ -180,7 +180,7 @@ Boxes can have any number of input and output wires. We think of boxes with no i
 %%| height: 2.5em
 ```
 
-String diagrams encode the structure of our model and make is easy to see which variables depend on each other. We will see in the next chapter how to read off conditional independence assumptions from the diagram, and how to use it to organize calculations.
+String diagrams encode the structure of our model and make it easy to see which variables depend on each other. We will see in the next chapter how to read off conditional independence assumptions from the diagram, and how to use it to organize calculations.
 
 A key feature of string diagrams is that only their connectivity matters for determining their meaning. For instance, the following diagrams are considered the same:
 
@@ -216,9 +216,9 @@ Sometimes certain identities hold for specific types of boxes. For instance, the
 %%| height: 2.5em
 ```
 
-It says that of we transform an input by $f$ and then delete the results, it's the same as directly deleting the input. Most boxes we will encounter are normalized and hence satisfy this property.
+It says that if we transform an input by $f$ and then delete the result, it's the same as directly deleting the input. Most boxes we will encounter are normalized and hence satisfy this property.
 
-We will see more examples of ways to calculate with string diagrams in the next chapter. For now, we can use these three to demonstrate calculate what happens to the fire alarm diagram when we delete the bottom output and simplify:
+We will see more examples of ways to calculate with string diagrams in the next chapter. For now, we can use these three to calculate what happens to the fire alarm diagram when we delete the bottom output and simplify:
 
 ``` {.tikz file="intro/fire-alarm-deletion.tikz"}
 %%| label: fire-alarm-deletion
@@ -267,7 +267,7 @@ We will build a generative model of this family tree and use conditioning to com
 
 #### Define variables {.unnumbered}
 
-The first step is to decide what variables to include. First, we note that I2 must be a carrier ($xX$) since her son II1 is affected, and she herself is unaffected. Hence, it is sufficient to model only II2 and her descendants III1–3. We do not need to model the older males (I3, I4, II1) or the fathers — their observed status is already captured by the inference that I2 is a carrier, and the fathers are assumed unaffected. 
+The first step is to decide what variables to include. First, we note that I2 must be a carrier ($xX$) since her son II1 is affected, and she herself is unaffected. Hence, it is sufficient to model only II2 and her descendants III1–3. We do not need to model the older males (I3, I4, II1) — their observed status is already captured by the inference that I2 is a carrier. Nor do we need to model the fathers, who are assumed unaffected. 
 
 #### Draw a string diagram {.unnumbered}
 
@@ -377,7 +377,7 @@ def infer_twins(N):
     )
 ```
 
-We now call the inference function to get out estimates:
+We now call the inference function to get our estimates:
 
 ```{python}
 random.seed(42)
@@ -460,6 +460,6 @@ print(f"Both twins affected: {both:.4f}")
 
 While simple rejection sampling is intuitive, it faces a major hurdle: **conditioning on rare events**. If the observed data has a very low probability of occurring under our model (e.g. 0.1%), we would have to discard most of our samples (e.g. 99.9%). This is extremely inefficient. More advanced inference algorithms---such as **Importance Sampling**, **Markov Chain Monte Carlo (MCMC)**, and **Variational Inference**---address this by attempting to sample more directly from the high-probability regions of the posterior distribution, rather than blindly simulating from the prior.
 
-Another challenge is **implementation overhead**. As you can imagine, directly implementing vectorized code gets complicated very quickly, even for this simple approach to sampling. This is where **probabilistic programming languages (PPLs)** come in. They provide high-level abstractions that allow us to write code in a more intuitive way, close to the mathematical definition, while automatically handling the complex inference algorithms under the hood. We will learn to use several of these frameworks throughout the course.
+Another challenge is **implementation overhead**. As you can see, writing vectorized code by hand gets complicated fast, even for this simple sampler. This is where **probabilistic programming languages (PPLs)** come in. They provide high-level abstractions that allow us to write code in a more intuitive way, close to the mathematical definition, while automatically handling the complex inference algorithms under the hood. We will learn to use several of these frameworks throughout the course.
 
 Despite the variety of algorithms, the usage pattern remains largely the same: we define a generative model, condition it on data, and receive a collection of samples from the posterior distribution. We then use these samples to estimate quantities of interest---like the probability of the twins being affected---by computing simple averages.

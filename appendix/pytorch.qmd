@@ -1,0 +1,433 @@
+# PyTorch Tutorial {.unnumbered}
+
+This tutorial covers the PyTorch features used in the course notes and exercises. It is intended as a quick reference — not a comprehensive introduction to PyTorch. For more background, see the [PyTorch tensors guide](https://pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html) and the [NumPy beginner guide](https://numpy.org/doc/2.3/user/absolute_beginners.html).
+
+```{python}
+#| code-fold: false
+import torch
+import torch.distributions as dist
+```
+
+## Tensors
+
+A **tensor** is PyTorch's fundamental data structure — a multi-dimensional array similar to a NumPy `ndarray`. Tensors support GPU acceleration and automatic differentiation, but in this course we mainly use them as efficient containers for batches of numbers.
+
+### Creating tensors
+
+The most basic way to create a tensor is from a Python number or list:
+
+```{python}
+#| code-fold: false
+# Scalar tensor (0-dimensional)
+a = torch.tensor(0.5)
+print(a, "shape:", a.shape)
+
+# 1D tensor
+b = torch.tensor([1.0, 2.0, 3.0])
+print(b, "shape:", b.shape)
+```
+
+You can also create tensors filled with specific values:
+
+```{python}
+#| code-fold: false
+# All ones, shape (4,)
+torch.ones(4)
+```
+
+```{python}
+#| code-fold: false
+# All zeros, shape (3,)
+torch.zeros(3)
+```
+
+### Shapes
+
+Every tensor has a **shape** — a tuple of integers describing the size of each dimension. A scalar has shape `()`, a vector of length $N$ has shape `(N,)`, and a matrix has shape `(rows, cols)`.
+
+```{python}
+#| code-fold: false
+x = torch.tensor([1.0, 2.0, 3.0])
+print("Shape:", x.shape)
+print("Number of elements:", x.numel())
+```
+
+### Data types
+
+Every tensor has a **dtype** that determines what kind of number each element stores. The most common dtypes are:
+
+| Dtype | Description |
+|---|---|
+| `torch.float32` | 32-bit floating point (default for most operations) |
+| `torch.bool` | Boolean (`True`/`False`) |
+| `torch.int64` | 64-bit integer |
+
+Specify the dtype at creation or convert later:
+
+```{python}
+# | code-fold: false
+# Create a boolean tensor
+mask = torch.ones(4, dtype=torch.bool)
+print(mask)
+
+# Convert to float
+print(mask.float())
+
+# Convert to bool
+x = torch.tensor([0.0, 1.0, 0.0])
+print(x.bool())
+```
+
+### Extracting Python values
+
+Use `.item()` to convert a single-element tensor to a plain Python number:
+
+```{python}
+#| code-fold: false
+x = torch.tensor(3.14)
+print(x.item())        # → 3.14
+print(type(x.item()))  # → <class 'float'>
+```
+
+This is needed when a plain Python number is required, e.g. in a format string or an `if` statement.
+
+
+## Indexing and selection
+
+### Integer indexing
+
+Access individual elements by position (0-indexed):
+
+```{python}
+#| code-fold: false
+x = torch.tensor([10.0, 20.0, 30.0, 40.0])
+
+print("First element:", x[0])
+print("Last element:", x[-1])
+```
+
+For multi-dimensional tensors, provide an index for each dimension:
+
+```{python}
+#| code-fold: false
+M = torch.tensor([[1.0, 2.0, 3.0],
+                   [4.0, 5.0, 6.0]])
+
+print("Row 0, Col 2:", M[0, 2])  # → 3.0
+print("Row 1, Col 0:", M[1, 0])  # → 4.0
+```
+
+### Slicing
+
+Slicing extracts a contiguous sub-tensor using `start:stop` (where `stop` is exclusive) or `start:stop:step`:
+
+```{python}
+#| code-fold: false
+x = torch.tensor([10.0, 20.0, 30.0, 40.0, 50.0])
+
+print("x[1:4] =", x[1:4])   # elements at indices 1, 2, 3
+print("x[:3]  =", x[:3])    # first three elements
+print("x[2:]  =", x[2:])    # from index 2 to the end
+print("x[::2] =", x[::2])   # every other element
+```
+
+Slice each dimension independently in multi-dimensional tensors:
+
+```{python}
+#| code-fold: false
+M = torch.tensor([[1.0, 2.0, 3.0],
+                   [4.0, 5.0, 6.0],
+                   [7.0, 8.0, 9.0]])
+
+print("First two rows:\n", M[:2])        # rows 0 and 1
+print("Column 1:", M[:, 1])              # all rows, column 1
+print("Sub-matrix:\n", M[:2, 1:])        # rows 0-1, columns 1-2
+```
+
+### Boolean masking
+
+Index a tensor with a boolean tensor of the same length to select elements where the mask is `True`:
+
+```{python}
+#| code-fold: false
+values = torch.tensor([10.0, 20.0, 30.0, 40.0])
+mask = torch.tensor([True, False, True, False])
+
+print(values[mask])  # → tensor([10., 30.])
+```
+
+This is the core operation in rejection sampling: generate many samples, build a mask for the evidence, and select the surviving samples.
+
+```{python}
+#| code-fold: false
+# Example: filtering samples
+F = torch.tensor([0.0, 1.0, 0.0, 1.0, 0.0])
+L = torch.tensor([1.0, 1.0, 0.0, 1.0, 0.0])
+
+# Keep only samples where L == 1
+mask = (L == 1).bool()
+F_filtered = F[mask]
+print("F values where L=1:", F_filtered)
+```
+
+### `torch.where`
+
+`torch.where(condition, x, y)` selects from `x` where the condition is `True` and from `y` where it is `False` — a vectorized `if`/`else`:
+
+```{python}
+#| code-fold: false
+cond = torch.tensor([True, False, True, False])
+x = torch.tensor([1.0, 1.0, 1.0, 1.0])
+y = torch.tensor([9.0, 9.0, 9.0, 9.0])
+
+print(torch.where(cond, x, y))  # → tensor([1., 9., 1., 9.])
+```
+
+
+## Arithmetic
+
+Tensor arithmetic is **element-wise** by default — each operation applies independently to every element.
+
+```{python}
+#| code-fold: false
+a = torch.tensor([1.0, 2.0, 3.0])
+b = torch.tensor([10.0, 20.0, 30.0])
+
+print("a + b =", a + b)
+print("a * b =", a * b)
+print("2 * a =", 2 * a)
+```
+
+### Encoding conditional probabilities as arithmetic
+
+A key technique used throughout the course is encoding conditional probabilities as arithmetic on 0/1 tensors. If `F` is a tensor of 0s and 1s (a binary variable), we can write:
+
+```python
+p = F * 0.8 + (1 - F) * 0.05
+```
+
+This computes a different probability for each element:
+
+- Where `F == 1`: `p = 1 * 0.8 + 0 * 0.05 = 0.8`
+- Where `F == 0`: `p = 0 * 0.8 + 1 * 0.05 = 0.05`
+
+This is equivalent to an `if`/`else` branch but works on entire tensors at once:
+
+```{python}
+#| code-fold: false
+F = torch.tensor([0.0, 1.0, 1.0, 0.0])
+p = F * 0.8 + (1 - F) * 0.05
+print("F =", F)
+print("p =", p)
+```
+
+For two binary inputs, nest the pattern:
+
+```{python}
+#| code-fold: false
+F = torch.tensor([0.0, 0.0, 1.0, 1.0])
+T = torch.tensor([0.0, 1.0, 0.0, 1.0])
+
+# p depends on both F and T
+p = F * 0.15 + (1 - F) * (T * 0.20 + (1 - T) * 0.10)
+print("p =", p)
+```
+
+
+## Broadcasting
+
+When two tensors of different shapes are combined, PyTorch **broadcasts** the smaller one to match the larger — without copying data. This is the mechanism behind expressions like `2 * a` or `F * 0.8` above, where a scalar is applied to every element.
+
+The rule: starting from the rightmost dimension, two dimensions are compatible if they are equal or one of them is 1. A size-1 dimension is "stretched" to match the other. For details, see the [NumPy broadcasting guide](https://numpy.org/doc/stable/user/basics.broadcasting.html#basics-broadcasting).
+
+```{python}
+#| code-fold: false
+# Scalar broadcast: 0.5 is treated as shape () → stretched to match (4,)
+a = torch.tensor([1.0, 2.0, 3.0, 4.0])
+print("a * 0.5 =", a * 0.5)
+```
+
+```{python}
+#| code-fold: false
+# 1D broadcast: shapes (4,) and (4,) — element-wise, no stretching needed
+a = torch.tensor([1.0, 2.0, 3.0, 4.0])
+b = torch.tensor([10.0, 20.0, 30.0, 40.0])
+print("a + b =", a + b)
+```
+
+Broadcasting extends to higher dimensions. A tensor of shape `(1, 4)` can broadcast with one of shape `(3, 1)` to produce shape `(3, 4)`:
+
+```{python}
+#| code-fold: false
+row = torch.tensor([[1.0, 2.0, 3.0, 4.0]])   # shape (1, 4)
+col = torch.tensor([[10.0], [20.0], [30.0]])  # shape (3, 1)
+print("row + col:")
+print(row + col)  # shape (3, 4)
+```
+
+
+## Comparisons and booleans
+
+### Comparisons
+
+Element-wise comparisons return boolean tensors:
+
+```{python}
+#| code-fold: false
+x = torch.tensor([0.0, 1.0, 0.0, 1.0])
+
+print("x == 1:", x == 1)
+print("x == 0:", x == 0)
+```
+
+### Boolean operators
+
+Use `&` (and), `|` (or), and `~` (not) for element-wise boolean logic. **Important:** these are bitwise operators — always parenthesize comparisons.
+
+```{python}
+#| code-fold: false
+a = torch.tensor([True, True, False, False])
+b = torch.tensor([True, False, True, False])
+
+print("a & b =", a & b)   # both true
+print("a | b =", a | b)   # at least one true
+print("~a    =", ~a)       # negation
+```
+
+### Building masks
+
+A common pattern is building a boolean **mask** that selects samples satisfying multiple conditions. Accumulate conditions with `&=`:
+
+```{python}
+#| code-fold: false
+x = torch.tensor([1.0, 0.0, 1.0, 0.0])
+y = torch.tensor([0.0, 0.0, 1.0, 1.0])
+
+mask = torch.ones(4, dtype=torch.bool)  # start: all True
+mask &= (x == 1)   # keep only where x == 1
+mask &= (y == 0)   # keep only where also y == 0
+
+print("mask =", mask)  # True only at index 0
+```
+
+
+## Reductions
+
+**Reductions** collapse a tensor along one or more dimensions to produce summary statistics.
+
+### `.sum()` and `.mean()`
+
+```{python}
+#| code-fold: false
+x = torch.tensor([1.0, 0.0, 1.0, 1.0, 0.0])
+
+print("Sum:", x.sum())     # → 3
+print("Mean:", x.mean())   # → 0.6
+```
+
+A common pattern for estimating probabilities: create a 0/1 tensor indicating whether an event occurred in each sample, then take its mean:
+
+```{python}
+#| code-fold: false
+# Estimate P(event) from samples
+event = torch.tensor([True, False, True, True, False])
+prob_estimate = event.float().mean()
+print("Estimated probability:", prob_estimate.item())
+```
+
+Note the `.float()` call — `.mean()` requires a floating-point tensor, so we convert from `bool` first.
+
+
+## Random sampling with `torch.distributions`
+
+The [`torch.distributions`](https://pytorch.org/docs/stable/distributions.html) module provides probability distributions as objects with a uniform interface. Create a distribution by specifying its parameters, then call `.sample()` to draw random values. Key distributions:
+
+| Class | Distribution | Parameters |
+|---|---|---|
+| `dist.Bernoulli(probs)` | Bernoulli (coin flip) | probability of 1 |
+| `dist.Categorical(probs)` | Categorical (die roll) | probability of each category |
+| `dist.Normal(loc, scale)` | Normal (Gaussian) | mean and standard deviation |
+| `dist.Uniform(low, high)` | Uniform | lower and upper bounds |
+
+All distributions share these core methods:
+
+- **`.sample(shape)`** — draw random samples. Pass a shape tuple like `(N,)` for multiple draws.
+- **`.log_prob(value)`** — compute the log-probability of a value.
+
+### Creating a distribution and sampling
+
+`Bernoulli` models a coin flip — it outputs 1 with probability $p$ and 0 with probability $1 - p$.
+
+```{python}
+#| code-fold: false
+coin = dist.Bernoulli(torch.tensor(0.3))
+print(coin)
+```
+
+Call `.sample()` with no arguments for a single draw, or pass a shape tuple for multiple draws:
+
+```{python}
+#| code-fold: false
+torch.manual_seed(0)
+
+coin = dist.Bernoulli(torch.tensor(0.5))
+
+# Single sample
+print("One sample:", coin.sample())
+
+# Five samples
+print("Five samples:", coin.sample((5,)))
+```
+
+The shape argument `(N,)` controls the **batch dimensions** of the output. If the distribution is scalar, `.sample((N,))` returns shape `(N,)`. The same pattern works for other distributions:
+
+```{python}
+#| code-fold: false
+torch.manual_seed(0)
+
+# Draw 5 samples from a standard normal distribution
+normal = dist.Normal(0.0, 1.0)
+print("Normal samples:", normal.sample((5,)))
+```
+
+### Per-element parameters
+
+Thanks to broadcasting, you can create a distribution from a *tensor of parameters*, giving each element its own independent draw:
+
+```{python}
+#| code-fold: false
+torch.manual_seed(0)
+
+# Different probability for each element
+probs = torch.tensor([0.1, 0.5, 0.9])
+samples = dist.Bernoulli(probs).sample()
+print("Samples:", samples)
+```
+
+When created from a tensor of shape `(N,)`, `.sample()` returns shape `(N,)` — one draw per parameter value. This is how we generate **conditional samples**: compute a parameter tensor using the arithmetic pattern from earlier, then pass it to the distribution:
+
+```{python}
+#| code-fold: false
+torch.manual_seed(0)
+
+# Different mean for each element
+means = torch.tensor([-2.0, 0.0, 2.0])
+samples = dist.Normal(means, 1.0).sample()
+print("Normal samples:", samples)
+```
+
+## Reproducibility
+
+Use `torch.manual_seed()` to make random sampling reproducible:
+
+```{python}
+#| code-fold: false
+torch.manual_seed(42)
+print(dist.Bernoulli(0.5).sample((5,)))
+
+torch.manual_seed(42)  # same seed → same output
+print(dist.Bernoulli(0.5).sample((5,)))
+```
+
+Setting the seed before each experiment ensures deterministic, reproducible results.
+

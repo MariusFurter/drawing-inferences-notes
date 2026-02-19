@@ -22,6 +22,9 @@ book:
     - part: "Exercises"
       chapters:
         - exercises/1-credit-card.qmd
+    - part: "Appendix"
+      chapters:
+        - appendix/pytorch.qmd
     - references.qmd
 
 filters:
