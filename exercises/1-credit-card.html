@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Exercise 1: Credit card fraud detection – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../references.html" rel="next">
+<link href="../chapters/intro.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-c40da3712e2408dbebc1b1cc0744a912.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-credit-card.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/1-credit-card.html">Exercise 1: Credit card fraud detection</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-credit-card.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Exercise 1: Credit card fraud detection</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#the-variables" id="toc-the-variables" class="nav-link" data-scroll-target="#the-variables">The Variables</a></li>
+  <li><a href="#tasks" id="toc-tasks" class="nav-link" data-scroll-target="#tasks">Tasks</a>
+  <ul class="collapse">
+  <li><a href="#structure-and-string-diagrams" id="toc-structure-and-string-diagrams" class="nav-link" data-scroll-target="#structure-and-string-diagrams">1. Structure and String Diagrams</a></li>
+  <li><a href="#implement-the-boxes" id="toc-implement-the-boxes" class="nav-link" data-scroll-target="#implement-the-boxes">2. Implement the Boxes</a></li>
+  <li><a href="#rejection-sampling" id="toc-rejection-sampling" class="nav-link" data-scroll-target="#rejection-sampling">3. Rejection Sampling</a></li>
+  <li><a href="#decision-making" id="toc-decision-making" class="nav-link" data-scroll-target="#decision-making">4. Decision Making</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-credit-card.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/1-credit-card.html">Exercise 1: Credit card fraud detection</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Exercise 1: Credit card fraud detection</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this exercise, you will build a generative model for <strong>credit card fraud detection</strong> and use rejection sampling to infer the probability of fraud given observed evidence.</p>
+<p>Every day, millions of transactions are processed. The vast majority are legitimate, but a tiny fraction are fraudulent. We cannot directly observe the intent behind a transaction (the hidden state), but we can observe signals that are correlated with fraud — such as unusual locations, large amounts, or odd timing. These signals are noisy: a legitimate user might shop at 3 AM, and a fraudster might buy groceries. Your task is to formalize these intuitions into a generative model, represent its structure as a <strong>string diagram</strong>, and use <strong>rejection sampling</strong> to compute posterior probabilities.</p>
+</section>
+<section id="the-variables" class="level2">
+<h2 class="anchored" data-anchor-id="the-variables">The Variables</h2>
+<p>We model a single transaction using the following binary random variables. Each variable takes the value 1 (true) or 0 (false).</p>
+<ul>
+<li><strong>Fraud (<span class="math inline">\(F\)</span>):</strong> The hidden state. Is this transaction fraudulent?</li>
+<li><strong>Travel (<span class="math inline">\(T\)</span>):</strong> Is the cardholder currently traveling abroad?</li>
+<li><strong>Location Anomaly (<span class="math inline">\(L\)</span>):</strong> Is the transaction location unusual for this user?</li>
+<li><strong>High-Risk Merchant (<span class="math inline">\(H\)</span>):</strong> Is the merchant in a category preferred by fraudsters (e.g., jewelry, electronics)?</li>
+<li><strong>Unusual Time (<span class="math inline">\(U\)</span>):</strong> Did the transaction occur at an unusual time for this user?</li>
+<li><strong>Large Amount (<span class="math inline">\(A\)</span>):</strong> Is the purchase amount significantly higher than the user’s average?</li>
+</ul>
+<p>Note that <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span> are <em>hidden</em> states — they describe the underlying situation. The remaining variables (<span class="math inline">\(L\)</span>, <span class="math inline">\(H\)</span>, <span class="math inline">\(U\)</span>, <span class="math inline">\(A\)</span>) are <em>observable</em> signals that may depend on the hidden states.</p>
+</section>
+<section id="tasks" class="level2">
+<h2 class="anchored" data-anchor-id="tasks">Tasks</h2>
+<section id="structure-and-string-diagrams" class="level3">
+<h3 class="anchored" data-anchor-id="structure-and-string-diagrams">1. Structure and String Diagrams</h3>
+<p>Think about how credit card fraud works causally. Which variables influence which? For instance, whether a transaction is fraudulent might affect the likelihood of a large amount, but not whether the cardholder is traveling.</p>
+<p><strong>Task:</strong> Draw a <strong>string diagram</strong> for this system using the notation from the course notes: boxes for processes and wires for variables. Wires carry information from left to right. The outputs of the diagram should be the observable variables <span class="math inline">\(L\)</span>, <span class="math inline">\(H\)</span>, <span class="math inline">\(U\)</span>, and <span class="math inline">\(A\)</span>. No box should appear to the left of its inputs.</p>
+<p><em>Hint:</em> Start by identifying which variables are generated independently (these are generators with no input wires) and which causally depend on others. For the dependent variables, think about what directly influences them. Remember that one variables might depend on several others. Draw the boxes separately first, then decide how to arrange them on the page to respect the left-to-right flow.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Here is one reasonable string diagram for this system (other choices are possible):</p>
+<div id="fraud-diagram" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="1-credit-card_files/mediabag/a5256e303b630c03813b3b0cb25849029a59f01b.svg" style="height:8em" class="figure-img"></p>
+<figcaption>A string diagram representing a generative model for credit card fraud detection.</figcaption>
+</figure>
+</div>
+<p>We have chosen to model <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span> as independent generators, since whether a transaction is fraudulent does not directly cause the cardholder to be traveling, and vice versa. The observable <span class="math inline">\(H\)</span> depends only on <span class="math inline">\(F\)</span>, since traveling would not cause me to shop at a high-risk merchant. The observables <span class="math inline">\(L\)</span> and <span class="math inline">\(A\)</span> depend on both <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span>, since both fraud and travel can cause unusual locations and amounts. We have chosen <span class="math inline">\(U\)</span> to depend on <span class="math inline">\(F\)</span> and <span class="math inline">\(L\)</span> since fraud might take place at unusual times, while being in a different time-zone will also cause me to shop at odd hours. Importantly, <span class="math inline">\(U\)</span> only depends on <span class="math inline">\(T\)</span> via <span class="math inline">\(L\)</span>. In other words, I will only show at odd hours while traveling if I’m in a different time-zone.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="implement-the-boxes" class="level3">
+<h3 class="anchored" data-anchor-id="implement-the-boxes">2. Implement the Boxes</h3>
+<p>Each box in your string diagram represents a process that randomly produces an output given its inputs. Your next task is to implement each box as a Python function. There are two ways to approach this — choose whichever feels more natural. There is no single correct answer — the goal is to make choices that tell a coherent generative story about how fraud manifests in transaction data.</p>
+<section id="option-a-specify-first-then-code" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="option-a-specify-first-then-code">Option A: Specify first, then code</h4>
+<p>First, write down the conditional distribution for each box explicitly. This means listing the probability of each output value for every combination of input values, just like the course notes do for the <code>family()</code> example. For instance, if your diagram has a box that generates <span class="math inline">\(L\)</span> from <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span>, you would write down values like <span class="math inline">\(p(L = 1 \mid F = 1, T = 0) = 0.8\)</span>, etc. Then, translate each table into a Python function that takes the input values as arguments and returns a random sample from the specified distribution.</p>
+</section>
+<section id="option-b-code-directly" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="option-b-code-directly">Option B: Code directly</h4>
+<p>Alternatively, skip the explicit tables and write the code directly. For each box, write a Python function that takes the input values as arguments and randomly produces an output (see the <a href="https://docs.python.org/3/library/random.html"><code>random</code> module</a> for basic random number generation). The conditional probabilities are then implicit in your code rather than written out as a table. This approach can feel more natural when the generative story is clear in your head but tedious to write out formally.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint: Vectorized Sampling">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint: Vectorized Sampling
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For rejection sampling (Task 3), you will need to generate millions of samples efficiently. If you write each box function using <a href="https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli"><code>torch.distributions.Bernoulli</code></a> and express conditional probabilities as arithmetic on 0/1 values (as in the <code>family_v()</code> example from the course notes), the same function will work for a single sample <em>and</em> for a batch of <span class="math inline">\(N\)</span> samples — no loops required. See the <a href="https://numpy.org/doc/2.3/user/absolute_beginners.html">Numpy beginner guide</a> for an introduction to working with array data, and <a href="https://pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html">PyTorch tensors guide</a> for specifics on using PyTorch.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint: Base Python Alternative">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint: Base Python Alternative
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If you prefer not to use PyTorch, you can use <code>if</code>/<code>else</code> with <a href="https://docs.python.org/3/library/random.html#random.binomialvariate"><code>random.binomialvariate</code></a> from base Python. The logic is the same, but you will need a loop to generate multiple samples, which will be much slower.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We write a generative function for each box, using arithmetic to compute the conditional probability before sampling with <a href="https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli"><code>torch.distributions.Bernoulli</code></a>. Since the inputs are 0/1 values, we can express the conditional probabilities as arithmetic expressions that work on both scalars and tensors. To sample a single value, call with <code>N=1</code>; to sample a batch of <code>N</code> values at once, pass a larger <code>N</code>. Alternatively, you could use <code>if</code>/<code>else</code> with <a href="https://docs.python.org/3/library/random.html#random.binomialvariate"><code>random.binomialvariate</code></a> from base Python — the logic is the same, just less compact and not vectorized.</p>
+<p><strong>Generators <span class="math inline">\(f\)</span> and <span class="math inline">\(t\)</span>.</strong> We choose a fraud rate of 0.088% based on <a href="https://www.ecb.europa.eu/pub/pdf/cardfraud/ecb.cardfraudreport202110~cac4c418e8.en.pdf">this report</a> by the European Central Bank. The same report puts the cross-border rate at 11%.</p>
+<div id="2fb84512" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.distributions <span class="im">import</span> Bernoulli</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_F(N):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(<span class="fl">0.00088</span>).sample((N,))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_T(N):</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(<span class="fl">0.11</span>).sample((N,))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Location anomaly <span class="math inline">\(l(F, T)\)</span>.</strong> The ECB report finds that 65% of fraudulent transactions are cross-border. For legitimate transactions, we assume a location anomaly occurs exactly when the cardholder is traveling. Note that for functions with arguments, we do not need to pass the shape parameter <code>N</code> since <code>torch.distributions</code> automatically broadcast to the size of the input variables.</p>
+<div id="645f42cd" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_L(F, T):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.65</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> T</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>High-risk merchant <span class="math inline">\(h(F)\)</span>.</strong> We assume 80% of fraudulent transactions target high-risk merchants (jewelry, electronics), compared to 5% for legitimate ones.</p>
+<div id="c7406973" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_H(F):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.80</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> <span class="fl">0.05</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Large amount <span class="math inline">\(a(F, T)\)</span>.</strong> We assume 15% of fraudulent transactions involve unusually large amounts. For legitimate transactions, the rate is 20% when traveling (more expensive purchases abroad) and 10% otherwise.</p>
+<div id="75d976c1" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_A(F, T):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.15</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> (T <span class="op">*</span> <span class="fl">0.20</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> T) <span class="op">*</span> <span class="fl">0.10</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Unusual time <span class="math inline">\(u(F, L)\)</span>.</strong> We assume 80% of fraudulent transactions happen at unusual times. For legitimate transactions, being in a different time zone (captured by <span class="math inline">\(L\)</span>) raises the rate to 40%, while the baseline is 5%.</p>
+<div id="f756125b" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_U(F, L):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.80</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> (L <span class="op">*</span> <span class="fl">0.40</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> L) <span class="op">*</span> <span class="fl">0.05</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="combining-the-boxes" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="combining-the-boxes">Combining the boxes</h4>
+<p>Whichever option you choose, you should end up with a separate function for each box. Then, combine them into a single function <code>transaction()</code> that calls the box functions in the causal order defined by your string diagram, passing outputs of earlier boxes as inputs to later ones. The function should return a sample tuple <span class="math inline">\((F, T, L, H, U, A)\)</span> containing both hidden and observable variables. <em>(Note that this corresponds to a slightly different string diagram than the one you drew in Task 1. Why?)</em></p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>It is now simple to combine the boxes into a single function. Note how the variable-passing logic follows the structure of the string diagram.</p>
+<div id="26e68a7d" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> transaction(N):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    F <span class="op">=</span> gen_F(N)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    T <span class="op">=</span> gen_T(N)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    L <span class="op">=</span> gen_L(F, T)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    H <span class="op">=</span> gen_H(F)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    U <span class="op">=</span> gen_U(F, L)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> gen_A(F, T)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> F, T, L, H, U, A</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="rejection-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="rejection-sampling">3. Rejection Sampling</h3>
+<p>Use rejection sampling to estimate the posterior probability of fraud given the evidence in each scenario below. Recall that rejection sampling works by generating many samples from the prior (i.e., calling <code>transaction()</code> repeatedly), discarding those that are incompatible with the observed evidence, and computing statistics on the survivors.</p>
+<p><strong>Task:</strong> For each scenario, report the <strong>estimated posterior probability</strong> <span class="math inline">\(p(F = 1 \mid \text{evidence})\)</span>, the <strong>acceptance rate</strong> (fraction of samples that matched the evidence), and the <strong>standard deviation</strong> of your estimator (see below).</p>
+<ul>
+<li><strong>Scenario A (The False Alarm):</strong> A location anomaly and unusual time are observed, but nothing else suspicious.
+<ul>
+<li>Evidence: <span class="math inline">\(L = 1, \, U = 1, \, H = 0, \, A = 0\)</span>.</li>
+</ul></li>
+<li><strong>Scenario B (Explaining Away):</strong> Same observations as Scenario A, but we also learn the user is traveling.
+<ul>
+<li>Evidence: <span class="math inline">\(L = 1, \, U = 1, \, H = 0, \, A = 0, \, T = 1\)</span>.</li>
+</ul></li>
+<li><strong>Scenario C (The Perfect Storm):</strong> Multiple strong indicators of fraud, no travel.
+<ul>
+<li>Evidence: <span class="math inline">\(L = 1, \, U = 1, \, H = 1, \, A = 1, \, T = 0\)</span>.</li>
+</ul></li>
+</ul>
+<p><em>Discussion:</em> Compare the acceptance rates across the three scenarios. What happens to efficiency as you condition on more variables? Relate your observations to the limitations of rejection sampling discussed in the course notes.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We write a generic rejection sampler that takes the evidence as a dictionary and the target variables as a list of names. It generates <code>N</code> samples from <code>transaction()</code>, builds a mask that selects samples matching all evidence, and computes the mean of each target variable among the survivors.</p>
+<div id="6cf08dba" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>VARS <span class="op">=</span> [<span class="st">"F"</span>, <span class="st">"T"</span>, <span class="st">"L"</span>, <span class="st">"H"</span>, <span class="st">"U"</span>, <span class="st">"A"</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rejection_sample(evidence, targets, N):</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Estimate p(targets | evidence) by rejection sampling.</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">        evidence: dict mapping variable names to observed values, e.g. {"L": 1, "U": 1}</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">        targets:  dict mapping variable names to values, e.g. {"F": 1}</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">        N:        number of prior samples to draw</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">        estimate: estimated probability p(targets | evidence)</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">        acceptance_rate: fraction of samples that matched the evidence</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    samples <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">zip</span>(VARS, transaction(N)))</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Build mask: keep samples that match all evidence</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> torch.ones(N, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> var, val <span class="kw">in</span> evidence.items():</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">&amp;=</span> samples[var] <span class="op">==</span> val</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    n_accepted <span class="op">=</span> mask.<span class="bu">sum</span>().item()</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    acceptance_rate <span class="op">=</span> n_accepted <span class="op">/</span> N</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Among accepted samples, check which match all target values</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_accepted <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        target_mask <span class="op">=</span> torch.ones(n_accepted, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> var, val <span class="kw">in</span> targets.items():</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>            target_mask <span class="op">&amp;=</span> samples[var][mask] <span class="op">==</span> val</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>        estimate <span class="op">=</span> target_mask.<span class="bu">float</span>().mean().item()</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        estimate <span class="op">=</span> <span class="bu">float</span>(<span class="st">"nan"</span>)</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> estimate, acceptance_rate</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Scenario A (The False Alarm):</strong> A location anomaly and unusual time are observed, but nothing else suspicious.</p>
+<div id="944d049e" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">10_000_000</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>est, rate <span class="op">=</span> rejection_sample(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    evidence<span class="op">=</span>{<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">0</span>, <span class="st">"A"</span>: <span class="dv">0</span>},</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>{<span class="st">"F"</span>: <span class="dv">1</span>},</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    N<span class="op">=</span>N,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(F=1 | L=1, U=1, H=0, A=0) = </span><span class="sc">{</span>est<span class="sc">:.4f}</span><span class="ss">, acceptance rate = </span><span class="sc">{</span>rate<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(F=1 | L=1, U=1, H=0, A=0) = 0.0023, acceptance rate = 3.35e-02</code></pre>
+</div>
+</div>
+<p><strong>Scenario B (Explaining Away):</strong> Same observations as Scenario A, but we also learn the user is traveling.</p>
+<div id="68077b50" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>est, rate <span class="op">=</span> rejection_sample(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    evidence<span class="op">=</span>{<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">0</span>, <span class="st">"A"</span>: <span class="dv">0</span>, <span class="st">"T"</span>: <span class="dv">1</span>},</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>{<span class="st">"F"</span>: <span class="dv">1</span>},</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    N<span class="op">=</span>N,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(F=1 | L=1, U=1, H=0, A=0, T=1) = </span><span class="sc">{</span>est<span class="sc">:.4f}</span><span class="ss">, acceptance rate = </span><span class="sc">{</span>rate<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(F=1 | L=1, U=1, H=0, A=0, T=1) = 0.0003, acceptance rate = 3.34e-02</code></pre>
+</div>
+</div>
+<p><strong>Scenario C (The Perfect Storm):</strong> Multiple strong indicators of fraud, no travel.</p>
+<div id="ad6b2df3" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>est, rate <span class="op">=</span> rejection_sample(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    evidence<span class="op">=</span>{<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">1</span>, <span class="st">"A"</span>: <span class="dv">1</span>, <span class="st">"T"</span>: <span class="dv">0</span>},</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>{<span class="st">"F"</span>: <span class="dv">1</span>},</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    N<span class="op">=</span>N,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(F=1 | L=1, U=1, H=1, A=1, T=0) = </span><span class="sc">{</span>est<span class="sc">:.4f}</span><span class="ss">, acceptance rate = </span><span class="sc">{</span>rate<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(F=1 | L=1, U=1, H=1, A=1, T=0) = 1.0000, acceptance rate = 4.79e-05</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<section id="estimating-variability" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="estimating-variability">Estimating variability</h4>
+<p>Any estimate based on a finite sample will vary if we repeat the procedure. To quantify this variability, run your rejection sampler multiple times (say, 100 runs of <span class="math inline">\(N\)</span> samples each) and collect the 100 resulting estimates. Then compute the <strong>mean</strong> and <strong>standard deviation</strong> of these values (e.g.&nbsp;using <a href="https://docs.python.org/3/library/statistics.html"><code>statistics</code></a>). This tells you how much your estimate typically fluctuates due to randomness in the sampling. A large standard deviation means the estimate is unreliable — you may need more samples per run, or the acceptance rate may be too low.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We run each scenario 100 times with 1M samples and collect the estimates, then compute the average and standard deviation.</p>
+<div id="88ac74bf" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> mean, stdev</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>scenarios <span class="op">=</span> {</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"A"</span>: {<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">0</span>, <span class="st">"A"</span>: <span class="dv">0</span>},</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"B"</span>: {<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">0</span>, <span class="st">"A"</span>: <span class="dv">0</span>, <span class="st">"T"</span>: <span class="dv">1</span>},</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"C"</span>: {<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">1</span>, <span class="st">"A"</span>: <span class="dv">1</span>, <span class="st">"T"</span>: <span class="dv">0</span>},</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">1_000_000</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>R <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, evidence <span class="kw">in</span> scenarios.items():</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    estimates <span class="op">=</span> [rejection_sample(evidence, {<span class="st">"F"</span>: <span class="dv">1</span>}, N)[<span class="dv">0</span>] <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(R)]</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    avg <span class="op">=</span> mean(estimates)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    sd <span class="op">=</span> stdev(estimates)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Scenario </span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">: P(F=1 | evidence) = </span><span class="sc">{</span>avg<span class="sc">:.2e}</span><span class="ss"> ± </span><span class="sc">{</span>sd<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Scenario A: P(F=1 | evidence) = 2.31e-03 ± 2.83e-04
+Scenario B: P(F=1 | evidence) = 2.61e-04 ± 9.04e-05
+Scenario C: P(F=1 | evidence) = 1.00e+00 ± 0.00e+00</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="decision-making" class="level3">
+<h3 class="anchored" data-anchor-id="decision-making">4. Decision Making</h3>
+<p>In practice, we use posterior probabilities to make decisions. Suppose the bank must decide whether to <strong>block</strong> a transaction or <strong>allow</strong> it. Each choice carries a cost:</p>
+<ul>
+<li><strong>Blocking a legitimate transaction</strong> costs the bank $50 in customer dissatisfaction.</li>
+<li><strong>Missing a fraudulent transaction</strong> costs the bank $500 (the average fraud loss).</li>
+</ul>
+<p>We can formalize these costs using a <strong>loss function</strong> <span class="math inline">\(\ell(a, f)\)</span>, which assigns a numerical penalty to each combination of action <span class="math inline">\(a \in \{\text{block}, \text{allow}\}\)</span> and true state <span class="math inline">\(f \in \{0, 1\}\)</span>:</p>
+<div class="half-width">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><span class="math inline">\(F = 0\)</span> (legitimate)</th>
+<th><span class="math inline">\(F = 1\)</span> (fraud)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Block</strong></td>
+<td><span class="math inline">\(50\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+</tr>
+<tr class="even">
+<td><strong>Allow</strong></td>
+<td><span class="math inline">\(0\)</span></td>
+<td><span class="math inline">\(500\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Since we don’t know the true state <span class="math inline">\(F\)</span>, we use the posterior <span class="math inline">\(q = p(F = 1 \mid \text{evidence})\)</span> to compute the <strong>expected loss</strong> of each action: <span class="math display">\[
+\mathbb{E}[\ell(a)] = \ell(a, 0) \cdot (1 - q) + \ell(a, 1) \cdot q
+\]</span></p>
+<p>The bank should choose the action with the lower expected loss.</p>
+<p><strong>Tasks:</strong></p>
+<ol type="1">
+<li>Compute the expected loss for each action (block and allow) as a function of <span class="math inline">\(q\)</span>.</li>
+<li>Derive a formula for the <strong>threshold</strong> <span class="math inline">\(q^*\)</span> above which the bank should block the transaction, by finding the value of <span class="math inline">\(q\)</span> where both actions have equal expected loss.</li>
+<li>For each of the three scenarios in Task 3, state whether the bank should block or allow the transaction based on your estimated posterior and this threshold.</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>Substituting the values from the loss table into the expected loss formula:</p>
+<ul>
+<li>Expected loss of blocking <span class="math inline">\(= 50 \cdot (1 - q) + 0 \cdot q = 50(1 - q)\)</span> — we pay $50 with probability <span class="math inline">\((1-q)\)</span>.</li>
+<li>Expected loss of allowing <span class="math inline">\(= 0 \cdot (1 - q) + 500 \cdot q = 500q\)</span> — we lose $500 with probability <span class="math inline">\(q\)</span>.</li>
+</ul></li>
+<li><p>We find the threshold <span class="math inline">\(q^*\)</span> by setting the two expected losses equal: <span class="math display">\[
+50 \cdot (1 - q^*) = 500 \cdot q^*
+\]</span></p>
+<p>This implies that <span class="math inline">\(q^* = \frac{50}{550} = \frac{1}{11} \approx 0.0909\)</span>. Hence, if the estimated probability of fraud exceeds roughly 9.09%, the bank should block the transaction; otherwise, it should allow it.</p></li>
+<li><p>Only Scenario C, which has the highest estimated probability of fraud, exceeds this threshold and would be blocked.</p></li>
+</ol>
+</div>
+</div>
+</div>
+
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/drawinginferences\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/intro.html" class="pagination-link" aria-label="Introduction">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
