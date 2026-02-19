@@ -14,10 +14,14 @@ book:
     logo: images/drawing-inferences-logo.png
     title: " "
     tools: []
+    collapse-level: 1
   reader-mode: false
   chapters:
     - index.qmd
     - chapters/intro.qmd
+    - part: "Exercises"
+      chapters:
+        - exercises/1-credit-card.qmd
     - references.qmd
 
 filters:

@@ -312,7 +312,6 @@ The idea is to write a program that randomly simulates the process of generating
 # | code-fold: false
 import random
 
-
 def family():
     # (m) Generate II2
     II2 = random.choice(["xX", "XX"])
@@ -350,29 +349,44 @@ To estimate conditional probabilities, we first filter the samples to only inclu
 The following code implements this idea to estimate the probabilities of interest. Instead of gathering all samples in memory, we can simply keep track of the relevant counts as we go.
 
 ```{python}
-N = 100_000
+# | label: infer-twins
+# | fig-cap: A Python function that uses rejection sampling to estimate the probabilities of interest.
+# | code-fold: false
+def infer_twins(N):
+
+    III3_unaffected = 0
+    at_least_one_twin_affected = 0
+    both_twins_affected = 0
+
+    for i in range(N):
+
+        # Simulate a family tree
+        II2, III1, III2, III3 = family()
+
+        # Condition on III1 = XY (unaffected son)
+        if III1 == "XY":
+            III3_unaffected += 1
+            if III2 == "xY" or III3 == "xY":
+                at_least_one_twin_affected += 1
+            if III2 == "xY" and III3 == "xY":
+                both_twins_affected += 1
+
+    return (
+        at_least_one_twin_affected / III3_unaffected,
+        both_twins_affected / III3_unaffected,
+    )
+```
+
+We now call the inference function to get out estimates:
+
+```{python}
 random.seed(42)
 
-III3_unaffected = 0
-at_least_one_twin_affected = 0
-both_twins_affected = 0
-
-for i in range(N):
-
-    # Simulate a family tree
-    II2, III1, III2, III3 = family()
-
-    # Condition on III1 = XY (unaffected son)
-    if III1 == "XY":
-        III3_unaffected += 1
-        if III2 == "xY" or III3 == "xY":
-            at_least_one_twin_affected += 1
-        if III2 == "xY" and III3 == "xY":
-            both_twins_affected += 1
+at_least_one, both = infer_twins(100_000)
 
 print(
-    f"At least one twin affected: {at_least_one_twin_affected / III3_unaffected:.4f}",
-    f"\nBoth twins affected: {both_twins_affected / III3_unaffected:.4f}",
+    f"At least one twin affected: {at_least_one:.4f}",
+    f"\nBoth twins affected: {both:.4f}",
 )
 ```
 
@@ -380,7 +394,7 @@ We see that the results are close to the exact values $5/24 \approx 0.208$ and $
 
 ### Vectorization
 
-To leverage modern hardware like GPUs, probabilistic programming often relies on **vectorized operations**. Instead of running the simulation in a loop $N$ times, we generate $N$ samples in parallel using tensors. We encode genotypes as binary values: 0 for unaffected ($XX$ or $XY$) and 1 for carrier or affected ($xX$ or $xY$). Here is the same model implemented using PyTorch:
+To leverage modern hardware like GPUs, probabilistic programming often relies on **vectorized operations**. Instead of running the simulation in a loop $N$ times, we generate $N$ samples in parallel using tensors. We encode genotypes as binary values: 0 for unaffected ($XX$ or $XY$) and 1 for carrier or affected ($xX$ or $xY$). This allows us to encode logic using arithmetic operations on tensors. Here is the same model implemented using PyTorch:
 
 ```{python}
 # | code-fold: false
@@ -408,24 +422,35 @@ def family_v(N):
 This time we generate all $N$ samples at once. The resulting tensors have shape $(N,)$, where each entry corresponds to a different simulated family tree. We can then apply the same filtering and counting logic as before, but now using vectorized operations instead of loops.
 
 ```{python}
-N = 100_000
+# | label: infer-twins-vectorized
+# | fig-cap: A vectorized inference function using PyTorch.
+# | code-fold: false
+def infer_twins_v(N):
+    # Generate samples (N-length vectors)
+    II2, III1, III2, III3 = family_v(N)
+
+    # Condition: Select indices where III1 is unaffected (0)
+    mask = (III1 == 0).bool()
+
+    # Filter samples
+    III2_cond = III2[mask]
+    III3_cond = III3[mask]
+
+    # Compute stats on filtered samples
+    # We first compute a 0-1 vector indicating the event
+    # then take the mean to get fraction of samples satisfying the event.
+    at_least_one = ((III2_cond == 1) | (III3_cond == 1)).float().mean()
+    both = ((III2_cond == 1) & (III3_cond == 1)).float().mean()
+
+    return at_least_one, both
+```
+
+We now call the vectorized inference function:
+
+```{python}
 torch.manual_seed(42)
 
-# Generate samples (N-length vectors)
-II2, III1, III2, III3 = family_v(N)
-
-# Condition: Select indices where III1 is unaffected (0)
-mask = (III1 == 0).bool()
-
-# Filter samples
-III2_cond = III2[mask]
-III3_cond = III3[mask]
-
-# Compute stats on filtered samples
-# We first compute a 0-1 vector indicating the event
-# then take the mean to get fraction of samples satisfying the event.
-at_least_one = ((III2_cond == 1) | (III3_cond == 1)).float().mean()
-both = ((III2_cond == 1) & (III3_cond == 1)).float().mean()
+at_least_one, both = infer_twins_v(100_000)
 
 print(f"At least one twin affected: {at_least_one:.4f}")
 print(f"Both twins affected: {both:.4f}")
@@ -441,5 +466,3 @@ Despite the variety of algorithms, the usage pattern remains largely the same: w
 
 ### WeightedSampling.torch implementation
 We conclude by demonstrating how this problem can be implemented using the `WeightedSampling.torch` library. 
-
-## Exercises

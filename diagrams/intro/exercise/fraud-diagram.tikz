@@ -1,0 +1,45 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (0) at (-4, 1) {$f$};
+		\node [style=small box] (1) at (-4, -1) {$t$};
+		\node [style=black node] (2) at (-2.5, 1) {};
+		\node [style=black node] (3) at (-2.5, -1) {};
+		\node [style=small box] (4) at (-0.75, 2) {$h$};
+		\node [style=small box] (5) at (2.5, 0.75) {$u$};
+		\node [style=small box] (6) at (-0.75, 0) {$l$};
+		\node [style=small box] (7) at (-0.75, -2) {$a$};
+		\node [style=black node] (8) at (0.75, 0) {};
+		\node [style=none] (9) at (-1.25, 0.25) {};
+		\node [style=none] (10) at (-1.25, -0.25) {};
+		\node [style=none] (11) at (2, 1) {};
+		\node [style=none] (12) at (2, 0.5) {};
+		\node [style=none] (13) at (4, 2) {};
+		\node [style=none] (14) at (4, 0.75) {};
+		\node [style=none] (15) at (4, -0.75) {};
+		\node [style=none] (16) at (4, -2) {};
+		\node [style=none] (17) at (-1.25, -1.75) {};
+		\node [style=none] (18) at (-1.25, -2.25) {};
+		\node [style=none] (20) at (-2.75, 1.75) {$F$};
+		\node [style=none] (22) at (-2.75, -2) {$T$};
+		\node [style=none] (23) at (3.75, -2.5) {$A$};
+		\node [style=none] (24) at (3.75, -0.25) {$L$};
+		\node [style=none] (25) at (3.75, 1.25) {$U$};
+		\node [style=none] (26) at (3.75, 2.5) {$H$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (1) to (3);
+		\draw [style=edge, in=180, out=60] (3) to (10.center);
+		\draw [style=edge, in=-180, out=-90, looseness=0.50] (2) to (17.center);
+		\draw [style=edge, in=-180, out=-75] (3) to (18.center);
+		\draw [style=edge, in=-180, out=-45] (2) to (9.center);
+		\draw [style=edge, in=-180, out=60] (2) to (4);
+		\draw [style=edge] (4) to (13.center);
+		\draw [style=edge] (2) to (11.center);
+		\draw [style=edge] (6) to (8);
+		\draw [style=edge, in=180, out=90, looseness=0.75] (8) to (12.center);
+		\draw [style=edge] (5) to (14.center);
+		\draw [style=edge, in=-180, out=-90, looseness=0.50] (8) to (15.center);
+		\draw [style=edge] (7) to (16.center);
+		\draw [style=edge] (2) to (0);
+	\end{pgfonlayer}
+\end{tikzpicture}
