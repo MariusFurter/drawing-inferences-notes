@@ -1,6 +1,7 @@
 # Quarto build output
 _book/
 _freeze/
+_site/
 *_files/
 
 # Python
