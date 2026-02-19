@@ -65,7 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../references.html" rel="next">
+<link href="../appendix/pytorch.html" rel="next">
 <link href="../chapters/intro.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -77,7 +77,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-05bc83e426d36830bea84f4881600e1b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-9d175643e8beedf6818e2022ee6e7a70.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -212,6 +212,23 @@ window.Quarto = {
 </li>
       </ul>
   </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../references.html" class="sidebar-item-text sidebar-link">
@@ -286,7 +303,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="structure-and-string-diagrams">1. Structure and String Diagrams</h3>
 <p>Think about how credit card fraud works causally. Which variables influence which? For instance, whether a transaction is fraudulent might affect the likelihood of a large amount, but not whether the cardholder is traveling.</p>
 <p><strong>Task:</strong> Draw a <strong>string diagram</strong> for this system using the notation from the course notes: boxes for processes and wires for variables. Wires carry information from left to right. The outputs of the diagram should be the observable variables <span class="math inline">\(L\)</span>, <span class="math inline">\(H\)</span>, <span class="math inline">\(U\)</span>, and <span class="math inline">\(A\)</span>. No box should appear to the left of its inputs.</p>
-<p><em>Hint:</em> Start by identifying which variables are generated independently (these are generators with no input wires) and which causally depend on others. For the dependent variables, think about what directly influences them. Remember that one variables might depend on several others. Draw the boxes separately first, then decide how to arrange them on the page to respect the left-to-right flow.</p>
+<p><em>Hint:</em> Start by identifying which variables are generated independently (these are generators with no input wires) and which causally depend on others. For the dependent variables, think about what directly influences them. Remember that one variable might depend on several others. Draw the boxes separately first, then decide how to arrange them on the page to respect the left-to-right flow.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -306,7 +323,7 @@ window.Quarto = {
 <figcaption>A string diagram representing a generative model for credit card fraud detection.</figcaption>
 </figure>
 </div>
-<p>We have chosen to model <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span> as independent generators, since whether a transaction is fraudulent does not directly cause the cardholder to be traveling, and vice versa. The observable <span class="math inline">\(H\)</span> depends only on <span class="math inline">\(F\)</span>, since traveling would not cause me to shop at a high-risk merchant. The observables <span class="math inline">\(L\)</span> and <span class="math inline">\(A\)</span> depend on both <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span>, since both fraud and travel can cause unusual locations and amounts. We have chosen <span class="math inline">\(U\)</span> to depend on <span class="math inline">\(F\)</span> and <span class="math inline">\(L\)</span> since fraud might take place at unusual times, while being in a different time-zone will also cause me to shop at odd hours. Importantly, <span class="math inline">\(U\)</span> only depends on <span class="math inline">\(T\)</span> via <span class="math inline">\(L\)</span>. In other words, I will only show at odd hours while traveling if I’m in a different time-zone.</p>
+<p>We have chosen to model <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span> as independent generators, since whether a transaction is fraudulent does not directly cause the cardholder to be traveling, and vice versa. The observable <span class="math inline">\(H\)</span> depends only on <span class="math inline">\(F\)</span>, since traveling would not cause me to shop at a high-risk merchant. The observables <span class="math inline">\(L\)</span> and <span class="math inline">\(A\)</span> depend on both <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span>, since both fraud and travel can cause unusual locations and amounts. We have chosen <span class="math inline">\(U\)</span> to depend on <span class="math inline">\(F\)</span> and <span class="math inline">\(L\)</span> since fraud might take place at unusual times, while being in a different time-zone will also cause me to shop at odd hours. Importantly, <span class="math inline">\(U\)</span> only depends on <span class="math inline">\(T\)</span> via <span class="math inline">\(L\)</span>. In other words, I will only shop at odd hours while traveling if I’m in a different time-zone.</p>
 </div>
 </div>
 </div>
@@ -344,7 +361,7 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>If you prefer not to use PyTorch, you can use <code>if</code>/<code>else</code> with <a href="https://docs.python.org/3/library/random.html#random.binomialvariate"><code>random.binomialvariate</code></a> from base Python. The logic is the same, but you will need a loop to generate multiple samples, which will be much slower.</p>
+<p>If you prefer not to use PyTorch, you can use <code>if</code>/<code>else</code> with the <a href="https://docs.python.org/3/library/random.html"><code>random</code></a> module from base Python (e.g., <code>random.random() &lt; p</code>). The logic is the same, but you will need a loop to generate multiple samples, which will be much slower.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
@@ -359,9 +376,9 @@ window.Quarto = {
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>We write a generative function for each box, using arithmetic to compute the conditional probability before sampling with <a href="https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli"><code>torch.distributions.Bernoulli</code></a>. Since the inputs are 0/1 values, we can express the conditional probabilities as arithmetic expressions that work on both scalars and tensors. To sample a single value, call with <code>N=1</code>; to sample a batch of <code>N</code> values at once, pass a larger <code>N</code>. Alternatively, you could use <code>if</code>/<code>else</code> with <a href="https://docs.python.org/3/library/random.html#random.binomialvariate"><code>random.binomialvariate</code></a> from base Python — the logic is the same, just less compact and not vectorized.</p>
-<p><strong>Generators <span class="math inline">\(f\)</span> and <span class="math inline">\(t\)</span>.</strong> We choose a fraud rate of 0.088% based on <a href="https://www.ecb.europa.eu/pub/pdf/cardfraud/ecb.cardfraudreport202110~cac4c418e8.en.pdf">this report</a> by the European Central Bank. The same report puts the cross-border rate at 11%.</p>
-<div id="2fb84512" class="cell" data-execution_count="1">
+<p>We write a generative function for each box, using arithmetic to compute the conditional probability before sampling with <a href="https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli"><code>torch.distributions.Bernoulli</code></a>. Since the inputs are 0/1 values, we can express the conditional probabilities as arithmetic expressions that work on both scalars and tensors. To sample a single value, call with <code>N=1</code>; to sample a batch of <code>N</code> values at once, pass a larger <code>N</code>. Alternatively, you could use <code>if</code>/<code>else</code> with the <a href="https://docs.python.org/3/library/random.html"><code>random</code></a> module from base Python — the logic is the same, just less compact and not vectorized.</p>
+<p><strong>Generators <span class="math inline">\(f\)</span> and <span class="math inline">\(t\)</span>.</strong> We choose a fraud rate of 0.088% based on <a href="https://www.ecb.europa.eu/pub/pdf/cardfraud/ecb.cardfraudreport202110~cac4c418e8.en.pdf">this 2021 report</a> by the European Central Bank. The same report puts the cross-border rate at 11%.</p>
+<div id="ffea9209" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.distributions <span class="im">import</span> Bernoulli</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -371,26 +388,60 @@ window.Quarto = {
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_T(N):</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(<span class="fl">0.11</span>).sample((N,))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><strong>Location anomaly <span class="math inline">\(l(F, T)\)</span>.</strong> The ECB report finds that 65% of fraudulent transactions are cross-border. For legitimate transactions, we assume a location anomaly occurs exactly when the cardholder is traveling. Note that for functions with arguments, we do not need to pass the shape parameter <code>N</code> since <code>torch.distributions</code> automatically broadcast to the size of the input variables.</p>
-<div id="645f42cd" class="cell" data-execution_count="2">
+<p><strong>Location anomaly <span class="math inline">\(l(F, T)\)</span>.</strong> Both fraud and travel can independently cause a location anomaly. We use a noisy-OR to combine them: fraud triggers an anomaly with probability 0.65 (the cross-border fraud rate from the ECB report), while traveling abroad guarantees one. The anomaly occurs unless <em>both</em> causes fail to fire. This gives the following conditional probabilities:</p>
+<div class="half-width">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(F\)</span></th>
+<th><span class="math inline">\(T\)</span></th>
+<th><span class="math inline">\(p(L = 1)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>1</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>0</td>
+<td>0.65</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>1</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note that for functions with arguments, we do not need to pass the shape parameter <code>N</code> since <code>torch.distributions</code> automatically broadcast to the size of the input variables.</p>
+<div id="533cf7d1" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_L(F, T):</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.65</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> T</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> (<span class="dv">1</span> <span class="op">-</span> <span class="fl">0.65</span> <span class="op">*</span> F) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> T)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><strong>High-risk merchant <span class="math inline">\(h(F)\)</span>.</strong> We assume 80% of fraudulent transactions target high-risk merchants (jewelry, electronics), compared to 5% for legitimate ones.</p>
-<div id="c7406973" class="cell" data-execution_count="3">
+<div id="a72e0d4d" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_H(F):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.80</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> <span class="fl">0.05</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><strong>Large amount <span class="math inline">\(a(F, T)\)</span>.</strong> We assume 15% of fraudulent transactions involve unusually large amounts. For legitimate transactions, the rate is 20% when traveling (more expensive purchases abroad) and 10% otherwise.</p>
-<div id="75d976c1" class="cell" data-execution_count="4">
+<div id="107614f0" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_A(F, T):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.15</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> (T <span class="op">*</span> <span class="fl">0.20</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> T) <span class="op">*</span> <span class="fl">0.10</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><strong>Unusual time <span class="math inline">\(u(F, L)\)</span>.</strong> We assume 80% of fraudulent transactions happen at unusual times. For legitimate transactions, being in a different time zone (captured by <span class="math inline">\(L\)</span>) raises the rate to 40%, while the baseline is 5%.</p>
-<div id="f756125b" class="cell" data-execution_count="5">
+<div id="d31b9457" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_U(F, L):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.80</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> (L <span class="op">*</span> <span class="fl">0.40</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> L) <span class="op">*</span> <span class="fl">0.05</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -414,8 +465,8 @@ window.Quarto = {
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>It is now simple to combine the boxes into a single function. Note how the variable-passing logic follows the structure of the string diagram.</p>
-<div id="26e68a7d" class="cell" data-execution_count="6">
+<p>It is now simple to combine the boxes into a single function. Note how the variable-passing logic follows the structure of the string diagram. The <code>transaction()</code> function returns all six variables, including the hidden ones <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span>. The corresponding string diagram therefore has six output wires, not just the four observable ones from Task 1.</p>
+<div id="3a655fd8" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> transaction(N):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    F <span class="op">=</span> gen_F(N)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    T <span class="op">=</span> gen_T(N)</span>
@@ -443,12 +494,12 @@ window.Quarto = {
 <ul>
 <li>Evidence: <span class="math inline">\(L = 1, \, U = 1, \, H = 0, \, A = 0, \, T = 1\)</span>.</li>
 </ul></li>
-<li><strong>Scenario C (The Perfect Storm):</strong> Multiple strong indicators of fraud, no travel.
+<li><strong>Scenario C:</strong> Multiple strong indicators of fraud.
 <ul>
-<li>Evidence: <span class="math inline">\(L = 1, \, U = 1, \, H = 1, \, A = 1, \, T = 0\)</span>.</li>
+<li>Evidence: <span class="math inline">\(L = 1, \, U = 1, \, H = 1, \, A = 1\)</span>.</li>
 </ul></li>
 </ul>
-<p><em>Discussion:</em> Compare the acceptance rates across the three scenarios. What happens to efficiency as you condition on more variables? Relate your observations to the limitations of rejection sampling discussed in the course notes.</p>
+<p><em>Discussion:</em> Compare the acceptance rates across the three scenarios. Can you explain the trends? Relate your observations to the limitations of rejection sampling discussed in the course notes.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -462,7 +513,7 @@ window.Quarto = {
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>We write a generic rejection sampler that takes the evidence as a dictionary and the target variables as a list of names. It generates <code>N</code> samples from <code>transaction()</code>, builds a mask that selects samples matching all evidence, and computes the mean of each target variable among the survivors.</p>
-<div id="6cf08dba" class="cell" data-execution_count="7">
+<div id="0f35e8fe" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>VARS <span class="op">=</span> [<span class="st">"F"</span>, <span class="st">"T"</span>, <span class="st">"L"</span>, <span class="st">"H"</span>, <span class="st">"U"</span>, <span class="st">"A"</span>]</span>
@@ -501,8 +552,9 @@ window.Quarto = {
 <span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> estimate, acceptance_rate</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>For comparison, recall that the base level of fraud was 0.088%.</p>
 <p><strong>Scenario A (The False Alarm):</strong> A location anomaly and unusual time are observed, but nothing else suspicious.</p>
-<div id="944d049e" class="cell" data-execution_count="8">
+<div id="49cef1de" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
@@ -513,14 +565,14 @@ window.Quarto = {
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>{<span class="st">"F"</span>: <span class="dv">1</span>},</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    N<span class="op">=</span>N,</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(F=1 | L=1, U=1, H=0, A=0) = </span><span class="sc">{</span>est<span class="sc">:.4f}</span><span class="ss">, acceptance rate = </span><span class="sc">{</span>rate<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(F=1 | L=1, U=1, H=0, A=0) = </span><span class="sc">{</span><span class="dv">100</span><span class="op">*</span>est<span class="sc">:.4f}</span><span class="ss">%, acceptance rate = </span><span class="sc">{</span>rate<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>P(F=1 | L=1, U=1, H=0, A=0) = 0.0023, acceptance rate = 3.35e-02</code></pre>
+<pre><code>P(F=1 | L=1, U=1, H=0, A=0) = 0.2406%, acceptance rate = 3.35e-02</code></pre>
 </div>
 </div>
 <p><strong>Scenario B (Explaining Away):</strong> Same observations as Scenario A, but we also learn the user is traveling.</p>
-<div id="68077b50" class="cell" data-execution_count="9">
+<div id="0d6506b8" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>est, rate <span class="op">=</span> rejection_sample(</span>
@@ -528,25 +580,27 @@ window.Quarto = {
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>{<span class="st">"F"</span>: <span class="dv">1</span>},</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    N<span class="op">=</span>N,</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(F=1 | L=1, U=1, H=0, A=0, T=1) = </span><span class="sc">{</span>est<span class="sc">:.4f}</span><span class="ss">, acceptance rate = </span><span class="sc">{</span>rate<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(F=1 | L=1, U=1, H=0, A=0, T=1) = </span><span class="sc">{</span><span class="dv">100</span><span class="op">*</span>est<span class="sc">:.4f}</span><span class="ss">%, acceptance rate = </span><span class="sc">{</span>rate<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>P(F=1 | L=1, U=1, H=0, A=0, T=1) = 0.0003, acceptance rate = 3.34e-02</code></pre>
+<pre><code>P(F=1 | L=1, U=1, H=0, A=0, T=1) = 0.0380%, acceptance rate = 3.34e-02</code></pre>
 </div>
 </div>
-<p><strong>Scenario C (The Perfect Storm):</strong> Multiple strong indicators of fraud, no travel.</p>
-<div id="ad6b2df3" class="cell" data-execution_count="10">
+<p><strong>Scenario C:</strong> Multiple strong indicators of fraud.</p>
+<div id="bd06c0fd" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>est, rate <span class="op">=</span> rejection_sample(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    evidence<span class="op">=</span>{<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">1</span>, <span class="st">"A"</span>: <span class="dv">1</span>, <span class="st">"T"</span>: <span class="dv">0</span>},</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    evidence<span class="op">=</span>{<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">1</span>, <span class="st">"A"</span>: <span class="dv">1</span>},</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>{<span class="st">"F"</span>: <span class="dv">1</span>},</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    N<span class="op">=</span>N,</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(F=1 | L=1, U=1, H=1, A=1, T=0) = </span><span class="sc">{</span>est<span class="sc">:.4f}</span><span class="ss">, acceptance rate = </span><span class="sc">{</span>rate<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"P(F=1 | L=1, U=1, H=1, A=1) = </span><span class="sc">{</span><span class="dv">100</span><span class="op">*</span>est<span class="sc">:.4f}</span><span class="ss">%, acceptance rate = </span><span class="sc">{</span>rate<span class="sc">:.2e}</span><span class="ss">"</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>P(F=1 | L=1, U=1, H=1, A=1, T=0) = 1.0000, acceptance rate = 4.79e-05</code></pre>
+<pre><code>P(F=1 | L=1, U=1, H=1, A=1) = 11.4245%, acceptance rate = 4.93e-04</code></pre>
 </div>
 </div>
 </div>
@@ -568,13 +622,13 @@ window.Quarto = {
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>We run each scenario 100 times with 1M samples and collect the estimates, then compute the average and standard deviation.</p>
-<div id="88ac74bf" class="cell" data-execution_count="11">
+<div id="d9e24f5f" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> mean, stdev</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>scenarios <span class="op">=</span> {</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"A"</span>: {<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">0</span>, <span class="st">"A"</span>: <span class="dv">0</span>},</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"B"</span>: {<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">0</span>, <span class="st">"A"</span>: <span class="dv">0</span>, <span class="st">"T"</span>: <span class="dv">1</span>},</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"C"</span>: {<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">1</span>, <span class="st">"A"</span>: <span class="dv">1</span>, <span class="st">"T"</span>: <span class="dv">0</span>},</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"C"</span>: {<span class="st">"L"</span>: <span class="dv">1</span>, <span class="st">"U"</span>: <span class="dv">1</span>, <span class="st">"H"</span>: <span class="dv">1</span>, <span class="st">"A"</span>: <span class="dv">1</span>},</span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">1_000_000</span></span>
@@ -586,9 +640,9 @@ window.Quarto = {
 <span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    sd <span class="op">=</span> stdev(estimates)</span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Scenario </span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">: P(F=1 | evidence) = </span><span class="sc">{</span>avg<span class="sc">:.2e}</span><span class="ss"> ± </span><span class="sc">{</span>sd<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Scenario A: P(F=1 | evidence) = 2.31e-03 ± 2.83e-04
-Scenario B: P(F=1 | evidence) = 2.61e-04 ± 9.04e-05
-Scenario C: P(F=1 | evidence) = 1.00e+00 ± 0.00e+00</code></pre>
+<pre><code>Scenario A: P(F=1 | evidence) = 2.45e-03 ± 2.89e-04
+Scenario B: P(F=1 | evidence) = 3.99e-04 ± 1.08e-04
+Scenario C: P(F=1 | evidence) = 1.17e-01 ± 1.34e-02</code></pre>
 </div>
 </div>
 </div>
@@ -1078,8 +1132,8 @@ Scenario C: P(F=1 | evidence) = 1.00e+00 ± 0.00e+00</code></pre>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../references.html" class="pagination-link" aria-label="References">
-        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../appendix/pytorch.html" class="pagination-link" aria-label="PyTorch Tutorial">
+        <span class="nav-page-text">PyTorch Tutorial</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

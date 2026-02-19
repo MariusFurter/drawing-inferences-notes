@@ -77,7 +77,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-05bc83e426d36830bea84f4881600e1b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-9d175643e8beedf6818e2022ee6e7a70.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -212,6 +212,23 @@ window.Quarto = {
 </li>
       </ul>
   </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../references.html" class="sidebar-item-text sidebar-link">
@@ -277,7 +294,7 @@ window.Quarto = {
 \def\kernel{\rightsquigarrow}
 \]</span></p>
 </div>
-<p>Let’s play a game. I’m carrying a mystery object on me. Your goal is to guess what it is. I will reveal that the object can be described by three properties — its <em>material</em>, <em>shape</em>, and <em>weight</em>:</p>
+<p>Let’s play a game. I’m carrying a mystery object. Your goal is to guess what it is. I will reveal that the object can be described by three properties — its <em>material</em>, <em>shape</em>, and <em>weight</em>:</p>
 <div class="half-width">
 <table class="caption-top table">
 <thead>
@@ -302,8 +319,8 @@ window.Quarto = {
 </tbody>
 </table>
 </div>
-<p>Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it’s more likely that the object is made of rubber than gold, because rubber is more common in everyday objects. You might also believe that if the object is a sphere, its more likely to be made of rubber.</p>
-<p>I could quantify you relative belief in option <span class="math inline">\(x\)</span> vs.&nbsp;<span class="math inline">\(y\)</span> by by asking you how much you are willing to bet that <span class="math inline">\(x\)</span> is the true state rather than <span class="math inline">\(y\)</span>. For instance, if you are indifferent between betting on <span class="math inline">\(x\)</span> and betting on <span class="math inline">\(y\)</span>, then you believe they are equally likely. If you are willing to bet $2 on <span class="math inline">\(x\)</span> to win $1 if you’re right, then you believe <span class="math inline">\(x\)</span> is twice as likely as <span class="math inline">\(y\)</span>.</p>
+<p>Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it’s more likely that the object is made of rubber than gold, because rubber is more common in everyday objects. You might also believe that if the object is a sphere, it’s more likely to be made of rubber.</p>
+<p>How strongly do you favor <span class="math inline">\(x\)</span> over <span class="math inline">\(y\)</span>? One way to measure this: ask yourself what odds you would offer. If you would bet $2 on <span class="math inline">\(x\)</span> against $1 on <span class="math inline">\(y\)</span>, then you believe <span class="math inline">\(x\)</span> is twice as likely.</p>
 <p>Now suppose you’ve chosen a combination of properties. I will reveal a clue.</p>
 <p><strong>Clue 1: The object is a ring.</strong></p>
 <p>What changes? If you previously bet on a sphere, you should switch — spheres have been ruled out. But if you already bet on a ring, should you change anything? How would confirming that the object is a ring change your beliefs about the remaining properties?</p>
@@ -330,7 +347,7 @@ window.Quarto = {
 <section id="conditioning" class="level3" data-number="1.1.1">
 <h3 data-number="1.1.1" class="anchored" data-anchor-id="conditioning"><span class="header-section-number">1.1.1</span> Conditioning</h3>
 <p>The key operation in our guessing game was eliminating impossible states. Suppose we learn that the true state lies in some subset <span class="math inline">\(F \subseteq \Omega\)</span>. For instance, <span class="math inline">\(F\)</span> might be the set of all ring-objects. How should we update our probabilities?</p>
-<p>States outside <span class="math inline">\(F\)</span> are now impossible, so they should receive probability zero. Among the states inside <span class="math inline">\(F\)</span>, we have no new reason to prefer one over another, so their relative likelihood should remain unchanged. Hence, we simply replace each event <span class="math inline">\(E \subseteq \Omega\)</span> by <span class="math inline">\(E \cap F\)</span> to remove any impossible states. Finally, we need to <em>renormalize</em> by <span class="math inline">\(p(F)\)</span>, so that these new probabilities take values between 0 and 1. <span class="math display">\[
+<p>States outside <span class="math inline">\(F\)</span> are now impossible, so they should receive probability zero. Among the states inside <span class="math inline">\(F\)</span>, we have no new reason to prefer one over another, so their relative likelihood should remain unchanged. Hence, we simply replace each event <span class="math inline">\(E \subseteq \Omega\)</span> by <span class="math inline">\(E \cap F\)</span> to remove any impossible states. Finally, we need to divide by <span class="math inline">\(p(F)\)</span> to <em>renormalize</em>, so that these new probabilities take values between 0 and 1. <span class="math display">\[
 p(E \mid F) := \frac{p(E \cap F)}{p(F)}.
 \]</span></p>
 <p>This process is called <strong>conditioning</strong> on <span class="math inline">\(F\)</span>. The expression <span class="math inline">\(p(E \mid F)\)</span> is <strong>the conditional probability of <span class="math inline">\(E\)</span> given <span class="math inline">\(F\)</span></strong>.</p>
@@ -367,7 +384,7 @@ p(x, y \mid z) = p(x \mid y, z) \,p(y \mid z).
 <section id="bayesian-inference" class="level3" data-number="1.1.3">
 <h3 data-number="1.1.3" class="anchored" data-anchor-id="bayesian-inference"><span class="header-section-number">1.1.3</span> Bayesian inference</h3>
 <p>We can now describe the general recipe for reasoning under uncertainty.</p>
-<p><strong>Step 1: Build a generative model.</strong> Specify a joint distribution <span class="math inline">\(p(x, y)\)</span> that describes all quantities of interest - both hidden and observable. This is called a <strong>generative model</strong> because it tells a story about how the data came to be. In the guessing game, the generative model must specify <span class="math inline">\(p(m,s,w)\)</span>, the probability of each combination of material, shape, and weight. Often the chain rule is used to break down the joint distribution into simpler pieces.</p>
+<p><strong>Step 1: Build a generative model.</strong> Specify a joint distribution <span class="math inline">\(p(x, y)\)</span> that describes all quantities of interest — both hidden and observable. This is called a <strong>generative model</strong> because it tells a story about how the data came to be. In the guessing game, the generative model must specify <span class="math inline">\(p(m,s,w)\)</span>, the probability of each combination of material, shape, and weight. Often the chain rule is used to break down the joint distribution into simpler pieces.</p>
 <p><strong>Step 2: Condition on observed data.</strong> Once we observe <span class="math inline">\(y\)</span>, compute the <strong>posterior distribution</strong> <span class="math inline">\(p(x \mid y)\)</span> by conditioning. This tells us what we should believe about <span class="math inline">\(x\)</span> in light of the evidence <span class="math inline">\(y\)</span>.</p>
 <p>That’s it, at least in principle. Bayesian inference is the process of building a generative model and then conditioning it on observed data to update our beliefs. Everything that follows in this course is an instance of this simple pattern. The challenge lies in carrying out each step: as our models grow more complex, both specifying the joint distribution and computing the posterior become harder. The rest of this section introduces two tools that help: <strong>conditional independence</strong> simplifies the task of building joint distributions (Step 1), and <strong>Bayes’ rule</strong> provides a way to compute the posterior when the model is specified in a particular direction (Step 2).</p>
 </section>
@@ -390,7 +407,7 @@ p(x, y \mid z) = p(x \mid z) \, p(y \mid z).
 <p>Since the joint distribution is symmetric — <span class="math inline">\(p(h, d) = p(d, h)\)</span> — applying the chain rule gives <strong>Bayes’ rule</strong>: <span class="math display">\[
 p(h \mid d) = \frac{p(h, d)}{p(d)} = \frac{p(d \mid h) \, p(h)}{p(d)}.
 \]</span></p>
-<p>In Bayesian terminology, <span class="math inline">\(p(h)\)</span> is called the <strong>prior distribution</strong> — our beliefs about <span class="math inline">\(h\)</span> before seeing any data. The term <span class="math inline">\(p(d \mid h)\)</span> is called the <strong>likelihood</strong> — how likely we would be to see the data if <span class="math inline">\(h\)</span> were true. The denominator <span class="math inline">\(p(d)\)</span> is called the <strong>evidence</strong> — the total probability of seeing the data under any possible hidden state. Finally, <span class="math inline">\(p(h \mid d)\)</span> is called the <strong>posterior distribution</strong> — our updated beliefs about <span class="math inline">\(h\)</span> after seeing the data.</p>
+<p>In Bayesian terminology, <span class="math inline">\(p(h)\)</span> is called the <strong>prior distribution</strong> — our beliefs about <span class="math inline">\(h\)</span> before seeing any data. The term <span class="math inline">\(p(d \mid h)\)</span> is called the <strong>likelihood</strong> — how likely we would be to see the data if <span class="math inline">\(h\)</span> were true. The denominator <span class="math inline">\(p(d)\)</span> is called the <strong>evidence</strong> — the total probability of the observed data. Finally, <span class="math inline">\(p(h \mid d)\)</span> is called the <strong>posterior distribution</strong> — our updated beliefs about <span class="math inline">\(h\)</span> after seeing the data.</p>
 <p>The denominator <span class="math inline">\(p(d)\)</span> is often not directly available but can be computed by summing the joint distribution over all possible values of <span class="math inline">\(h\)</span>. This is the <strong>marginalization</strong> identity:</p>
 <p><span class="math display">\[
 p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \, p(h).
@@ -401,22 +418,22 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 </section>
 <section id="string-diagrams" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="string-diagrams"><span class="header-section-number">1.2</span> String diagrams</h2>
-<p>We will now describe a convenient way to build and reason about generative models using <strong>string diagrams</strong>. This will allow us to visually manipulate complex models without having to resort to tedious algebraic calculations. Two examples of string diagrams are shown below. The one on the left is represents a typical causal model. The one on the right illustrates other syntactic possibilities.</p>
+<p>We will now describe a convenient way to build and reason about generative models using <strong>string diagrams</strong>. This lets us manipulate complex models visually, without tedious algebra. Two examples of string diagrams are shown below. The one on the left represents a typical causal model. The one on the right illustrates other syntactic possibilities.</p>
 <div id="string-diagrams" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="intro_files/mediabag/f68d71ee048fdc6dc1bbf5f8b68bc09fe59ad0ee.svg" style="height:7.5em" class="figure-img"></p>
 <figcaption>Two examples of string diagrams.</figcaption>
 </figure>
 </div>
-<p>String diagrams consist of boxes that are connected by wires. You can imagine information flowing through the wires from left to right. The diagram can have incoming and outgoing wires that are not connected to any boxes. The boxes represent processes that transform information. You can think of them as random functions that take an input and produce an output according to some distribution. In the next chapter, we will make this interpretation precise.</p>
-<p>Boxes can have any number of input and output wires. We think of boxes with no inputs as <strong>generators</strong> and boxes with no outputs as <strong>evaluators</strong>. Wires are allowed to cross. The point where this happens is called a <strong>swap</strong>. Moreover, the black <strong>copy</strong> and <strong>delete</strong> nodes allow us to split and terminate wires. You should think of copy nodes a perfectly duplicating the information in the wire, while delete nodes throw the information away. Here is a summary of the visual elements used to construct string diagrams:</p>
+<p>String diagrams consist of boxes that are connected by wires. You can imagine information flowing through the wires from left to right. Diagrams are <em>open</em>: they can have input wires entering from the left and output wires leaving on the right. The boxes represent processes that transform information. You can think of them as random functions that take an input and produce an output according to some distribution. In the next chapter, we will make this interpretation precise.</p>
+<p>Boxes can have any number of input and output wires. We think of boxes with no inputs as <strong>generators</strong> and boxes with no outputs as <strong>evaluators</strong>. Wires are allowed to cross. The point where this happens is called a <strong>swap</strong>. Moreover, the black <strong>copy</strong> and <strong>delete</strong> nodes allow us to split and terminate wires. You should think of copy nodes as perfectly duplicating the information in the wire, while delete nodes throw the information away. Here is a summary of the visual elements used to construct string diagrams:</p>
 <div id="string-diagram-elements" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="intro_files/mediabag/72afb1257e133f50548256fb835842677fcc6103.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>The visual elements used to construct string diagrams.</figcaption>
 </figure>
 </div>
-<p>String diagrams encode the structure of our model and make is easy to see which variables depend on each other. We will see in the next chapter how to read off conditional independence assumptions from the diagram, and how to use it to organize calculations.</p>
+<p>String diagrams encode the structure of our model and make it easy to see which variables depend on each other. We will see in the next chapter how to read off conditional independence assumptions from the diagram, and how to use it to organize calculations.</p>
 <p>A key feature of string diagrams is that only their connectivity matters for determining their meaning. For instance, the following diagrams are considered the same:</p>
 <div id="deformations" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -446,8 +463,8 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <figcaption>An identity that holds for any normalized box <span class="math inline">\(f\)</span>.</figcaption>
 </figure>
 </div>
-<p>It says that of we transform an input by <span class="math inline">\(f\)</span> and then delete the results, it’s the same as directly deleting the input. Most boxes we will encounter are normalized and hence satisfy this property.</p>
-<p>We will see more examples of ways to calculate with string diagrams in the next chapter. For now, we can use these three to demonstrate calculate what happens to the fire alarm diagram when we delete the bottom output and simplify:</p>
+<p>It says that if we transform an input by <span class="math inline">\(f\)</span> and then delete the result, it’s the same as directly deleting the input. Most boxes we will encounter are normalized and hence satisfy this property.</p>
+<p>We will see more examples of ways to calculate with string diagrams in the next chapter. For now, we can use these three to calculate what happens to the fire alarm diagram when we delete the bottom output and simplify:</p>
 <div id="fire-alarm-deletion" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="intro_files/mediabag/c2be84ecbd27197766fe92a84b4177b01b482d24.svg" style="height:11em" class="figure-img"></p>
@@ -499,7 +516,7 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <h3 data-number="1.3.3" class="anchored" data-anchor-id="building-a-generative-model"><span class="header-section-number">1.3.3</span> Building a generative model</h3>
 <section id="define-variables" class="level4 unnumbered">
 <h4 class="unnumbered anchored" data-anchor-id="define-variables">Define variables</h4>
-<p>The first step is to decide what variables to include. First, we note that I2 must be a carrier (<span class="math inline">\(xX\)</span>) since her son II1 is affected, and she herself is unaffected. Hence, it is sufficient to model only II2 and her descendants III1–3. We do not need to model the older males (I3, I4, II1) or the fathers — their observed status is already captured by the inference that I2 is a carrier, and the fathers are assumed unaffected.</p>
+<p>The first step is to decide what variables to include. First, we note that I2 must be a carrier (<span class="math inline">\(xX\)</span>) since her son II1 is affected, and she herself is unaffected. Hence, it is sufficient to model only II2 and her descendants III1–3. We do not need to model the older males (I3, I4, II1) — their observed status is already captured by the inference that I2 is a carrier. Nor do we need to model the fathers, who are assumed unaffected.</p>
 </section>
 <section id="draw-a-string-diagram" class="level4 unnumbered">
 <h4 class="unnumbered anchored" data-anchor-id="draw-a-string-diagram">Draw a string diagram</h4>
@@ -594,8 +611,8 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        both_twins_affected <span class="op">/</span> III3_unaffected,</span>
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>We now call the inference function to get out estimates:</p>
-<div id="bbd555a3" class="cell" data-execution_count="3">
+<p>We now call the inference function to get our estimates:</p>
+<div id="f2c8a2ef" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">42</span>)</span>
@@ -658,7 +675,7 @@ Both twins affected: 0.1236</code></pre>
 <span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> at_least_one, both</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We now call the vectorized inference function:</p>
-<div id="dfa5de00" class="cell" data-execution_count="6">
+<div id="482bbb4d" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
@@ -677,7 +694,7 @@ Both twins affected: 0.1247</code></pre>
 <section id="limitations" class="level3" data-number="1.3.6">
 <h3 data-number="1.3.6" class="anchored" data-anchor-id="limitations"><span class="header-section-number">1.3.6</span> Limitations</h3>
 <p>While simple rejection sampling is intuitive, it faces a major hurdle: <strong>conditioning on rare events</strong>. If the observed data has a very low probability of occurring under our model (e.g.&nbsp;0.1%), we would have to discard most of our samples (e.g.&nbsp;99.9%). This is extremely inefficient. More advanced inference algorithms—such as <strong>Importance Sampling</strong>, <strong>Markov Chain Monte Carlo (MCMC)</strong>, and <strong>Variational Inference</strong>—address this by attempting to sample more directly from the high-probability regions of the posterior distribution, rather than blindly simulating from the prior.</p>
-<p>Another challenge is <strong>implementation overhead</strong>. As you can imagine, directly implementing vectorized code gets complicated very quickly, even for this simple approach to sampling. This is where <strong>probabilistic programming languages (PPLs)</strong> come in. They provide high-level abstractions that allow us to write code in a more intuitive way, close to the mathematical definition, while automatically handling the complex inference algorithms under the hood. We will learn to use several of these frameworks throughout the course.</p>
+<p>Another challenge is <strong>implementation overhead</strong>. As you can see, writing vectorized code by hand gets complicated fast, even for this simple sampler. This is where <strong>probabilistic programming languages (PPLs)</strong> come in. They provide high-level abstractions that allow us to write code in a more intuitive way, close to the mathematical definition, while automatically handling the complex inference algorithms under the hood. We will learn to use several of these frameworks throughout the course.</p>
 <p>Despite the variety of algorithms, the usage pattern remains largely the same: we define a generative model, condition it on data, and receive a collection of samples from the posterior distribution. We then use these samples to estimate quantities of interest—like the probability of the twins being affected—by computing simple averages.</p>
 
 
