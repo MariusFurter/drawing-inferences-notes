@@ -1,0 +1,19 @@
+# Quarto build output
+_book/
+_freeze/
+*_files/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+/.quarto/
+
+**/*.quarto_ipynb
+
+# hidden
+_hidden/

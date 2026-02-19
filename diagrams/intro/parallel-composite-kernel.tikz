@@ -1,0 +1,20 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=box node] (0) at (0, 0.75) {$f_1$};
+		\node [style=box node] (1) at (0, -0.75) {$f_2$};
+		\node [style=none] (2) at (-2, 0.75) {};
+		\node [style=none] (3) at (-2, -0.75) {};
+		\node [style=none] (4) at (2, -0.75) {};
+		\node [style=none] (5) at (2, 0.75) {};
+		\node [style=none] (6) at (-1.5, 1.25) {$X_1$};
+		\node [style=none] (7) at (-1.5, -0.25) {$X_2$};
+		\node [style=none] (8) at (1.5, 1.25) {$Y_1$};
+		\node [style=none] (9) at (1.5, -0.25) {$Y_2$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (2.center) to (0);
+		\draw [style=edge] (5.center) to (0);
+		\draw [style=edge] (3.center) to (1);
+		\draw [style=edge] (4.center) to (1);
+	\end{pgfonlayer}
+\end{tikzpicture}

@@ -1,0 +1,130 @@
+# Graphical models
+We will now describe graphical modeling with string diagrams in detail. This will allow us to visually manipulate complex models without having to resort to tedious algebraic calculations. At the end of the section, we will be able to interpret the following diagram as a probability distribution and tell which variables are conditionally independent of each other. Moreover, you will understand how to sample from this distribution by implementing a probabilistic program according to the structure of the diagram.
+
+``` {.tikz file="index/fire-alarm.tikz"}
+%%| label: fire-alarm
+%%| fig-cap: A string diagram representing a causal model for a fire alarm.
+%%| height: 7em
+```
+
+## Kernels
+The basic building blocks of our models are called kernels. 
+
+::: {#def-discrete-kernel}
+Let $X$ and $Y$ be finite sets. A **discrete kernel** $f : X \kernel Y$ assigns each $x \in X$ and $y \in Y$ a non-negative real number $f(y \mid x)$. We call $f$ a **probability kernel** if it is normalized: $\sum_{y \in Y} f(y \mid x) = 1$ for every $x \in X$.
+:::
+
+As the notation suggests, we think of a probability kernel $f : X \kernel Y$ as specifying the conditional distribution $p(y \mid x)$ of $Y$ given $X$. Another perspective is to see $f$ as a **random function**: given input $x$, $f$ *randomly* selects an output $y$ according to the probabilities $f(y \mid x)$. A key feature of the definition is that the probability of $y$ depends *only* on the input $x$. In other words, once we know $x$, the output $y$ is independent of any other variable $w$:
+$$
+f(y \mid x) = p(y \mid x) = p(y \mid x, w).
+$$
+
+Unnormalized kernels arise in many contexts, including conditioning. For general kernels it is possible that $\sum_{y \in Y} f(y \mid x) = 0$ for some input $x$. In this case it assigns zero likelihood to every outcome and thus acts like a partial function that produces no output.
+
+We represent a kernel $f : X \kernel Y$ as a box with an input wire $X$ and an output wire $Y$:
+
+``` {.tikz file="intro/single-kernel.tikz"}
+%%| label: Kernel
+%%| fig-cap: A kernel $f : X \kernel Y$.
+%%| height: 3em
+```
+
+#### Sequential composition {.unnumbered}
+
+Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ to get a new kernel $g \then f : X \kernel Z$. This is called the **sequential composition** of $f$ and $g$. The symbol $\then$ is pronounced "then" since the input $x$ is processed first by $f$, then by $g$.
+
+``` {.tikz file="intro/sequential-composite-kernel.tikz"}
+%%| label: Sequential composite kernel
+%%| fig-cap: Sequential composition of kernels $f : X \kernel Y$ and $g : Y \kernel Z$.
+%%| height: 3em
+```
+
+The question is how to compute the composite kernel $g \then f$ from $f$ and $g$. Note that interpreting $f$ and $g$ as conditional distributions, the chain rule and conditional independence gives:
+
+$$
+\begin{aligned}
+    p(z \mid x) &= \sum_{y \in Y} p(z,y \mid x) =  \sum_{y \in Y} p(z \mid y, x) \, p(y \mid x) \\
+    &= \sum_{y \in Y} p(z \mid y) \, p(y \mid x) = \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
+\end{aligned}
+$$
+
+We take this as the definition of the composite kernel.
+
+::: {#def-sequential-composite-kernel}
+The **sequential composition** of kernels $f : X \kernel Y$ and $g : Y \kernel Z$ is the kernel $g \then f : X \kernel Z$ defined by
+$$
+(g \then f)(z \mid x) := \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
+$$
+:::
+
+#### Parallel composition {.unnumbered}
+
+Next, we can place two kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ side by side to get a new kernel $f_1 \otimes f_2 : X_1 \times X_2 \kernel Y_1 \times Y_2$. This is called the **parallel composition** of $f_1$ and $f_2$.
+
+``` {.tikz file="intro/parallel-composite-kernel.tikz"}
+%%| label: Parallel composite kernel
+%%| fig-cap: Parallel composition of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$.
+%%| height: 5.5em
+```
+
+Intuitively, the parallel composition $f_1 \otimes f_2$ represents the joint behavior of two independent processes. Interpreting $f_1$ and $f_2$ as independent conditional distributions, we have:
+$$
+p(y_1, y_2 \mid x_1, x_2) 
+= p(y_1 \mid y_2, x_1, x_2) \, p(y_2 \mid x_1, x_2)
+= p(y_1 \mid x_1) \, p(y_2 \mid x_2).
+$$
+
+We use this as the definition of the parallel composite kernel.
+
+::: {#def-parallel-composite-kernel}
+Given finite sets $X_1$ and $X_2$, we define their product
+$$
+    X_1 \otimes X_2 := X_1 \times X_2 = \{(x_1,x_2) \mid x_1 \in X_1 \text{ and } x_2 \in X_2\}
+$$
+to be the Cartesian product of sets. 
+The **parallel composition** of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ is the kernel $f_1 \otimes f_2 : X_1 \times X_2 \kernel Y_1 \times Y_2$ defined by
+$$
+(f_1 \otimes f_2)(y_1, y_2 \mid x_1, x_2) := f_1(y_1 \mid x_1   ) \, f_2(y_2 \mid x_2).
+$$
+::: 
+
+#### Bundling wires {.unnumbered}
+
+``` {.tikz file="intro/bundle.tikz"}
+%%| label: Multi-input multi-output kernel
+%%| fig-cap: A kernel $f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2$.
+%%| height: 4em
+```
+
+
+``` {.tikz file="intro/measure.tikz"}
+%%| label: A kernel representing a measure
+%%| fig-cap: A kernel $m : I \kernel X$ represents a measure on $X$.
+%%| height: 3em
+```
+
+[Add other options, will need to add equalities to tikz figures to render correctly.]
+
+#### Crossing wires {.unnumbered}
+
+
+
+#### Copying and deleting {.unnumbered}
+
+
+## Model building
+
+[Example of fire alarm model]
+
+## Reading off conditional independences
+
+
+## Exact evaluation
+
+[Explain parsing rules.]
+
+## Sampling from models
+
+[Sampling from probability kernels]
+
+[Explain how to interpret kernels as probabilistic program. Also, why it is sound.]

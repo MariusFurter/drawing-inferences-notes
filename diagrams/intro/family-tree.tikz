@@ -1,0 +1,29 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (1) at (-3.25, 0.25) {$m$};
+		\node [style=small box] (2) at (-0.25, 1.25) {$s$};
+		\node [style=small box] (3) at (-0.25, -0.75) {$t$};
+		\node [style=black node] (4) at (-1.75, 0.25) {};
+		\node [style=none] (5) at (1.25, 1.25) {};
+		\node [style=none] (6) at (0.25, -0.375) {};
+		\node [style=none] (7) at (0.25, -1.125) {};
+		\node [style=none] (8) at (1.25, -0.375) {};
+		\node [style=none] (9) at (1.25, -1.125) {};
+		\node [style=none] (10) at (-0.75, 1.25) {};
+		\node [style=none] (11) at (-0.75, -0.75) {};
+		\node [style=none] (13) at (-2, 1.5) {II2};
+		\node [style=none] (14) at (2.25, 1.25) {III1};
+		\node [style=none] (15) at (2.25, -0.375) {III2};
+		\node [style=none] (16) at (2.25, -1.125) {III3};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (1) to (4);
+		\draw [style=edge, in=180, out=0] (2) to (5.center);
+		\draw [style=edge] (6.center) to (8.center);
+		\draw [style=edge] (7.center) to (9.center);
+		\draw [style=edge, bend left=45, looseness=0.75] (4) to (10.center);
+		\draw [style=edge] (10.center) to (2);
+		\draw [style=edge, bend right=45, looseness=0.75] (4) to (11.center);
+		\draw [style=edge] (11.center) to (3);
+	\end{pgfonlayer}
+\end{tikzpicture}
