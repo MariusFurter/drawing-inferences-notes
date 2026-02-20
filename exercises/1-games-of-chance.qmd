@@ -1,0 +1,165 @@
+# Exercise 1: Games of chance {.unnumbered}
+
+## Introduction
+
+In the 16th and 17th centuries, gamblers and mathematicians wrestled with questions about dice and card games. Their struggles gave birth to probability theory. In this exercise, we use modern sampling techniques to tackle the very problems that stumped them — and beat the founders of probability at their own game.
+
+Along the way, we will introduce discrete distributions, expectation, the law of large numbers, indicator random variables, and the idea that conditioning corresponds to filtering samples.
+
+*For more on the origins of probability, see the Wikipedia article on the [history of probability](https://en.wikipedia.org/wiki/History_of_probability).*
+
+## 1. Simulating chance
+
+Before tackling historical problems, we need a basic sampling toolkit. Each distribution below is motivated by a gambling scenario. The goal is to get comfortable generating random samples in Python using the [`random`](https://docs.python.org/3/library/random.html) module or [`torch.distributions`](https://pytorch.org/docs/stable/distributions.html).
+
+**Distributions to know:**
+
+- **Discrete Uniform** — rolling a fair die. Each of the $k$ outcomes is equally likely. 
+    - [Girolamo Cardano](https://en.wikipedia.org/wiki/Girolamo_Cardano) studied dice odds systematically around 1564 in *Liber de Ludo Aleae*, one of the earliest works on probability (which also contained a section on effective cheating methods).
+- **Bernoulli** — a single coin flip with two outcomes (success/failure). 
+    - Named after [Jacob Bernoulli](https://en.wikipedia.org/wiki/Jacob_Bernoulli), whose *[Ars Conjectandi](https://en.wikipedia.org/wiki/Ars_Conjectandi)* laid the foundations of probability theory, including the first proof of the law of large numbers.
+- **Binomial** — the number of successes in $n$ independent Bernoulli trials. How many rounds does a gambler win out of $n$?
+- **Geometric** — the number of trials until the first success. How many rounds until you finally win?
+- **Categorical** — a loaded die or weighted lottery. Generalizes the uniform distribution to unequal probabilities.
+
+**Task:** For each distribution above, choose concrete parameters, sample $N = 10\,000$ values, and plot a histogram of the results.
+
+## 2. Expectation and the Law of Large Numbers
+
+### Expectation
+
+If you roll a fair die many times and average the results, you will get a number close to $3.5$. This is intuitive: each face appears roughly $1/6$ of the time, so the average is approximately
+
+$$
+\frac{1}{6}\cdot 1 + \frac{1}{6}\cdot 2 + \cdots + \frac{1}{6}\cdot 6 = 3.5.
+$$
+
+This motivates the general definition. Given a finite set $\Omega$ with a probability distribution $p$, the **expectation** of a function $t \colon \Omega \to \mathbb{R}$ is:
+
+$$
+\mathbb{E}_p[t] := \sum_{\omega \in \Omega} t(\omega)\, p(\omega).
+$$
+
+Each outcome is weighted by its probability — exactly what averaging over many samples approximates. In the die example, $\Omega = \{1, \ldots, 6\}$, $p$ is the uniform distribution, and $t$ is the identity $t(\omega) = \omega$.
+
+The function $t$ is a **measurement** or **test function** — it extracts a numerical quantity from each outcome. Two useful ways to think about $\mathbb{E}_p[t]$:
+
+- **Fair price of a gamble:** if a game pays out $t(\omega)$ dollars on outcome $\omega$, then $\mathbb{E}_p[t]$ is the entry fee at which neither side has an advantage.
+- **Best single-number summary:** $\mathbb{E}_p[t]$ is the constant $c$ that minimizes $\mathbb{E}_p[(t - c)^2]$. In this sense it is the single number that best represents the distribution of $t$-values.
+
+### The Law of Large Numbers
+
+The averaging intuition above is made precise by the **Law of Large Numbers**. If $\omega_1, \omega_2, \ldots$ are independent draws from $p$, then for any $t \colon \Omega \to \mathbb{R}$:
+
+$$
+\frac{1}{N}\sum_{i=1}^N t(\omega_i) \;\longrightarrow\; \mathbb{E}_p[t] \quad \text{as } N \to \infty.
+$$
+
+For our purposes, this means that we can **estimate any expectation by sampling**: draw $N$ samples from $p$, apply $t$ to each, and average. For large enough $N$ the result will be close to the true expectation. This is the core of **Monte Carlo estimation** — it will be used repeatedly throughout the course.
+
+**Task:** Roll a fair die $N$ times for increasing values of $N$ (e.g. $N = 1, 10, 100, 1000, 10'000$). Plot the **running average** as a function of $n$. Overlay the true expectation $3.5$ as a horizontal line. Observe how the running average converges.
+
+### Estimating probabilities
+
+For any event $E \subseteq \Omega$, the **indicator function** $\mathbf{1}_E : \Omega \to \mathbb{R}$ equals 1 on outcomes in $E$ and 0 otherwise:
+
+$$
+\mathbf{1}_E(\omega) := \begin{cases}
+1 & \text{if } \omega \in E, \\
+0 & \text{if } \omega \notin E.
+\end{cases}
+$$
+
+
+**Task:** Show that $\mathbb{E}_p[\mathbf{1}_E] = P(E)$, and explain why the sample mean of $\mathbf{1}_E$ over $N$ independent draws therefore converges to $P(E)$.
+
+This means we can **estimate any probability** by sampling and counting the fraction of samples that fall in $E$:
+
+$$
+P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
+$$
+
+## 3. Chevalier de Méré's dice problems
+
+The [Chevalier de Méré](https://en.wikipedia.org/wiki/Antoine_Gombaud), a French nobleman and avid gambler, suspected that getting at least one 6 in four rolls of a single die was more likely than getting at least one double-six in 24 rolls of two dice — but his mathematical skills were not sufficient to prove it. He posed the question to Blaise Pascal, who solved the problem and confirmed de Méré's suspicion.
+
+#### At least one 6 in four rolls
+
+**Task:** Write a function `one_six(N)` that simulates this experiment $N$ times:
+
+1. Roll a single die 4 times.
+2. Check whether at least one roll is a 6.
+
+Return the fraction of trials where this occurs. Report the estimate for $N = 100\,000$.
+
+*Exact answer for comparison:* $1 - (5/6)^4 \approx 0.5177$.
+
+#### At least one double-six in 24 rolls
+
+**Task:** Write a function `double_six(N)` that simulates the following experiment $N$ times, as above:
+
+1. Roll two dice 24 times.
+2. Check whether at least one roll is a double-six (both dice show 6).
+
+Return the fraction of trials where this occurs. Report the estimate for $N = 100\,000$.
+
+*Exact answer:* $1 - (35/36)^{24} \approx 0.4914$.
+
+## 4. Galileo and the Grand Duke's dice
+
+Around 1620, Grand Duke [Cosimo II de' Medici](https://en.wikipedia.org/wiki/Cosimo_II_de%27_Medici) of Tuscany noticed something puzzling about three-dice gambling: the **sum 10 appeared more often than 9**, even though both 9 and 10 can each be expressed as a sum of three integers (from 1 to 6) in exactly 6 ways. He asked [Galileo Galilei](https://en.wikipedia.org/wiki/Galileo_Galilei) to explain. Galileo's analysis, *Sopra le Scoperte dei Dadi*, is one of the earliest correct applications of combinatorics to probability.
+
+**Task:**  Simulate rolling 3 fair dice $N = 100'000$ times. Compute the sum $S = D_1 + D_2 + D_3$ for each trial. Plot a histogram of $S$. Confirm that $P(S = 10) > P(S = 9)$.
+
+*Exact values:* $P(S = 9) = 25/216 \approx 0.1157$, $\;P(S = 10) = 27/216 = 0.125$.
+
+*Explanation:* A **partition** of a number is a way to write it as an unordered sum (e.g. $\{1, 2, 6\}$ is a partition of 9). Both 9 and 10 have exactly 6 partitions into three parts from $\{1,\ldots,6\}$. However, when we take $\{1,\ldots,6\}^3$ as the set of all possible outcomes, we are assuming that we can distinguish which die shows which face — in other words, order matters. Thus the relevant favorable outcomes are **ordered** partitions (permutations of a partition). For example, the partition $\{1, 2, 6\}$ gives rise to $3! = 6$ ordered outcomes: $(1,2,6)$, $(1,6,2)$, $(2,1,6)$, etc. It happens that 10 has more ordered partitions than 9 which includes the partition $\{3, 3, 3\}$ which has only 1 ordering.
+
+## 5. The Problem of Points — conditioning as filtering
+
+From the 1654 [Pascal–Fermat correspondence](https://en.wikipedia.org/wiki/Problem_of_points#Pascal_and_Fermat) comes the most celebrated problem in early probability. Two equally skilled players are playing a game of chance to a target score. **The game is interrupted before either player wins. How should the stakes be divided fairly?**
+
+The correct solution to this "[problem of points](https://en.wikipedia.org/wiki/Problem_of_points)" developed by Pascal and Fermat is as follows: the stakes should be split in proportion to each player's probability of winning *from the current state*.
+
+**Setup.** Players A and B flip a fair coin repeatedly. Heads gives A a point; tails gives B a point. The first player to reach $n$ points wins the total stake.
+
+#### Simulating complete games
+
+**Task:** Write a function `play_game(n)` that simulates a single game to $n$ points:
+
+1. Flip a fair coin repeatedly. Award a point to A on heads, to B on tails.
+2. Stop when either player reaches $n$ points.
+3. Return the full sequence of cumulative scores $(a_t, b_t)$ at each round $t$, and the identity of the winner.
+
+Simulate $N = 100'000$ games with $n = 5$. Estimate $P(\text{A wins})$. *(Should be approximately $0.5$ by symmetry.)*
+
+#### Conditioning by filtering
+
+Suppose the game is interrupted when A has 4 points and B has 2 (out of 5 needed). What is $P(\text{A wins} \mid \text{score reaches } (4, 2))$?
+
+**Task:** From the $N$ simulated games above, estimate this conditional probability:
+
+1. **Filter:** keep only games where the score passes through the state $(4, 2)$ at some round.
+2. Among these survivors, count the fraction where A ultimately wins.
+3. Compute the **acceptance rate** — what fraction of the $N$ games survived the filter?
+
+**Task:** Explain why filtering samples and computing statistics on the survivors gives a valid estimate of the conditional probability. Why might this approach be wasteful?
+
+#### Simulating the remainder directly
+
+Instead of filtering complete games, we can simulate only the **remaining flips** starting from the state $(4, 2)$. This corresponds to directly simulating from the conditional distribution. From this state, A needs 1 more point and B needs 3 more.
+
+**Task:** Write a function that simulates $N = 100'000$ continuations from the state $(4, 2)$:
+
+1. Flip coins until either A gains 1 point or B gains 3 points.
+2. Record whether A wins.
+
+Estimate $P(\text{A wins} \mid \text{score is } (4, 2))$ and compare to the result from the filtering approach.
+
+*Note: Simulating directly from the conditional distribution is possible here because the game has a sequential structure — given the current score, the future flips do not depend on how we got there. This is a property of the model, not something that holds in general. We will learn systematic techniques for reasoning about when and how we can condition in this way when we study conditioning in string diagrams.*
+
+#### Pascal's exact solution
+
+Pascal reasoned as follows: from the state $(4, 2)$ with a target of 5, the game will be decided in **at most 3 more flips** (since B needs 3 points to win). There are $2^3 = 8$ equally likely outcomes for 3 coin flips. Enumerate all 8 outcomes and count in how many A wins (i.e. gets at least 1 head).
+
+*Exact answer:* $P(\text{A wins}) = 7/8 = 0.875$.
