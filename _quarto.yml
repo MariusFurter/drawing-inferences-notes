@@ -6,7 +6,7 @@ book:
   title: "Drawing Inferences"
   author: "Marius Furter"
   date: today
-  url: https://drawinginferences.com
+  #site-url: https://drawinginferences.com
   # navbar:
   #   background: none
   #   title: " "
@@ -22,7 +22,7 @@ book:
     - chapters/intro.qmd
     - part: "Exercises"
       chapters:
-        - exercises/1-credit-card.qmd
+        - exercises/2-credit-card.qmd
     - part: "Appendix"
       chapters:
         - appendix/pytorch.qmd

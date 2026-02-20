@@ -1,4 +1,4 @@
-# Exercise 1: Credit card fraud detection {.unnumbered}
+# Exercise 2: Credit card fraud detection {.unnumbered}
 
 ## Introduction
 

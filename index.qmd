@@ -32,15 +32,26 @@ The contents pf the course intersect and unify the following areas:
 3. Probabilistic machine learning
 4. Decision theory
 
-Most of the material can be found in the following books, although without explicit use of probabilistic programming:
+Much of the material can be found in the following books, although the presentation will differ from these sources:
 
-1. [Statistical rethinking (Richard McElreath)](https://xcelab.net/rm/statistical-rethinking/)
-2. Artificial intelligence: a modern approach (Russel & Norvig)
-3. [Probabilistic machine learning 1 & 2 (Kevin Murphy)](https://probml.github.io/pml-book/)
-4. [Pattern recognition and machine learning (Christopher Bishop)](https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/)
-5. [Bayesian data analysis (Gelman, Carlin, Stern, Dunson, Vehtari, Rubin)](http://www.stat.columbia.edu/~gelman/book/)
-6. [Causality (Judea Pearl)](http://bayes.cs.ucla.edu/BOOK-2K/)
-7. [Algorithms for decision making (Kochenderfer, Wheeler, Wray)](https://algorithmsbook.com)
+Applied Bayesian statistics:
+
+1. Bayesian data analysis [@GelmanBDA2013] ([online](http://www.stat.columbia.edu/~gelman/book/))
+2. Statistical rethinking [@McElreathRethinking2018] ([online](https://xcelab.net/rm/statistical-rethinking/))
+
+Graphical models and inference algorithms:
+
+3. Artificial intelligence: a modern approach (Part IV) [@RussellArtificial2021] ([online](https://aima.cs.berkeley.edu))
+4. Probabilistic machine learning 1 & 2 [@MurphyPML12022; @MurphyPML22023] ([online](https://probml.github.io/pml-book/))
+5. Pattern recognition and machine learning [@BishopPattern2006] ([online](https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/))
+
+Decision theory using graphical models:
+
+6. Algorithms for decision making [@KochenderferAlgorithms2022] ([online](https://algorithmsbook.com)) 
+
+Causal modeling:
+
+7. Causality [@Pearl2009] ([online](http://bayes.cs.ucla.edu/BOOK-2K/))
 
 ## Prerequisites
 
