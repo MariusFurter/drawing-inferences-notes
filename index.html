@@ -22,7 +22,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -288,15 +308,25 @@ window.Quarto = {
 <li>Probabilistic machine learning</li>
 <li>Decision theory</li>
 </ol>
-<p>Most of the material can be found in the following books, although without explicit use of probabilistic programming:</p>
+<p>Much of the material can be found in the following books, although the presentation will differ from these sources:</p>
+<p>Applied Bayesian statistics:</p>
 <ol type="1">
-<li><a href="https://xcelab.net/rm/statistical-rethinking/">Statistical rethinking (Richard McElreath)</a></li>
-<li>Artificial intelligence: a modern approach (Russel &amp; Norvig)</li>
-<li><a href="https://probml.github.io/pml-book/">Probabilistic machine learning 1 &amp; 2 (Kevin Murphy)</a></li>
-<li><a href="https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/">Pattern recognition and machine learning (Christopher Bishop)</a></li>
-<li><a href="http://www.stat.columbia.edu/~gelman/book/">Bayesian data analysis (Gelman, Carlin, Stern, Dunson, Vehtari, Rubin)</a></li>
-<li><a href="http://bayes.cs.ucla.edu/BOOK-2K/">Causality (Judea Pearl)</a></li>
-<li><a href="https://algorithmsbook.com">Algorithms for decision making (Kochenderfer, Wheeler, Wray)</a></li>
+<li>Bayesian data analysis <span class="citation" data-cites="GelmanBDA2013">(<a href="references.html#ref-GelmanBDA2013" role="doc-biblioref">Gelman et al. 2013</a>)</span> (<a href="http://www.stat.columbia.edu/~gelman/book/">online</a>)</li>
+<li>Statistical rethinking <span class="citation" data-cites="McElreathRethinking2018">(<a href="references.html#ref-McElreathRethinking2018" role="doc-biblioref">McElreath 2018</a>)</span> (<a href="https://xcelab.net/rm/statistical-rethinking/">online</a>)</li>
+</ol>
+<p>Graphical models and inference algorithms:</p>
+<ol start="3" type="1">
+<li>Artificial intelligence: a modern approach (Part IV) <span class="citation" data-cites="RussellArtificial2021">(<a href="references.html#ref-RussellArtificial2021" role="doc-biblioref">Russell and Norvig 2021</a>)</span> (<a href="https://aima.cs.berkeley.edu">online</a>)</li>
+<li>Probabilistic machine learning 1 &amp; 2 <span class="citation" data-cites="MurphyPML12022 MurphyPML22023">(<a href="references.html#ref-MurphyPML12022" role="doc-biblioref">Murphy 2022</a>, <a href="references.html#ref-MurphyPML22023" role="doc-biblioref">2023</a>)</span> (<a href="https://probml.github.io/pml-book/">online</a>)</li>
+<li>Pattern recognition and machine learning <span class="citation" data-cites="BishopPattern2006">(<a href="references.html#ref-BishopPattern2006" role="doc-biblioref">Bishop 2006</a>)</span> (<a href="https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/">online</a>)</li>
+</ol>
+<p>Decision theory using graphical models:</p>
+<ol start="6" type="1">
+<li>Algorithms for decision making <span class="citation" data-cites="KochenderferAlgorithms2022">(<a href="references.html#ref-KochenderferAlgorithms2022" role="doc-biblioref">Kochenderfer, Wheeler, and Wray 2022</a>)</span> (<a href="https://algorithmsbook.com">online</a>)</li>
+</ol>
+<p>Causal modeling:</p>
+<ol start="7" type="1">
+<li>Causality <span class="citation" data-cites="Pearl2009">(<a href="references.html#ref-Pearl2009" role="doc-biblioref">Pearl 2009</a>)</span> (<a href="http://bayes.cs.ucla.edu/BOOK-2K/">online</a>)</li>
 </ol>
 </section>
 <section id="prerequisites" class="level2">
@@ -390,6 +420,32 @@ window.Quarto = {
 
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-BishopPattern2006" class="csl-entry" role="listitem">
+Bishop, Christopher M. 2006. <em>Pattern Recognition and Machine Learning</em>. Springer New York, NY. <a href="https://link.springer.com/book/9780387310732">https://link.springer.com/book/9780387310732</a>.
+</div>
+<div id="ref-GelmanBDA2013" class="csl-entry" role="listitem">
+Gelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki Vehtari, and Donald B. Rubin. 2013. <em>Bayesian Data Analysis</em>. Chapman; Hall/CRC. https://doi.org/<a href="https://doi.org/10.1201/b16018">https://doi.org/10.1201/b16018</a>.
+</div>
+<div id="ref-KochenderferAlgorithms2022" class="csl-entry" role="listitem">
+Kochenderfer, Mykel J., Tim A. Wheeler, and Kyle H. Wray. 2022. <em>Algorithms for Decision Making</em>. MIT Press. <a href="https://algorithmsbook.com/decisionmaking/">https://algorithmsbook.com/decisionmaking/</a>.
+</div>
+<div id="ref-McElreathRethinking2018" class="csl-entry" role="listitem">
+McElreath, Richard. 2018. <em>Statistical Rethinking: A Bayesian Course with Examples in r and Stan</em>. Chapman; Hall/CRC. https://doi.org/<a href="https://doi.org/10.1201/9781315372495">https://doi.org/10.1201/9781315372495</a>.
+</div>
+<div id="ref-MurphyPML12022" class="csl-entry" role="listitem">
+Murphy, Kevin P. 2022. <em>Probabilistic Machine Learning: An Introduction</em>. MIT Press. <a href="http://probml.github.io/book1">http://probml.github.io/book1</a>.
+</div>
+<div id="ref-MurphyPML22023" class="csl-entry" role="listitem">
+———. 2023. <em>Probabilistic Machine Learning: Advanced Topics</em>. MIT Press. <a href="http://probml.github.io/book2">http://probml.github.io/book2</a>.
+</div>
+<div id="ref-Pearl2009" class="csl-entry" role="listitem">
+Pearl, Judea. 2009. <span>“Causality: Models, Reasoning, and Inference,”</span> September. https://doi.org/<a href="https://doi.org/10.1017/CBO9780511803161">https://doi.org/10.1017/CBO9780511803161</a>.
+</div>
+<div id="ref-RussellArtificial2021" class="csl-entry" role="listitem">
+Russell, Stuart J, and Peter Norvig. 2021. <em>Artificial Intelligence: A Modern Approach</em>. 4th ed. Pearson.
+</div>
+</div>
 </section>
 </section>
 
@@ -467,7 +523,7 @@ window.Quarto = {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/drawinginferences\.com");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
