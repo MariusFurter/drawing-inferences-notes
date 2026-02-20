@@ -19,9 +19,9 @@ Let's play a game. I'm carrying a mystery object. Your goal is to guess what it 
 
 :::
 
-Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it's more likely that the object is made of rubber than gold, because rubber is more common in everyday objects. You might also believe that if the object is a sphere, it's more likely to be made of rubber. 
+Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it's more likely that the object is made of rubber than gold, because rubber objects are more common. You might also believe that if the object is a sphere, it's more likely to be made of rubber. 
 
-How strongly do you favor $x$ over $y$? One way to measure this: ask yourself what odds you would offer. If you would bet \$2 on $x$ against \$1 on $y$, then you believe $x$ is twice as likely.
+How strongly do you favor object $x$ over $y$? One way to measure this: ask yourself what odds you would offer. If you would bet \$2 on $x$ against \$1 on $y$, then you believe $x$ is twice as likely.
 
 Now suppose you've chosen a combination of properties. I will reveal a clue.
 
@@ -54,7 +54,7 @@ We assign every subset $E \subseteq \Omega$ a number $p(E)$ that captures how li
 
 2. **Additivity.** Whenever $E_1$ and $E_2$ have no elements in common, we have $p(E_1 \cup E_2) = p(E_1) + p(E_2).$ Such events are called *mutually exclusive* because they can't both happen at the same time. Additivity says that the probability of either $E_1$ or $E_2$ happening is the sum of their individual probabilities.
 
-From additivity, it follows that the probability of $E$ *not* happening is $p(E^\text{c}) = 1 - p(E)$. Also, since any set is the union of its individual elements, we get $p(E) = \sum_{e \in E} p(\{e\})$. In other words, the probability of any event is determined by the probabilities of individual states.
+It $E \subseteq F$, we can write $F = E \cup (F \setminus E)$, so that by additivity $p(E) \leq p(F)$. Additivity also implies that the probability of $E$ *not* happening is $p(E^\text{c}) = 1 - p(E)$. Also, since any set is the union of its individual elements, we get $p(E) = \sum_{e \in E} p(\{e\})$. In other words, the probability of any event is determined by the probabilities of individual states.
 
 ### Conditioning
 
@@ -304,25 +304,29 @@ For now, we will approximate the solution by sampling from a probabilistic progr
 
 ### Rejection sampling
 
-The idea is to write a program that randomly simulates the process of generating the family tree according to the laws of heredity.  We can then run this program many times to get a large sample of possible family trees, and use this sample to estimate the probability that one or both twins are affected. The following Python code implements the generative process described by the string diagram:
+The idea is to write a program that randomly simulates the process of generating the family tree according to the laws of heredity.  We can then run this program many times to get a large sample of possible family trees, and use this sample to estimate the probability that one or both twins are affected. The following Python code implements the generative process of each box in the string diagram:
 
 ```{python}
-# | label: family-program
-# | fig-cap: A Python program that simulates the family tree.
+# | label: family-boxes
+# | fig-cap: Python functions implementing the generative process of each box.
 # | code-fold: false
-import random
-
-def family():
-    # (m) Generate II2
+def gen_m():
+    # generate mother II2
     II2 = random.choice(["xX", "XX"])
+    return II2
 
-    # (s) Generate son III1
+
+def gen_s(II2):
+    # generate son III1
     if II2 == "xX":
         III1 = random.choice(["xY", "XY"])
     elif II2 == "XX":
         III1 = "XY"
+    return III1
 
-    # (t) Generate twins
+
+def gen_t(II2):
+    # generate twins
     is_MZ = random.choice([True, False])
 
     if is_MZ:
@@ -339,6 +343,22 @@ def family():
         elif II2 == "XX":
             III2 = III3 = "XY"
 
+    return III2, III3
+```
+
+We can now assemble these functions according structure of the string diagram. Notice how the pattern of variables mirrors the information flow in the diagram.
+
+```{python}
+# | label: family-program
+# | fig-cap: A Python program that simulates the family tree.
+# | code-fold: false
+import random
+
+
+def family():
+    II2 = gen_m()
+    III1 = gen_s(II2)
+    III2, III3 = gen_t(II2)
     return II2, III1, III2, III3
 ```
 

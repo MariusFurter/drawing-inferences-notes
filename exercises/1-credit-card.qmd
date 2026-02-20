@@ -257,7 +257,7 @@ print(
 
 #### Estimating variability {.unnumbered}
 
-Any estimate based on a finite sample will vary if we repeat the procedure. To quantify this variability, run your rejection sampler multiple times (say, 100 runs of $N$ samples each) and collect the 100 resulting estimates. Then compute the **mean** and **standard deviation** of these values (e.g. using [`statistics`](https://docs.python.org/3/library/statistics.html)). This tells you how much your estimate typically fluctuates due to randomness in the sampling. A large standard deviation means the estimate is unreliable — you may need more samples per run, or the acceptance rate may be too low.
+Any estimate based on a finite sample will vary if we repeat the procedure. To quantify this variability, run your rejection sampler multiple times (say, 100 runs of $N$ samples each) and collect the 100 resulting estimates. Then compute the **mean** and **standard deviation** of these values (e.g. using [`statistics`](https://docs.python.org/3/library/statistics.html)). This tells you how much your estimate typically fluctuates due to randomness in the sampling. A large standard deviation means the estimate is unreliable. How does the variability change with different values of $N$? 
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
