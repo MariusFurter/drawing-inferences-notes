@@ -1,30 +1,8 @@
-# Exercise 1: Games of chance {.unnumbered}
+# Exercise 1: Classic Puzzles {.unnumbered}
 
-## Introduction
+Some of the best-known puzzles in probability are famous precisely because the correct answer defies most people's intuition. In this exercise, we use simulation to tackle several of these classics, estimating probabilities and expectations directly via sampling and the law of large numbers.
 
-In the 16th and 17th centuries, gamblers and mathematicians wrestled with questions about dice and card games. Their struggles gave birth to probability theory. In this exercise, we use modern sampling techniques to tackle the very problems that stumped them — and beat the founders of probability at their own game.
-
-Along the way, we will introduce discrete distributions, expectation, the law of large numbers, indicator random variables, and the idea that conditioning corresponds to filtering samples.
-
-*For more on the origins of probability, see the Wikipedia article on the [history of probability](https://en.wikipedia.org/wiki/History_of_probability).*
-
-## 1. Simulating chance
-
-Before tackling historical problems, we need a basic sampling toolkit. Each distribution below is motivated by a gambling scenario. The goal is to get comfortable generating random samples in Python using the [`random`](https://docs.python.org/3/library/random.html) module or [`torch.distributions`](https://pytorch.org/docs/stable/distributions.html).
-
-**Distributions to know:**
-
-- **Discrete Uniform** — rolling a fair die. Each of the $k$ outcomes is equally likely. 
-    - [Girolamo Cardano](https://en.wikipedia.org/wiki/Girolamo_Cardano) studied dice odds systematically around 1564 in *Liber de Ludo Aleae*, one of the earliest works on probability (which also contained a section on effective cheating methods).
-- **Bernoulli** — a single coin flip with two outcomes (success/failure). 
-    - Named after [Jacob Bernoulli](https://en.wikipedia.org/wiki/Jacob_Bernoulli), whose *[Ars Conjectandi](https://en.wikipedia.org/wiki/Ars_Conjectandi)* laid the foundations of probability theory, including the first proof of the law of large numbers.
-- **Binomial** — the number of successes in $n$ independent Bernoulli trials. How many rounds does a gambler win out of $n$?
-- **Geometric** — the number of trials until the first success. How many rounds until you finally win?
-- **Categorical** — a loaded die or weighted lottery. Generalizes the uniform distribution to unequal probabilities.
-
-**Task:** For each distribution above, choose concrete parameters, sample $N = 10\,000$ values, and plot a histogram of the results.
-
-## 2. Expectation and the Law of Large Numbers
+## Background: Expectation and the Law of Large Numbers
 
 ### Expectation
 
@@ -37,27 +15,25 @@ $$
 This motivates the general definition. Given a finite set $\Omega$ with a probability distribution $p$, the **expectation** of a function $t \colon \Omega \to \mathbb{R}$ is:
 
 $$
-\mathbb{E}_p[t] := \sum_{\omega \in \Omega} t(\omega)\, p(\omega).
+\mathbb{E}_{p(\omega)}[t(\omega)] := \sum_{\omega \in \Omega} t(\omega)\, p(\omega).
 $$
 
 Each outcome is weighted by its probability — exactly what averaging over many samples approximates. In the die example, $\Omega = \{1, \ldots, 6\}$, $p$ is the uniform distribution, and $t$ is the identity $t(\omega) = \omega$.
 
-The function $t$ is a **measurement** or **test function** — it extracts a numerical quantity from each outcome. Two useful ways to think about $\mathbb{E}_p[t]$:
+The function $t$ is a **measurement** or **test function** — it extracts a numerical quantity from each outcome. Two useful ways to think about $\mathbb{E}_{p(\omega)}[t(\omega)]$:
 
-- **Fair price of a gamble:** if a game pays out $t(\omega)$ dollars on outcome $\omega$, then $\mathbb{E}_p[t]$ is the entry fee at which neither side has an advantage.
-- **Best single-number summary:** $\mathbb{E}_p[t]$ is the constant $c$ that minimizes $\mathbb{E}_p[(t - c)^2]$. In this sense it is the single number that best represents the distribution of $t$-values.
+- **Fair price of a gamble:** If a game pays out $t(\omega)$ dollars on outcome $\omega$, then $\mathbb{E}_{p(\omega)}[t(\omega)]$ is the entry fee at which neither side has an advantage.
+- **Best single-number summary:** $\mathbb{E}_{p(\omega)}[t(\omega)]$ is the constant $c$ that minimizes $\mathbb{E}_{p(\omega)}[(t(\omega) - c)^2]$. In this sense it is the single number that best represents the distribution of $t$-values.
 
 ### The Law of Large Numbers
 
 The averaging intuition above is made precise by the **Law of Large Numbers**. If $\omega_1, \omega_2, \ldots$ are independent draws from $p$, then for any $t \colon \Omega \to \mathbb{R}$:
 
 $$
-\frac{1}{N}\sum_{i=1}^N t(\omega_i) \;\longrightarrow\; \mathbb{E}_p[t] \quad \text{as } N \to \infty.
+\frac{1}{N}\sum_{i=1}^N t(\omega_i) \;\longrightarrow\; \mathbb{E}_{p(\omega)}[t(\omega)] \quad \text{as } N \to \infty.
 $$
 
-For our purposes, this means that we can **estimate any expectation by sampling**: draw $N$ samples from $p$, apply $t$ to each, and average. For large enough $N$ the result will be close to the true expectation. This is the core of **Monte Carlo estimation** — it will be used repeatedly throughout the course.
-
-**Task:** Roll a fair die $N$ times for increasing values of $N$ (e.g. $N = 1, 10, 100, 1000, 10'000$). Plot the **running average** as a function of $n$. Overlay the true expectation $3.5$ as a horizontal line. Observe how the running average converges.
+For our purposes, this means that we can **estimate any expectation by sampling**: draw $N$ samples from $p$, apply $t$ to each, and average. For large enough $N$ the result will be close to the true expectation. This is the core of **Monte Carlo estimation** which forms the basis of the course.
 
 ### Estimating probabilities
 
@@ -70,8 +46,7 @@ $$
 \end{cases}
 $$
 
-
-**Task:** Show that $\mathbb{E}_p[\mathbf{1}_E] = P(E)$, and explain why the sample mean of $\mathbf{1}_E$ over $N$ independent draws therefore converges to $P(E)$.
+**Task:** Show that $\mathbb{E}_{p(\omega)}[\mathbf{1}_E(\omega)] = P(E)$, and explain why the sample mean of $\mathbf{1}_E$ over $N$ independent draws therefore converges to $P(E)$.
 
 This means we can **estimate any probability** by sampling and counting the fraction of samples that fall in $E$:
 
@@ -79,13 +54,189 @@ $$
 P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
 $$
 
-## 3. Chevalier de Méré's dice problems
+### Rejection sampling from the conditional distribution
 
-The [Chevalier de Méré](https://en.wikipedia.org/wiki/Antoine_Gombaud), a French nobleman and avid gambler, suspected that getting at least one 6 in four rolls of a single die was more likely than getting at least one double-six in 24 rolls of two dice — but his mathematical skills were not sufficient to prove it. He posed the question to Blaise Pascal, who solved the problem and confirmed de Méré's suspicion.
+Often we want to estimate a quantity that depends not on the full distribution $p$, but on the **conditional distribution** $p(\,\cdot \mid B)$ given some observed event $B$. By the law of large numbers, it suffices to generate samples from $p(\,\cdot \mid B)$ — but how do we do that when we only know how to sample from $p$?
 
-#### At least one 6 in four rolls
+The simplest strategy is **rejection sampling** (also called *conditioning by filtering*): draw samples from $p$ and **discard** every sample that does not lie in $B$. The surviving samples are then used as if they came from the conditional distribution.
 
-**Task:** Write a function `one_six(N)` that simulates this experiment $N$ times:
+Concretely, to obtain a sample from $p(\,\cdot \mid B)$:
+
+1. Draw $\omega \sim p$.
+2. If $\omega \in B$, keep it; otherwise, discard and return to step 1.
+
+The fraction of samples that survive is called the **acceptance rate** and converges to $p(B)$.
+
+**Task:** Show that this procedure produces samples distributed according to $p(\,\cdot \mid B)$. Further show that the acceptance rate converges to $p(B)$.
+
+*Hint 1:* Recall that the conditional distribution is defined by $p(\{\omega\} \mid B) = p(\{\omega\}) / P(B)$ for $\omega \in B$ and $0$ otherwise.
+
+*Hint 2:* For any $\omega \in B$, compute $P(\text{kept sample} = \omega) = P(\omega \mid \omega \in B)$.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+We want to show that for any $\omega \in B$,
+
+$$
+P(\text{kept sample} = \omega) = \frac{p(\omega)}{P(B)} = p(\omega \mid B).
+$$
+
+Each draw from $p$ is either accepted (if $\omega \in B$) or rejected (if $\omega \notin B$). Conditioned on acceptance, the probability that the accepted sample is a particular $\omega \in B$ is:
+
+$$
+P(\text{kept sample} = \omega) = P(\omega \mid \omega \in B) = \frac{P(\{\omega\} \cap B)}{P(B)} = \frac{p(\omega)}{P(B)},
+$$
+
+where the last step uses the fact that $\omega \in B$, so $\{\omega\} \cap B = \{\omega\}$. This is exactly $p(\omega \mid B)$.
+
+For $\omega \notin B$, the kept sample is never $\omega$ since such draws are always rejected.
+
+Hence the accepted samples are distributed according to $p(\,\cdot \mid B)$, and therefore the sample mean of any test function $t$ over $M$ accepted samples converges to $\mathbb{E}_{p(\omega \mid B)}[t(\omega)]$ by the law of large numbers.
+
+:::
+
+## 1. Warm-up: Simulating discrete distributions
+
+Before tackling the puzzles, we set up a basic sampling toolkit. Each distribution below is a building block for the simulations that follow. The goal is to get comfortable generating random samples in Python using [`torch.distributions`](https://pytorch.org/docs/stable/distributions.html).
+
+**Distributions to know:**
+
+- **Discrete Uniform** — rolling a fair die. Each of the $k$ outcomes is equally likely.
+- **Bernoulli** — a single coin flip with two outcomes (success/failure).
+- **Binomial** — the number of successes in $n$ independent Bernoulli trials.
+- **Geometric** — the number of trials until the first success.
+- **Categorical** — a loaded die or weighted lottery. Generalizes the uniform distribution to unequal probabilities.
+
+**Task:** For each distribution above, choose concrete parameters, sample $N = 10\,000$ values, and plot a histogram of the results.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+```{python}
+# | code-fold: false
+import torch
+from torch.distributions import Bernoulli, Binomial, Geometric, Categorical
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+N = 10_000
+
+# 1. Discrete Uniform: fair six-sided die (values 1–6)
+uniform_samples = Categorical(probs=torch.ones(6)).sample((N,)) + 1
+
+# 2. Bernoulli (p = 0.5): fair coin flip
+bernoulli_samples = Bernoulli(probs=torch.tensor(0.5)).sample((N,))
+
+# 3. Binomial (n = 10, p = 0.3): successes in 10 trials
+binom_samples = Binomial(total_count=10, probs=torch.tensor(0.3)).sample((N,))
+
+# 4. Geometric (p = 1/6): rolls until first 6
+geom_samples = Geometric(probs=torch.tensor(1 / 6)).sample((N,))
+
+# 5. Categorical: loaded die with weights [1, 1, 1, 1, 1, 3]
+loaded_probs = torch.tensor([1, 1, 1, 1, 1, 3], dtype=torch.float)
+cat_samples = Categorical(probs=loaded_probs).sample((N,)) + 1  # shift to 1–6
+```
+
+```{python}
+fig, axes = plt.subplots(3, 2, figsize=(6, 7))
+axes = axes.flatten()
+
+panels = [
+    (uniform_samples, "Uniform (fair die)", None),
+    (bernoulli_samples, "Bernoulli (p = 0.5)", None),
+    (binom_samples, "Binomial (n=10, p=0.3)", None),
+    (geom_samples, "Geometric (p = 1/6)", 40),
+    (cat_samples, "Categorical (loaded die)", None),
+]
+
+for ax, (data, title, clip) in zip(axes, panels):
+    vals = data.int().numpy()
+    lo, hi = int(vals.min()), int(vals.max())
+    if clip:
+        hi = min(hi, clip)
+        vals = vals[vals <= clip]
+    bins = list(range(lo, hi + 2))
+    sns.histplot(
+        vals,
+        bins=bins,
+        discrete=True,
+        stat="probability",
+        ax=ax,
+        color="steelblue",
+        edgecolor="white",
+        linewidth=0.5,
+    )
+    ax.set_title(title, fontsize=10)
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+
+axes[5].set_visible(False)  # hide unused panel
+fig.supylabel("Probability", fontsize=10)
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+**Task:** Roll a fair die $N$ times for increasing values of $N$ (e.g. $N = 1, 10, 100, 1000, 10\,000$). Plot the **running average** as a function of $n$. Overlay the true expectation $3.5$ as a horizontal line. Observe how the running average converges.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+
+
+:::
+
+## 2. The Monty Hall problem
+
+The [Monty Hall problem](https://en.wikipedia.org/wiki/Monty_Hall_problem) is one of the most famous puzzles in probability, named after the host of the American television game show *Let's Make a Deal*. It became widely known in 1990 when [Marilyn vos Savant](https://en.wikipedia.org/wiki/Marilyn_vos_Savant#Monty_Hall_problem) published the correct solution in her magazine column, prompting thousands of readers — including many professional mathematicians — to write in insisting she was wrong.
+
+**The setup.** A game show host presents you with three doors. Behind one door is a car; behind the other two are goats. The game proceeds in three steps:
+
+1. **You pick a door** (say door 1).
+2. **The host opens another door** to reveal a goat. The host *knows* what is behind each door and will always open a door with a goat.
+3. **You are offered a choice:** stick with your original door, or switch to the remaining unopened door.
+
+**Should you switch?**
+
+The answer — which surprises most people — is **yes**: switching wins with probability $2/3$, while staying wins with probability $1/3$. The key insight is that the host's action gives you information: by always revealing a goat, the host *concentrates* the probability of the two doors you didn't pick onto the single remaining door.
+
+#### Simulating the standard game
+
+**Task:** Write a function `monty_hall(N)` that simulates the full game $N$ times:
+
+1. Place the car uniformly at random behind one of the three doors.
+2. The contestant picks door 1.
+3. The host opens a door (not the contestant's, not the car's) to reveal a goat. If the host has a choice of two goat doors, pick one uniformly at random.
+4. Record the identity of the door the host opens, whether **staying** wins, and whether **switching** wins.
+
+Run $N = 100\,000$ simulations. Estimate $P(\text{win by staying})$ and $P(\text{win by switching})$.
+
+*Exact answers:* $P(\text{stay}) = 1/3$, $\;P(\text{switch}) = 2/3$.
+
+#### Host variants — the generating mechanism matters
+
+Much of the controversy surrounding the Monty Hall problem stems from the fact that the problem statement doesn't always make the host's strategy explicit. Different assumptions about *why* the host opens a door lead to different conditional probabilities — even when the observable event (you see a goat) is the same. This is a crucial lesson: **getting conditioning right requires a precise model of the data-generating process, not just a description of what was observed.**
+
+**(a) The ignorant host.** The host ***does not know where the car is*** and simply opens one of the two remaining doors uniformly at random. If the host accidentally reveals the car, the game is void.
+
+**Task:** Simulate this variant. Among **non-void** games (host revealed a goat), estimate $P(\text{win by switching} \mid \text{host reveals a goat})$.
+
+*Expected answer:* $1/2$ — switching and staying are equally good.
+
+**Task:** Without simulating, think about what happens in these two additional variants:
+
+- **(b) The malicious host.** The host knows where the car is and ***only offers the switch when the contestant has picked the car***. What is $P(\text{win by switching} \mid \text{offered switch})$?
+- **(c) The benevolent host.** The host knows where the car is and ***only offers the switch when the contestant has picked a goat***. What is $P(\text{win by switching} \mid \text{offered switch})$?
+
+## 3. Dice problems
+
+Dice were among the first objects studied probabilistically. Here we revisit two classic dice problems and solve them by simulation.
+
+#### De Méré's problem
+
+The [Chevalier de Méré](https://en.wikipedia.org/wiki/Antoine_Gombaud), a French nobleman and avid gambler, suspected that getting at least one 6 in four rolls of a single die was more likely than getting at least one double-six in 24 rolls of two dice. He posed the question to Blaise Pascal, who confirmed his intuition.
+
+**Task (a):** Write a function `one_six(N)` that simulates this experiment $N$ times:
 
 1. Roll a single die 4 times.
 2. Check whether at least one roll is a 6.
@@ -94,9 +245,7 @@ Return the fraction of trials where this occurs. Report the estimate for $N = 10
 
 *Exact answer for comparison:* $1 - (5/6)^4 \approx 0.5177$.
 
-#### At least one double-six in 24 rolls
-
-**Task:** Write a function `double_six(N)` that simulates the following experiment $N$ times, as above:
+**Task (b):** Write a function `double_six(N)` that simulates the following experiment $N$ times:
 
 1. Roll two dice 24 times.
 2. Check whether at least one roll is a double-six (both dice show 6).
@@ -105,61 +254,57 @@ Return the fraction of trials where this occurs. Report the estimate for $N = 10
 
 *Exact answer:* $1 - (35/36)^{24} \approx 0.4914$.
 
-## 4. Galileo and the Grand Duke's dice
+#### Galileo and the Grand Duke's dice
 
-Around 1620, Grand Duke [Cosimo II de' Medici](https://en.wikipedia.org/wiki/Cosimo_II_de%27_Medici) of Tuscany noticed something puzzling about three-dice gambling: the **sum 10 appeared more often than 9**, even though both 9 and 10 can each be expressed as a sum of three integers (from 1 to 6) in exactly 6 ways. He asked [Galileo Galilei](https://en.wikipedia.org/wiki/Galileo_Galilei) to explain. Galileo's analysis, *Sopra le Scoperte dei Dadi*, is one of the earliest correct applications of combinatorics to probability.
+Around 1620, [Cosimo II de' Medici](https://en.wikipedia.org/wiki/Cosimo_II_de%27_Medici) noticed that when rolling three dice, the **sum 10 appeared more often than 9**, even though both can be written as a sum of three integers (from 1 to 6) in exactly 6 ways. He asked [Galileo](https://en.wikipedia.org/wiki/Galileo_Galilei) to explain.
 
-**Task:**  Simulate rolling 3 fair dice $N = 100'000$ times. Compute the sum $S = D_1 + D_2 + D_3$ for each trial. Plot a histogram of $S$. Confirm that $P(S = 10) > P(S = 9)$.
+**Task:** Simulate rolling 3 fair dice $N = 100\,000$ times. Compute the sum $S = D_1 + D_2 + D_3$ for each trial. Plot a histogram of $S$. Confirm that $P(S = 10) > P(S = 9)$.
 
 *Exact values:* $P(S = 9) = 25/216 \approx 0.1157$, $\;P(S = 10) = 27/216 = 0.125$.
 
-*Explanation:* A **partition** of a number is a way to write it as an unordered sum (e.g. $\{1, 2, 6\}$ is a partition of 9). Both 9 and 10 have exactly 6 partitions into three parts from $\{1,\ldots,6\}$. However, when we take $\{1,\ldots,6\}^3$ as the set of all possible outcomes, we are assuming that we can distinguish which die shows which face — in other words, order matters. Thus the relevant favorable outcomes are **ordered** partitions (permutations of a partition). For example, the partition $\{1, 2, 6\}$ gives rise to $3! = 6$ ordered outcomes: $(1,2,6)$, $(1,6,2)$, $(2,1,6)$, etc. It happens that 10 has more ordered partitions than 9 which includes the partition $\{3, 3, 3\}$ which has only 1 ordering.
+*Explanation:* A **partition** of a number is a way to write it as an unordered sum (e.g. $\{1, 2, 6\}$ is a partition of 9). Both 9 and 10 have exactly 6 partitions into three parts from $\{1,\ldots,6\}$. However, when we take $\{1,\ldots,6\}^3$ as the set of all possible outcomes, we are assuming that we can distinguish which die shows which face — in other words, order matters. Thus the relevant favorable outcomes are **ordered** partitions (permutations of a partition). For example, the partition $\{1, 2, 6\}$ gives rise to $3! = 6$ ordered outcomes: $(1,2,6)$, $(1,6,2)$, $(2,1,6)$, etc. It happens that 10 has more ordered partitions than 9, since 9 includes the partition $\{3, 3, 3\}$ which has only 1 ordering.
 
-## 5. The Problem of Points — conditioning as filtering
+## 4. Bertrand's box paradox
 
-From the 1654 [Pascal–Fermat correspondence](https://en.wikipedia.org/wiki/Problem_of_points#Pascal_and_Fermat) comes the most celebrated problem in early probability. Two equally skilled players are playing a game of chance to a target score. **The game is interrupted before either player wins. How should the stakes be divided fairly?**
+[Bertrand's box paradox](https://en.wikipedia.org/wiki/Bertrand%27s_box_paradox), posed by [Joseph Bertrand](https://en.wikipedia.org/wiki/Joseph_Bertrand) in 1889, is a probability puzzle where naive intuition leads most people astray.
 
-The correct solution to this "[problem of points](https://en.wikipedia.org/wiki/Problem_of_points)" developed by Pascal and Fermat is as follows: the stakes should be split in proportion to each player's probability of winning *from the current state*.
+**The setup.** There are three boxes:
 
-**Setup.** Players A and B flip a fair coin repeatedly. Heads gives A a point; tails gives B a point. The first player to reach $n$ points wins the total stake.
+- **Box 1:** contains 2 gold coins.
+- **Box 2:** contains 2 silver coins.
+- **Box 3:** contains 1 gold coin and 1 silver coin.
 
-#### Simulating complete games
+You pick a box uniformly at random. Without looking inside, you reach in and draw one coin — it turns out to be **gold**. What is the probability that the *other* coin in the same box is also gold?
 
-**Task:** Write a function `play_game(n)` that simulates a single game to $n$ points:
 
-1. Flip a fair coin repeatedly. Award a point to A on heads, to B on tails.
-2. Stop when either player reaches $n$ points.
-3. Return the full sequence of cumulative scores $(a_t, b_t)$ at each round $t$, and the identity of the winner.
+#### Simulating the experiment
 
-Simulate $N = 100'000$ games with $n = 5$. Estimate $P(\text{A wins})$. *(Should be approximately $0.5$ by symmetry.)*
+**Task:** Write a function `bertrand_box(N)` that simulates the full experiment $N$ times:
+
+1. Pick one of the three boxes uniformly at random.
+2. Pick one of the two coins in that box uniformly at random — this is your drawn coin.
+3. Record the color of the drawn coin and the color of the remaining coin.
+
+Run $N = 100\,000$ simulations.
 
 #### Conditioning by filtering
 
-Suppose the game is interrupted when A has 4 points and B has 2 (out of 5 needed). What is $P(\text{A wins} \mid \text{score reaches } (4, 2))$?
+**Task:** From the $N$ simulations, estimate $P(\text{other coin is gold} \mid \text{drawn coin is gold})$ using rejection sampling:
 
-**Task:** From the $N$ simulated games above, estimate this conditional probability:
+1. **Filter:** From the above simulations keep only the trials where the drawn coin is gold.
+2. Among the survivors, count the fraction where the other coin is also gold.
+3. Compute the **acceptance rate** — what fraction of trials survived the filter?
 
-1. **Filter:** keep only games where the score passes through the state $(4, 2)$ at some round.
-2. Among these survivors, count the fraction where A ultimately wins.
-3. Compute the **acceptance rate** — what fraction of the $N$ games survived the filter?
+**Task:** Explain why the acceptance rate is approximately $1/2$, not $1/3$.
 
-**Task:** Explain why filtering samples and computing statistics on the survivors gives a valid estimate of the conditional probability. Why might this approach be wasteful?
+**Task:** Also estimate $P(\text{other coin is gold} \mid \text{drawn coin is silver})$. Is the result what you expect?
 
-#### Simulating the remainder directly
+#### Exact computation
 
-Instead of filtering complete games, we can simulate only the **remaining flips** starting from the state $(4, 2)$. This corresponds to directly simulating from the conditional distribution. From this state, A needs 1 more point and B needs 3 more.
+**Task:** Use Bayes' theorem to compute the exact answer. 
 
-**Task:** Write a function that simulates $N = 100'000$ continuations from the state $(4, 2)$:
+*Hint*: For each box $i \in \{1, 2, 3\}$, determine $P(\text{draw gold} \mid \text{Box } i)$, then apply Bayes' rule to find $P(\text{Box 1} \mid \text{draw gold})$.
 
-1. Flip coins until either A gains 1 point or B gains 3 points.
-2. Record whether A wins.
+**Task:** Can you convince yourself of the answer without doing any calculations?
 
-Estimate $P(\text{A wins} \mid \text{score is } (4, 2))$ and compare to the result from the filtering approach.
-
-*Note: Simulating directly from the conditional distribution is possible here because the game has a sequential structure — given the current score, the future flips do not depend on how we got there. This is a property of the model, not something that holds in general. We will learn systematic techniques for reasoning about when and how we can condition in this way when we study conditioning in string diagrams.*
-
-#### Pascal's exact solution
-
-Pascal reasoned as follows: from the state $(4, 2)$ with a target of 5, the game will be decided in **at most 3 more flips** (since B needs 3 points to win). There are $2^3 = 8$ equally likely outcomes for 3 coin flips. Enumerate all 8 outcomes and count in how many A wins (i.e. gets at least 1 head).
-
-*Exact answer:* $P(\text{A wins}) = 7/8 = 0.875$.
+*Hint:* Think about **all six coins** individually, rather than reasoning at the level of boxes.

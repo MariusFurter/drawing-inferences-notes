@@ -374,7 +374,7 @@ The following code implements this idea to estimate the probabilities of interes
 # | code-fold: false
 def infer_twins(N):
 
-    III3_unaffected = 0
+    III1_unaffected = 0
     at_least_one_twin_affected = 0
     both_twins_affected = 0
 
@@ -385,15 +385,15 @@ def infer_twins(N):
 
         # Condition on III1 = XY (unaffected son)
         if III1 == "XY":
-            III3_unaffected += 1
+            III1_unaffected += 1
             if III2 == "xY" or III3 == "xY":
                 at_least_one_twin_affected += 1
             if III2 == "xY" and III3 == "xY":
                 both_twins_affected += 1
 
     return (
-        at_least_one_twin_affected / III3_unaffected,
-        both_twins_affected / III3_unaffected,
+        at_least_one_twin_affected / III1_unaffected,
+        both_twins_affected / III1_unaffected,
     )
 ```
 
