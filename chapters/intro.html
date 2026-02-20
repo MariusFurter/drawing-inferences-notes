@@ -319,8 +319,8 @@ window.Quarto = {
 </tbody>
 </table>
 </div>
-<p>Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it’s more likely that the object is made of rubber than gold, because rubber is more common in everyday objects. You might also believe that if the object is a sphere, it’s more likely to be made of rubber.</p>
-<p>How strongly do you favor <span class="math inline">\(x\)</span> over <span class="math inline">\(y\)</span>? One way to measure this: ask yourself what odds you would offer. If you would bet $2 on <span class="math inline">\(x\)</span> against $1 on <span class="math inline">\(y\)</span>, then you believe <span class="math inline">\(x\)</span> is twice as likely.</p>
+<p>Even before I give you any more information, you might already have some beliefs about what combinations are more likely than others. For instance, you might believe it’s more likely that the object is made of rubber than gold, because rubber objects are more common. You might also believe that if the object is a sphere, it’s more likely to be made of rubber.</p>
+<p>How strongly do you favor object <span class="math inline">\(x\)</span> over <span class="math inline">\(y\)</span>? One way to measure this: ask yourself what odds you would offer. If you would bet $2 on <span class="math inline">\(x\)</span> against $1 on <span class="math inline">\(y\)</span>, then you believe <span class="math inline">\(x\)</span> is twice as likely.</p>
 <p>Now suppose you’ve chosen a combination of properties. I will reveal a clue.</p>
 <p><strong>Clue 1: The object is a ring.</strong></p>
 <p>What changes? If you previously bet on a sphere, you should switch — spheres have been ruled out. But if you already bet on a ring, should you change anything? How would confirming that the object is a ring change your beliefs about the remaining properties?</p>
@@ -343,7 +343,7 @@ window.Quarto = {
 <li><p><strong>Normalization.</strong> <span class="math inline">\(p(\emptyset) = 0\)</span> and <span class="math inline">\(p(\Omega) = 1.\)</span> We could choose a different scale, but this is the most convenient one.</p></li>
 <li><p><strong>Additivity.</strong> Whenever <span class="math inline">\(E_1\)</span> and <span class="math inline">\(E_2\)</span> have no elements in common, we have <span class="math inline">\(p(E_1 \cup E_2) = p(E_1) + p(E_2).\)</span> Such events are called <em>mutually exclusive</em> because they can’t both happen at the same time. Additivity says that the probability of either <span class="math inline">\(E_1\)</span> or <span class="math inline">\(E_2\)</span> happening is the sum of their individual probabilities.</p></li>
 </ol>
-<p>From additivity, it follows that the probability of <span class="math inline">\(E\)</span> <em>not</em> happening is <span class="math inline">\(p(E^\text{c}) = 1 - p(E)\)</span>. Also, since any set is the union of its individual elements, we get <span class="math inline">\(p(E) = \sum_{e \in E} p(\{e\})\)</span>. In other words, the probability of any event is determined by the probabilities of individual states.</p>
+<p>It <span class="math inline">\(E \subseteq F\)</span>, we can write <span class="math inline">\(F = E \cup (F \setminus E)\)</span>, so that by additivity <span class="math inline">\(p(E) \leq p(F)\)</span>. Additivity also implies that the probability of <span class="math inline">\(E\)</span> <em>not</em> happening is <span class="math inline">\(p(E^\text{c}) = 1 - p(E)\)</span>. Also, since any set is the union of its individual elements, we get <span class="math inline">\(p(E) = \sum_{e \in E} p(\{e\})\)</span>. In other words, the probability of any event is determined by the probabilities of individual states.</p>
 <section id="conditioning" class="level3" data-number="1.1.1">
 <h3 data-number="1.1.1" class="anchored" data-anchor-id="conditioning"><span class="header-section-number">1.1.1</span> Conditioning</h3>
 <p>The key operation in our guessing game was eliminating impossible states. Suppose we learn that the true state lies in some subset <span class="math inline">\(F \subseteq \Omega\)</span>. For instance, <span class="math inline">\(F\)</span> might be the set of all ring-objects. How should we update our probabilities?</p>
@@ -612,7 +612,7 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We now call the inference function to get our estimates:</p>
-<div id="f2c8a2ef" class="cell" data-execution_count="3">
+<div id="da1cb527" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">42</span>)</span>
@@ -675,7 +675,7 @@ Both twins affected: 0.1236</code></pre>
 <span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> at_least_one, both</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We now call the vectorized inference function:</p>
-<div id="482bbb4d" class="cell" data-execution_count="6">
+<div id="bcc00b83" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
