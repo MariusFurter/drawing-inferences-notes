@@ -113,7 +113,7 @@ By the LLN, this converges to $\mathbb{E}_{p(\omega)}[\mathbf{1}_F(\omega)] = p(
 
 ## Warm-up: Simulating discrete distributions
 
-Before tackling the puzzles, we set up a basic sampling toolkit. Each distribution below is a building block for the simulations that follow. The goal is to get comfortable generating random samples in Python. We recommend using [`torch.distributions`](https://pytorch.org/docs/stable/distributions.html) for sampling, [`matplotlib`](https://matplotlib.org) for general plotting, and [`seaborn`](https://seaborn.pydata.org) for statistical plots like histograms. You can find a short tutorial on using PyTorch for sampling in the [appendix](../appendix/pytorch.qmd).
+Before tackling the puzzles, we set up a basic sampling toolkit. Each distribution below is a building block for the simulations that follow. The goal is to get comfortable generating random samples in Python. We recommend using [`torch.distributions`](https://pytorch.org/docs/stable/distributions.html) for sampling, [`matplotlib`](https://matplotlib.org) for general plotting, and [`seaborn`](https://seaborn.pydata.org) for statistical plots like histograms. You can find a short tutorial on using PyTorch for sampling in the [Appendix](../appendix/pytorch.qmd).
 
 **Distributions to know:**
 

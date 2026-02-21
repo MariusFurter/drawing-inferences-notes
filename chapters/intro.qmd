@@ -417,7 +417,7 @@ We see that the results are close to the exact values $5/24 \approx 0.208$ and $
 
 ### Vectorization
 
-To leverage modern hardware like GPUs, probabilistic programming often relies on **vectorized operations**. Instead of running the simulation in a loop $N$ times, we generate $N$ samples in parallel using tensors. We encode genotypes as binary values: 0 for unaffected ($XX$ or $XY$) and 1 for carrier or affected ($xX$ or $xY$). This allows us to encode logic using arithmetic operations on tensors. Here is the same model implemented using PyTorch:
+To leverage modern hardware like GPUs, probabilistic programming often relies on **vectorized operations**. Instead of running the simulation in a loop $N$ times, we generate $N$ samples in parallel using tensors. We encode genotypes as binary values: 0 for unaffected ($XX$ or $XY$) and 1 for carrier or affected ($xX$ or $xY$). This allows us to encode logic using arithmetic operations on tensors. Here is the same model implemented using PyTorch. A short tutorial on PyTorch can be found in the [Appendix](../appendix/pytorch.qmd).
 
 ```{python}
 # | code-fold: false

@@ -56,7 +56,7 @@ Alternatively, skip the explicit tables and write the code directly. For each bo
 
 
 ::: {.callout-note title="Hint: Vectorized Sampling"}
-For rejection sampling (Task 3), you will need to generate millions of samples efficiently. If you write each box function using [`torch.distributions.Bernoulli`](https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli) and express conditional probabilities as arithmetic on 0/1 values (as in the `family_v()` example from the course notes), the same function will work for a single sample *and* for a batch of $N$ samples — no loops required. See the [Numpy beginner guide](https://numpy.org/doc/2.3/user/absolute_beginners.html) for an introduction to working with array data, and [PyTorch tensors guide](https://pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html) for specifics on using PyTorch.
+For rejection sampling (Task 3), you will need to generate millions of samples efficiently. If you write each box function using [`torch.distributions.Bernoulli`](https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli) and express conditional probabilities as arithmetic on 0/1 values (as in the `family_v()` example from the course notes), the same function will work for a single sample *and* for a batch of $N$ samples — no loops required. See the [Appendix](../appendix/pytorch.qmd) for a short introduction to PyTorch. We also recommend the [Numpy beginner guide](https://numpy.org/doc/2.3/user/absolute_beginners.html) for an introduction to working with array data, and [PyTorch tensors guide](https://pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html) for specifics on using PyTorch.
 :::
 
 ::: {.callout-note title="Hint: Base Python Alternative"}
