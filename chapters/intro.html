@@ -65,7 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../exercises/2-credit-card.html" rel="next">
+<link href="../exercises/1-games-of-chance.html" rel="next">
 <link href="../index.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -206,6 +206,12 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../exercises/1-games-of-chance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
   </div>
@@ -338,12 +344,14 @@ window.Quarto = {
 <li><strong>or</strong>: The event “<span class="math inline">\(E_1\)</span> or <span class="math inline">\(E_2\)</span>” corresponds to the union <span class="math inline">\(E_1 \cup E_2\)</span> — the states where at least one holds.</li>
 <li><strong>not</strong>: The event “not <span class="math inline">\(E\)</span>” corresponds to the complement <span class="math inline">\(E^\text{c} = \Omega \setminus E\)</span> — the states where <span class="math inline">\(E\)</span> fails to hold.</li>
 </ul>
-<p>We assign every subset <span class="math inline">\(E \subseteq \Omega\)</span> a number <span class="math inline">\(p(E)\)</span> that captures how likely we think <span class="math inline">\(E\)</span> is. If our assignment satisfies the following two properties, we call it a <strong>probability measure</strong> on <span class="math inline">\(\Omega\)</span>:</p>
+<p>We assign every subset <span class="math inline">\(E \subseteq \Omega\)</span> a number <span class="math inline">\(p(E)\)</span> that captures how likely we think <span class="math inline">\(E\)</span> is. If our assignment satisfies the following two properties, we call <span class="math inline">\(p\)</span> a <strong>probability measure / distribution</strong> on <span class="math inline">\(\Omega\)</span>:</p>
 <ol type="1">
 <li><p><strong>Normalization.</strong> <span class="math inline">\(p(\emptyset) = 0\)</span> and <span class="math inline">\(p(\Omega) = 1.\)</span> We could choose a different scale, but this is the most convenient one.</p></li>
 <li><p><strong>Additivity.</strong> Whenever <span class="math inline">\(E_1\)</span> and <span class="math inline">\(E_2\)</span> have no elements in common, we have <span class="math inline">\(p(E_1 \cup E_2) = p(E_1) + p(E_2).\)</span> Such events are called <em>mutually exclusive</em> because they can’t both happen at the same time. Additivity says that the probability of either <span class="math inline">\(E_1\)</span> or <span class="math inline">\(E_2\)</span> happening is the sum of their individual probabilities.</p></li>
 </ol>
-<p>It <span class="math inline">\(E \subseteq F\)</span>, we can write <span class="math inline">\(F = E \cup (F \setminus E)\)</span>, so that by additivity <span class="math inline">\(p(E) \leq p(F)\)</span>. Additivity also implies that the probability of <span class="math inline">\(E\)</span> <em>not</em> happening is <span class="math inline">\(p(E^\text{c}) = 1 - p(E)\)</span>. Also, since any set is the union of its individual elements, we get <span class="math inline">\(p(E) = \sum_{e \in E} p(\{e\})\)</span>. In other words, the probability of any event is determined by the probabilities of individual states.</p>
+<p>It <span class="math inline">\(E \subseteq F\)</span>, we can write <span class="math inline">\(F = E \cup (F \setminus E)\)</span>, so that by additivity <span class="math inline">\(p(E) \leq p(F)\)</span>. Additivity also implies that the probability of <span class="math inline">\(E\)</span> <em>not</em> happening is <span class="math inline">\(p(E^\text{c}) = 1 - p(E)\)</span>.</p>
+<!-- This section could be improved -->
+<p>Since any set is the union of its individual elements, we get <span class="math inline">\(p(E) = \sum_{e \in E} p(\{e\})\)</span>. In other words, the probability of any event is determined by the probabilities of individual states. To simplify notation, we write <span class="math inline">\(p(\omega) := p(\{\omega\})\)</span> for any element <span class="math inline">\(\omega \in \Omega\)</span>. The function <span class="math inline">\(p : \Omega \to [0, 1]\)</span> that assigns a probability to each state is called a <strong>probability density function</strong> (pdf). It satisfies <span class="math inline">\(p(E) = \sum_{\omega \in E} p(\omega)\)</span> and <span class="math inline">\(\sum_{\omega \in \Omega} p(\omega) = 1\)</span>. Conversely, any function <span class="math inline">\(q : \Omega \to [0, 1]\)</span> that sums to 1 defines a probability measure by <span class="math inline">\(q(E) = \sum_{\omega \in E} q(\omega)\)</span>.</p>
 <section id="conditioning" class="level3" data-number="1.1.1">
 <h3 data-number="1.1.1" class="anchored" data-anchor-id="conditioning"><span class="header-section-number">1.1.1</span> Conditioning</h3>
 <p>The key operation in our guessing game was eliminating impossible states. Suppose we learn that the true state lies in some subset <span class="math inline">\(F \subseteq \Omega\)</span>. For instance, <span class="math inline">\(F\)</span> might be the set of all ring-objects. How should we update our probabilities?</p>
@@ -604,7 +612,7 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <div id="infer-twins" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> infer_twins(N):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    III3_unaffected <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    III1_unaffected <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    at_least_one_twin_affected <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    both_twins_affected <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
@@ -615,19 +623,19 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Condition on III1 = XY (unaffected son)</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> III1 <span class="op">==</span> <span class="st">"XY"</span>:</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            III3_unaffected <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            III1_unaffected <span class="op">+=</span> <span class="dv">1</span></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> III2 <span class="op">==</span> <span class="st">"xY"</span> <span class="kw">or</span> III3 <span class="op">==</span> <span class="st">"xY"</span>:</span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                at_least_one_twin_affected <span class="op">+=</span> <span class="dv">1</span></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> III2 <span class="op">==</span> <span class="st">"xY"</span> <span class="kw">and</span> III3 <span class="op">==</span> <span class="st">"xY"</span>:</span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>                both_twins_affected <span class="op">+=</span> <span class="dv">1</span></span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        at_least_one_twin_affected <span class="op">/</span> III3_unaffected,</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        both_twins_affected <span class="op">/</span> III3_unaffected,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        at_least_one_twin_affected <span class="op">/</span> III1_unaffected,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        both_twins_affected <span class="op">/</span> III1_unaffected,</span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We now call the inference function to get our estimates:</p>
-<div id="8cf9cdca" class="cell" data-execution_count="4">
+<div id="290f88f4" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">42</span>)</span>
@@ -690,7 +698,7 @@ Both twins affected: 0.1236</code></pre>
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> at_least_one, both</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We now call the vectorized inference function:</p>
-<div id="180cd4b3" class="cell" data-execution_count="7">
+<div id="087439c6" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
@@ -791,7 +799,7 @@ Both twins affected: 0.1247</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/drawinginferences\.com");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -1125,8 +1133,8 @@ Both twins affected: 0.1247</code></pre>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../exercises/2-credit-card.html" class="pagination-link" aria-label="Exercise 2: Credit card fraud detection">
-        <span class="nav-page-text">Exercise 2: Credit card fraud detection</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../exercises/1-games-of-chance.html" class="pagination-link" aria-label="Exercise 1: Classic puzzles">
+        <span class="nav-page-text">Exercise 1: Classic puzzles</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
