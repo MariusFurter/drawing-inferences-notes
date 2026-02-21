@@ -73,7 +73,7 @@ Statistics and machine learning is often presented as a collection of disparate 
 We write code instead of formulas. We run simulations instead of calculating.
 :::
 
-Mathematical prerequisites exclude many people who could benefit from modeling. We will avoid most math by focusing on coding and simulation.
+Mathematical prerequisites exclude many people who could benefit from modeling. We will avoid complex math by focusing on coding and simulation.
 
 ::: {.callout-tip}
 ## Compositional
