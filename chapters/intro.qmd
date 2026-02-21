@@ -48,13 +48,16 @@ Logical operations on events correspond to set operations:
 - **or**: The event "$E_1$ or $E_2$" corresponds to the union $E_1 \cup E_2$ — the states where at least one holds.
 - **not**: The event "not $E$" corresponds to the complement $E^\text{c} = \Omega \setminus E$ — the states where $E$ fails to hold.
 
-We assign every subset $E \subseteq \Omega$ a number $p(E)$ that captures how likely we think $E$ is. If our assignment satisfies the following two properties, we call it a **probability measure** on $\Omega$:
+We assign every subset $E \subseteq \Omega$ a number $p(E)$ that captures how likely we think $E$ is. If our assignment satisfies the following two properties, we call $p$ a **probability measure / distribution** on $\Omega$:
 
 1. **Normalization.** $p(\emptyset) = 0$ and $p(\Omega) = 1.$ We could choose a different scale, but this is the most convenient one. 
 
 2. **Additivity.** Whenever $E_1$ and $E_2$ have no elements in common, we have $p(E_1 \cup E_2) = p(E_1) + p(E_2).$ Such events are called *mutually exclusive* because they can't both happen at the same time. Additivity says that the probability of either $E_1$ or $E_2$ happening is the sum of their individual probabilities.
 
-It $E \subseteq F$, we can write $F = E \cup (F \setminus E)$, so that by additivity $p(E) \leq p(F)$. Additivity also implies that the probability of $E$ *not* happening is $p(E^\text{c}) = 1 - p(E)$. Also, since any set is the union of its individual elements, we get $p(E) = \sum_{e \in E} p(\{e\})$. In other words, the probability of any event is determined by the probabilities of individual states.
+It $E \subseteq F$, we can write $F = E \cup (F \setminus E)$, so that by additivity $p(E) \leq p(F)$. Additivity also implies that the probability of $E$ *not* happening is $p(E^\text{c}) = 1 - p(E)$. 
+
+<!-- This section could be improved -->
+Since any set is the union of its individual elements, we get $p(E) = \sum_{e \in E} p(\{e\})$. In other words, the probability of any event is determined by the probabilities of individual states. To simplify notation, we write $p(\omega) := p(\{\omega\})$ for any element $\omega \in \Omega$. The function $p : \Omega \to [0, 1]$ that assigns a probability to each state is called a **probability density function** (pdf). It satisfies $p(E) = \sum_{\omega \in E} p(\omega)$ and $\sum_{\omega \in \Omega} p(\omega) = 1$. Conversely, any function $q : \Omega \to [0, 1]$ that sums to 1 defines a probability measure by $q(E) = \sum_{\omega \in E} q(\omega)$.
 
 ### Conditioning
 
