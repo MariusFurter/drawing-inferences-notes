@@ -20,6 +20,7 @@ book:
   chapters:
     - index.qmd
     - chapters/intro.qmd
+    - chapters/graphical-models.qmd
     - part: "Exercises"
       chapters:
         - exercises/1-classic-puzzles.qmd
@@ -31,6 +32,8 @@ book:
 
 filters:
   - diagram
+  - quarto
+  - shared-theorem-counter
 
 diagram:
   cache: true

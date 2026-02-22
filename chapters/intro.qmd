@@ -1,9 +1,3 @@
-::: {.hidden}
-$$
- \def\then{\mathbin{;}}
- \def\kernel{\rightsquigarrow}
-$$
-:::
 
 # Introduction
 

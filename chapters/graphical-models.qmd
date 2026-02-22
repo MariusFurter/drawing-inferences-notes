@@ -1,5 +1,12 @@
+::: {.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+$$
+:::
+
 # Graphical models
-We will now describe graphical modeling with string diagrams in detail. This will allow us to visually manipulate complex models without having to resort to tedious algebraic calculations. At the end of the section, we will be able to interpret the following diagram as a probability distribution and tell which variables are conditionally independent of each other. Moreover, you will understand how to sample from this distribution by implementing a probabilistic program according to the structure of the diagram.
+We will now learn how to interpret string diagrams as probability distributions. This will allow us to visually manipulate complex models without algebra. At the end of the section, we will be able to interpret the following diagram as a probability distribution and tell which variables are conditionally independent of each other. Moreover, you will understand how to sample from this distribution by implementing a probabilistic program according to the structure of the diagram.
 
 ``` {.tikz file="index/fire-alarm.tikz"}
 %%| label: fire-alarm
@@ -23,23 +30,25 @@ Unnormalized kernels arise in many contexts, including conditioning. For general
 
 We represent a kernel $f : X \kernel Y$ as a box with an input wire $X$ and an output wire $Y$:
 
-``` {.tikz file="intro/single-kernel.tikz"}
+``` {.tikz file="graphical-models/single-kernel.tikz"}
 %%| label: Kernel
 %%| fig-cap: A kernel $f : X \kernel Y$.
 %%| height: 3em
 ```
 
-#### Sequential composition {.unnumbered}
+We will now see how kernels can be combined to build complex models. The two main operations for combining kernels are sequential composition and parallel composition. We will also need some additional operations for manipulating wires, such as crossing, copying, and deleting wires.
 
-Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ to get a new kernel $g \then f : X \kernel Z$. This is called the **sequential composition** of $f$ and $g$. The symbol $\then$ is pronounced "then" since the input $x$ is processed first by $f$, then by $g$.
+### Sequential composition {.unnumbered}
 
-``` {.tikz file="intro/sequential-composite-kernel.tikz"}
+Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ to get a new kernel $(g \then f) : X \kernel Z$. This is called the **sequential composition** of $f$ and $g$. The symbol $\then$ is pronounced "then" since the input $x$ is processed first by $f$, then by $g$.
+
+``` {.tikz file="graphical-models/sequential-composite-kernel.tikz"}
 %%| label: Sequential composite kernel
 %%| fig-cap: Sequential composition of kernels $f : X \kernel Y$ and $g : Y \kernel Z$.
 %%| height: 3em
 ```
 
-The question is how to compute the composite kernel $g \then f$ from $f$ and $g$. Note that interpreting $f$ and $g$ as conditional distributions, the chain rule and conditional independence gives:
+How do we compute the composite kernel $g \then f$ from $f$ and $g$? Note that interpreting $f$ and $g$ as conditional distributions, the chain rule and conditional independence gives:
 
 $$
 \begin{aligned}
@@ -51,23 +60,43 @@ $$
 We take this as the definition of the composite kernel.
 
 ::: {#def-sequential-composite-kernel}
-The **sequential composition** of kernels $f : X \kernel Y$ and $g : Y \kernel Z$ is the kernel $g \then f : X \kernel Z$ defined by
+The **sequential composition** of kernels $f : X \kernel Y$ and $g : Y \kernel Z$ is the kernel $(g \then f) : X \kernel Z$ defined by
 $$
 (g \then f)(z \mid x) := \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
 $$
 :::
 
-#### Parallel composition {.unnumbered}
 
-Next, we can place two kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ side by side to get a new kernel $f_1 \otimes f_2 : X_1 \times X_2 \kernel Y_1 \times Y_2$. This is called the **parallel composition** of $f_1$ and $f_2$.
+Using only sequential composition, we can already build a famous model:
 
-``` {.tikz file="intro/parallel-composite-kernel.tikz"}
+::: {#exm-markov-chain}
+Consider a probability kernel $k : X \kernel X$ whose input and output are the same set $X$. We think of $X$ as a state space. Then $k$ describes a system that randomly hops between states: at each time step $t$, the system moves from state $x_t$ to state $x_{t+1}$ with probability $k(x_{t+1} \mid x_t)$. This is called a **Markov chain** and can be represented as the following string diagram:
+
+``` {.tikz file="graphical-models/markov-chain.tikz"}
+%%| label: Markov chain
+%%| fig-cap: A Markov chain with transition kernel $k : X \kernel X$.
+%%| height: 2.5em
+```
+
+Composing $k$ with itself gives the two-step transition $k^2 := (k \then k)$:
+$$
+k^2(x_{t+2} \mid x_t) = \sum_{x_{t+1}} k(x_{t+2} \mid x_{t+1}) \, k(x_{t+1} \mid x_t).
+$$
+
+This is the *Chapman–Kolmogorov equation* for Markov chains. From this perspective, a general kernel $f : X \kernel Y$ can be seen as a generalization of a Markov chain where the input and output spaces need not coincide.
+:::
+
+### Parallel composition {.unnumbered}
+
+Next, we can place two kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ side by side to get a new kernel $(f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2$. This is called the **parallel composition** of $f_1$ and $f_2$.
+
+``` {.tikz file="graphical-models/parallel-composite-kernel.tikz"}
 %%| label: Parallel composite kernel
 %%| fig-cap: Parallel composition of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$.
 %%| height: 5.5em
 ```
 
-Intuitively, the parallel composition $f_1 \otimes f_2$ represents the joint behavior of two independent processes. Interpreting $f_1$ and $f_2$ as independent conditional distributions, we have:
+Intuitively, the parallel composition $(f_1 \otimes f_2)$ represents the joint behavior of two independent processes. How should we define the resulting kernel? Interpreting $f_1$ and $f_2$ as independent conditional distributions, we have:
 $$
 p(y_1, y_2 \mid x_1, x_2) 
 = p(y_1 \mid y_2, x_1, x_2) \, p(y_2 \mid x_1, x_2)
@@ -82,28 +111,48 @@ $$
     X_1 \otimes X_2 := X_1 \times X_2 = \{(x_1,x_2) \mid x_1 \in X_1 \text{ and } x_2 \in X_2\}
 $$
 to be the Cartesian product of sets. 
-The **parallel composition** of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ is the kernel $f_1 \otimes f_2 : X_1 \times X_2 \kernel Y_1 \times Y_2$ defined by
+The **parallel composition** of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ is the kernel $(f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2$ defined by
 $$
 (f_1 \otimes f_2)(y_1, y_2 \mid x_1, x_2) := f_1(y_1 \mid x_1   ) \, f_2(y_2 \mid x_2).
 $$
 ::: 
 
-#### Bundling wires {.unnumbered}
+### Bundling wires {.unnumbered}
 
-``` {.tikz file="intro/bundle.tikz"}
+The product of sets allows us to represent kernels with multiple inputs and outputs. For example, we draw a kernel $f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2$ as a box with two input wires $X_1$ and $X_2$ and two output wires $Y_1$ and $Y_2$:
+
+``` {.tikz file="graphical-models/bundle.tikz"}
 %%| label: Multi-input multi-output kernel
 %%| fig-cap: A kernel $f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2$.
 %%| height: 4em
 ```
 
+This makes sense because the elements of $X_1 \otimes X_2$ are pairs $(x_1, x_2)$, so we can think of each coordinate as occupying a separate input wire. 
 
-``` {.tikz file="intro/measure.tikz"}
-%%| label: A kernel representing a measure
-%%| fig-cap: A kernel $m : I \kernel X$ represents a measure on $X$.
-%%| height: 3em
+Next, we would like to draw boxes without input or output wires. There are three basic types:
+
+``` {.tikz file="graphical-models/no-inputs.tikz"}
+%%| label: Kernels without inputs or outputs
+%%| fig-cap: Kernels without inputs or outputs
+%%| height: 2.5em
 ```
 
-[Add other options, will need to add equalities to tikz figures to render correctly.]
+How would we interpret $m$ as a kernel? We know that its output set it $X$, but what about its input set? The key idea is to think of $m$ as receiving a dummy input that carries no information. We represent this dummy input by a special set $I := \{\bullet\}$ that contains only one element. Then $m$ is a kernel of type $m : I \kernel X$. Since a wires labeled by $I$ carry no information, we can drop and insert them at will. In particular, we can draw $m$ without an input wire:
+
+``` {.tikz file="graphical-models/measure.tikz"}
+%%| label: Kernels without inputs
+%%| fig-cap: A kernel $m : I \kernel X$ can be drawn without input wires.
+%%| height: 2.5em
+```
+
+The convention of dropping and inserting $I$-wires also makes sense mathematically: By definition, 
+$$I \otimes X = \{ (\bullet,x) \mid x \in X \}.$$ 
+
+Notice that this set is essentially the same as $X$; its elements are all just paired with the dummy element $\bullet$. Mathematicians would say that $I \otimes X$ and $X$ are *isomorphic* (same shape) via the correspondence $(\bullet,x) \leftrightarrow x$. We can thus identify $I \otimes X$ with $X$ and write $I \otimes X \cong X$. The same applies to the output side: $X \otimes I \cong X$.
+
+We can now give a precise interpretation to the three types of kernels without inputs or outputs: A kernel $m : I \kernel X$ assigns each $x \in X$ as non-negative number $m(x \mid \bullet)$. We think of $m$ as a measure on $X$. A kernel $t : X \kernel I$ assigns each $x \in X$ a non-negative number $t(\bullet \mid x)$. We think of $t$ as a test function on $X$. Finally, a kernel $s : I \kernel I$ assigns the single element $\bullet$ a non-negative number $s(\bullet \mid \bullet)$. We think of $s$ as a scalar.
+
+
 
 #### Crossing wires {.unnumbered}
 
@@ -116,7 +165,7 @@ $$
 
 [Example of fire alarm model]
 
-## Reading off conditional independences
+## Reading off conditional independencies
 
 
 ## Exact evaluation

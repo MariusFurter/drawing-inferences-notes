@@ -32,7 +32,7 @@ Think about how credit card fraud works causally. Which variables influence whic
 ::: {.callout-tip collapse="true" title="Solution"}
 
 Here is one reasonable string diagram for this system (other choices are possible):
-``` {.tikz file="intro/exercise/fraud-diagram.tikz"}
+``` {.tikz file="credit-card/fraud-diagram.tikz"}
 %%| label: fraud-diagram
 %%| fig-cap: A string diagram representing a generative model for credit card fraud detection.
 %%| height: 8em
