@@ -1,0 +1,22 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-5, 0) {};
+		\node [style=black node] (1) at (-3.5, 0) {};
+		\node [style=none] (2) at (-2.5, 0.75) {};
+		\node [style=none] (3) at (-2.5, -0.75) {};
+		\node [style=none] (4) at (-2, 0.75) {};
+		\node [style=none] (5) at (-2, -0.75) {};
+		\node [style=none] (6) at (2, 0) {};
+		\node [style=black node] (7) at (3.5, 0) {};
+		\node [style=none] (8) at (-3.5, -1.5) {$\mathsf{copy}_X$};
+		\node [style=none] (9) at (2.75, -1.5) {$\mathsf{del}_X$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (0.center) to (1);
+		\draw [style=edge, in=-180, out=75, looseness=1.25] (1) to (2.center);
+		\draw [style=edge] (2.center) to (4.center);
+		\draw [style=edge, in=180, out=-75, looseness=1.25] (1) to (3.center);
+		\draw [style=edge] (3.center) to (5.center);
+		\draw [style=edge] (6.center) to (7);
+	\end{pgfonlayer}
+\end{tikzpicture}

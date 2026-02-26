@@ -1,0 +1,16 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (1, 0) {};
+		\node [style=none] (1) at (3, 0) {};
+		\node [style=none] (2) at (-4, 0) {};
+		\node [style=small box] (3) at (-2.5, 0) {$\mathsf{id}_X$};
+		\node [style=none] (4) at (-1, 0) {};
+		\node [style=none] (5) at (0, 0) {$=$};
+		\node [style=none] (6) at (2, 0.5) {$X$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (2.center) to (3);
+		\draw [style=edge] (3) to (4.center);
+		\draw [style=edge] (0.center) to (1.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

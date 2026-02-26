@@ -2,16 +2,21 @@
 $$
  \def\then{\mathbin{;}}
  \def\kernel{\rightsquigarrow}
+ \def\swap{\mathsf{swap}}
+ \def\id{\mathsf{id}}
+ \def\cp{\mathsf{copy}}
+ \def\del{\mathsf{del}}
+ \def\ivmark#1{[\![#1]\!]}
 $$
 :::
 
 # Graphical models
-We will now learn how to interpret string diagrams as probability distributions. This will allow us to visually manipulate complex models without algebra. At the end of the section, we will be able to interpret the following diagram as a probability distribution and tell which variables are conditionally independent of each other. Moreover, you will understand how to sample from this distribution by implementing a probabilistic program according to the structure of the diagram.
+We will now learn how to interpret string diagrams as probability distributions. This will allow us to visually manipulate complex models without algebra. At the end of the section, we will be able to interpret the following diagram as a probability distribution. Moreover, you will understand how to sample from this distribution by implementing a probabilistic program according to the structure of the diagram.
 
 ``` {.tikz file="index/fire-alarm.tikz"}
 %%| label: fire-alarm
 %%| fig-cap: A string diagram representing a causal model for a fire alarm.
-%%| height: 7em
+%%| height: 5.5em
 ```
 
 ## Kernels
@@ -33,22 +38,22 @@ We represent a kernel $f : X \kernel Y$ as a box with an input wire $X$ and an o
 ``` {.tikz file="graphical-models/single-kernel.tikz"}
 %%| label: Kernel
 %%| fig-cap: A kernel $f : X \kernel Y$.
-%%| height: 3em
+%%| height: 2.5em
 ```
 
 We will now see how kernels can be combined to build complex models. The two main operations for combining kernels are sequential composition and parallel composition. We will also need some additional operations for manipulating wires, such as crossing, copying, and deleting wires.
 
 ### Sequential composition {.unnumbered}
 
-Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ to get a new kernel $(g \then f) : X \kernel Z$. This is called the **sequential composition** of $f$ and $g$. The symbol $\then$ is pronounced "then" since the input $x$ is processed first by $f$, then by $g$.
+Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ to get a new kernel $(g \then f) : X \kernel Z$. This is called the **sequential composition** of $f$ and $g$. The symbol $\then \,$ is pronounced "then" since the input $x$ is processed first by $f$, then by $g$.
 
 ``` {.tikz file="graphical-models/sequential-composite-kernel.tikz"}
 %%| label: Sequential composite kernel
 %%| fig-cap: Sequential composition of kernels $f : X \kernel Y$ and $g : Y \kernel Z$.
-%%| height: 3em
+%%| height: 2.5em
 ```
 
-How do we compute the composite kernel $g \then f$ from $f$ and $g$? Note that interpreting $f$ and $g$ as conditional distributions, the chain rule and conditional independence gives:
+How do we compute the composite kernel $(g \then f)$ from $f$ and $g$? Note that interpreting $f$ and $g$ as conditional distributions, the chain rule and conditional independence gives:
 
 $$
 \begin{aligned}
@@ -67,6 +72,34 @@ $$
 :::
 
 
+**Notation:** The **Iverson bracket** $[\![ \phi ]\!]$ converts a logical statement $\phi$ into a number:
+$$
+[\![ \phi ]\!] := \begin{cases} 1 & \text{if } \phi \text{ is true,} \\ 0 & \text{otherwise.} \end{cases}
+$$
+
+::: {#def-identity-kernel}
+For every set $X$, the **identity kernel** $\id_X : X \kernel X$ is defined by
+$$
+\id_X(x' \mid x) := [\![ x' = x ]\!].
+$$
+:::
+
+The identity kernel passes its input through unchanged: given input $x$, it outputs $x$ with probability 1. Composing any kernel $f : X \kernel Y$ with identities leaves it unchanged:
+$$
+\begin{aligned}
+(\id_X \then f)(y \mid x) &= \sum_{x' \in X} f(y \mid x') \, [\![ x' = x ]\!] = f(y \mid x), \\
+(f \then \id_Y)(y' \mid x) &= \sum_{y \in Y} \, [\![ y' = y ]\!] \, f(y \mid x) = f(y' \mid x).
+\end{aligned}
+$$
+
+Since composing with the identity has no effect, we may interpret wires labeled by $X$ as identity kernels. In particular, we can stretch or shorten any wire without changing the meaning of the diagram.
+
+``` {.tikz file="graphical-models/omit-identity.tikz"}
+%%| label: Identity kernel
+%%| fig-cap: A wire labeled by $X$ may be interpreted as the identity kernel $\id_X : X \kernel X$.
+%%| height: 2.5em
+```
+
 Using only sequential composition, we can already build a famous model:
 
 ::: {#exm-markov-chain}
@@ -83,12 +116,13 @@ $$
 k^2(x_{t+2} \mid x_t) = \sum_{x_{t+1}} k(x_{t+2} \mid x_{t+1}) \, k(x_{t+1} \mid x_t).
 $$
 
-This is the *Chapman–Kolmogorov equation* for Markov chains. From this perspective, a general kernel $f : X \kernel Y$ can be seen as a generalization of a Markov chain where the input and output spaces need not coincide.
+This is the *Chapman–Kolmogorov equation* for Markov chains. From this perspective, a probability kernel $f : X \kernel Y$ can be seen as a generalization of a Markov chain where the input and output spaces need not coincide.
 :::
+
 
 ### Parallel composition {.unnumbered}
 
-Next, we can place two kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ side by side to get a new kernel $(f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2$. This is called the **parallel composition** of $f_1$ and $f_2$.
+Next, we can place two kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ side by side to get a new kernel $(f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2$. This is called the **parallel composition** of $f_1$ and $f_2$. Intuitively, the parallel composition $(f_1 \otimes f_2)$ represents the joint behavior of two independent processes. 
 
 ``` {.tikz file="graphical-models/parallel-composite-kernel.tikz"}
 %%| label: Parallel composite kernel
@@ -96,11 +130,12 @@ Next, we can place two kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_
 %%| height: 5.5em
 ```
 
-Intuitively, the parallel composition $(f_1 \otimes f_2)$ represents the joint behavior of two independent processes. How should we define the resulting kernel? Interpreting $f_1$ and $f_2$ as independent conditional distributions, we have:
+How should we define the resulting kernel? Interpreting $f_1$ and $f_2$ as independent conditional distributions, we have:
 $$
 p(y_1, y_2 \mid x_1, x_2) 
 = p(y_1 \mid y_2, x_1, x_2) \, p(y_2 \mid x_1, x_2)
-= p(y_1 \mid x_1) \, p(y_2 \mid x_2).
+= p(y_1 \mid x_1) \, p(y_2 \mid x_2)
+= f_1(y_1 \mid x_1) \, f_2(y_2 \mid x_2).
 $$
 
 We use this as the definition of the parallel composite kernel.
@@ -110,6 +145,7 @@ Given finite sets $X_1$ and $X_2$, we define their product
 $$
     X_1 \otimes X_2 := X_1 \times X_2 = \{(x_1,x_2) \mid x_1 \in X_1 \text{ and } x_2 \in X_2\}
 $$
+
 to be the Cartesian product of sets. 
 The **parallel composition** of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ is the kernel $(f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2$ defined by
 $$
@@ -127,7 +163,7 @@ The product of sets allows us to represent kernels with multiple inputs and outp
 %%| height: 4em
 ```
 
-This makes sense because the elements of $X_1 \otimes X_2$ are pairs $(x_1, x_2)$, so we can think of each coordinate as occupying a separate input wire. 
+This makes intuitive sense because the elements of $X_1 \otimes X_2$ are pairs $(x_1, x_2)$, so we can think of each coordinate as occupying a separate input wire. Moreover, it is consistent with drawing identity kernels as wires since $\id_{X_1 \otimes X_2} = \id_{X_1} \otimes \id_{X_2}$, as we can verify by direct calculation.
 
 Next, we would like to draw boxes without input or output wires. There are three basic types:
 
@@ -148,32 +184,247 @@ How would we interpret $m$ as a kernel? We know that its output set it $X$, but 
 The convention of dropping and inserting $I$-wires also makes sense mathematically: By definition, 
 $$I \otimes X = \{ (\bullet,x) \mid x \in X \}.$$ 
 
-Notice that this set is essentially the same as $X$; its elements are all just paired with the dummy element $\bullet$. Mathematicians would say that $I \otimes X$ and $X$ are *isomorphic* (same shape) via the correspondence $(\bullet,x) \leftrightarrow x$. We can thus identify $I \otimes X$ with $X$ and write $I \otimes X \cong X$. The same applies to the output side: $X \otimes I \cong X$.
+Notice that this set is essentially the same as $X$; its elements are all just paired with the dummy element $\bullet$. Mathematicians would say that $I \otimes X$ and $X$ are *isomorphic* (same shape) via the re-labeling $(\bullet,x) \leftrightarrow x$. We can thus identify $I \otimes X$ with $X$ and write $I \otimes X \cong X$. The same applies to the output side: $X \otimes I \cong X$.
 
-We can now give a precise interpretation to the three types of kernels without inputs or outputs: A kernel $m : I \kernel X$ assigns each $x \in X$ as non-negative number $m(x \mid \bullet)$. We think of $m$ as a measure on $X$. A kernel $t : X \kernel I$ assigns each $x \in X$ a non-negative number $t(\bullet \mid x)$. We think of $t$ as a test function on $X$. Finally, a kernel $s : I \kernel I$ assigns the single element $\bullet$ a non-negative number $s(\bullet \mid \bullet)$. We think of $s$ as a scalar.
+We can now give a precise interpretation to the three types of kernels without inputs or outputs: 
+
+- A kernel $m : I \kernel X$ assigns each $x \in X$ as non-negative number $m(x \mid \bullet)$. We think of $m$ as a **measure** on $X$.
+- A kernel $t : X \kernel I$ assigns each $x \in X$ a non-negative number $t(\bullet \mid x)$. We think of $t$ as a **test function** on $X$.
+- Finally, a kernel $s : I \kernel I$ consists of a single non-negative number $s(\bullet \mid \bullet)$. We think of $s$ as a **scalar**.
+
+### Crossing wires {.unnumbered}
+Next, we will define a kernel that **swaps** wires.
+
+::: {#def-swap-kernel}
+For each pair of finite sets $X$ and $Y$, we define the **swap kernel** $\swap_{X,Y} : X \otimes Y \kernel Y \otimes X$ by
+$$
+\swap_{X,Y}(y', x' \mid x, y) := [\![ x' = x \text{ and } y' = y ]\!].
+$$
+
+In other words, $\swap_{X,Y}$ is a deterministic kernel that takes a pair $(x, y)$ and returns the swapped pair $(y, x)$ with probability 1.
+:::
+
+In string diagrams, we represent $\swap_{X,Y}$ as crossing wires:
+
+``` {.tikz file="graphical-models/swap.tikz"}
+%%| label: Swap kernel
+%%| fig-cap: The swap kernel $\swap_{X,Y}$ is drawn as crossing wires.
+%%| height: 3.5em
+```
+
+The swap kernel satisfies two important laws.
+
+**Swapping twice is the identity.** If we swap the wires and then swap them back, we end up with the original ordering: 
+
+``` {.tikz file="graphical-models/swap-twice.tikz"}
+%%| label: Swapping twice is the identity
+%%| fig-cap: Swapping twice is the same as doing nothing.
+%%| height: 2.5em
+```
+
+This follows immediately from the fact that swapping the components of a tuple twice returns the original tuple: $(x,y) \mapsto (y,x) \mapsto (x,y)$. This tells us that the only relevant information about wires is *what they connect*, not how they are routed in the diagram. Any tangled arrangement of crossings that connects the same endpoints can be simplified.
+
+**Boxes can be moved through swaps.** If we place two independent kernels $f : X_1 \kernel Y_1$ and $g : X_2 \kernel Y_2$ in parallel and then swap the outputs, we get the same result as first swapping the inputs and then applying the kernels in the opposite order. This can be verified by a direct calculation. 
+
+``` {.tikz file="graphical-models/swap-nat.tikz"}
+%%| label: Boxes can be moved through swaps
+%%| fig-cap: Boxes can be moved through swaps.
+%%| height: 5em
+```
+
+### Copying and deleting {.unnumbered}
+
+We now introduce kernels that allow us to split and terminate wires. This is crucial for managing the information flow in our models.
+
+::: {#def-copy-delete-kernels}
+For each set $X$, the **copy kernel** $\cp_X : X \kernel X \otimes X$ and **delete kernel** $\del_X : X \kernel I$ are defined by
+$$
+\cp_X(x', x'' \mid x) := [\![ x' = x \text{ and } x'' = x ]\!], \qquad \del_X(\bullet \mid x) := 1.
+$$
+:::
+
+The copy kernel duplicates its input: given $x$, it outputs the pair $(x, x)$ with probability 1. The delete kernel discards its input: it sends every $x$ to the dummy output $\bullet$ with probability 1. In string diagrams, we draw copy as a splitting node and delete as a terminating node:
+
+``` {.tikz file="graphical-models/copy-delete.tikz"}
+%%| label: Copy and delete kernels
+%%| fig-cap: The copy kernel $\cp_X$ duplicates its input, while the delete kernel $\del_X$ discards its input.
+%%| height: 3.5em
+```
+
+These operations satisfy several natural laws that ensure copying and deleting behave as expected. All of them can be verified by direct calculation.
+
+**Copy then delete is the identity.** If we copy a wire and immediately delete one of the copies, we recover the original wire:
+
+``` {.tikz file="graphical-models/copy-then-delete.tikz"}
+%%| label: Copy then delete is the identity
+%%| fig-cap: Copying a wire and then deleting one of the copies does nothing.
+%%| height: 2.5em
+```
+
+**Copy is associative.** Copying a wire and then copying one of the resulting wires gives the same result regardless of which copy we split further:
+
+``` {.tikz file="graphical-models/copy-associative.tikz"}
+%%| label: Copy is associative
+%%| fig-cap: When copying twice, it does not matter which copy we split further.
+%%| height: 3em
+```
+
+Associativity means that there is a unique way to produce $n$ copies of a wire, regardless of how the binary splittings are arranged. We can therefore draw an $n$-fold copy as a single node with $n$ outgoing wires without ambiguity.
+
+```{.tikz file="graphical-models/n-fold-copy.tikz"}
+%%| label: n-fold copy
+%%| fig-cap: An $n$-fold copy can be drawn as a single node with $n$ outgoing wires.
+%%| height: 3.5em
+```
+
+**Copy is commutative.** Copying and then swapping the two outputs is the same as just copying. This reflects the fact that the two copies are identical — there is no distinction between the "first" and "second" copy.
+
+``` {.tikz file="graphical-models/copy-commutative.tikz"}
+%%| label: Copy is commutative
+%%| fig-cap: Copying and then swapping the outputs is the same as just copying.
+%%| height: 2.5em
+```
+
+**Compatibility with bundling.** Copying and deleting on a product $X_1 \otimes X_2$ can be performed wire by wire. Deleting a pair amounts to deleting each component independently. Copying a pair amounts to copying each component and then rearranging the wires so that the two copies of $X_1$ are adjacent and the two copies of $X_2$ are adjacent:
+
+``` {.tikz file="graphical-models/delete-product.tikz"}
+%%| label: Delete on products
+%%| fig-cap: Deleting a product amounts to deleting each component independently.
+%%| height: 3em
+```
+
+``` {.tikz file="graphical-models/copy-product.tikz"}
+%%| label: Copy on products
+%%| fig-cap: Copying a product amounts to copying each component and then rearranging the wires.
+%%| height: 6em
+```
+
+#### Copy enforces equality {.unnumbered}
+
+The copy kernel plays a central role in building models because it enables **variables sharing**. Whenever two boxes in a string diagram need to receive the same input, we route the wire through a copy node.
+
+Consider two kernels $f : X \kernel Y$ and $g : X \kernel Z$ that both depend on the same variable $X$. To build a joint kernel that feeds the same $x$ to both $f$ and $g$, we first copy the input wire and then apply $f$ and $g$ in parallel:
+
+[Diagram]
+
+Evaluating this composite gives:
+$$
+(\cp_X \then (f \otimes g))(y, z \mid x) = \sum_{x', x''} f(y \mid x') \, g(z \mid x'') \, [\![ x' = x \text{ and } x'' = x ]\!] = f(y \mid x) \, g(z \mid x).
+$$
+
+Note how the Iverson bracket in the copy kernel **enforces equality** $x' = x'' = x$, which collapses the sum. The result is the product $f(y \mid x) \, g(z \mid x)$, expressing that $Y$ and $Z$ are conditionally independent given $X$. In fact, this pattern defines the notion of conditional independence graphically. We will return to this point in the next chapter.
+
+[Diagram: copy then parallel application of $f$ and $g$]
+
+Another common pattern occurs is composing two kernels, but retaining the intermediate output via copying.
+
+[Diagram]
+
+#### Delete marginalizes {.unnumbered}
+
+The delete kernel provides the mechanism for **marginalizing out** a variable. Composing a kernel $f : X \kernel Y$ with $\del_Y$ sums over all possible output values:
+$$
+(f \then \del_Y)(\bullet \mid x) = \sum_{y \in Y} \del_Y(\bullet \mid y) \, f(y \mid x) = \sum_{y \in Y} f(y \mid x).
+$$
+
+If $f$ is a probability kernel, this sum equals 1, so deleting an output of a probability kernel is the same as deleting its input. This property is characteristic of probability kernels. We call such kernels **normalized**.
+
+[Diagram: deleting the output of a probability kernel does nothing]
+
+More generally, if $f : X \kernel Y \otimes Z$ is a kernel with two outputs, then deleting $Y$ gives the **marginal** on $Z$:
+
+[Diagram]
+
+The resulting kernel sums over all possible values of $y$:
+$$
+(f \then (\id_X \otimes \del_Y))(z \mid x) = \sum_{y \in Y} f(y, z \mid x).
+$$
 
 
+### Deterministic kernels {.unnumbered}
 
-#### Crossing wires {.unnumbered}
+Any function $f : X \to Y$ between finite sets can be viewed as a kernel. The idea is that a deterministic function is a special case of a random function — one that always produces the same output.
 
+::: {#def-deterministic-kernel}
+Given a function $f : X \to Y$, the corresponding **deterministic kernel** $\bar{f} : X \kernel Y$ is defined by
+$$
+\bar{f}(y \mid x) := [\![ y = f(x) ]\!].
+$$
+:::
 
+In other words, $\bar{f}$ maps $x$ to $f(x)$ with probability 1. Note that the identity kernel is the deterministic kernel corresponding to the identity function: $\id_X = \overline{\id_X}$.
 
-#### Copying and deleting {.unnumbered}
+This assignment is compatible with composition. Given functions $f : X \to Y$ and $g : Y \to Z$, the composite deterministic kernel $(\bar{f} \then \bar{g})$ equals the deterministic kernel of the composite function $\overline{f \then g}$:
+$$
+(\bar{f} \then \bar{g})(z \mid x) = \sum_{y \in Y} [\![ z = g(y) ]\!] \, [\![ y = f(x) ]\!] = [\![ z = g(f(x)) ]\!] = \overline{f \then g}(z \mid x).
+$$
 
+Deterministic kernels are characterized by two properties: they can be **copied** and **deleted**.
 
-## Model building
+**Deterministic kernels can be copied.** For any function $f : X \to Y$, applying $\bar{f}$ and then copying the output is the same as first copying the input and then applying $\bar{f}$ to each copy independently:
 
-[Example of fire alarm model]
+[Diagram: copyability of $\bar{f}$]
 
-## Reading off conditional independencies
+This says that $\bar{f} \then \cp_Y = \cp_X \then (\bar{f} \otimes \bar{f})$. To verify:
+$$
+(\bar{f} \then \cp_Y)(y', y'' \mid x) = [\![ y' = f(x) \text{ and } y'' = f(x) ]\!] = (\cp_X \then (\bar{f} \otimes \bar{f}))(y', y'' \mid x).
+$$
 
+The right-hand side evaluates to $\sum_{x', x''} [\![ y' = f(x') ]\!] \, [\![ y'' = f(x'') ]\!] \, [\![ x' = x \text{ and } x'' = x ]\!] = [\![ y' = f(x) ]\!] \, [\![ y'' = f(x) ]\!]$, which equals the left-hand side.
 
-## Exact evaluation
+Intuitively, copying is compatible with deterministic kernels because a deterministic process has no internal randomness. Copying the output of a deterministic function is the same as running the function twice on the same input — both produce the same result. This fails for genuinely random kernels: running a random process twice on the same input may produce different outputs, so copying the output is *not* the same as running two independent copies.
 
-[Explain parsing rules.]
+**Deterministic kernels can be deleted.** Every deterministic kernel $\bar{f}$ satisfies $\bar{f} \then \del_Y = \del_X$:
+
+[Diagram: deletability of $\bar{f}$]
+
+This is immediate since $\sum_{y \in Y} [\![ y = f(x) ]\!] = 1$ for every $x$, so deterministic kernels are always normalized.
+
+In fact, a kernel is deterministic (i.e., arises from a function) if and only if it is both copyable and normalized. The copyability condition forces the kernel to concentrate all its probability on a single output value, while normalization ensures that value gets probability exactly 1.
+
+## Exact evaluation of models
+[We can now understand how string diagrams can be interpreted as probability distributions. We will illustrate this with the fire alarm model.]
+
+``` {.tikz file="index/fire-alarm.tikz"}
+%%| label: fire-alarm
+%%| fig-cap: A string diagram representing a causal model for a fire alarm.
+%%| height: 5.5em
+```
+
+[String diagram describes a composition of kernels. Hence, for any specification of the boxes, we can compute the resulting kernel by applying the composition rules.]
+
+### Parsing rules {.unnumbered}
+
+[There are many ways to parse a string diagram as a composition of kernels. However, all parsings yield the same result. This is because the kernel composition rules satisfy certain algebraic properties]
+
+[Associativity of sequential composition]
+
+[Interchange law: $(f_1 \then g_1) \otimes (f_2 \then g_2) = (f_1 \otimes f_2) \then (g_1 \otimes g_2)$]
+
+[Together with the properties of swap, copy, and delete kernels, these algebraic properties ensure that all parsings of a string diagram yield the same kernel.]
+
+[One standard form is to perform all marginalization at the end.]
+
+### Computation by tensor operations {.unnumbered}
+
+[Sequential composition corresponds to tensor multiplication, while parallel composition corresponds to the Kronecker product. Copy composition corresponds to (x,y,z) -> f()(x,y) * g(y,z). Delete composition corresponds to summing out the corresponding variable. Hence, we can compute the resulting kernel by performing a sequence of tensor operations.]
+
+[Different parsings have different computational complexity.]
 
 ## Sampling from models
 
 [Sampling from probability kernels]
 
 [Explain how to interpret kernels as probabilistic program. Also, why it is sound.]
+
+## Comparison to other approaches {.unnumbered}
+
+### Bayesian networks {.unnumbered}
+
+### Factor graphs {.unnumbered}
+
+### Undirected graphical models {.unnumbered}
+
+## Bibliographic notes {.unnumbered}
+
+Mention Fong, Jacobs, Fritz. Also mention Jacobs' book "Structured probabilistic reasoning".

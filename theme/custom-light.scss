@@ -46,3 +46,40 @@ figure.figure > figcaption {
   margin-left: auto;
   margin-right: auto;
 }
+
+// ── Theorem-like environments ──────────────────────────────────
+// Light tinted backgrounds that echo the brand palette.
+
+.theorem {
+  padding: 0.85em 1.1em 0.85em;
+  border-radius: 6px;
+  margin-bottom: 1em;
+  // Default: salmon-red tint (theorems, lemmas, corollaries, propositions)
+  background-color: rgba($salmon-red, 0.08);
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+
+  // Strip trailing space when display math ends the environment
+  > p:last-child mjx-container[display="true"],
+  > p:last-child .math.display {
+    margin-bottom: 0 !important;
+  }
+}
+
+// Definitions — sky-blue tint
+.theorem.definition {
+  background-color: rgba($sky-blue, 0.08);
+}
+
+// Examples, exercises — seaweed tint
+.theorem.example,
+.theorem.exercise {
+  background-color: rgba($seaweed, 0.15);
+}
+
+// Remarks — neutral grey tint
+.theorem.remark {
+  background-color: rgba($body-color, 0.04);
+}
