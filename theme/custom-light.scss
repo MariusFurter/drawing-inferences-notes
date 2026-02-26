@@ -83,3 +83,41 @@ figure.figure > figcaption {
 .theorem.remark {
   background-color: rgba($body-color, 0.04);
 }
+
+// ── Collapsible proofs ─────────────────────────────────────────
+.proof details summary {
+  cursor: pointer;
+  font-style: italic;
+  color: $body-color;
+
+  &::marker {
+    color: rgba($body-color, 0.4);
+  }
+}
+
+.proof details[open] summary {
+  margin-bottom: 0.5em;
+}
+
+// QED square on the summary line (visible when collapsed)
+.proof-qed-inline {
+  float: right;
+  font-style: normal;
+  font-size: 0.7em;
+  line-height: inherit;
+  color: rgba($body-color, 0.35);
+}
+
+// Hide inline QED when proof is open (the end-of-proof one shows instead)
+.proof details[open] .proof-qed-inline {
+  display: none;
+}
+
+// QED square at end of proof body
+.proof-qed {
+  display: block;
+  text-align: right;
+  font-size: 0.8em;
+  color: rgba($body-color, 0.35);
+  margin-top: -0.5em;
+}

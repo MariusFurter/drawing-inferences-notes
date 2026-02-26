@@ -62,6 +62,43 @@ format:
       light: [cosmo, theme/custom-light.scss]
     html-math-method: mathjax
     include-in-header: theme/mathjax-config.html
+    include-after-body:
+      - text: |
+          <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".proof").forEach(function (div) {
+              var details = document.createElement("details");
+              var summary = document.createElement("summary");
+              var titleSpan = div.querySelector(".proof-title");
+              if (titleSpan) {
+                summary.appendChild(titleSpan.cloneNode(true));
+                titleSpan.remove();
+              } else {
+                summary.innerHTML = "<em>Proof</em>.";
+              }
+              var isRemark = div.classList.contains("remark");
+              // Add QED square to summary (visible when collapsed)
+              if (!isRemark) {
+                var summaryQed = document.createElement("span");
+                summaryQed.className = "proof-qed-inline";
+                summaryQed.textContent = "\u25A0";
+                summary.appendChild(summaryQed);
+              }
+              details.appendChild(summary);
+              while (div.firstChild) {
+                details.appendChild(div.firstChild);
+              }
+              // Add QED square at end of proof body
+              if (!isRemark) {
+                var qed = document.createElement("span");
+                qed.className = "proof-qed";
+                qed.textContent = "\u25A0";
+                details.appendChild(qed);
+              }
+              div.appendChild(details);
+            });
+          });
+          </script>
     code-fold: true
     toc: true
     number-sections: true

@@ -1,0 +1,24 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-2.75, 0) {};
+		\node [style=black node] (1) at (-1.25, 0) {};
+		\node [style=none] (2) at (-0.25, 1) {};
+		\node [style=none] (3) at (-0.25, -1) {};
+		\node [style=none] (4) at (1.75, 1) {};
+		\node [style=none] (5) at (1.75, -1) {};
+		\node [style=small box] (6) at (0.25, 1) {$f$};
+		\node [style=small box] (7) at (0.25, -1) {$g$};
+		\node [style=none] (8) at (-2.25, 0.5) {$X$};
+		\node [style=none] (9) at (1.5, 1.5) {$Y$};
+		\node [style=none] (10) at (1.5, -0.5) {$Z$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (0.center) to (1);
+		\draw [style=edge, in=-180, out=75, looseness=1.25] (1) to (2.center);
+		\draw [style=edge, in=180, out=-75, looseness=1.25] (1) to (3.center);
+		\draw [style=edge] (2.center) to (6);
+		\draw [style=edge] (6) to (4.center);
+		\draw [style=edge] (3.center) to (7);
+		\draw [style=edge] (7) to (5.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
