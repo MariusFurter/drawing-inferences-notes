@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; Graphical models – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../exercises/1-classic-puzzles.html" rel="next">
+<link href="../chapters/intro.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/graphical-models.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/graphical-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#kernels" id="toc-kernels" class="nav-link active" data-scroll-target="#kernels"><span class="header-section-number">2.1</span> Kernels</a>
+  <ul class="collapse">
+  <li><a href="#sequential-composition" id="toc-sequential-composition" class="nav-link" data-scroll-target="#sequential-composition"><span class="header-section-number">2.1.1</span> Sequential composition</a></li>
+  <li><a href="#parallel-composition" id="toc-parallel-composition" class="nav-link" data-scroll-target="#parallel-composition"><span class="header-section-number">2.1.2</span> Parallel composition</a></li>
+  <li><a href="#bundling-wires" id="toc-bundling-wires" class="nav-link" data-scroll-target="#bundling-wires"><span class="header-section-number">2.1.3</span> Bundling wires</a></li>
+  <li><a href="#crossing-wires" id="toc-crossing-wires" class="nav-link" data-scroll-target="#crossing-wires"><span class="header-section-number">2.1.4</span> Crossing wires</a></li>
+  <li><a href="#copying-and-deleting" id="toc-copying-and-deleting" class="nav-link" data-scroll-target="#copying-and-deleting"><span class="header-section-number">2.1.5</span> Copying and deleting</a></li>
+  <li><a href="#deterministic-kernels" id="toc-deterministic-kernels" class="nav-link" data-scroll-target="#deterministic-kernels"><span class="header-section-number">2.1.6</span> Deterministic kernels</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="hidden">
+<p><span class="math display">\[
+\def\then{\mathbin{;}}
+\def\kernel{\rightsquigarrow}
+\def\swap{\mathsf{swap}}
+\def\id{\mathsf{id}}
+\def\cp{\mathsf{copy}}
+\def\del{\mathsf{del}}
+\def\ivmark#1{[\![#1]\!]}
+\]</span></p>
+</div>
+<p>In this chapter, we learn how to interpret string diagrams as probability distributions. This lets us manipulate complex models visually, without tedious algebra. By the end, you will be able to read the following diagram as a probability distribution and sample from it by writing a probabilistic program that follows the structure of the diagram.</p>
+<div id="fire-alarm" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/b606ab507ea06786558ffabef915b5eb395ce000.svg" style="height:5.5em" class="figure-img"></p>
+<figcaption>A string diagram representing a causal model for a fire alarm.</figcaption>
+</figure>
+</div>
+<section id="kernels" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="kernels"><span class="header-section-number">2.1</span> Kernels</h2>
+<p>The basic building blocks of our models are <strong>kernels</strong>.</p>
+<div id="def-discrete-kernel" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 2.1</strong></span> Let <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> be finite sets. A <strong>discrete kernel</strong> <span class="math inline">\(f : X \kernel Y\)</span> assigns each <span class="math inline">\(x \in X\)</span> and <span class="math inline">\(y \in Y\)</span> a non-negative real number <span class="math inline">\(f(y \mid x)\)</span>. We call <span class="math inline">\(f\)</span> a <strong>probability kernel</strong> if it is normalized: <span class="math inline">\(\sum_{y \in Y} f(y \mid x) = 1\)</span> for every <span class="math inline">\(x \in X\)</span>.</p>
+</div>
+<p>As the notation suggests, we think of a probability kernel <span class="math inline">\(f : X \kernel Y\)</span> as specifying the conditional distribution <span class="math inline">\(p(y \mid x)\)</span> of <span class="math inline">\(Y\)</span> given <span class="math inline">\(X\)</span>. We can also think of <span class="math inline">\(f\)</span> as a <strong>random function</strong>: given an input <span class="math inline">\(x\)</span>, it randomly picks an output <span class="math inline">\(y\)</span> according to the probabilities <span class="math inline">\(f(y \mid x)\)</span>. A key feature is that the output probability depends <em>only</em> on the input <span class="math inline">\(x\)</span> — once we know <span class="math inline">\(x\)</span>, learning any other variable <span class="math inline">\(w\)</span> tells us nothing more about <span class="math inline">\(y\)</span>: <span class="math display">\[
+f(y \mid x) = p(y \mid x) = p(y \mid x, w).
+\]</span></p>
+<p>Unnormalized kernels come up naturally in many settings, including conditioning. It is possible that <span class="math inline">\(\sum_{y \in Y} f(y \mid x) = 0\)</span> for some input <span class="math inline">\(x\)</span> — the kernel assigns zero likelihood to every outcome and acts like a partial function that produces no output.</p>
+<p>We represent a kernel <span class="math inline">\(f : X \kernel Y\)</span> as a box with an input wire <span class="math inline">\(X\)</span> and an output wire <span class="math inline">\(Y\)</span>:</p>
+<div id="Kernel" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/60d4f9a401e1b84996ced01605ea6af2fb242f9a.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>A kernel <span class="math inline">\(f : X \kernel Y\)</span>.</figcaption>
+</figure>
+</div>
+<p>We now see how to combine kernels into complex models. The two main operations are sequential and parallel composition. We also need a few operations for manipulating wires: crossing, copying, and deleting.</p>
+<section id="sequential-composition" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="sequential-composition"><span class="header-section-number">2.1.1</span> Sequential composition</h3>
+<p>Given a second kernel <span class="math inline">\(g : Y \kernel Z\)</span>, we can feed the output of <span class="math inline">\(f\)</span> into <span class="math inline">\(g\)</span> to get a new kernel <span class="math inline">\((g \then f) : X \kernel Z\)</span>. This is called the <strong>sequential composition</strong> of <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>. The symbol <span class="math inline">\(\then \,\)</span> is pronounced “then” since the input <span class="math inline">\(x\)</span> is processed first by <span class="math inline">\(f\)</span>, then by <span class="math inline">\(g\)</span>.</p>
+<div id="Sequential composite kernel" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/88df33de011f712a868a7b72de2b976a573b3806.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>Sequential composition of kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : Y \kernel Z\)</span>.</figcaption>
+</figure>
+</div>
+<p>How do we compute the composite kernel <span class="math inline">\((g \then f)\)</span> from <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>? If we interpret <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> as conditional distributions, the chain rule and conditional independence give:</p>
+<p><span class="math display">\[
+\begin{aligned}
+    p(z \mid x) &amp;= \sum_{y \in Y} p(z,y \mid x) =  \sum_{y \in Y} p(z \mid y, x) \, p(y \mid x) \\
+    &amp;= \sum_{y \in Y} p(z \mid y) \, p(y \mid x) = \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
+\end{aligned}
+\]</span></p>
+<p>We take this as the definition of the composite kernel.</p>
+<div id="def-sequential-composite-kernel" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 2.2</strong></span> The <strong>sequential composition</strong> of kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : Y \kernel Z\)</span> is the kernel <span class="math inline">\((g \then f) : X \kernel Z\)</span> defined by <span class="math display">\[
+(g \then f)(z \mid x) := \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
+\]</span></p>
+<p>We parse sequential composites in string diagrams from left to right.</p>
+</div>
+<p><strong>Notation:</strong> The <strong>Iverson bracket</strong> <span class="math inline">\(\ivmark{\phi}\)</span> converts a logical statement <span class="math inline">\(\phi\)</span> into a number: <span class="math display">\[
+\ivmark{\phi} := \begin{cases} 1 &amp; \text{if } \phi \text{ is true,} \\ 0 &amp; \text{otherwise.} \end{cases}
+\]</span></p>
+<div id="def-identity-kernel" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 2.3</strong></span> For every set <span class="math inline">\(X\)</span>, the <strong>identity kernel</strong> <span class="math inline">\(\id_X : X \kernel X\)</span> is defined by <span class="math display">\[
+\id_X(x' \mid x) := \ivmark{x' = x}.
+\]</span></p>
+</div>
+<p>The identity kernel passes its input through unchanged: given input <span class="math inline">\(x\)</span>, it outputs <span class="math inline">\(x\)</span> with probability 1. Composing any kernel <span class="math inline">\(f : X \kernel Y\)</span> with identities leaves it unchanged: <span class="math display">\[
+\begin{aligned}
+(\id_X \then f)(y \mid x) &amp;= \sum_{x' \in X} f(y \mid x') \, \ivmark{x' = x} = f(y \mid x), \\
+(f \then \id_Y)(y' \mid x) &amp;= \sum_{y \in Y} \, \ivmark{y' = y} \, f(y \mid x) = f(y' \mid x).
+\end{aligned}
+\]</span></p>
+<p>Since composing with the identity has no effect, we can think of a wire labeled <span class="math inline">\(X\)</span> as the identity kernel <span class="math inline">\(\id_X\)</span>. In particular, stretching or shortening a wire doesn’t change the meaning of the diagram.</p>
+<div id="Identity kernel" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/8542a84ab0ba65d50cb140d6ee1a939b34402b3f.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>A wire labeled by <span class="math inline">\(X\)</span> may be interpreted as the identity kernel <span class="math inline">\(\id_X : X \kernel X\)</span>.</figcaption>
+</figure>
+</div>
+<p>Using only sequential composition, we can already build a famous model:</p>
+<div id="exm-markov-chain" class="theorem example">
+<p><span class="theorem-title"><strong>Example 2.4</strong></span> Consider a probability kernel <span class="math inline">\(k : X \kernel X\)</span> whose input and output are the same set <span class="math inline">\(X\)</span>. We think of <span class="math inline">\(X\)</span> as a state space. Then <span class="math inline">\(k\)</span> describes a system that randomly hops between states: at each time step <span class="math inline">\(t\)</span>, the system moves from state <span class="math inline">\(x_t\)</span> to state <span class="math inline">\(x_{t+1}\)</span> with probability <span class="math inline">\(k(x_{t+1} \mid x_t)\)</span>. This is called a <strong>Markov chain</strong> and can be represented as the following string diagram:</p>
+<div id="Markov chain" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/c8bff627b0f1bfafa02ff6a1bbdb818fee8dfa2f.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>A Markov chain with transition kernel <span class="math inline">\(k : X \kernel X\)</span>.</figcaption>
+</figure>
+</div>
+<p>Composing <span class="math inline">\(k\)</span> with itself gives the two-step transition <span class="math inline">\(k^2 := (k \then k)\)</span>: <span class="math display">\[
+k^2(x_{t+2} \mid x_t) = \sum_{x_{t+1}} k(x_{t+2} \mid x_{t+1}) \, k(x_{t+1} \mid x_t).
+\]</span></p>
+<p>This is the <em>Chapman–Kolmogorov equation</em> for Markov chains. From this perspective, a probability kernel <span class="math inline">\(f : X \kernel Y\)</span> can be seen as a generalization of a Markov chain where the input and output spaces need not coincide.</p>
+</div>
+</section>
+<section id="parallel-composition" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="parallel-composition"><span class="header-section-number">2.1.2</span> Parallel composition</h3>
+<p>Next, we can place two kernels <span class="math inline">\(f_1 : X_1 \kernel Y_1\)</span> and <span class="math inline">\(f_2 : X_2 \kernel Y_2\)</span> side by side to get a new kernel <span class="math inline">\((f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2\)</span>. This is the <strong>parallel composition</strong> of <span class="math inline">\(f_1\)</span> and <span class="math inline">\(f_2\)</span>. It represents the joint behavior of two independent processes.</p>
+<div id="Parallel composite kernel" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/f0516830345e6cd4513d2d04d2a03a64cfc9002c.svg" style="height:5.5em" class="figure-img"></p>
+<figcaption>Parallel composition of kernels <span class="math inline">\(f_1 : X_1 \kernel Y_1\)</span> and <span class="math inline">\(f_2 : X_2 \kernel Y_2\)</span>.</figcaption>
+</figure>
+</div>
+<p>How should we define this? If <span class="math inline">\(f_1\)</span> and <span class="math inline">\(f_2\)</span> act independently, we have: <span class="math display">\[
+p(y_1, y_2 \mid x_1, x_2)
+= p(y_1 \mid y_2, x_1, x_2) \, p(y_2 \mid x_1, x_2)
+= p(y_1 \mid x_1) \, p(y_2 \mid x_2)
+= f_1(y_1 \mid x_1) \, f_2(y_2 \mid x_2).
+\]</span></p>
+<p>We take this as our definition.</p>
+<div id="def-parallel-composite-kernel" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 2.5</strong></span> Given finite sets <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span>, we define their product <span class="math display">\[
+    X_1 \otimes X_2 := X_1 \times X_2 = \{(x_1,x_2) \mid x_1 \in X_1 \text{ and } x_2 \in X_2\}
+\]</span></p>
+<p>to be the Cartesian product of sets. The <strong>parallel composition</strong> of kernels <span class="math inline">\(f_1 : X_1 \kernel Y_1\)</span> and <span class="math inline">\(f_2 : X_2 \kernel Y_2\)</span> is the kernel <span class="math inline">\((f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2\)</span> defined by <span class="math display">\[
+(f_1 \otimes f_2)(y_1, y_2 \mid x_1, x_2) := f_1(y_1 \mid x_1   ) \, f_2(y_2 \mid x_2).
+\]</span></p>
+<p>We parse parallel composites in string diagrams from top to bottom.</p>
+</div>
+</section>
+<section id="bundling-wires" class="level3" data-number="2.1.3">
+<h3 data-number="2.1.3" class="anchored" data-anchor-id="bundling-wires"><span class="header-section-number">2.1.3</span> Bundling wires</h3>
+<p>Using products, we can represent kernels with multiple inputs and outputs. For example, we draw a kernel <span class="math inline">\(f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2\)</span> as a box with two input wires <span class="math inline">\(X_1, X_2\)</span> and two output wires <span class="math inline">\(Y_1, Y_2\)</span>:</p>
+<div id="Multi-input multi-output kernel" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/7aa92c8e1efa894f4bd81705dd1b2d87c05b417f.svg" style="height:4em" class="figure-img"></p>
+<figcaption>A kernel <span class="math inline">\(f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2\)</span>.</figcaption>
+</figure>
+</div>
+<p>This makes sense because the elements of <span class="math inline">\(X_1 \otimes X_2\)</span> are pairs <span class="math inline">\((x_1, x_2)\)</span>, so each coordinate occupies its own wire. It is also consistent with drawing identity kernels as wires, since <span class="math inline">\(\id_{X_1 \otimes X_2} = \id_{X_1} \otimes \id_{X_2}\)</span> (verify this by direct calculation).</p>
+<p>We also want to draw boxes without input or output wires. There are three basic types:</p>
+<div id="Kernels without inputs or outputs" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/d080e5c75709e52e9bbd7452fa270b16c9ea0b7c.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>Kernels without inputs or outputs</figcaption>
+</figure>
+</div>
+<p>How should we interpret <span class="math inline">\(m\)</span> as a kernel? Its output set is <span class="math inline">\(X\)</span>, but what is its input set? The idea is to give <span class="math inline">\(m\)</span> a dummy input that carries no information. We represent this dummy input by a special set <span class="math inline">\(I := \{\bullet\}\)</span> containing a single element. Then <span class="math inline">\(m\)</span> is a kernel <span class="math inline">\(m : I \kernel X\)</span>. Since wires labeled by <span class="math inline">\(I\)</span> carry no information, we can drop and insert them freely. In particular, we draw <span class="math inline">\(m\)</span> without an input wire:</p>
+<div id="Kernels without inputs" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/fc7d0af47ebcc839ddb1bb23c3983a61fe437bc5.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>A kernel <span class="math inline">\(m : I \kernel X\)</span> can be drawn without input wires.</figcaption>
+</figure>
+</div>
+<p>This convention also makes sense mathematically. By definition, <span class="math display">\[I \otimes X = \{ (\bullet,x) \mid x \in X \}.\]</span></p>
+<p>This set is essentially the same as <span class="math inline">\(X\)</span> — its elements are just paired with the dummy element <span class="math inline">\(\bullet\)</span>. We say <span class="math inline">\(I \otimes X\)</span> and <span class="math inline">\(X\)</span> are <em>isomorphic</em> (same shape) via the relabeling <span class="math inline">\((\bullet,x) \leftrightarrow x\)</span>, and write <span class="math inline">\(I \otimes X \cong X\)</span>. The same applies on the output side: <span class="math inline">\(X \otimes I \cong X\)</span>.</p>
+<p>Here is what these three types represent:</p>
+<ul>
+<li>A kernel <span class="math inline">\(m : I \kernel X\)</span> assigns each <span class="math inline">\(x \in X\)</span> a non-negative number <span class="math inline">\(m(x \mid \bullet)\)</span>. We think of <span class="math inline">\(m\)</span> as a <strong>measure</strong> on <span class="math inline">\(X\)</span>.</li>
+<li>A kernel <span class="math inline">\(t : X \kernel I\)</span> assigns each <span class="math inline">\(x \in X\)</span> a non-negative number <span class="math inline">\(t(\bullet \mid x)\)</span>. We think of <span class="math inline">\(t\)</span> as a <strong>test function</strong> on <span class="math inline">\(X\)</span>.</li>
+<li>A kernel <span class="math inline">\(s : I \kernel I\)</span> is a single non-negative number <span class="math inline">\(s(\bullet \mid \bullet)\)</span>. We think of <span class="math inline">\(s\)</span> as a <strong>scalar</strong>.</li>
+</ul>
+</section>
+<section id="crossing-wires" class="level3" data-number="2.1.4">
+<h3 data-number="2.1.4" class="anchored" data-anchor-id="crossing-wires"><span class="header-section-number">2.1.4</span> Crossing wires</h3>
+<p>Next, we define a kernel that <strong>swaps</strong> wires.</p>
+<div id="def-swap-kernel" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 2.6</strong></span> For each pair of finite sets <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, we define the <strong>swap kernel</strong> <span class="math inline">\(\swap_{X,Y} : X \otimes Y \kernel Y \otimes X\)</span> by <span class="math display">\[
+\swap_{X,Y}(y', x' \mid x, y) := \ivmark{(x', y') = (x, y)}.
+\]</span></p>
+<p>In other words, <span class="math inline">\(\swap_{X,Y}\)</span> is a deterministic kernel that takes a pair <span class="math inline">\((x, y)\)</span> and returns the swapped pair <span class="math inline">\((y, x)\)</span> with probability 1.</p>
+</div>
+<p>In string diagrams, we represent <span class="math inline">\(\swap_{X,Y}\)</span> as crossing wires:</p>
+<div id="Swap kernel" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/d452d992ea0bd3a301f85784fe650a1e6cc74da2.svg" style="height:3.5em" class="figure-img"></p>
+<figcaption>The swap kernel <span class="math inline">\(\swap_{X,Y}\)</span> is drawn as crossing wires.</figcaption>
+</figure>
+</div>
+<p>The swap kernel satisfies two important laws.</p>
+<p><strong>Swapping twice is the identity.</strong> If we swap the wires and swap them back, we get the original ordering:</p>
+<div id="Swapping twice is the identity" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/f30a766c2d42f4ad74e9fffcee1fad211a51197c.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>Swapping twice is the same as doing nothing.</figcaption>
+</figure>
+</div>
+<p>This is immediate: swapping a tuple twice returns the original, <span class="math inline">\((x,y) \mapsto (y,x) \mapsto (x,y)\)</span>. The takeaway is that the only thing that matters about wires is <em>what they connect</em>, not how they are routed in the picture. Any tangled arrangement of crossings that connects the same endpoints can be simplified.</p>
+<p><strong>Boxes can be moved through swaps.</strong> If we place two independent kernels <span class="math inline">\(f : X_1 \kernel Y_1\)</span> and <span class="math inline">\(g : X_2 \kernel Y_2\)</span> in parallel and then swap the outputs, we get the same result as first swapping the inputs and then applying the kernels in the opposite order (verify this by direct calculation).</p>
+<div id="Boxes can be moved through swaps" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/de64879e65514076c6ff1005b9a97f377838c64e.svg" style="height:5em" class="figure-img"></p>
+<figcaption>Boxes can be moved through swaps.</figcaption>
+</figure>
+</div>
+</section>
+<section id="copying-and-deleting" class="level3" data-number="2.1.5">
+<h3 data-number="2.1.5" class="anchored" data-anchor-id="copying-and-deleting"><span class="header-section-number">2.1.5</span> Copying and deleting</h3>
+<p>We now introduce kernels that allow us to split and terminate wires. This is crucial for managing the information flow in our models.</p>
+<div id="def-copy-delete-kernels" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 2.7</strong></span> For each set <span class="math inline">\(X\)</span>, the <strong>copy kernel</strong> <span class="math inline">\(\cp_X : X \kernel X \otimes X\)</span> and <strong>delete kernel</strong> <span class="math inline">\(\del_X : X \kernel I\)</span> are defined by <span class="math display">\[
+\cp_X(x', x'' \mid x) := \ivmark{x' = x'' = x}, \qquad \del_X(\bullet \mid x) := 1.
+\]</span></p>
+</div>
+<p>The copy kernel duplicates its input: given <span class="math inline">\(x\)</span>, it outputs the pair <span class="math inline">\((x, x)\)</span> with probability 1. The delete kernel discards its input: it sends every <span class="math inline">\(x\)</span> to the dummy output <span class="math inline">\(\bullet\)</span> with probability 1. In string diagrams, we draw copy as a splitting node and delete as a terminating node:</p>
+<div id="Copy and delete kernels" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/f8d7c3590279ed003b84d934d9e4d6a349654e8e.svg" style="height:3.5em" class="figure-img"></p>
+<figcaption>The copy kernel <span class="math inline">\(\cp_X\)</span> duplicates its input, while the delete kernel <span class="math inline">\(\del_X\)</span> discards its input.</figcaption>
+</figure>
+</div>
+<p>Copy and delete satisfy several natural laws. All of them can be verified by direct calculation.</p>
+<p><strong>Copy then delete is the identity.</strong> If we copy a wire and immediately delete one of the copies, we recover the original wire:</p>
+<div id="Copy then delete is the identity" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/c409685aaafa924ef6176c114ecd3587ec220858.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>Copying a wire and then deleting one of the copies does nothing.</figcaption>
+</figure>
+</div>
+<p><strong>Copy is associative.</strong> Copying a wire and then copying one of the resulting wires gives the same result regardless of which copy we split further:</p>
+<div id="Copy is associative" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/ecd76bfbec23e6de3c88fd390b75e6b4a2de596d.svg" style="height:3em" class="figure-img"></p>
+<figcaption>When copying twice, it does not matter which copy we split further.</figcaption>
+</figure>
+</div>
+<p>Since copying is associative, there is a unique way to produce <span class="math inline">\(n\)</span> copies of a wire, no matter how the binary splittings are arranged. We can therefore draw an <span class="math inline">\(n\)</span>-fold copy as a single node with <span class="math inline">\(n\)</span> outgoing wires:</p>
+<div id="n-fold copy" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/710e8220f30e6b8e84d206ad5c045f27a24bdaa9.svg" style="height:3.5em" class="figure-img"></p>
+<figcaption>An <span class="math inline">\(n\)</span>-fold copy can be drawn as a single node with <span class="math inline">\(n\)</span> outgoing wires.</figcaption>
+</figure>
+</div>
+<p><strong>Copy is commutative.</strong> Copying and then swapping the two outputs is the same as just copying. This reflects the fact that the two copies are identical — there is no distinction between the “first” and “second” copy.</p>
+<div id="Copy is commutative" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/1754c685fd3bbbd5b29201c9596da77c65fbb118.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>Copying and then swapping the outputs is the same as just copying.</figcaption>
+</figure>
+</div>
+<p><strong>Compatibility with bundling.</strong> Copying and deleting on a product <span class="math inline">\(X_1 \otimes X_2\)</span> can be done wire by wire. Deleting a pair amounts to deleting each component. Copying a pair amounts to copying each component and rearranging the wires so that the two copies of <span class="math inline">\(X_1\)</span> are adjacent and the two copies of <span class="math inline">\(X_2\)</span> are adjacent:</p>
+<div id="Delete on products" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/2827fde5f582c97aa4dd12c8e0e0e5dc5fa9d826.svg" style="height:3em" class="figure-img"></p>
+<figcaption>Deleting a product amounts to deleting each component independently.</figcaption>
+</figure>
+</div>
+<div id="Copy on products" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/a9e0c03d3c288524ada074ecae616f80eaf7765d.svg" style="height:6em" class="figure-img"></p>
+<figcaption>Copying a product amounts to copying each component and then rearranging the wires.</figcaption>
+</figure>
+</div>
+<section id="copy-enforces-equality" class="level4" data-number="2.1.5.1">
+<h4 data-number="2.1.5.1" class="anchored" data-anchor-id="copy-enforces-equality"><span class="header-section-number">2.1.5.1</span> Copy enforces equality</h4>
+<p>The copy kernel plays a central role in building models because it enables <strong>variable sharing</strong>. Whenever two boxes need the same input, we route the wire through a copy node.</p>
+<p>Consider two kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : X \kernel Z\)</span> that both depend on <span class="math inline">\(X\)</span>. To feed the same <span class="math inline">\(x\)</span> to both <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>, we first copy the input wire and then apply <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> in parallel:</p>
+<div id="Variable sharing" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/b4ddee17b6fd0d7ed965abc0788fcde85dcb1f1a.svg" style="height:5em" class="figure-img"></p>
+<figcaption>Feeding the same value into two kernels <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>.</figcaption>
+</figure>
+</div>
+<p>Evaluating this composite gives: <span class="math display">\[
+(\cp_X \then (f \otimes g))(y, z \mid x) = \sum_{x', x''} f(y \mid x') \, g(z \mid x'') \, \ivmark{x' = x'' = x} = f(y \mid x) \, g(z \mid x).
+\]</span></p>
+<p>Notice how the Iverson bracket in the copy kernel <strong>enforces equality</strong> <span class="math inline">\(x' = x'' = x\)</span>, collapsing the sum. The result is the product <span class="math inline">\(f(y \mid x) \, g(z \mid x)\)</span> — meaning <span class="math inline">\(Y\)</span> and <span class="math inline">\(Z\)</span> are conditionally independent given <span class="math inline">\(X\)</span>. This pattern is the graphical definition of conditional independence. We will return to this point later.</p>
+<p>Another common pattern is composing two kernels while retaining the intermediate output via copying. We call this <strong>copy composition</strong>:</p>
+<div id="Copy composition" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/5ef8fe98ae26f82c529ed3f5a73143033abaee67.svg" style="height:4.5em" class="figure-img"></p>
+<figcaption>Copy composition of kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : Y \kernel Z\)</span>.</figcaption>
+</figure>
+</div>
+<p>Evaluating this composite shows that copy composition acts like the chain rule for conditional probabilities: <span class="math display">\[
+(f \then \cp_Y \then (\id_Y \otimes g))(y,z \mid x)
+= \sum_{y', y''} \, \ivmark{y' = y'' = y} \, f(y' \mid x) \, g(z \mid y'')
+= f(y \mid x) \, g(z \mid y).
+\]</span></p>
+</section>
+<section id="delete-marginalizes" class="level4" data-number="2.1.5.2">
+<h4 data-number="2.1.5.2" class="anchored" data-anchor-id="delete-marginalizes"><span class="header-section-number">2.1.5.2</span> Delete marginalizes</h4>
+<p>The delete kernel gives us a way to <strong>marginalize out</strong> a variable. Composing a kernel <span class="math inline">\(f : X \kernel Y\)</span> with <span class="math inline">\(\del_Y\)</span> sums over all possible output values: <span class="math display">\[
+(f \then \del_Y)(\bullet \mid x) = \sum_{y \in Y} \del_Y(\bullet \mid y) \, f(y \mid x) = \sum_{y \in Y} f(y \mid x).
+\]</span></p>
+<p>If <span class="math inline">\(f\)</span> is a probability kernel, this sum equals 1, so deleting the output is the same as deleting the input. This property characterizes probability kernels — we call them <strong>normalized</strong>.</p>
+<div id="Normalized kernels" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/d636a7819b42d2e909fbe1fe7b7a21009cc34e9a.svg" style="height:2.5em" class="figure-img"></p>
+<figcaption>A kernel <span class="math inline">\(f : X \kernel Y\)</span> is normalized if deleting its output is the same as deleting its input.</figcaption>
+</figure>
+</div>
+<p>More generally, if <span class="math inline">\(f : X \kernel Y \otimes Z\)</span> is a kernel with two outputs, then deleting <span class="math inline">\(Y\)</span> gives the <strong>marginal</strong> on <span class="math inline">\(Z\)</span>:</p>
+<div id="Marginal kernels" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/5ad28b222c220c09b4eb7a464a248f7a70c1aa27.svg" style="height:3.5em" class="figure-img"></p>
+<figcaption>Deleting an output of a kernel gives the marginal on the remaining outputs.</figcaption>
+</figure>
+</div>
+<p>The resulting kernel sums over all possible values of <span class="math inline">\(y\)</span>: <span class="math display">\[
+(f \then (\id_X \otimes \del_Y))(z \mid x) = \sum_{y \in Y} f(y, z \mid x).
+\]</span></p>
+</section>
+</section>
+<section id="deterministic-kernels" class="level3" data-number="2.1.6">
+<h3 data-number="2.1.6" class="anchored" data-anchor-id="deterministic-kernels"><span class="header-section-number">2.1.6</span> Deterministic kernels</h3>
+<p>Any function <span class="math inline">\(f : X \to Y\)</span> between finite sets can be viewed as a kernel. The idea is that a deterministic function is a special case of a random function — one that always produces the same output.</p>
+<div id="def-deterministic-kernel" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 2.8</strong></span> Given a function <span class="math inline">\(f : X \to Y\)</span>, the corresponding <strong>deterministic kernel</strong> <span class="math inline">\(\bar{f} : X \kernel Y\)</span> is defined by <span class="math display">\[
+\bar{f}(y \mid x) := \ivmark{y = f(x)}.
+\]</span></p>
+<p>In other words, <span class="math inline">\(\bar{f}\)</span> maps <span class="math inline">\(x\)</span> to <span class="math inline">\(f(x)\)</span> with probability 1.</p>
+</div>
+<p>The identity, swap, copy, and delete kernels all arise from deterministic functions in this way. The definition is also compatible with composition: given functions <span class="math inline">\(f : X \to Y\)</span> and <span class="math inline">\(g : Y \to Z\)</span>, the composite deterministic kernel <span class="math inline">\((\bar{f} \then \bar{g})\)</span> equals the deterministic kernel of the composite function <span class="math inline">\(\overline{f \then g}\)</span>: <span class="math display">\[
+(\bar{f} \then \bar{g})(z \mid x) = \sum_{y \in Y} \ivmark{z = g(y)} \, \ivmark{y = f(x)} = \ivmark{z = g(f(x))} = \overline{f \then g}(z \mid x).
+\]</span></p>
+<p>Deterministic kernels are characterized by two properties: they can be <strong>copied</strong> and they are <strong>normalized</strong>.</p>
+<div id="def-copyable-kernel" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 2.9</strong></span> We say that a kernel <span class="math inline">\(f : X \kernel Y\)</span> is <strong>copyable</strong> if applying <span class="math inline">\(f\)</span> and then copying the output is the same as first copying the input and then applying <span class="math inline">\(f\)</span> to each copy independently:</p>
+<img src="graphical-models_files/mediabag/0a44030aa1b698e1b7d29795ba22c53664edcf4f.svg" style="height:5em">
+<p>In symbols, <span class="math inline">\(f\)</span> is copyable when <span class="math inline">\(f \then \cp_Y = \cp_X \then (f \otimes f)\)</span>.</p>
+</div>
+<p>A kernel is copyable precisely when it always produces the same output for a given input. In that case, copying the output is the same as running the process twice on the same input. This fails for genuinely random kernels: running a random process twice may produce different outputs, so copying after the fact is <em>not</em> the same as running two independent copies.</p>
+<p>The following proposition makes this precise.</p>
+<div id="prp-copyable-kernel" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 2.10</strong></span> A discrete kernel is copyable if and only if it arises from a deterministic function. In other words, <span class="math inline">\(f : X \kernel Y\)</span> is copyable if and only if there exists a function <span class="math inline">\(g : X \to Y\)</span> such that <span class="math inline">\(f = \bar{g}\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>We expand both sides and set them equal. The left-hand side gives: <span class="math display">\[
+(f \then \cp_Y)(y', y'' \mid x) = \sum_{y} f(y \mid x) \, \ivmark{y' = y'' = y} = f(y' \mid x) \, \ivmark{y' = y''}.
+\]</span></p>
+<p>The right-hand side gives: <span class="math display">\[
+(\cp_X \then (f \otimes f))(y', y'' \mid x) = \sum_{x', x''} f(y' \mid x') \, f(y'' \mid x'') \, \ivmark{x' = x'' = x} = f(y' \mid x) \, f(y'' \mid x).
+\]</span></p>
+<p>First, suppose <span class="math inline">\(f\)</span> arises from a function. Then <span class="math inline">\(f(y' \mid x) = \ivmark{y' = f(x)}\)</span>, so the left-hand side becomes <span class="math inline">\(\ivmark{y' = y'' = f(x)}\)</span> and the right-hand side becomes <span class="math inline">\(\ivmark{y' = f(x)} \, \ivmark{y'' = f(x)}\)</span>, which are equal.</p>
+<p>Conversely, suppose <span class="math inline">\(f\)</span> is copyable, so that <span class="math inline">\(f(y' \mid x) \, \ivmark{y' = y''} = f(y' \mid x) \, f(y'' \mid x)\)</span> for all <span class="math inline">\(x, y', y''\)</span>. Setting <span class="math inline">\(y' = y''\)</span> gives <span class="math inline">\(f(y' \mid x) = f(y' \mid x)^2\)</span>, so <span class="math inline">\(f(y' \mid x) \in \{0, 1\}\)</span> for every <span class="math inline">\(x\)</span> and <span class="math inline">\(y'\)</span>. Next, suppose for contradiction that there exist two distinct values <span class="math inline">\(y' \neq y''\)</span> with <span class="math inline">\(f(y' \mid x) = f(y'' \mid x) = 1\)</span> for some <span class="math inline">\(x\)</span>. Then the left-hand side equals <span class="math inline">\(1 \cdot \ivmark{y' = y''} = 0\)</span>, while the right-hand side equals <span class="math inline">\(1 \cdot 1 = 1\)</span>, a contradiction. Hence for each <span class="math inline">\(x\)</span>, there is at most one value <span class="math inline">\(y\)</span> with <span class="math inline">\(f(y \mid x) = 1\)</span>. For each such <span class="math inline">\(x\)</span>, we can define a function <span class="math inline">\(g : X \to Y\)</span> by setting <span class="math inline">\(g(x)\)</span> to be this unique <span class="math inline">\(y\)</span>, giving <span class="math inline">\(f(y \mid x) = \ivmark{y = g(x)} = \bar{g}(y \mid x)\)</span>.</p>
+</div>
+<!-- 
+## Exact evaluation of models
+[We can now understand how string diagrams can be interpreted as probability distributions. We will illustrate this with the fire alarm model.]
+
+``` {.tikz file="index/fire-alarm.tikz"}
+%%| label: fire-alarm
+%%| fig-cap: A string diagram representing a causal model for a fire alarm.
+%%| height: 5.5em
+```
+
+[String diagram describes a composition of kernels. Hence, for any specification of the boxes, we can compute the resulting kernel by applying the composition rules.]
+
+### Parsing rules
+
+[There are many ways to parse a string diagram as a composition of kernels. However, all parsings yield the same result. This is because the kernel composition rules satisfy certain algebraic properties]
+
+[Associativity of sequential composition]
+
+[Interchange law: $(f_1 \then g_1) \otimes (f_2 \then g_2) = (f_1 \otimes f_2) \then (g_1 \otimes g_2)$]
+
+[Together with the properties of swap, copy, and delete kernels, these algebraic properties ensure that all parsings of a string diagram yield the same kernel.]
+
+[One standard form is to perform all marginalization at the end.]
+
+### Computation by tensor operations
+
+[Sequential composition corresponds to tensor multiplication, while parallel composition corresponds to the Kronecker product. Copy composition corresponds to (x,y,z) -> f()(x,y) * g(y,z). Delete composition corresponds to summing out the corresponding variable. Hence, we can compute the resulting kernel by performing a sequence of tensor operations.]
+
+[Different parsings have different computational complexity.]
+
+## Sampling from models
+
+[Sampling from probability kernels]
+
+[Explain how to interpret kernels as probabilistic program. Also, why it is sound.]
+
+## Comparison to other approaches
+
+### Bayesian networks
+
+### Factor graphs
+
+### Undirected graphical models
+
+## Bibliographic notes {.unnumbered}
+
+Mention Fong, Jacobs, Fritz. Also mention Jacobs' book "Structured probabilistic reasoning". -->
+
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/intro.html" class="pagination-link" aria-label="Introduction">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../exercises/1-classic-puzzles.html" class="pagination-link" aria-label="Exercise 1: Classic puzzles">
+        <span class="nav-page-text">Exercise 1: Classic puzzles</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    // Add QED square to summary (visible when collapsed)
+    var summaryQed = document.createElement("span");
+    summaryQed.className = "proof-qed-inline";
+    summaryQed.textContent = "\u25A0";
+    summary.appendChild(summaryQed);
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    var qed = document.createElement("span");
+    qed.className = "proof-qed";
+    qed.textContent = "\u25A0";
+    details.appendChild(qed);
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>

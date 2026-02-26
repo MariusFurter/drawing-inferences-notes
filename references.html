@@ -60,7 +60,7 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-9d175643e8beedf6818e2022ee6e7a70.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -178,6 +178,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
@@ -281,8 +287,8 @@ Introduction</em>. MIT Press. <a href="http://probml.github.io/book1">http://pro
 Press. <a href="http://probml.github.io/book2">http://probml.github.io/book2</a>.
 </div>
 <div id="ref-Pearl2009" class="csl-entry" role="listitem">
-Pearl, Judea. 2009. <span>“Causality: Models, Reasoning, and
-Inference,”</span> September. https://doi.org/<a href="https://doi.org/10.1017/CBO9780511803161">https://doi.org/10.1017/CBO9780511803161</a>.
+Pearl, Judea. 2009. <em>Causality: Models, Reasoning, and
+Inference</em>. Cambridge University Press. https://doi.org/<a href="https://doi.org/10.1017/CBO9780511803161">https://doi.org/10.1017/CBO9780511803161</a>.
 </div>
 <div id="ref-RussellArtificial2021" class="csl-entry" role="listitem">
 Russell, Stuart J, and Peter Norvig. 2021. <em>Artificial Intelligence:
@@ -704,6 +710,36 @@ A Modern Approach</em>. 4th ed. Pearson.
   </div>
 </nav>
 </div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    // Add QED square to summary (visible when collapsed)
+    var summaryQed = document.createElement("span");
+    summaryQed.className = "proof-qed-inline";
+    summaryQed.textContent = "\u25A0";
+    summary.appendChild(summaryQed);
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    var qed = document.createElement("span");
+    qed.className = "proof-qed";
+    qed.textContent = "\u25A0";
+    details.appendChild(qed);
+    div.appendChild(details);
+  });
+});
+</script>
 
 
 

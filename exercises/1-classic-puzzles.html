@@ -66,7 +66,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../exercises/2-credit-card.html" rel="next">
-<link href="../chapters/intro.html" rel="prev">
+<link href="../chapters/graphical-models.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -77,7 +77,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-9d175643e8beedf6818e2022ee6e7a70.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -193,6 +193,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -420,7 +426,7 @@ P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
 </section>
 <section id="warm-up-simulating-discrete-distributions" class="level2">
 <h2 class="anchored" data-anchor-id="warm-up-simulating-discrete-distributions">Warm-up: Simulating discrete distributions</h2>
-<p>Before tackling the puzzles, we set up a basic sampling toolkit. Each distribution below is a building block for the simulations that follow. The goal is to get comfortable generating random samples in Python. We recommend using <a href="https://pytorch.org/docs/stable/distributions.html"><code>torch.distributions</code></a> for sampling, <a href="https://matplotlib.org"><code>matplotlib</code></a> for general plotting, and <a href="https://seaborn.pydata.org"><code>seaborn</code></a> for statistical plots like histograms. You can find a short tutorial on using PyTorch for sampling in the <a href="../appendix/pytorch.html">appendix</a>.</p>
+<p>Before tackling the puzzles, we set up a basic sampling toolkit. Each distribution below is a building block for the simulations that follow. The goal is to get comfortable generating random samples in Python. We recommend using <a href="https://pytorch.org/docs/stable/distributions.html"><code>torch.distributions</code></a> for sampling, <a href="https://matplotlib.org"><code>matplotlib</code></a> for general plotting, and <a href="https://seaborn.pydata.org"><code>seaborn</code></a> for statistical plots like histograms. You can find a short tutorial on using PyTorch for sampling in the <a href="../appendix/pytorch.html">Appendix</a>.</p>
 <p><strong>Distributions to know:</strong></p>
 <ul>
 <li><strong>Discrete Uniform</strong> — rolling a fair die. Each of the <span class="math inline">\(k\)</span> outcomes is equally likely.</li>
@@ -442,7 +448,7 @@ P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="c009c2db" class="cell" data-execution_count="1">
+<div id="349b9927" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.distributions <span class="im">import</span> Bernoulli, Binomial, Geometric, Categorical</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
@@ -468,7 +474,7 @@ P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>cat_samples <span class="op">=</span> Categorical(probs<span class="op">=</span>loaded_probs).sample((N,)) <span class="op">+</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We plot the histograms of the results using <a href="https://seaborn.pydata.org/generated/seaborn.histplot.html"><code>seaborn.histplot</code></a>.</p>
-<div id="b5c51eb3" class="cell" data-execution_count="2">
+<div id="54aec2b8" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">7</span>))</span>
@@ -533,7 +539,7 @@ P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>First, we simulate the die rolls and compute the running average using <code>torch.cumsum</code>.</p>
-<div id="71c13c32" class="cell" data-execution_count="3">
+<div id="d6714a69" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">10_000</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">41</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -545,7 +551,7 @@ P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>running_average <span class="op">=</span> torch.cumsum(die_rolls, dim<span class="op">=</span><span class="dv">0</span>) <span class="op">/</span> n_rolls</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, we plot the running average on a logarithmic scale and overlay the true expectation:</p>
-<div id="8df32d01" class="cell" data-execution_count="4">
+<div id="33335afd" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -612,7 +618,7 @@ P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="49177d05" class="cell" data-execution_count="5">
+<div id="39a6978e" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> one_six(N):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Roll a single die 4 times for N trials</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Shape: (N, 4)</span></span>
@@ -625,7 +631,7 @@ P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> has_six.<span class="bu">float</span>().mean().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="f056da17" class="cell" data-execution_count="6">
+<div id="f1750988" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> double_six(N):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Roll two dice 24 times for N trials</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Shape: (N, 24, 2)</span></span>
@@ -641,7 +647,7 @@ P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> has_double_six.<span class="bu">float</span>().mean().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We simulate both experiments with <span class="math inline">\(N = 100\,000\)</span> and report the results:</p>
-<div id="5011787c" class="cell" data-execution_count="7">
+<div id="5fa18aef" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>
@@ -679,7 +685,7 @@ P(at least one double-6 in 24 rolls): 0.4893</code></pre>
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="2c7aebdf" class="cell" data-execution_count="8">
+<div id="fb190ec9" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -703,7 +709,7 @@ p(S = 10): 0.1252</code></pre>
 </div>
 </div>
 <p>We plot the histogram of the sums using <code>seaborn.histplot</code>:</p>
-<div id="fb057bb7" class="cell" data-execution_count="9">
+<div id="b69b4210" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
@@ -784,7 +790,7 @@ p(S = 10): 0.1252</code></pre>
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="f7778026" class="cell" data-execution_count="10">
+<div id="468b0c19" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bertrand_box(N):</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Represent Gold as 1, Silver as 0</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Box 0: Gold, Gold   -&gt; [1, 1]</span></span>
@@ -838,7 +844,7 @@ p(S = 10): 0.1252</code></pre>
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="6b0fe2d3" class="cell" data-execution_count="11">
+<div id="2cde0632" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate p(other is gold | drawn is gold)</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter: Keep only trials where drawn coin is gold (1)</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>is_drawn_gold <span class="op">=</span> drawn_coins <span class="op">==</span> <span class="dv">1</span></span>
@@ -971,7 +977,7 @@ p(B_1 \mid G) = \frac{1 \cdot (1/3)}{1/2} = \frac{1/3}{1/2} = \frac{2}{3}.
 </div>
 <div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="e1767661" class="cell" data-execution_count="12">
+<div id="2e2eab4e" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> monty_hall(N):</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Car is placed uniformly at random behind door 0, 1, or 2</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    car_door <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">3</span>)).sample((N,))</span>
@@ -1006,7 +1012,7 @@ p(B_1 \mid G) = \frac{1 \cdot (1/3)}{1/2} = \frac{1/3}{1/2} = \frac{2}{3}.
 <span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> p_stay, p_switch</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We now run the simulation with <span class="math inline">\(N = 100\,000\)</span> and report the results:</p>
-<div id="99ef84a7" class="cell" data-execution_count="13">
+<div id="0bcf20b2" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>
@@ -1042,7 +1048,7 @@ p(win by switching): 0.6671</code></pre>
 </div>
 <div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="e4b7df50" class="cell" data-execution_count="14">
+<div id="795c9b2c" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> monty_hall_ignorant(N):</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Car is placed uniformly at random behind door 0, 1, or 2</span></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    car_door <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">3</span>)).sample((N,))</span>
@@ -1074,7 +1080,7 @@ p(win by switching): 0.6671</code></pre>
 <span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> p_stay, p_switch</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="8d104f3d" class="cell" data-execution_count="15">
+<div id="fbca86f6" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>
@@ -1520,8 +1526,8 @@ Ignorant host - p(win by switching): 0.5018</code></pre>
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/intro.html" class="pagination-link" aria-label="Introduction">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span>
+      <a href="../chapters/graphical-models.html" class="pagination-link" aria-label="Graphical models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
@@ -1531,6 +1537,36 @@ Ignorant host - p(win by switching): 0.5018</code></pre>
   </div>
 </nav>
 </div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    // Add QED square to summary (visible when collapsed)
+    var summaryQed = document.createElement("span");
+    summaryQed.className = "proof-qed-inline";
+    summaryQed.textContent = "\u25A0";
+    summary.appendChild(summaryQed);
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    var qed = document.createElement("span");
+    qed.className = "proof-qed";
+    qed.textContent = "\u25A0";
+    details.appendChild(qed);
+    div.appendChild(details);
+  });
+});
+</script>
 
 
 

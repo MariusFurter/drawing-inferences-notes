@@ -77,7 +77,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-9d175643e8beedf6818e2022ee6e7a70.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -193,6 +193,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -354,7 +360,7 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>For rejection sampling (Task 3), you will need to generate millions of samples efficiently. If you write each box function using <a href="https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli"><code>torch.distributions.Bernoulli</code></a> and express conditional probabilities as arithmetic on 0/1 values (as in the <code>family_v()</code> example from the course notes), the same function will work for a single sample <em>and</em> for a batch of <span class="math inline">\(N\)</span> samples — no loops required. See the <a href="https://numpy.org/doc/2.3/user/absolute_beginners.html">Numpy beginner guide</a> for an introduction to working with array data, and <a href="https://pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html">PyTorch tensors guide</a> for specifics on using PyTorch.</p>
+<p>For rejection sampling (Task 3), you will need to generate millions of samples efficiently. If you write each box function using <a href="https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli"><code>torch.distributions.Bernoulli</code></a> and express conditional probabilities as arithmetic on 0/1 values (as in the <code>family_v()</code> example from the course notes), the same function will work for a single sample <em>and</em> for a batch of <span class="math inline">\(N\)</span> samples — no loops required. See the <a href="../appendix/pytorch.html">Appendix</a> for a short introduction to PyTorch. We also recommend the <a href="https://numpy.org/doc/2.3/user/absolute_beginners.html">Numpy beginner guide</a> for an introduction to working with array data, and <a href="https://pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html">PyTorch tensors guide</a> for specifics on using PyTorch.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Hint: Base Python Alternative">
@@ -384,7 +390,7 @@ window.Quarto = {
 <div class="callout-body-container callout-body">
 <p>We write a generative function for each box, using arithmetic to compute the conditional probability before sampling with <a href="https://pytorch.org/docs/stable/distributions.html#torch.distributions.Bernoulli"><code>torch.distributions.Bernoulli</code></a>. Since the inputs are 0/1 values, we can express the conditional probabilities as arithmetic expressions that work on both scalars and tensors. To sample a single value, call with <code>N=1</code>; to sample a batch of <code>N</code> values at once, pass a larger <code>N</code>. Alternatively, you could use <code>if</code>/<code>else</code> with the <a href="https://docs.python.org/3/library/random.html"><code>random</code></a> module from base Python — the logic is the same, just less compact and not vectorized.</p>
 <p><strong>Generators <span class="math inline">\(f\)</span> and <span class="math inline">\(t\)</span>.</strong> We choose a fraud rate of 0.088% based on <a href="https://www.ecb.europa.eu/pub/pdf/cardfraud/ecb.cardfraudreport202110~cac4c418e8.en.pdf">this 2021 report</a> by the European Central Bank. The same report puts the cross-border rate at 11%.</p>
-<div id="05eb7c30" class="cell" data-execution_count="1">
+<div id="b21e8314" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.distributions <span class="im">import</span> Bernoulli</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -429,25 +435,25 @@ window.Quarto = {
 </table>
 </div>
 <p>Note that for functions with arguments, we do not need to pass the shape parameter <code>N</code> since <code>torch.distributions</code> automatically broadcast to the size of the input variables.</p>
-<div id="bf401d2a" class="cell" data-execution_count="2">
+<div id="78c114b1" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_L(F, T):</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> (<span class="dv">1</span> <span class="op">-</span> <span class="fl">0.65</span> <span class="op">*</span> F) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> T)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><strong>High-risk merchant <span class="math inline">\(h(F)\)</span>.</strong> We assume 80% of fraudulent transactions target high-risk merchants (jewelry, electronics), compared to 5% for legitimate ones.</p>
-<div id="384949d3" class="cell" data-execution_count="3">
+<div id="9c9760f8" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_H(F):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.80</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> <span class="fl">0.05</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><strong>Large amount <span class="math inline">\(a(F, T)\)</span>.</strong> We assume 15% of fraudulent transactions involve unusually large amounts. For legitimate transactions, the rate is 20% when traveling (more expensive purchases abroad) and 10% otherwise.</p>
-<div id="2edf14f0" class="cell" data-execution_count="4">
+<div id="b851f7bc" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_A(F, T):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.15</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> (T <span class="op">*</span> <span class="fl">0.20</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> T) <span class="op">*</span> <span class="fl">0.10</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><strong>Unusual time <span class="math inline">\(u(F, L)\)</span>.</strong> We assume 80% of fraudulent transactions happen at unusual times. For legitimate transactions, being in a different time zone (captured by <span class="math inline">\(L\)</span>) raises the rate to 40%, while the baseline is 5%.</p>
-<div id="71981d8b" class="cell" data-execution_count="5">
+<div id="314f2bcb" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_U(F, L):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> F <span class="op">*</span> <span class="fl">0.80</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> F) <span class="op">*</span> (L <span class="op">*</span> <span class="fl">0.40</span> <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> L) <span class="op">*</span> <span class="fl">0.05</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Bernoulli(p).sample()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -472,7 +478,7 @@ window.Quarto = {
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>It is now simple to combine the boxes into a single function. Note how the variable-passing logic follows the structure of the string diagram. The <code>transaction()</code> function returns all six variables, including the hidden ones <span class="math inline">\(F\)</span> and <span class="math inline">\(T\)</span>. The corresponding string diagram therefore has six output wires, not just the four observable ones from Task 1.</p>
-<div id="80e12a4d" class="cell" data-execution_count="6">
+<div id="efef4122" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> transaction(N):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    F <span class="op">=</span> gen_F(N)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    T <span class="op">=</span> gen_T(N)</span>
@@ -519,7 +525,7 @@ window.Quarto = {
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>We write a generic rejection sampler that takes the evidence as a dictionary and the target variables as a list of names. It generates <code>N</code> samples from <code>transaction()</code>, builds a mask that selects samples matching all evidence, and computes the mean of each target variable among the survivors.</p>
-<div id="0d8a0e03" class="cell" data-execution_count="7">
+<div id="0887885f" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>VARS <span class="op">=</span> [<span class="st">"F"</span>, <span class="st">"T"</span>, <span class="st">"L"</span>, <span class="st">"H"</span>, <span class="st">"U"</span>, <span class="st">"A"</span>]</span>
@@ -560,7 +566,7 @@ window.Quarto = {
 </div>
 <p>For comparison, recall that the base level of fraud was 0.088%.</p>
 <p><strong>Scenario A (The False Alarm):</strong> A location anomaly and unusual time are observed, but nothing else suspicious.</p>
-<div id="f5dc7b3b" class="cell" data-execution_count="8">
+<div id="3346b99f" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
@@ -578,7 +584,7 @@ window.Quarto = {
 </div>
 </div>
 <p><strong>Scenario B (Explaining Away):</strong> Same observations as Scenario A, but we also learn the user is traveling.</p>
-<div id="ed675363" class="cell" data-execution_count="9">
+<div id="09005ef0" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>est, rate <span class="op">=</span> rejection_sample(</span>
@@ -593,7 +599,7 @@ window.Quarto = {
 </div>
 </div>
 <p><strong>Scenario C:</strong> Multiple strong indicators of fraud.</p>
-<div id="724bbb22" class="cell" data-execution_count="10">
+<div id="098b64ca" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>est, rate <span class="op">=</span> rejection_sample(</span>
@@ -628,7 +634,7 @@ window.Quarto = {
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>We run each scenario 100 times with 1M samples and collect the estimates, then compute the average and standard deviation.</p>
-<div id="e69af612" class="cell" data-execution_count="11">
+<div id="b134cf48" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> mean, stdev</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>scenarios <span class="op">=</span> {</span>
@@ -1144,6 +1150,36 @@ Scenario C: P(F=1 | evidence) = 1.17e-01 ± 1.34e-02</code></pre>
   </div>
 </nav>
 </div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    // Add QED square to summary (visible when collapsed)
+    var summaryQed = document.createElement("span");
+    summaryQed.className = "proof-qed-inline";
+    summaryQed.textContent = "\u25A0";
+    summary.appendChild(summaryQed);
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    var qed = document.createElement("span");
+    qed.className = "proof-qed";
+    qed.textContent = "\u25A0";
+    details.appendChild(qed);
+    div.appendChild(details);
+  });
+});
+</script>
 
 
 
