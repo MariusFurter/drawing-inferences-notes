@@ -45,7 +45,7 @@ We now see how to combine kernels into complex models. The two main operations a
 
 ### Sequential composition
 
-Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ to get a new kernel $(g \then f) : X \kernel Z$. This is called the **sequential composition** of $f$ and $g$. The symbol $\then \,$ is pronounced "then" since the input $x$ is processed first by $f$, then by $g$.
+Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ to get a new kernel $(f \then g) : X \kernel Z$. This is called the **sequential composition** of $f$ and $g$. The symbol $\then \,$ is pronounced "then": in the expression $f \then g$, the input is processed first by $f$, then by $g$.
 
 ``` {.tikz file="graphical-models/sequential-composite-kernel.tikz"}
 %%| label: Sequential composite kernel
@@ -53,7 +53,7 @@ Given a second kernel $g : Y \kernel Z$, we can feed the output of $f$ into $g$ 
 %%| height: 2.5em
 ```
 
-How do we compute the composite kernel $(g \then f)$ from $f$ and $g$? If we interpret $f$ and $g$ as conditional distributions, the chain rule and conditional independence give:
+How do we compute the composite kernel $(f \then g)$ from $f$ and $g$? If we interpret $f$ and $g$ as conditional distributions, the chain rule and conditional independence give:
 
 $$
 \begin{aligned}
@@ -65,9 +65,9 @@ $$
 We take this as the definition of the composite kernel.
 
 ::: {#def-sequential-composite-kernel}
-The **sequential composition** of kernels $f : X \kernel Y$ and $g : Y \kernel Z$ is the kernel $(g \then f) : X \kernel Z$ defined by
+The **sequential composition** of kernels $f : X \kernel Y$ and $g : Y \kernel Z$ is the kernel $(f \then g) : X \kernel Z$ defined by
 $$
-(g \then f)(z \mid x) := \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
+(f \then g)(z \mid x) := \sum_{y \in Y} g(z \mid y) \, f(y \mid x).
 $$
 
 We parse sequential composites in string diagrams from left to right.
@@ -150,7 +150,7 @@ $$
 to be the Cartesian product of sets. 
 The **parallel composition** of kernels $f_1 : X_1 \kernel Y_1$ and $f_2 : X_2 \kernel Y_2$ is the kernel $(f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2$ defined by
 $$
-(f_1 \otimes f_2)(y_1, y_2 \mid x_1, x_2) := f_1(y_1 \mid x_1   ) \, f_2(y_2 \mid x_2).
+(f_1 \otimes f_2)(y_1, y_2 \mid x_1, x_2) := f_1(y_1 \mid x_1) \, f_2(y_2 \mid x_2).
 $$
 
 We parse parallel composites in string diagrams from top to bottom.
@@ -195,6 +195,21 @@ Here is what these three types represent:
 - A kernel $m : I \kernel X$ assigns each $x \in X$ a non-negative number $m(x \mid \bullet)$. We think of $m$ as a **measure** on $X$.
 - A kernel $t : X \kernel I$ assigns each $x \in X$ a non-negative number $t(\bullet \mid x)$. We think of $t$ as a **test function** on $X$.
 - A kernel $s : I \kernel I$ is a single non-negative number $s(\bullet \mid \bullet)$. We think of $s$ as a **scalar**.
+
+Composing a measure $m : I \kernel X$ with a test function $t : X \kernel I$ gives a scalar $(m \then t) : I \kernel I$ called the **expectation** of $t$ under $m$:
+
+```{.tikz file="graphical-models/expectation.tikz"}
+%%| label: Expectation
+%%| fig-cap: Composing a measure $m : I \kernel X$ with a test function $t : X \kernel I$ gives the expectation of $t$ under $m$.
+%%| height: 2.5em
+```
+
+The resulting scalar is computed by summing over all $x \in X$:
+$$
+(m \then t)(\bullet \mid \bullet) = \sum_{x \in X} t(\bullet \mid x) \, m(x \mid \bullet).
+$$
+
+When $m$ is a probability measure and $t$ assigns real-valued weights, this is the usual expectation $\mathbb{E}_{m(x)}[t(x)] := \sum_{x \in X} t(x) \, m(x)$. We will use this notation freely from now on.
 
 ### Crossing wires
 Next, we define a kernel that **swaps** wires.
@@ -345,7 +360,7 @@ $$
 (f \then \del_Y)(\bullet \mid x) = \sum_{y \in Y} \del_Y(\bullet \mid y) \, f(y \mid x) = \sum_{y \in Y} f(y \mid x).
 $$
 
-If $f$ is a probability kernel, this sum equals 1, so deleting the output is the same as deleting the input. This property characterizes probability kernels — we call them **normalized**.
+If $f$ is a probability kernel, this sum equals 1, so deleting the output is the same as deleting the input. This is precisely the normalization condition from @def-discrete-kernel.
 
 ``` {.tikz file="graphical-models/normalized-kernel.tikz"}
 %%| label: Normalized kernels
@@ -363,9 +378,27 @@ More generally, if $f : X \kernel Y \otimes Z$ is a kernel with two outputs, the
 
 The resulting kernel sums over all possible values of $y$:
 $$
-(f \then (\id_X \otimes \del_Y))(z \mid x) = \sum_{y \in Y} f(y, z \mid x).
+(f \then (\del_Y \otimes \id_Z))(z \mid x) = \sum_{y \in Y} f(y, z \mid x).
 $$
 
+
+::: {#exm-hidden-markov-model}
+In a Markov chain (@exm-markov-chain), we observe the state directly at each time step. A **hidden Markov model** (HMM) introduces a separation between the system's internal state and what we can measure: the state $X$ evolves as before, but we never see it directly. Instead, at each time step we receive a noisy observation $O$ that depends on the current state. The model is built from three kernels:
+
+- An **initial distribution** $i : I \kernel X$, a measure on $X$ specifying the probability of each starting state.
+- A **transition kernel** $k : X \kernel X$, the same as in a Markov chain, describing how the hidden state evolves from one time step to the next.
+- An **observation kernel** $o : X \kernel O$, which produces a noisy observation from the current hidden state.
+
+At each time step, the state wire is copied: one copy feeds into the next transition, and the other is passed to the observation kernel. The observation wires are outputs of the model. The state wires between transitions are internal — they are marginalized out when we compute the distribution over observations.
+
+``` {.tikz file="graphical-models/hidden-markov-model.tikz"}
+%%| label: Hidden Markov model
+%%| fig-cap: A hidden Markov model with initial distribution $i : I \kernel X$, transition kernel $k : X \kernel X$, and observation kernel $o : X \kernel O$.
+%%| height: 5em
+```
+
+Hidden Markov models are widely used in speech recognition, natural language processing, bioinformatics (e.g., gene finding and sequence alignment), and signal processing. The key computational tasks — computing the likelihood of an observation sequence, inferring the most likely hidden state sequence, and learning the model parameters — can all be performed efficiently using the sum-pushing techniques we discuss in the next section. Later in the course, we will encounter the same diagrammatic structure with continuous state spaces and general (non-discrete) kernels, where it describes **state-space models** used in tracking, control, and time-series analysis.
+:::
 
 ### Deterministic kernels
 
@@ -380,7 +413,7 @@ $$
 In other words, $\bar{f}$ maps $x$ to $f(x)$ with probability 1. 
 :::
 
-The identity, swap, copy, and delete kernels all arise from deterministic functions in this way. The definition is also compatible with composition: given functions $f : X \to Y$ and $g : Y \to Z$, the composite deterministic kernel $(\bar{f} \then \bar{g})$ equals the deterministic kernel of the composite function $\overline{f \then g}$:
+The identity, swap, copy, and delete kernels all arise from deterministic functions in this way. This construction is also compatible with composition: given functions $f : X \to Y$ and $g : Y \to Z$, the composite deterministic kernel $(\bar{f} \then \bar{g})$ equals the deterministic kernel of the composite function $\overline{f \then g}$:
 $$
 (\bar{f} \then \bar{g})(z \mid x) = \sum_{y \in Y} \ivmark{z = g(y)} \, \ivmark{y = f(x)} = \ivmark{z = g(f(x))} = \overline{(f \then g)}(z \mid x).
 $$
@@ -477,10 +510,9 @@ A useful standard form is obtained by performing all marginalization at the end.
 
 To evaluate this diagram, recall that copy composition produces a product of kernels with shared variables (the copy nodes enforce equality via Iverson brackets), and that delete sums out a variable. Combining these, we get the **sum-product form**:
 $$
-p(x_s, x_a) = \sum_{x_f, x_l} f(x_f \mid \bullet) \, s(x_s \mid x_f) \, p(x_l \mid x_f) \, t(x_a \mid x_s, x_l).
+p(x_s, x_a) = \sum_{x_f, x_l} f(x_f \mid \bullet) \, s(x_s \mid x_f) \, p(x_l \mid x_f) \, t(x_a \mid x_s, x_l),
 $$
-
-where the subscripts denote what wire the variable corresponds to. In general, any string diagram of probability kernels evaluates to an expression of this form:
+where the subscripts denote which wire the variable corresponds to. In general, any string diagram of probability kernels evaluates to an expression of this form:
 $$
 \sum_{\text{internal}} \prod_{i} f_i(\text{outputs}_i \mid \text{inputs}_i),
 $$
@@ -488,60 +520,36 @@ where the sum ranges over all internal variables (wires that do not exit the dia
 
 ### Computation by tensor operations
 
-Each composition rule translates directly into a tensor operation. We represent a kernel $f : X \kernel Y$ as a tensor `f` of shape `(|X|, |Y|)`, where `f[x, y]` stores $f(y \mid x)$. Since our variables take values $0, 1, \ldots, n-1$, we can use them directly as indices.
+Each composition rule translates directly into a tensor operation. If we represent a kernel $f : X \kernel Y$ as a matrix whose $(x, y)$-entry is $f(y \mid x)$, then:
 
-[Issue: The results no longer have the shape (|Input|, |Output|) after composition?]
+- **Sequential composition** is matrix multiplication.
+- **Parallel composition** is the tensor (Kronecker) product.
+- **Copy composition** is an element-wise product with shared indices.
+- **Delete** sums out an index.
 
-- **Sequential composition** sums over the shared variable: $(f \then g)(z \mid x) = \sum_y f(y \mid x) \, g(z \mid y)$.
+We can therefore evaluate any string diagram by performing a sequence of such operations. The order in which we perform these operations does not affect the final result, but it can dramatically affect the computational cost.
 
-    ```python
-    # f has shape (|X|, |Y|), g has shape (|Y|, |Z|)
-    fg = torch.einsum('xy,yz->xz', f, g)
-    ```
-
-- **Parallel composition** takes the outer product: $(f_1 \otimes f_2)(y_1, y_2 \mid x_1, x_2) = f_1(y_1 \mid x_1) \, f_2(y_2 \mid x_2)$.
-
-    ```python
-    # f1 has shape (|X1|, |Y1|), f2 has shape (|X2|, |Y2|)
-    f1f2 = torch.einsum('ab,cd->acbd', f1, f2)
-    ```
-
-- **Copy composition** multiplies tensors that share an index without summing it out: the result at $(x, y, z)$ is $f(y \mid x) \, g(z \mid y)$.
-
-    ```python
-    # f has shape (|X|, |Y|), g has shape (|Y|, |Z|)
-    fg = torch.einsum('xy,yz->xyz', f, g)
-    ```
-
-- **Delete** sums out the corresponding index.
-
-    ```python
-    # marginalize out the last axis
-    result = tensor.sum(dim=-1)
-    ```
-
-We can therefore evaluate any string diagram by performing a sequence of tensor operations. The order in which we perform these operations does not affect the final result, but it can dramatically affect the computational cost.
-
-[Issue: Compute computational cost more carefully.]
-Consider the fire alarm model with binary variables ($|F| = |S| = |L| = |A| = 2$). The naive sum-product form
+Consider the fire alarm model with binary variables ($|F| = |S| = |L| = |A| = 2$). For each output pair $(x_s, x_a)$, the naive sum-product form
 $$
 \sum_{x_f, x_l} f(x_f \mid \bullet) \, s(x_s \mid x_f) \, p(x_l \mid x_f) \, t(x_a \mid x_s, x_l)
 $$
-requires us to evaluate the product for every combination of $x_f$ and $x_l$ — that is $2 \times 2 = 4$ terms for each pair $(x_s, x_a)$. But we can reduce the work by pushing sums inward. Summing over $x_l$ first gives:
+requires evaluating the product for all $2 \times 2 = 4$ combinations of $x_f$ and $x_l$ and summing the results — a total of $15$ arithmetic operations.^[Each of the $4$ terms involves $3$ multiplications, and summing $4$ terms takes $3$ additions, giving $4 \times 3 + 3 = 15$.] We can reduce the work by **pushing sums inward**. Summing over $x_l$ first gives:
 $$
-\sum_{x_f} f(x_f \mid \bullet) \, s(x_s \mid x_f) \, \sum_{x_l} p(x_l \mid x_f) \, t(x_a \mid x_s, x_l).
+\sum_{x_f} f(x_f \mid \bullet) \, s(x_s \mid x_f) \, \left( \sum_{x_l} p(x_l \mid x_f) \, t(x_a \mid x_s, x_l) \right).
 $$
 
-Here the inner sum over $x_l$ only involves two terms (for each fixed $x_f$), and the outer sum over $x_f$ also involves two terms. We can rearrange further:
+For each value of $x_f$, the inner sum over $x_l$ requires $3$ operations ($2$ multiplications and $1$ addition). Doing this for both values of $x_f$ and then evaluating the outer sum brings the total to $11$ operations. Another possible arrangement is to sum over $x_f$ first:
 $$
 \sum_{x_l} t(x_a \mid x_s, x_l) \, \sum_{x_f} f(x_f \mid \bullet) \, s(x_s \mid x_f) \, p(x_l \mid x_f).
 $$
 
-Each rearrangement corresponds to a different order of tensor contractions, and the best order depends on the structure of the diagram. Finding the optimal contraction order is NP-hard in general, but good heuristics exist. This is the basis for exact inference algorithms like *variable elimination*. [Cite Darwiche for more information.]
+This requires $13$ operations. 
+
+In this small, densely connected example, the savings are modest, but they can scale exponentially with the size of the model. (Consider a chain of $n$ binary kernels: the sum-product form sums over $2^n$ configurations, while contracting from left to right takes only $O(n)$ matrix multiplications.) Finding the optimal contraction order is NP-hard in general, but good heuristics exist. This is the basis for exact inference algorithms like *variable elimination*. (See @DarwicheBayesianNetworks2009 for an introduction to these algorithms.)
 
 ## Sampling from models
 
-In the [Introduction](intro.qmd), we saw how to sample from a generative model by implementing each box in the string diagram as a random function. But why does this work? In this section, we describe the general procedure and explain why it is sound.
+An exact evaluation of even a modest-sized model can be expensive: the sum-product form requires summing over all configurations of the internal variables. Sampling gives us a way to *approximate* the answer instead. In the [Introduction](intro.qmd), we saw how to sample from a generative model by implementing each box in the string diagram as a random function. But why does this work? In this section, we describe the general procedure and explain why it is sound.
 
 ### From diagrams to programs
 
@@ -560,7 +568,7 @@ We want to show that the program we get by composing samplers this way actually 
 
 > **Faithful sampling.** Each call to `f(x)` independently returns $y$ with probability $f(y \mid x)$, using its own source of randomness that does not depend on — or influence — any other part of the program.
 
-This packs together three ideas. First, each sampler draws from the correct distribution. Second, different calls use independent randomness. Third, the output depends only on the explicit input $x$ — not on any hidden external state. The last point is the programmatic version of the defining property of a kernel: once we know $x$, no additional information changes the output distribution.
+This captures three ideas. First, each sampler draws from the correct distribution. Second, different calls use independent randomness. Third, the output depends only on the explicit input $x$ — not on any hidden external state. The last point is the programmatic version of the defining property of a kernel: once we know $x$, no additional information changes the output distribution.
 
 Any reasonable programming language satisfies this assumption automatically, as long as each sampler is a pure function that draws from an independent random number generator.
 
@@ -598,20 +606,43 @@ Since every string diagram is built from these operations, any program that fait
 
 Note that this argument relies on every box being a *probability* kernel. Sampling is inherently self-normalizing: drawing a random output always produces a probability distribution, so there is no way to directly sample from an unnormalized kernel. Normalization also ensures that ignoring a variable (deletion) is harmless. In the next chapter, we will see how to handle unnormalized kernels using *weighted samples*.
 
+### Estimating expectations from samples
+
+The theoretical foundation for estimating quantities from finite samples is the **Law of Large Numbers**.
+
+**Law of Large Numbers.** If $x_1, x_2, \ldots$ are independent draws from a probability measure $m$ on a finite set $X$, then for any test function $t \colon X \to \mathbb{R}$:
+$$
+\frac{1}{N}\sum_{i=1}^N t(x_i) \;\longrightarrow\; \mathbb{E}_{m(x)}[t(x)] \quad \text{as } N \to \infty.
+$$
+
+In other words, we can **estimate any expectation by sampling**: draw $N$ samples from $m$, apply $t$ to each, and average. For large enough $N$, the sample average will be close to the true expectation. This is the core idea behind **Monte Carlo estimation**.
+
+**Estimating probabilities.** Probabilities are a special case of expectations. For any event $E \subseteq X$, define the **indicator function** $\mathbf{1}_E \colon X \to \mathbb{R}$ by
+$$
+\mathbf{1}_E(x) := \begin{cases} 1 & \text{if } x \in E, \\ 0 & \text{otherwise.} \end{cases}
+$$
+
+Then $\mathbb{E}_{m(x)}[\mathbf{1}_E(x)] = \sum_{x \in X} \mathbf{1}_E(x) \, m(x) = \sum_{x \in E} m(x) = P(E)$. By the Law of Large Numbers, we can therefore estimate any probability by counting the fraction of samples that fall in $E$:
+$$
+P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(x_i).
+$$
+
+This is precisely what we do when we sample from a string diagram and count how often a particular outcome occurs.
+
 ## Comparison to other approaches
 
-There are several well-known frameworks for representing probabilistic models, each with its own strengths. Here we compare string diagrams to the three common alternatives.
+There are several well-known frameworks for representing probabilistic models, each with its own strengths. Here we compare string diagrams to three common alternatives.
 
 ### Bayesian networks
 
-A **Bayesian network** represents a joint distribution over a set of random variables using a directed acyclic graph (DAG). Each node corresponds to a variable, and each node is equipped with a conditional probability distribution (CPD) that specifies the distribution of that variable given its parents. The joint distribution factors as a product of these CPDs:
+A **Bayesian network** represents a joint distribution over a set of random variables using a directed acyclic graph (DAG). Each node corresponds to a variable and is equipped with a conditional probability distribution (CPD) that specifies the distribution of that variable given its parents. The joint distribution factors as a product of these CPDs:
 $$
 p(x_1, \ldots, x_n) = \prod_{i=1}^{n} p(x_i \mid \text{parents}(x_i)).
 $$
 
-[DAG representing fire alarm.]
+<!-- [DAG representing fire alarm.] -->
 
-[Advantage is that drawing DAG is somewhat simpler than drawing a string diagram (because we usually think in terms of variables rather than mechanisms and because DAGs are less informative).]
+Bayesian networks have one clear practical advantage: they are **easier to draw**. Each node is simply a variable, and each arrow represents a direct dependence. There is no need to name the mechanisms, draw copy or delete nodes, or route wires. This simplicity reflects the fact that DAGs carry less information — they record *which* variables depend on which, but not *how* the dependencies are implemented. For quick sketches and high-level model specification, this is often all that is needed.
 
 Our string diagrams encompass Bayesian networks as a special case. A Bayesian network corresponds to a string diagram with no global input, where each box has exactly one output wire that is either fed into downstream boxes or sent to the global output. Comparing the product above to the sum-product form from the previous section confirms this: in a Bayesian network, every variable appears as an output wire of some box, and the internal variables are those that are not observed.
 
@@ -627,15 +658,11 @@ However, string diagrams are strictly more expressive than standard Bayesian net
 
 Bayesian networks can be extended to support some of these features — for instance, by adding context variables or hidden nodes — but these extensions go beyond the standard definition.
 
-Beyond expressiveness, there are two deeper issues with Bayesian networks.
+The extra expressiveness of string diagrams comes with deeper structural advantages.
 
-First, DAGs are **not compositional**. You cannot take a subgraph and treat it as a single node in a larger network. In string diagrams, any sub-diagram can be wrapped into a box, producing a new kernel that can be plugged into other diagrams. This compositional structure makes it easy to build complex models from reusable components.
-
-[Additional point: String diagrams can enforce typing of variables, and capture patterns of reuse (e.g. same f can appear in several places).]
+First, DAGs are **not compositional**. You cannot take a subgraph and treat it as a single node in a larger network. In string diagrams, any sub-diagram can be wrapped into a box, producing a new kernel that can be plugged into other diagrams. This compositional structure makes it easy to build complex models from reusable components. String diagrams also enforce typing of variables and capture patterns of reuse — for instance, the same kernel $f$ can appear in several places in a diagram, making it clear that the same mechanism is applied repeatedly.
 
 Second, DAGs **cannot distinguish between certain factorizations**. Two different causal mechanisms can lead to the same DAG structure. String diagrams, by contrast, record the full compositional structure — including which variables are shared and how — so distinct factorizations produce visibly different diagrams.
-
-[Example of this.]
 
 ### Factor graphs
 
@@ -647,7 +674,7 @@ where $Z$ is a normalizing constant.
 
 Many variants of factor graphs exist, mostly originating from the engineering and signal processing communities. A particularly good version is the **Forney-style factor graph** (FFG) (see @LoeligerFactorGraphs2004). Like string diagrams, FFGs place variables on edges rather than nodes, allow half-edges (which act like global inputs and outputs), and use explicit equality nodes (analogous to our copy kernels). Directed variants can be obtained by adding arrows to the edges. The structure is quite similar to string diagrams, and FFGs support compositionality — a sub-graph can be wrapped into a single factor node.
 
-[FFG diagram for fire alarm.]
+<!-- [FFG diagram for fire alarm.] -->
 
 The main advantage of string diagrams over factor graphs is their role as a **visual proof system**. The coherence theorem (see @rem-smc) guarantees that string diagrams provide a faithful syntax for reasoning about kernels — any equation that can be derived by deforming diagrams is valid, and conversely. This goes beyond the discrete setting: string diagrams apply to general measure-theoretic kernels and many other mathematical structures (any symmetric monoidal category with the appropriate structure). Results proved diagrammatically transfer automatically to all these settings.
 
@@ -663,4 +690,4 @@ Unlike Bayesian networks, undirected models do not impose acyclicity, which make
 
 ## Bibliographic notes {.unnumbered}
 
-Mention Fong, Jacobs, Fritz. Also mention Jacobs' book "Structured probabilistic reasoning".
+<!-- Mention Fong, Jacobs, Fritz. Also mention Jacobs' book "Structured probabilistic reasoning". -->
