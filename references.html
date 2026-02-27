@@ -265,6 +265,10 @@ window.Quarto = {
 Bishop, Christopher M. 2006. <em>Pattern Recognition and Machine
 Learning</em>. Springer New York, NY. <a href="https://link.springer.com/book/9780387310732">https://link.springer.com/book/9780387310732</a>.
 </div>
+<div id="ref-DarwicheBayesianNetworks2009" class="csl-entry" role="listitem">
+Darwiche, Adnan. 2009. <span>“Modeling and Reasoning with Bayesian
+Networks,”</span> April. https://doi.org/<a href="https://doi.org/10.1017/CBO9780511811357">https://doi.org/10.1017/CBO9780511811357</a>.
+</div>
 <div id="ref-GelmanBDA2013" class="csl-entry" role="listitem">
 Gelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki
 Vehtari, and Donald B. Rubin. 2013. <em>Bayesian Data Analysis</em>.
@@ -273,6 +277,11 @@ Chapman; Hall/CRC. https://doi.org/<a href="https://doi.org/10.1201/b16018">http
 <div id="ref-KochenderferAlgorithms2022" class="csl-entry" role="listitem">
 Kochenderfer, Mykel J., Tim A. Wheeler, and Kyle H. Wray. 2022.
 <em>Algorithms for Decision Making</em>. MIT Press. <a href="https://algorithmsbook.com/decisionmaking/">https://algorithmsbook.com/decisionmaking/</a>.
+</div>
+<div id="ref-LoeligerFactorGraphs2004" class="csl-entry" role="listitem">
+Loeliger, H. 2004. <span>“An Introduction to Factor Graphs.”</span>
+<em>IEEE Signal Processing Magazine</em> 21 (1): 28–41.
+https://doi.org/<a href="https://doi.org/10.1109/MSP.2004.1267047">https://doi.org/10.1109/MSP.2004.1267047</a>.
 </div>
 <div id="ref-McElreathRethinking2018" class="csl-entry" role="listitem">
 McElreath, Richard. 2018. <em>Statistical Rethinking: A Bayesian Course
@@ -722,20 +731,25 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       summary.innerHTML = "<em>Proof</em>.";
     }
+    var isRemark = div.classList.contains("remark");
     // Add QED square to summary (visible when collapsed)
-    var summaryQed = document.createElement("span");
-    summaryQed.className = "proof-qed-inline";
-    summaryQed.textContent = "\u25A0";
-    summary.appendChild(summaryQed);
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
     details.appendChild(summary);
     while (div.firstChild) {
       details.appendChild(div.firstChild);
     }
     // Add QED square at end of proof body
-    var qed = document.createElement("span");
-    qed.className = "proof-qed";
-    qed.textContent = "\u25A0";
-    details.appendChild(qed);
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
     div.appendChild(details);
   });
 });

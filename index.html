@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Marius Furter">
-<meta name="dcterms.date" content="2026-02-26">
+<meta name="dcterms.date" content="2026-02-27">
 
 <title>Drawing Inferences</title>
 <style>
@@ -277,7 +277,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 26, 2026</p>
+      <p class="date">February 27, 2026</p>
     </div>
   </div>
   
@@ -884,20 +884,25 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       summary.innerHTML = "<em>Proof</em>.";
     }
+    var isRemark = div.classList.contains("remark");
     // Add QED square to summary (visible when collapsed)
-    var summaryQed = document.createElement("span");
-    summaryQed.className = "proof-qed-inline";
-    summaryQed.textContent = "\u25A0";
-    summary.appendChild(summaryQed);
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
     details.appendChild(summary);
     while (div.firstChild) {
       details.appendChild(div.firstChild);
     }
     // Add QED square at end of proof body
-    var qed = document.createElement("span");
-    qed.className = "proof-qed";
-    qed.textContent = "\u25A0";
-    details.appendChild(qed);
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
     div.appendChild(details);
   });
 });
