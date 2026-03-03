@@ -14,9 +14,9 @@ $$
 
 ## Introduction
 
-In Exercises 1 and 2, we approximated posteriors by sampling. Here, we compute them **exactly**. This is possible because hidden Markov models have the right structure: the hidden state is discrete and low-dimensional, and the chain topology means we only ever multiply small matrices. We will **derive** the classical **forward algorithm** by systematically parsing the HMM string diagram from left to right. The algorithm emerges directly from the kernel composition rules; there is no need to prove that it is correct. This is a powerful example of how the diagrammatic language can guide us to the right algorithm.
+In Exercises 1 and 2, we approximated posteriors by sampling. Here, we compute them **exactly**. We will **derive** the classical **forward algorithm** by systematically parsing the HMM string diagram from left to right. The algorithm emerges directly from the kernel composition rules; there is no need to prove that it is correct. This is a powerful example of how the diagrammatic language can guide us to the right algorithm.
 
-### The HMM string diagram
+### The HMM and the filtering problem
 
 Recall the structure of a hidden Markov model from the course notes:
 
@@ -26,18 +26,50 @@ Recall the structure of a hidden Markov model from the course notes:
 %%| height: 5em
 ```
 
-The model is built from three kernels:
+The sum-product form of the joint distribution represented by the diagram is:
+$$
+p(x_t, y_1, \ldots, y_t) = \sum_{x_1, \ldots, x_t} i(x_1) o(y_t \mid x_t) \prod_{t=1}^{t-1} o(y_t \mid x_t) \, k(x_{t+1} \mid x_t).
+$$
 
-- An **initial distribution** $i : I \kernel X$, specifying the probability of each starting state.
-- A **transition kernel** $k : X \kernel X$, describing how the hidden state evolves from one time step to the next.
-- An **observation kernel** $o : X \kernel O$, producing a noisy observation from the current hidden state.
+Given observations $\bar{y}_1, \ldots, \bar{y}_T$, the **filtering distribution** is the posterior over the current hidden state given everything observed so far:
+$$
+p(x_t \mid \bar{y}_1, \ldots, \bar{y}_t) \quad \text{for } t = 1, \ldots, T.
+$$
 
-At each step, the state wire is copied: one copy feeds into the next transition, the other into the observation kernel. The state wires between transitions are internal — they are never observed directly. When we represent each kernel as a matrix or vector, the composition rules from Chapter 2 tell us exactly how to combine them:
+Our goal is to compute this exactly. Conditioning amounts to evaluating the joint at the observed values and normalizing:
+$$
+p(x_t \mid \bar{y}_1, \ldots, \bar{y}_t) = \frac{p(x_t, \bar{y}_1, \ldots, \bar{y}_t)}{\sum_{x_t} p(x_t, \bar{y}_1, \ldots, \bar{y}_t)}.
+$$
+
+We can represent the numerator $p(x_t, \bar{y}_1, \ldots, \bar{y}_t)$ as the following diagram, where $w_t(x) = o(\bar{y}_t \mid x)$ is the **observation weight** function.
+
+``` {.tikz file="graphical-models/hmm-conditioned.tikz"}
+%%| label: hmm-conditioned-diagram
+%%| fig-cap: "The HMM with observations fixed to $\bar{y}_1, \\bar{y}_2, \bar{y}_3, \ldots\,$: each observation kernel $o$ is replaced by the weight function $w_t(x) = o(\bar{y}_t \mid x)$."
+%%| height: 5em
+```
+
+**Task:** Verify that evaluating this diagram yields exactly the unnormalized filtering distribution $p(x_t, \bar{y}_1, \ldots, \bar{y}_t)$.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+We must simply plug in $\bar{y}_1, \ldots, \bar{y}_t$ into the sum-product form of the joint distribution:
+
+$p(x_t, \bar y_1, \ldots, \bar y_t) = \sum_{x_1, \ldots, x_t} i(x_1) o(\bar y_t \mid x_t) \prod_{t=1}^{t-1} o(\bar y_t \mid x_t) \, k(x_{t+1} \mid x_t).$
+
+Applying the definition of the observation weight $w_t(x) := o(\bar{y}_t \mid x)$, we can rewrite this as:
+$$
+p(x_t, \bar y_1, \ldots, \bar y_t)
+= \sum_{x_1, \ldots, x_t} i(x_1) w_t(x_t) \prod_{t=1}^{t-1} w_t(x_t) \, k(x_{t+1} \mid x_t).
+$$
+
+This is exactly the sum-product form of the proposed diagram.
+:::
+
+Therefore, to compute the filtering distribution, it is sufficient to evaluate the diagram using the kernel composition rules and normalize the result. In particular, we can represent composition rules as tensor operations: 
 
 - **Sequential composition** $(f \then g)$ becomes **matrix multiplication**.
-- **Copy composition** followed by **deletion** of the observation wire translates into **element-wise weighting** by the observation likelihood.
-
-The forward algorithm is simply what you get when you evaluate the diagram from left to right, one time step at a time, using these two operations.
+- **Copy composition** becomes **element-wise multiplication**.
 
 ### Choose your application
 
@@ -45,14 +77,16 @@ The tasks below are stated in general terms. Choose **one** of the following two
 
 #### Application A: CpG island detection in DNA {.unnumbered}
 
-**The science.** In the human genome, the dinucleotide CG (called "CpG") is relatively rare — most cytosines in a CG context are chemically modified (methylated) and tend to mutate over evolutionary time. However, certain regions called **CpG islands** resist this modification and retain a high frequency of C and G nucleotides. CpG islands are biologically important: they are found near roughly 70% of human gene promoters and play a key role in gene regulation.
+**The setting.** In the human genome, the dinucleotide CG (called "CpG") is relatively rare — most cytosines in a CG context are chemically modified (methylated) and tend to mutate over evolutionary time. However, certain regions called **CpG islands** resist this modification and retain a high frequency of C and G nucleotides. CpG islands are biologically important: they are found near roughly 70% of human gene promoters and play a key role in gene regulation.
 
-Detecting CpG islands from raw DNA sequence is a classic application of HMMs in bioinformatics. The hidden state indicates whether we are currently inside or outside a CpG island, and the observations are the nucleotides (A, C, G, T) at each position.
+Detecting CpG islands from raw DNA sequence is a classic application of HMMs in bioinformatics (see e.g. @DurbinBiologicalSequences1998). The hidden state indicates whether we are currently inside or outside a CpG island, and the observations are the nucleotides (A, C, G, T) at each position.
 
 **The variables:**
 
-- **Hidden state** $X = \{\texttt{non-island},\, \texttt{island}\}$ (2 states, encoded as 0 and 1)
-- **Observation** $O = \{\texttt{A},\, \texttt{C},\, \texttt{G},\, \texttt{T}\}$ (4 symbols, encoded as 0, 1, 2, 3)
+- **Hidden state** $X = \{0, 1\}$, with two states:
+    - $0$ = non-island
+    - $1$ = island
+- **Observation** $O = \{\text{A},\, \text{C},\, \text{G},\, \text{T}\}$ (encoded as $0, 1, 2, 3$)
 
 **Data files** (in the `data/` folder):
 
@@ -62,12 +96,15 @@ Detecting CpG islands from raw DNA sequence is a classic application of HMMs in 
 
 #### Application B: Volatility regime detection in financial markets {.unnumbered}
 
-**The setting.** Stock market returns exhibit **volatility clustering**: calm periods with small daily moves alternate with turbulent periods of large swings. This phenomenon is well-documented and has been modeled using regime-switching models since Hamilton (1989). The hidden state represents the current volatility regime, and the observations are discretized daily returns.
+**The setting.** Stock market returns exhibit **volatility clustering**: calm periods with small daily moves alternate with turbulent periods of large swings. This phenomenon is well-documented and has been modeled using regime-switching models since @HamiltonRegimeSwitch1989. The hidden state represents the current volatility regime, and the observations are discretized daily returns.
 
 **The variables:**
 
-- **Hidden state** $X = \{\texttt{low\_vol},\, \texttt{high\_vol}\}$ (2 states, encoded as 0 and 1)
-- **Observation** $O = \{\texttt{large\_drop},\, \texttt{small\_drop},\, \texttt{flat},\, \texttt{small\_gain},\, \texttt{large\_gain}\}$ (5 bins, encoded as 0–4)
+- **Hidden state** $X = \{0, 1\}$, with two regimes:
+    - $0$ = low volatility
+    - $1$ = high volatility
+- **Observation** $O = \{0, 1, 2, 3, 4\}$, five bins for daily returns:
+    - $0$ = large drop, $1$ = small drop, $2$ = flat, $3$ = small gain, $4$ = large gain
 
 The bin boundaries for daily percentage returns are: $(-\infty, -1.5\%,\, -0.5\%,\, 0.5\%,\, 1.5\%,\, +\infty)$.
 
@@ -227,25 +264,18 @@ For the volatility application, the observation matrix should show that the low-
 
 ### 3. Deriving the forward algorithm from the string diagram
 
-We now derive the key computational tool for HMMs — not by memorizing a formula, but by reading it off the string diagram. The idea is to **evaluate the HMM diagram from left to right**, composing one time step at a time using the tensor operations from Chapter 2.
-
-Given a sequence of observations $y_1, y_2, \ldots, y_T$, we want to compute the **filtering distribution** — the exact posterior distribution over the hidden state at each time step given all observations so far:
-$$
-p(x_t \mid y_1, \ldots, y_t) \quad \text{for } t = 1, \ldots, T.
-$$
-
-This tells us: "given everything we have observed so far, what do we believe about the current hidden state?"
+We now derive the key computational tool for HMMs — not by memorizing a formula, but by reading it off the string diagram. The idea is to **evaluate the conditioned diagram from left to right**, composing one time step at a time using the tensor operations from Chapter 2.
 
 #### Parsing the diagram left to right {.unnumbered}
 
-Consider what happens as we "roll up" the diagram one time step at a time. At each step, we maintain a **belief vector** — a (possibly unnormalized) measure on the state space $X$ that summarizes everything to the left. We define this as the vector $\alpha_t$ with entries:
+Consider what happens as we "roll up" the conditioned diagram one time step at a time. At each step, we maintain a **belief vector** — an unnormalized measure on the state space $X$ that summarizes everything to the left. We define this as the vector $\alpha_t$ with entries:
 $$
-\alpha_t(x) := p(x_t = x,\, y_1, \ldots, y_t).
+\alpha_t(x) := p(x_t = x,\, \bar{y}_1, \ldots, \bar{y}_t).
 $$
 
-This is the joint probability of being in state $x$ at time $t$ *and* having produced the observation sequence $y_1, \ldots, y_t$. The filtering distribution is obtained by normalizing:
+This is the joint probability of being in state $x$ at time $t$ *and* having produced the observations $\bar{y}_1, \ldots, \bar{y}_t$. The filtering distribution is obtained by normalizing:
 $$
-p(x_t = x \mid y_1, \ldots, y_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t(x')}.
+p(x_t \mid \bar{y}_1, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t(x')}.
 $$
 
 **Task:** Derive the **forward recursion** — express $\alpha_t$ in terms of $\alpha_{t-1}$ — by interpreting it as a left-to-right composition in the HMM string diagram. At each time step, the diagram performs two operations:
