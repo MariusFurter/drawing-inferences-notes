@@ -1,0 +1,16 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (1) at (-4, 1) {$(\alpha(t) \mathbin{;} k) \odot w_{t+1}$};
+		\node [style=small box] (7) at (0, 1) {$k$};
+		\node [style=black node] (12) at (1.5, 1) {};
+		\node [style=small box] (13) at (3, -1) {$w_{t+2}$};
+		\node [style=none] (14) at (3.5, 1) {};
+		\node [style=none] (19) at (4.25, 1) {\ldots};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge, in=180, out=-90, looseness=1.25] (12) to (13);
+		\draw [style=edge] (7) to (12);
+		\draw [style=edge] (12) to (14.center);
+		\draw [style=edge] (1) to (7);
+	\end{pgfonlayer}
+\end{tikzpicture}

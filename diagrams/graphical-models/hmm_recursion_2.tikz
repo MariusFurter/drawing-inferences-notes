@@ -1,0 +1,20 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (1) at (-3.5, 1) {$\alpha_t \mathbin{;} k$};
+		\node [style=small box] (7) at (2, 1) {$k$};
+		\node [style=black node] (8) at (-1.5, 1) {};
+		\node [style=small box] (10) at (0.25, -1) {$w_{t+1}$};
+		\node [style=black node] (12) at (3.5, 1) {};
+		\node [style=small box] (13) at (5, -1) {$w_{t+2}$};
+		\node [style=none] (14) at (5.5, 1) {};
+		\node [style=none] (19) at (6.25, 1) {\ldots};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (8) to (7);
+		\draw [style=edge, in=180, out=-90, looseness=1.25] (8) to (10);
+		\draw [style=edge] (1) to (8);
+		\draw [style=edge, in=180, out=-90, looseness=1.25] (12) to (13);
+		\draw [style=edge] (7) to (12);
+		\draw [style=edge] (12) to (14.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

@@ -16,64 +16,9 @@ $$
 
 In Exercises 1 and 2, we approximated posteriors by sampling. Here, we compute them **exactly**. We will **derive** the classical **forward algorithm** by systematically parsing the HMM string diagram from left to right. The algorithm emerges directly from the kernel composition rules; there is no need to prove that it is correct. This is a powerful example of how the diagrammatic language can guide us to the right algorithm.
 
-### The HMM and the filtering problem
-
-Recall the structure of a hidden Markov model from the course notes:
-
-``` {.tikz file="graphical-models/hidden-markov-model.tikz"}
-%%| label: hmm-diagram
-%%| fig-cap: "A hidden Markov model with initial distribution $i : I \kernel X$, transition kernel $k : X \kernel X$, and observation kernel $o : X \kernel O$."
-%%| height: 5em
-```
-
-The sum-product form of the joint distribution represented by the diagram is:
-$$
-p(x_t, y_1, \ldots, y_t) = \sum_{x_1, \ldots, x_t} i(x_1) o(y_t \mid x_t) \prod_{t=1}^{t-1} o(y_t \mid x_t) \, k(x_{t+1} \mid x_t).
-$$
-
-Given observations $\bar{y}_1, \ldots, \bar{y}_T$, the **filtering distribution** is the posterior over the current hidden state given everything observed so far:
-$$
-p(x_t \mid \bar{y}_1, \ldots, \bar{y}_t) \quad \text{for } t = 1, \ldots, T.
-$$
-
-Our goal is to compute this exactly. Conditioning amounts to evaluating the joint at the observed values and normalizing:
-$$
-p(x_t \mid \bar{y}_1, \ldots, \bar{y}_t) = \frac{p(x_t, \bar{y}_1, \ldots, \bar{y}_t)}{\sum_{x_t} p(x_t, \bar{y}_1, \ldots, \bar{y}_t)}.
-$$
-
-We can represent the numerator $p(x_t, \bar{y}_1, \ldots, \bar{y}_t)$ as the following diagram, where $w_t(x) = o(\bar{y}_t \mid x)$ is the **observation weight** function.
-
-``` {.tikz file="graphical-models/hmm-conditioned.tikz"}
-%%| label: hmm-conditioned-diagram
-%%| fig-cap: "The HMM with observations fixed to $\bar{y}_1, \\bar{y}_2, \bar{y}_3, \ldots\,$: each observation kernel $o$ is replaced by the weight function $w_t(x) = o(\bar{y}_t \mid x)$."
-%%| height: 5em
-```
-
-**Task:** Verify that evaluating this diagram yields exactly the unnormalized filtering distribution $p(x_t, \bar{y}_1, \ldots, \bar{y}_t)$.
-
-::: {.callout-tip collapse="true" title="Solution"}
-
-We must simply plug in $\bar{y}_1, \ldots, \bar{y}_t$ into the sum-product form of the joint distribution:
-
-$p(x_t, \bar y_1, \ldots, \bar y_t) = \sum_{x_1, \ldots, x_t} i(x_1) o(\bar y_t \mid x_t) \prod_{t=1}^{t-1} o(\bar y_t \mid x_t) \, k(x_{t+1} \mid x_t).$
-
-Applying the definition of the observation weight $w_t(x) := o(\bar{y}_t \mid x)$, we can rewrite this as:
-$$
-p(x_t, \bar y_1, \ldots, \bar y_t)
-= \sum_{x_1, \ldots, x_t} i(x_1) w_t(x_t) \prod_{t=1}^{t-1} w_t(x_t) \, k(x_{t+1} \mid x_t).
-$$
-
-This is exactly the sum-product form of the proposed diagram.
-:::
-
-Therefore, to compute the filtering distribution, it is sufficient to evaluate the diagram using the kernel composition rules and normalize the result. In particular, we can represent composition rules as tensor operations: 
-
-- **Sequential composition** $(f \then g)$ becomes **matrix multiplication**.
-- **Copy composition** becomes **element-wise multiplication**.
-
 ### Choose your application
 
-The tasks below are stated in general terms. Choose **one** of the following two applications to work with throughout the exercise. Both involve a 2-state HMM — the only difference is what the states and observations represent.
+The tasks below are stated in general terms. Choose **one** of the following two applications to work with throughout the exercise. Both involve a 2-state hidden Markov model — the only difference is what the states and observations represent.
 
 #### Application A: CpG island detection in DNA {.unnumbered}
 
@@ -126,58 +71,121 @@ Load your chosen training dataset. Inspect the first few rows and compute basic 
 - How many distinct hidden states and observation symbols are there?
 - What fraction of time steps are spent in each hidden state?
 
-::: {.callout-tip collapse="true" title="Solution"}
+::: {.callout-note collapse="true" title="Hint: Working with pandas"}
+[pandas](https://pandas.pydata.org/) is a Python library for working with tabular data. If you've never used it before, there is a 10-minute introduction in the [user guide](https://pandas.pydata.org/docs/user_guide/index.html). Here are the operations you will need:
+
+- **Load a CSV file:** [`pd.read_csv(path)`](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html) returns a `DataFrame` — a table with named columns.
+- **Inspect the first rows:** [`df.head()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.head.html) shows the first 5 rows.
+- **Number of rows:** `len(df)` returns the number of rows.
+- **Unique values:** [`df["col"].unique()`](https://pandas.pydata.org/docs/reference/api/pandas.Series.unique.html) returns the distinct values in a column, and [`df["col"].nunique()`](https://pandas.pydata.org/docs/reference/api/pandas.Series.nunique.html) returns their count.
+- **Value counts:** [`df["col"].value_counts(normalize=True)`](https://pandas.pydata.org/docs/reference/api/pandas.Series.value_counts.html) returns the fraction of each value.
+- **Map to integers:** Create a dictionary like `{"A": 0, "C": 1, ...}` and apply it with [`df["col"].map(mapping)`](https://pandas.pydata.org/docs/reference/api/pandas.Series.map.html) to convert categorical strings to integer codes.
+- **Convert to list:** [`df["col"].tolist()`](https://pandas.pydata.org/docs/reference/api/pandas.Series.tolist.html) converts a column to a Python list.
+:::
+
+::: {.callout-tip collapse="true" title="Solution — Application A (CpG islands)"}
 
 ```{python}
 #| code-fold: false
-import csv
-
-# --- Change this line to switch applications ---
-APPLICATION = "cpg"  # or "vol"
-
-if APPLICATION == "cpg":
-    train_file = "../data/cpg_train.csv"
-    test_file = "../data/cpg_test.csv"
-    labels_file = "../data/cpg_test_labels.csv"
-    state_names = ["non-island", "island"]
-    obs_col = "nucleotide"
-    state_col = "state"
-    obs_names = ["A", "C", "G", "T"]
-else:
-    train_file = "../data/vol_train.csv"
-    test_file = "../data/vol_test.csv"
-    labels_file = "../data/vol_test_labels.csv"
-    state_names = ["low_vol", "high_vol"]
-    obs_col = "return_bin"
-    state_col = "regime"
-    obs_names = ["large_drop", "small_drop", "flat", "small_gain", "large_gain"]
-
-# Map names to indices
-state_to_idx = {s: i for i, s in enumerate(state_names)}
-obs_to_idx = {o: i for i, o in enumerate(obs_names)}
-n_states = len(state_names)
-n_obs = len(obs_names)
+import pandas as pd
 
 # Load training data
-with open(train_file) as f:
-    reader = csv.DictReader(f)
-    train_data = list(reader)
+cpg_train_df = pd.read_csv("../data/cpg_train.csv")
+cpg_train_df.head()
+```
 
-train_states = [state_to_idx[row[state_col]] for row in train_data]
-train_obs = [obs_to_idx[row[obs_col]] for row in train_data]
+```{python}
+#| code-fold: false
+# Basic statistics
+print(f"Time steps:    {len(cpg_train_df)}")
+print(f"Hidden states: {cpg_train_df['state'].nunique()} — {cpg_train_df['state'].unique().tolist()}")
+print(f"Observations:  {cpg_train_df['nucleotide'].nunique()} — {cpg_train_df['nucleotide'].unique().tolist()}")
+print(f"\nState fractions:")
+print(cpg_train_df["state"].value_counts(normalize=True).to_string())
+```
 
-print(f"Training data: {len(train_data)} time steps")
-print(f"Hidden states: {n_states} ({state_names})")
-print(f"Observations:  {n_obs} ({obs_names})")
+```{python}
+#| code-fold: false
+# Define names and mappings
+cpg_state_names = ["non-island", "island"]
+cpg_obs_names = ["A", "C", "G", "T"]
+cpg_state_to_idx = {s: i for i, s in enumerate(cpg_state_names)}
+cpg_obs_to_idx = {o: i for i, o in enumerate(cpg_obs_names)}
+cpg_n_states = len(cpg_state_names)
+cpg_n_obs = len(cpg_obs_names)
 
-from collections import Counter
-state_counts = Counter(train_states)
-for s, name in enumerate(state_names):
-    frac = state_counts[s] / len(train_states)
-    print(f"  State '{name}': {state_counts[s]} ({100*frac:.1f}%)")
+# Convert to integer lists
+cpg_train_states = cpg_train_df["state"].map(cpg_state_to_idx).tolist()
+cpg_train_obs = cpg_train_df["nucleotide"].map(cpg_obs_to_idx).tolist()
+
+# File paths and column names
+cpg_test_file = "../data/cpg_test.csv"
+cpg_labels_file = "../data/cpg_test_labels.csv"
+cpg_obs_col = "nucleotide"
+cpg_state_col = "state"
 ```
 :::
 
+::: {.callout-tip collapse="true" title="Solution — Application B (Volatility regimes)"}
+
+```{python}
+#| code-fold: false
+import pandas as pd
+
+# Load training data
+vol_train_df = pd.read_csv("../data/vol_train.csv")
+vol_train_df.head()
+```
+
+```{python}
+#| code-fold: false
+# Basic statistics
+print(f"Time steps:    {len(vol_train_df)}")
+print(f"Hidden states: {vol_train_df['regime'].nunique()} — {vol_train_df['regime'].unique().tolist()}")
+print(f"Observations:  {vol_train_df['return_bin'].nunique()} — {vol_train_df['return_bin'].unique().tolist()}")
+print(f"\nRegime fractions:")
+print(vol_train_df["regime"].value_counts(normalize=True).to_string())
+```
+
+```{python}
+#| code-fold: false
+# Define names and mappings
+vol_state_names = ["low_vol", "high_vol"]
+vol_obs_names = ["large_drop", "small_drop", "flat", "small_gain", "large_gain"]
+vol_state_to_idx = {s: i for i, s in enumerate(vol_state_names)}
+vol_obs_to_idx = {o: i for i, o in enumerate(vol_obs_names)}
+vol_n_states = len(vol_state_names)
+vol_n_obs = len(vol_obs_names)
+
+# Convert to integer lists
+vol_train_states = vol_train_df["regime"].map(vol_state_to_idx).tolist()
+vol_train_obs = vol_train_df["return_bin"].map(vol_obs_to_idx).tolist()
+
+# File paths and column names
+vol_test_file = "../data/vol_test.csv"
+vol_labels_file = "../data/vol_test_labels.csv"
+vol_obs_col = "return_bin"
+vol_state_col = "regime"
+```
+:::
+
+
+### The Hidden Markov Model
+
+The training data has a sequential structure: a hidden state evolves over time, and at each time step we observe a noisy signal that depends on the current state. This is exactly the setup of a **hidden Markov model** (HMM). Recall the structure from the course notes:
+
+``` {.tikz file="graphical-models/hidden-markov-model.tikz"}
+%%| label: hmm-diagram
+%%| fig-cap: "A hidden Markov model with initial distribution $i : I \kernel X$, transition kernel $k : X \kernel X$, and observation kernel $o : X \kernel O$."
+%%| height: 5em
+```
+
+The model is built from three kernels: an **initial distribution** $i : I \kernel X$ specifying the probability of each starting state, a **transition kernel** $k : X \kernel X$ describing how the hidden state evolves, and an **observation kernel** $o : X \kernel O$ producing a noisy observation from the current state. The sum-product form of the joint distribution represented by the diagram is:
+$$
+p(x_t, y_0, \ldots, y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \left( \prod_{j=0}^{t} o(y_j \mid x_j) \right) \left( \prod_{k=0}^{t-1} k(x_{k+1} \mid x_k) \right) .
+$$
+
+To use this model, we need to specify the three boxes $i$, $k$, and $o$ from data.
 
 ### 2. Estimate the model parameters
 
@@ -185,150 +193,311 @@ An HMM is specified by three objects: an initial distribution $i$, a transition 
 
 **Task:** Estimate the initial distribution, transition matrix, and observation matrix from the training data by counting:
 
-a) **Initial distribution** $\hat{i}(x)$: the fraction of sequences that start in state $x$. Since we only have one training sequence, use the state at position 0.
-
-b) **Transition matrix** $\hat{K}$: entry $\hat{k}(x' \mid x)$ is the fraction of times the hidden state transitions from $x$ to $x'$. Formally:
+a. **Initial distribution** $\hat{i}(x)$: the fraction of time steps spent in state $x$. Formally:
 $$
-\hat{k}(x' \mid x) = \frac{\#\{t : s_t = x \text{ and } s_{t+1} = x'\}}{\#\{t : s_t = x\}}
+\hat{i}(x) = \frac{\#\{t : s_t = x\}}{T}
 $$
 
-c) **Observation matrix** $\hat{O}$: entry $\hat{o}(y \mid x)$ is the fraction of times observation $y$ is emitted in state $x$. Formally:
+b. **Transition matrix** $\hat{K}$: entry $\hat{k}(x' \mid x)$ is estimated by counting transitions and adding 1 to every count before normalizing:
 $$
-\hat{o}(y \mid x) = \frac{\#\{t : s_t = x \text{ and } y_t = y\}}{\#\{t : s_t = x\}}
+\hat{k}(x' \mid x) = \frac{\#\{t : s_t = x \text{ and } s_{t+1} = x'\} + 1}{\#\{t : s_t = x\} + |X|}
+$$
+
+c. **Observation matrix** $\hat{O}$: entry $\hat{o}(y \mid x)$ is estimated analogously:
+$$
+\hat{o}(y \mid x) = \frac{\#\{t : s_t = x \text{ and } y_t = y\} + 1}{\#\{t : s_t = x\} + |Y|}
 $$
 
 Print the estimated matrices. Do the values make intuitive sense for your application?
 
-::: {.callout-note title="Hint"}
-Use PyTorch tensors to store the matrices. The transition matrix $K$ has shape `(n_states, n_states)` where `K[x, x']` $= k(x' \mid x)$. The observation matrix $O$ has shape `(n_states, n_obs)` where `O[x, y]` $= o(y \mid x)$. Each row should sum to 1.
+::: {.callout-note title="Note: Why add 1 to every count?"}
+Adding 1 to each count before normalizing ensures that no entry is ever exactly zero — even for transitions or emissions that happen not to appear in the training data. A zero entry would be problematic: once the model assigns probability 0 to a transition, no amount of evidence can recover from it. The "count $+\, 1$" rule is a natural solution that treats every event as having been observed at least once. We will see later, when we study conjugate distributions, that this formula has a precise Bayesian justification: it corresponds to the posterior mean under a uniform (flat) Dirichlet prior.
 :::
 
-::: {.callout-tip collapse="true" title="Solution"}
+::: {.callout-note collapse="true" title="Hint"}
+Use PyTorch tensors for all matrices. 
+
+**Matrix layout:** The transition matrix $K$ has shape `(n_states, n_states)` where `K[x, x']` $= k(x' \mid x)$. The observation matrix $O$ has shape `(n_states, n_obs)` where `O[x, y]` $= o(y \mid x)$. Each row is a probability distribution and should sum to 1.
+
+Here is a step-by-step approach:
+
+1. **Initial distribution:** Create a vector of length `n_states` initialized to zeros. Loop over `train_states` and increment the count for each state. Normalize by dividing by the total.
+
+2. **Transition counts:** Create a matrix of shape `(n_states, n_states)` initialized to **ones** (not zeros — this gives the $+\,1$ smoothing). Loop over consecutive pairs `(train_states[t], train_states[t+1])` and increment `counts[x, x']`. Normalize each **row** so it sums to 1: `K = counts / counts.sum(dim=1, keepdim=True)`.
+
+3. **Observation counts:** Create a matrix of shape `(n_states, n_obs)` initialized to **ones**. Loop over all time steps and increment `counts[train_states[t], train_obs[t]]`. Normalize each row: `O = counts / counts.sum(dim=1, keepdim=True)`.
+:::
+
+::: {.callout-tip collapse="true" title="Solution — Application A (CpG islands)"}
+
+We estimate the initial distribution from the state frequencies in the training data:
 
 ```{python}
 #| code-fold: false
 import torch
 
-# Initial distribution: state at t=0
-init = torch.zeros(n_states)
-init[train_states[0]] = 1.0
-
-# Transition counts
-trans_counts = torch.zeros(n_states, n_states)
-for t in range(len(train_states) - 1):
-    trans_counts[train_states[t], train_states[t + 1]] += 1
-
-# Normalize rows
-K = trans_counts / trans_counts.sum(dim=1, keepdim=True)
-
-# Observation counts
-obs_counts = torch.zeros(n_states, n_obs)
-for t in range(len(train_states)):
-    obs_counts[train_states[t], train_obs[t]] += 1
-
-# Normalize rows
-O = obs_counts / obs_counts.sum(dim=1, keepdim=True)
+cpg_init = torch.zeros(cpg_n_states)
+for s in cpg_train_states:
+    cpg_init[s] += 1
+cpg_init = cpg_init / cpg_init.sum()
 
 print("Initial distribution:")
-for s, name in enumerate(state_names):
-    print(f"  i({name}) = {init[s]:.4f}")
+for s, name in enumerate(cpg_state_names):
+    print(f"  i({name}) = {cpg_init[s]:.4f}")
+```
 
-print("\nTransition matrix K[x, x'] = k(x' | x):")
+Next, we count the state-to-state transitions and add 1 to every cell before normalizing:
+
+```{python}
+#| code-fold: false
+cpg_trans_counts = torch.ones(cpg_n_states, cpg_n_states)  # +1 smoothing
+for t in range(len(cpg_train_states) - 1):
+    cpg_trans_counts[cpg_train_states[t], cpg_train_states[t + 1]] += 1
+
+cpg_K = cpg_trans_counts / cpg_trans_counts.sum(dim=1, keepdim=True)
+
+print("Transition matrix K[x, x'] = k(x' | x):")
+print(f"  {'':>12}  {'non-island':>12}  {'island':>12}")
+for s, name in enumerate(cpg_state_names):
+    print(f"  {name:>12}  {cpg_K[s, 0]:>12.4f}  {cpg_K[s, 1]:>12.4f}")
+```
+
+Both rows are dominated by the diagonal — the chain is "sticky," staying in each state for many consecutive positions. This is expected: CpG islands and non-island regions span hundreds of nucleotides.
+
+Finally, we estimate the observation matrix in the same way:
+
+```{python}
+#| code-fold: false
+cpg_obs_counts = torch.ones(cpg_n_states, cpg_n_obs)  # +1 smoothing
+for t in range(len(cpg_train_states)):
+    cpg_obs_counts[cpg_train_states[t], cpg_train_obs[t]] += 1
+
+cpg_O = cpg_obs_counts / cpg_obs_counts.sum(dim=1, keepdim=True)
+
+print("Observation matrix O[x, y] = o(y | x):")
+print(f"  {'':>12}  {'A':>12}  {'C':>12}  {'G':>12}  {'T':>12}")
+for s, name in enumerate(cpg_state_names):
+    row = "  ".join(f"{cpg_O[s, o_idx]:>12.4f}" for o_idx in range(cpg_n_obs))
+    print(f"  {name:>12}  {row}")
+```
+
+CpG islands should show elevated probabilities for C and G, while non-island regions favor A and T — consistent with the biological mechanism (methylation suppresses CpG outside islands).
+:::
+
+::: {.callout-tip collapse="true" title="Solution — Application B (Volatility regimes)"}
+
+We estimate the initial distribution from the regime frequencies in the training data:
+
+```{python}
+#| code-fold: false
+import torch
+
+vol_init = torch.zeros(vol_n_states)
+for s in vol_train_states:
+    vol_init[s] += 1
+vol_init = vol_init / vol_init.sum()
+
+print("Initial distribution:")
+for s, name in enumerate(vol_state_names):
+    print(f"  i({name}) = {vol_init[s]:.4f}")
+```
+
+Next, we count the regime-to-regime transitions and add 1 to every cell before normalizing:
+
+```{python}
+#| code-fold: false
+vol_trans_counts = torch.ones(vol_n_states, vol_n_states)  # +1 smoothing
+for t in range(len(vol_train_states) - 1):
+    vol_trans_counts[vol_train_states[t], vol_train_states[t + 1]] += 1
+
+vol_K = vol_trans_counts / vol_trans_counts.sum(dim=1, keepdim=True)
+
+print("Transition matrix K[x, x'] = k(x' | x):")
+print(f"  {'':>12}  {'low_vol':>12}  {'high_vol':>12}")
+for s, name in enumerate(vol_state_names):
+    print(f"  {name:>12}  {vol_K[s, 0]:>12.4f}  {vol_K[s, 1]:>12.4f}")
+```
+
+Both regimes are sticky, but the high-volatility regime should have a somewhat higher exit probability — turbulent periods tend to be shorter than calm ones.
+
+Finally, we estimate the observation matrix in the same way:
+
+```{python}
+#| code-fold: false
+vol_obs_counts = torch.ones(vol_n_states, vol_n_obs)  # +1 smoothing
+for t in range(len(vol_train_states)):
+    vol_obs_counts[vol_train_states[t], vol_train_obs[t]] += 1
+
+vol_O = vol_obs_counts / vol_obs_counts.sum(dim=1, keepdim=True)
+
+print("Observation matrix O[x, y] = o(y | x):")
 print(f"  {'':>12}", end="")
-for name in state_names:
+for name in vol_obs_names:
     print(f"  {name:>12}", end="")
 print()
-for s, name in enumerate(state_names):
+for s, name in enumerate(vol_state_names):
     print(f"  {name:>12}", end="")
-    for s2 in range(n_states):
-        print(f"  {K[s, s2]:>12.4f}", end="")
-    print()
-
-print("\nObservation matrix O[x, y] = o(y | x):")
-print(f"  {'':>12}", end="")
-for name in obs_names:
-    print(f"  {name:>12}", end="")
-print()
-for s, name in enumerate(state_names):
-    print(f"  {name:>12}", end="")
-    for o in range(n_obs):
-        print(f"  {O[s, o]:>12.4f}", end="")
+    for o_idx in range(vol_n_obs):
+        print(f"  {vol_O[s, o_idx]:>12.4f}", end="")
     print()
 ```
 
-For the CpG application, the observation matrix should show that CpG islands have higher probabilities for C and G, while non-island regions have higher probabilities for A and T. The transition matrix should show high self-transition probabilities (both states are "sticky"), with the island state having a slightly higher probability of exiting.
-
-For the volatility application, the observation matrix should show that the low-volatility regime concentrates probability on "flat" and "small gain," while the high-volatility regime spreads probability more evenly across all bins including the tails. The transition matrix should again be sticky, with high-volatility regimes being somewhat shorter-lived.
+The low-volatility regime should concentrate probability on "flat" and "small gain," while the high-volatility regime spreads mass more evenly across all bins, including the tails.
 :::
+
+### The filtering problem
+
+Now that we have a fully specified HMM, we can use it to infer hidden states from new observations. Given observations $\bar{y}_0, \ldots, \bar{y}_{T-1}$, the **filtering distribution** is the posterior over the current hidden state given everything observed so far:
+$$
+p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) \quad \text{for } t = 0, \ldots, T-1.
+$$
+
+Our goal is to compute this exactly. Conditioning amounts to evaluating the joint at the observed values and normalizing:
+$$
+p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{p(x_t, \bar{y}_0, \ldots, \bar{y}_t)}{\sum_{x_t} p(x_t, \bar{y}_0, \ldots, \bar{y}_t)}.
+$$
+
+We can represent the numerator $p(x_t, \bar{y}_0, \ldots, \bar{y}_t)$ as the following diagram, where $w_t(x) = o(\bar{y}_t \mid x)$ is the **observation weight** function.
+
+``` {.tikz file="graphical-models/hmm-conditioned.tikz"}
+%%| label: hmm-conditioned-diagram
+%%| fig-cap: "The HMM with observations fixed to $\bar{y}_0, \bar{y}_1, \bar{y}_2, \ldots\,$: each observation kernel $o$ is replaced by the weight function $w_t(x) = o(\bar{y}_t \mid x)$."
+%%| height: 5em
+```
+
+**Task:** Verify that evaluating this diagram yields exactly the unnormalized filtering distribution $p(x_t, \bar{y}_0, \ldots, \bar{y}_t)$.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+We must simply plug in $\bar{y}_0, \ldots, \bar{y}_t$ into the sum-product form of the joint distribution:
+
+$p(x_t, \bar y_0, \ldots, \bar y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \prod_{s=0}^{t} o(\bar y_s \mid x_s) \prod_{s=0}^{t-1} k(x_{s+1} \mid x_s).$
+
+Applying the definition of the observation weight $w_s(x) := o(\bar{y}_s \mid x)$, we can rewrite this as:
+$$
+p(x_t, \bar y_0, \ldots, \bar y_t)
+= \sum_{x_0, \ldots, x_{t-1}} i(x_0) \prod_{s=0}^{t} w_s(x_s) \prod_{s=0}^{t-1} k(x_{s+1} \mid x_s).
+$$
+
+This is exactly the sum-product form of the proposed diagram.
+:::
+
+Therefore, to compute the filtering distribution, it is sufficient to evaluate the diagram using the kernel composition rules and normalize the result. In particular, we can represent composition rules as tensor operations: 
+
+- **Sequential composition** $(f \then g)$ becomes **matrix multiplication**.
+- **Copy composition** becomes **element-wise multiplication**.
 
 
 ### 3. Deriving the forward algorithm from the string diagram
 
-We now derive the key computational tool for HMMs — not by memorizing a formula, but by reading it off the string diagram. The idea is to **evaluate the conditioned diagram from left to right**, composing one time step at a time using the tensor operations from Chapter 2.
+We now derive the key computational tool for HMMs — not by memorizing a formula, but by reading it off the string diagram. The idea is to **evaluate the conditioned diagram from left to right** using the kernel composition rules. 
 
-#### Parsing the diagram left to right {.unnumbered}
-
-Consider what happens as we "roll up" the conditioned diagram one time step at a time. At each step, we maintain a **belief vector** — an unnormalized measure on the state space $X$ that summarizes everything to the left. We define this as the vector $\alpha_t$ with entries:
+At each step, we maintain a **belief vector** — an unnormalized measure on the state space $X$ that summarizes everything to the left. We define this as the vector $\alpha_t$ with entries:
 $$
-\alpha_t(x) := p(x_t = x,\, \bar{y}_1, \ldots, \bar{y}_t).
+\alpha_t(x) := p(x_t = x,\, \bar{y}_0, \ldots, \bar{y}_t).
 $$
 
-This is the joint probability of being in state $x$ at time $t$ *and* having produced the observations $\bar{y}_1, \ldots, \bar{y}_t$. The filtering distribution is obtained by normalizing:
+This is the joint probability of being in state $x$ at time $t$ *and* having produced the observations $\bar{y}_0, \ldots, \bar{y}_t$. The filtering distribution is obtained by normalizing:
 $$
-p(x_t \mid \bar{y}_1, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t(x')}.
-$$
-
-**Task:** Derive the **forward recursion** — express $\alpha_t$ in terms of $\alpha_{t-1}$ — by interpreting it as a left-to-right composition in the HMM string diagram. At each time step, the diagram performs two operations:
-
-a) **Predict (sequential composition):** The state wire passes through the transition kernel $k$. As a tensor operation, this is a matrix-vector product — exactly the formula for sequential composition of kernels.
-b) **Update (observation weighting):** The state wire is copied; one copy feeds into the observation kernel $o$, which produces the observed value $y_t$. Conditioning on this observation amounts to multiplying the state vector element-wise by the observation likelihood.
-
-*Hint:* Start by writing out $\alpha_t(x)$ using the sum-product form of the diagram. Factor the expression to expose $\alpha_{t-1}$. You should find:
-$$
-\alpha_t(x') = o(y_t \mid x') \sum_{x} k(x' \mid x)\, \alpha_{t-1}(x).
+p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t(x')}.
 $$
 
-In vector notation, with $w_t$ denoting the vector of observation weights $w_t(x) := o(y_t \mid x)$:
-$$
-\alpha_t = w_t \odot (K^\top \alpha_{t-1}),
-$$
-where $\odot$ is the element-wise (Hadamard) product. This is the **forward algorithm** — a classical result in signal processing and machine learning, here derived directly from the composition rules for kernels.
+**Task:** Derive the **forward recursion** — express $\alpha_{t+1}$ in terms of $\alpha_{t}$ — by interpreting it as a left-to-right composition in the HMM string diagram. The starting point is
+
+``` {.tikz file="graphical-models/hmm-recursion-1.tikz"}
+%%| label: hmm-recursion-1
+%%| height: 5em
+```
+
+::: {.callout-note collapse="true" title="Hint"}
+Identify the two composition operations that connect $\alpha_t$ to the next time step in the conditioned diagram. The first involves the transition kernel $k$, and the second involves the observation weight $w_{t+1}$. What type of composition (sequential or copy) does each one correspond to?
+:::
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
-We derive the recursion by expanding the definition:
+We read the recursion directly from the conditioned diagram by identifying the two operations that advance from time $t$ to time $t+1$.
+
+**Step 1: Sequential composition with $k$ (predict).** The belief vector $\alpha_t$ is connected to the transition kernel $k$ by an internal wire over which we sum. This is sequential composition $\alpha_t \then k$, which propagates the belief forward through the transition:
+
+``` {.tikz file="graphical-models/hmm-recursion-2.tikz"}
+%%| label: hmm-recursion-2
+%%| height: 5em
+```
+
+In components: $(\alpha_t \then k)(x') = \sum_{x} k(x' \mid x)\, \alpha_t(x)$.
+
+**Step 2: Copy composition with $w_{t+1}$ (update).** The state wire at time $t{+}1$ is copied: one copy feeds into the observation weight $w_{t+1}$, and the other continues as the output. This is the copy composition of $\alpha_t \then k$ with $w_{t+1}$:
+
+``` {.tikz file="graphical-models/hmm-recursion-3.tikz"}
+%%| label: hmm-recursion-3
+%%| height: 5em
+```
+
+Copy composition multiplies element-wise (we write $\odot$ for element-wise multiplication), giving:
 $$
-\begin{aligned}
-\alpha_t(x') &= p(x_t = x',\, y_1, \ldots, y_t) \\
-&= \sum_{x} p(x_t = x',\, y_t,\, x_{t-1} = x, \, y_1, \ldots, y_{t-1}) \\
-&= \sum_{x} p(y_t \mid x_t = x') \, p(x_t = x' \mid x_{t-1} = x) \, p(x_{t-1} = x, \, y_1, \ldots, y_{t-1}) \\
-&= \sum_{x} o(y_t \mid x') \, k(x' \mid x) \, \alpha_{t-1}(x) \\
-&= o(y_t \mid x') \sum_{x} k(x' \mid x) \, \alpha_{t-1}(x).
-\end{aligned}
+((\alpha_t \then k) \odot w_{t+1})(x') = (\alpha_t \then k)(x') \cdot w_{t+1}(x').
 $$
 
-In the third line, we used the conditional independence structure encoded in the HMM diagram: given $x_t$, the observation $y_t$ is independent of everything else (only the local observation wire connects them); and given $x_{t-1}$, the next state $x_t$ is independent of earlier history (the Markov property from the chain structure).
+We are now back in the situation we started with, but one time step to the right. The resulting vector is exactly $\alpha_{t+1}$. The **forward recursion** is therefore:
+$$
+\boxed{\alpha_{t+1} = (\alpha_t \then k) \odot w_{t+1}.}
+$$
 
-The two steps correspond directly to the two operations we perform as we move one step to the right in the diagram:
-
-1. **Predict (sequential composition):** compute $\bar{\alpha}_t(x') = \sum_x k(x' \mid x) \, \alpha_{t-1}(x)$. This is a matrix-vector product $\bar{\alpha}_t = K^\top \alpha_{t-1}$ — exactly the formula for composing a measure with a kernel.
-
-2. **Update (observation weighting):** multiply by the observation weight $\alpha_t(x') = o(y_t \mid x') \, \bar{\alpha}_t(x')$. This is an element-wise product $\alpha_t = w_t \odot \bar{\alpha}_t$. It accounts for the copy node and observation kernel at this time step: we keep only the component of the belief that is consistent with the observed $y_t$.
-
-The base case is $\alpha_1(x) = o(y_1 \mid x) \, i(x)$, where $i$ is the initial distribution.
-
-Notice that the entire algorithm is determined by the diagrammatic structure — we never needed to invoke Bayes' rule or write down a likelihood function. The composition rules do the work for us.
-
+For the **base case**, the same logic applies at $t = 0$: the initial distribution $i$ is copy-composed with $w_0$, giving $\alpha_0 = i \odot w_0$, i.e., $\alpha_0(x) = i(x) \cdot w_0(x)$.
 :::
+
+**Task:** Express the forward recursion for $\alpha_{t+1}$ in terms of matrix and element-wise multiplication. Use the convention that $K$ is the transition matrix with entries $K[x, x'] = k(x' \mid x)$ and $O$ is the observation matrix with entries $O[x, y] = o(y \mid x)$.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+We translate each composition operation into a tensor operation, treating $\alpha_t$ as a **row vector**.
+
+1. **Sequential composition** $\alpha_t \then k$ **is a vector–matrix product.** Expanding the definition:
+$$
+(\alpha_t \then k)(x') = \sum_{x} k(x' \mid x)\, \alpha_t(x) = \sum_{x} \alpha_t(x)\, K[x, x'].
+$$
+This is exactly the row-vector–matrix product $\alpha_t K$.
+
+2. **Copy composition with $w_{t+1}$ is element-wise multiplication.** The observation weight vector $w_{t+1}$ has entries $w_{t+1}(x') = o(\bar{y}_{t+1} \mid x') = O[x', \bar{y}_{t+1}]$. Copy composition multiplies entrywise:
+$$
+\alpha_{t+1}(x') = (\alpha_t \then k)(x') \cdot w_{t+1}(x')
+$$
+This is the **Hadamard product** (element-wise multiplication) of the vectors $\alpha_t K$ and $w_{t+1}$. We write $\odot$ for the Hadamard product: $(u \odot v)(x) := u(x) \cdot v(x)$.
+
+Putting these together, the forward recursion in matrix form is:
+$$
+\boxed{\alpha_{t+1} = (\alpha_t K) \odot w_{t+1},}
+$$
+where $w_{t+1} = O[\,\cdot\,, \bar{y}_{t+1}]$ is column $\bar{y}_{t+1}$ of $O$, read as a row vector. The base case is $\alpha_0 = i \odot w_0$.
+:::
+
 
 
 ### 4. Implement the forward algorithm
 
-**Task:** Implement the forward algorithm in PyTorch. Your function should take the initial distribution, transition matrix, observation matrix, and a sequence of observations, and return the filtering distribution $p(x_t \mid y_1, \ldots, y_t)$ at each time step.
+**Task:** Implement the forward algorithm in PyTorch. Your function should take the initial distribution, transition matrix, observation matrix, and a sequence of observations, and return the filtering distribution $p(x_t \mid y_0, \ldots, y_t)$ at each time step.
 
-::: {.callout-note title="Hint: Numerical stability"}
-The unnormalized $\alpha_t$ values shrink exponentially with $t$ (each step multiplies by probabilities $< 1$). For long sequences, they will underflow to zero. A simple fix: **normalize** $\alpha_t$ at every step. The normalized vector is exactly the filtering distribution $p(x_t \mid y_1, \ldots, y_t)$.
+::: {.callout-note title="Note: Numerical stability"}
+The unnormalized $\alpha_t$ values shrink exponentially with $t$ (each step multiplies by probabilities $< 1$). For long sequences, they will underflow to zero. However, since the filtering distribution is obtained by normalizing $\alpha_t$, we are free to **rescale** $\alpha_t$ by any positive constant without affecting the result — only the direction of the vector matters, not its magnitude. In particular, we can **normalize** $\alpha_t$ at every step and use the normalized version as input to the next recursion. The normalized vector is exactly the filtering distribution $p(x_t \mid y_0, \ldots, y_t)$, which is what we want to compute anyway.
 :::
+
+::: {.callout-note collapse="true" title="Hint: Step-by-step instructions"}
+Write a function `forward(init, K, O, observations)` that returns a tensor of shape `(T, n_states)` containing the filtering distribution at each time step.
+
+1. **Initialization.** Create a tensor `filtering` of shape `(T, n_states)` to store the results. Set `T = len(observations)`.
+
+2. **Base case.** Compute the observation weight vector `w_0 = O[:, observations[0]]` and form `alpha = init * w_0`. Normalize: `alpha = alpha / alpha.sum()`. Store `filtering[0] = alpha`.
+
+3. **Recursion.** For each `t` in `1, ..., T-1`:
+    a. **Predict:** compute `alpha = alpha @ K` (row vector times transition matrix).
+    b. **Update:** compute `alpha = alpha * O[:, observations[t]]` (Hadamard product with observation weights).
+    c. **Normalize:** compute `alpha = alpha / alpha.sum()`.
+    d. Store `filtering[t] = alpha`.
+
+4. Return `filtering`.
+:::
+
+
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
@@ -345,23 +514,23 @@ def forward(init, K, O, observations):
 
     Returns:
         filtering: tensor of shape (T, n_states),
-                   filtering[t] = p(x_t | y_1, ..., y_t)
+                   filtering[t] = p(x_t | y_0, ..., y_t)
     """
     T = len(observations)
     n_states = init.shape[0]
     filtering = torch.zeros(T, n_states)
 
-    # Base case: alpha_1 = w_1 * i
-    alpha = O[:, observations[0]] * init
+    # Base case: alpha_0 = i * w_0
+    alpha = init * O[:, observations[0]]
     alpha = alpha / alpha.sum()  # normalize
     filtering[0] = alpha
 
     for t in range(1, T):
-        # Predict: propagate through transition
-        alpha = K.T @ alpha
+        # Predict: propagate through transition (row vector times matrix)
+        alpha = alpha @ K
 
         # Update: weight by observation likelihood
-        alpha = O[:, observations[t]] * alpha
+        alpha = alpha * O[:, observations[t]]
 
         # Normalize
         alpha = alpha / alpha.sum()
@@ -382,54 +551,45 @@ Plot this posterior probability over time. On the same plot, overlay the true hi
 - Where does it do well? Where does it struggle?
 - What happens at the boundaries when the hidden state switches?
 
-::: {.callout-tip collapse="true" title="Solution"}
+::: {.callout-tip collapse="true" title="Solution — Application A (CpG islands)"}
+
+Load the test sequence and true labels:
 
 ```{python}
 #| code-fold: false
-# Load test observations
-with open(test_file) as f:
-    reader = csv.DictReader(f)
-    test_data = list(reader)
+cpg_test_df = pd.read_csv(cpg_test_file)
+cpg_test_obs = torch.tensor(cpg_test_df[cpg_obs_col].map(cpg_obs_to_idx).tolist())
 
-test_obs_seq = [obs_to_idx[row[obs_col]] for row in test_data]
-test_obs_tensor = torch.tensor(test_obs_seq)
-
-# Load true labels for comparison
-with open(labels_file) as f:
-    reader = csv.DictReader(f)
-    label_data = list(reader)
-
-true_states = [state_to_idx[row[state_col]] for row in label_data]
+cpg_labels_df = pd.read_csv(cpg_labels_file)
+cpg_true_states = cpg_labels_df[cpg_state_col].map(cpg_state_to_idx).tolist()
 ```
 
-```{python}
-# Run forward algorithm
-filtering = forward(init, K, O, test_obs_tensor)
+Run the forward algorithm:
 
-# Extract posterior probability of state 1
-p_state1 = filtering[:, 1].numpy()
+```{python}
+#| code-fold: false
+cpg_filtering = forward(cpg_init, cpg_K, cpg_O, cpg_test_obs)
+cpg_p_state1 = cpg_filtering[:, 1].numpy()
 ```
 
+Plot the filtering distribution against the true hidden states:
+
 ```{python}
-#| label: fig-forward
-#| fig-cap: "Posterior probability of the hidden state (blue) overlaid with the true state (orange shading)."
+#| label: fig-forward-cpg
+#| fig-cap: "CpG application: posterior probability of being in a CpG island (blue) overlaid with the true state (orange shading)."
 import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots(figsize=(12, 3.5))
-
-T = len(p_state1)
+T = len(cpg_p_state1)
 t_axis = range(T)
 
-# Shade true state-1 regions
 ax.fill_between(t_axis, 0, 1,
-                where=[s == 1 for s in true_states],
-                alpha=0.25, color="orange", label=f"True {state_names[1]}")
+                where=[s == 1 for s in cpg_true_states],
+                alpha=0.25, color="orange", label="True island")
+ax.plot(t_axis, cpg_p_state1, linewidth=0.8, color="steelblue",
+        label="$p(\\mathrm{island} \\mid y_{0:t})$")
 
-# Plot posterior
-ax.plot(t_axis, p_state1, linewidth=0.8, color="steelblue",
-        label=f"$p({state_names[1]} \\mid y_{{1:t}})$")
-
-ax.set_xlabel("Position" if APPLICATION == "cpg" else "Trading day")
+ax.set_xlabel("Time step $t$")
 ax.set_ylabel("Posterior probability")
 ax.set_ylim(-0.05, 1.05)
 ax.legend(loc="upper right")
@@ -438,130 +598,110 @@ plt.tight_layout()
 plt.show()
 ```
 
-The model typically tracks the hidden state well once it has accumulated enough evidence — the posterior probability rises (or falls) decisively within the interior of each segment. At boundaries, there is a brief transition period where the model is uncertain. The length of this transition depends on how different the observation distributions are in the two states: the more distinctive the emissions, the faster the model "catches on" to a state switch.
+The model typically tracks the hidden state well once it has accumulated enough evidence — the posterior probability rises (or falls) decisively within the interior of each segment. At boundaries, there is a brief transition period where the model is uncertain.
+:::
+
+::: {.callout-tip collapse="true" title="Solution — Application B (Volatility regimes)"}
+
+Load the test sequence and true labels:
+
+```{python}
+#| code-fold: false
+vol_test_df = pd.read_csv(vol_test_file)
+vol_test_obs = torch.tensor(vol_test_df[vol_obs_col].map(vol_obs_to_idx).tolist())
+
+vol_labels_df = pd.read_csv(vol_labels_file)
+vol_true_states = vol_labels_df[vol_state_col].map(vol_state_to_idx).tolist()
+```
+
+Run the forward algorithm:
+
+```{python}
+#| code-fold: false
+vol_filtering = forward(vol_init, vol_K, vol_O, vol_test_obs)
+vol_p_state1 = vol_filtering[:, 1].numpy()
+```
+
+Plot the filtering distribution against the true hidden states:
+
+```{python}
+#| label: fig-forward-vol
+#| fig-cap: "Volatility application: posterior probability of the high-volatility regime (blue) overlaid with the true regime (orange shading)."
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(12, 3.5))
+T = len(vol_p_state1)
+t_axis = range(T)
+
+ax.fill_between(t_axis, 0, 1,
+                where=[s == 1 for s in vol_true_states],
+                alpha=0.25, color="orange", label="True high_vol")
+ax.plot(t_axis, vol_p_state1, linewidth=0.8, color="steelblue",
+        label="$p(\\mathrm{high\\_vol} \\mid y_{0:t})$")
+
+ax.set_xlabel("Time step $t$")
+ax.set_ylabel("Posterior probability")
+ax.set_ylim(-0.05, 1.05)
+ax.legend(loc="upper right")
+ax.set_title("Forward algorithm: filtering distribution over time")
+plt.tight_layout()
+plt.show()
+```
+
+The model typically tracks the hidden state well once it has accumulated enough evidence. The length of the transition at boundaries depends on how different the observation distributions are in the two regimes.
 :::
 
 
 ### 6. Evaluate inference quality
 
-**Task:** Evaluate how well the forward algorithm recovered the hidden states.
+The forward algorithm returns a full probability distribution over states at each time step, not just a single guess. We consider two ways to evaluate its quality — one that reduces the posterior to a point estimate, and one that evaluates the posterior directly.
 
-a) **Hard classification:** At each time step, assign the state with the higher posterior probability. Compute the **accuracy** — the fraction of time steps where this matches the true state.
+**Task:** Compute the following two metrics and interpret the results.
 
-b) **Confidence calibration:** Among all time steps where the model assigns posterior probability $\geq 0.9$ to state 1, what fraction are actually in state 1? Repeat for the threshold $\geq 0.9$ for state 0. A well-calibrated model should have these fractions close to 0.9 or higher.
+a. **MAP accuracy.** The simplest summary of the posterior is the **maximum a posteriori (MAP) estimate**: at each time step, predict the state $\hat x_t$ with the highest posterior probability. The **accuracy** is the fraction of time steps where this prediction matches the true state $x_t^*$:
+$$
+\text{Accuracy} = \frac{\#\{t : \hat{x}_t = x_t^*\}}{T}, \qquad \hat{x}_t := \operatorname*{argmax}_{x}\, p(x_t = x \mid \bar{y}_{0:t}).
+$$
+This is easy to interpret but discards the uncertainty information in the posterior. A prediction with 51% confidence counts the same as one with 99%.
 
-::: {.callout-tip collapse="true" title="Solution"}
+b. **Log-loss.** To evaluate the full posterior, we use the **log-loss** (also called cross-entropy loss):
+$$
+\mathcal{L} = -\frac{1}{T} \sum_{t=0}^{T-1} \log p(x_t^* \mid \bar{y}_{0:t}),
+$$
+where $x_t^*$ is the true state at time $t$. This measures how many nats^[A **nat** (natural unit of information) is the information-theoretic unit obtained when using the natural logarithm. One nat equals the amount of information gained by observing an event of probability $1/e$. If we used $\log_2$ instead, the unit would be **bits**.] of surprise the model experiences on average when seeing the true state. It is a **proper scoring rule**: it is minimized if and only if the predicted probabilities match the true conditional probabilities. Unlike accuracy, log-loss rewards well-calibrated uncertainty — a model that assigns 90% to the correct state scores better than one that assigns 60%, even though both get the MAP estimate right. Note that log-loss does not have an intuitive absolute scale (unlike accuracy, where 95% is immediately interpretable). Its main value is in **comparing models**: a lower log-loss means one model's posteriors are closer to the truth than another's.
+
+::: {.callout-tip collapse="true" title="Solution — Application A (CpG islands)"}
 
 ```{python}
 #| code-fold: false
-true_tensor = torch.tensor(true_states)
+cpg_true_tensor = torch.tensor(cpg_true_states)
 
-# (a) Hard classification accuracy
-predicted = filtering.argmax(dim=1)
-accuracy = (predicted == true_tensor).float().mean().item()
-print(f"Classification accuracy: {100*accuracy:.1f}%")
+# (a) MAP accuracy
+cpg_predicted = cpg_filtering.argmax(dim=1)
+cpg_accuracy = (cpg_predicted == cpg_true_tensor).float().mean().item()
+print(f"MAP accuracy: {100*cpg_accuracy:.1f}%")
 
-# (b) Confidence calibration
-for target_state in [0, 1]:
-    confident = filtering[:, target_state] >= 0.9
-    if confident.sum() > 0:
-        actual = true_tensor[confident] == target_state
-        frac = actual.float().mean().item()
-        n = confident.sum().item()
-        print(
-            f"When p({state_names[target_state]}) >= 0.9: "
-            f"{100*frac:.1f}% actually {state_names[target_state]} "
-            f"({int(n)} time steps)"
-        )
-    else:
-        print(f"No time steps with p({state_names[target_state]}) >= 0.9")
+# (b) Log-loss
+cpg_true_probs = cpg_filtering[range(len(cpg_true_states)), cpg_true_states]
+cpg_log_loss = -torch.log(cpg_true_probs).mean().item()
+print(f"Log-loss:     {cpg_log_loss:.4f} nats")
 ```
 :::
 
-
-### 7. Effect of model parameters
-
-The forward algorithm uses the transition and observation matrices as fixed inputs. In this task, you will investigate how the inference results change when you modify these parameters.
-
-**Task:** Modify one parameter at a time and re-run the forward algorithm on the same test sequence. For each modification, re-plot the filtering distribution and describe what happens.
-
-a) **Stickier transitions:** Multiply the off-diagonal entries of $K$ by 0.5 and renormalize each row. This makes the model expect longer runs in each state. How does this change the posterior?
-
-b) **Weaker observations:** Replace the observation matrix with one where both states have nearly identical emission distributions (e.g., average the two rows of $O$). What happens to the model's ability to distinguish states?
-
-::: {.callout-tip collapse="true" title="Solution"}
+::: {.callout-tip collapse="true" title="Solution — Application B (Volatility regimes)"}
 
 ```{python}
 #| code-fold: false
-# (a) Stickier transitions
-K_sticky = K.clone()
-for s in range(n_states):
-    for s2 in range(n_states):
-        if s != s2:
-            K_sticky[s, s2] *= 0.5
-    K_sticky[s] /= K_sticky[s].sum()
+vol_true_tensor = torch.tensor(vol_true_states)
 
-filtering_sticky = forward(init, K_sticky, O, test_obs_tensor)
+# (a) MAP accuracy
+vol_predicted = vol_filtering.argmax(dim=1)
+vol_accuracy = (vol_predicted == vol_true_tensor).float().mean().item()
+print(f"MAP accuracy: {100*vol_accuracy:.1f}%")
+
+# (b) Log-loss
+vol_true_probs = vol_filtering[range(len(vol_true_states)), vol_true_states]
+vol_log_loss = -torch.log(vol_true_probs).mean().item()
+print(f"Log-loss:     {vol_log_loss:.4f} nats")
 ```
-
-```{python}
-#| label: fig-sticky
-#| fig-cap: "Effect of stickier transitions: the model becomes slower to recognize state changes but more confident within runs."
-fig, axes = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
-
-for ax, filt, title in zip(
-    axes,
-    [filtering, filtering_sticky],
-    ["Original K", "Stickier K (off-diag × 0.5)"],
-):
-    ax.fill_between(range(T), 0, 1,
-                    where=[s == 1 for s in true_states],
-                    alpha=0.25, color="orange")
-    ax.plot(filt[:, 1].numpy(), linewidth=0.8, color="steelblue")
-    ax.set_ylabel(f"$p$({state_names[1]})")
-    ax.set_ylim(-0.05, 1.05)
-    ax.set_title(title)
-
-axes[-1].set_xlabel("Position" if APPLICATION == "cpg" else "Trading day")
-plt.tight_layout()
-plt.show()
-```
-
-With stickier transitions, the model is slower to detect state changes (the posterior takes more time to swing from 0 to 1 or vice versa) but is more confident within the interior of each segment, because the prior strongly favors staying in the current state.
-
-```{python}
-#| code-fold: false
-# (b) Weaker observations
-O_weak = O.mean(dim=0, keepdim=True).expand(n_states, -1).clone()
-# Add a tiny difference to avoid identical rows
-O_weak[0] = 0.9 * O_weak[0] + 0.1 * O[0]
-O_weak[1] = 0.9 * O_weak[1] + 0.1 * O[1]
-
-filtering_weak = forward(init, K, O_weak, test_obs_tensor)
-```
-
-```{python}
-#| label: fig-weak-obs
-#| fig-cap: "Effect of weaker observations: the model can barely distinguish between states."
-fig, axes = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
-
-for ax, filt, title in zip(
-    axes,
-    [filtering, filtering_weak],
-    ["Original O", "Weakened O (rows nearly averaged)"],
-):
-    ax.fill_between(range(T), 0, 1,
-                    where=[s == 1 for s in true_states],
-                    alpha=0.25, color="orange")
-    ax.plot(filt[:, 1].numpy(), linewidth=0.8, color="steelblue")
-    ax.set_ylabel(f"$p$({state_names[1]})")
-    ax.set_ylim(-0.05, 1.05)
-    ax.set_title(title)
-
-axes[-1].set_xlabel("Position" if APPLICATION == "cpg" else "Trading day")
-plt.tight_layout()
-plt.show()
-```
-
-With weakened observations, the model receives almost no information from each observation. The posterior is driven almost entirely by the transition prior and drifts slowly between states. The model can no longer reliably distinguish the two states.
 :::
