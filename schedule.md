@@ -15,17 +15,16 @@ Feb 27:
 
 March 6:
 
-- Conditioning string diagrams
-- Evaluators add weights (likelihood weighting)
+- Discrete kernels
 - Exercise:
-  - Fitting BN to data (with counts) (maybe titanic dataset)
   - Hidden Markov model (fit to data / condition / exact computation / computation via sampling (+ resampling))
 
 March 13:
 
+- Conditioning and Likelihood weighting
 - Intervening
 - Derive classical causal stuff
-- Exercise:
+- Exercise: Something causal.
 
 March 20:
 

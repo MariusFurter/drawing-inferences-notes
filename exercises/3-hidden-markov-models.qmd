@@ -45,9 +45,9 @@ Detecting CpG islands from raw DNA sequence is a classic application of HMMs in 
 
 **Data files** (generated from a known HMM so we can check our results against ground truth):
 
-- [cpg_train.csv](../data/cpg_train.csv) — 2000 nucleotide positions with labeled hidden states (for parameter estimation)
-- [cpg_test.csv](../data/cpg_test.csv) — 500 nucleotide positions without labels (for inference)
-- [cpg_test_labels.csv](../data/cpg_test_labels.csv) — true hidden states for the test sequence (for validation)
+- [cpg_train.csv](../data/exercise-3/cpg_train.csv) — 2000 nucleotide positions with labeled hidden states (for parameter estimation)
+- [cpg_test.csv](../data/exercise-3/cpg_test.csv) — 500 nucleotide positions without labels (for inference)
+- [cpg_test_labels.csv](../data/exercise-3/cpg_test_labels.csv) — true hidden states for the test sequence (for validation)
 
 #### Application B: Volatility regime detection in financial markets {.unnumbered}
 
@@ -65,17 +65,17 @@ The bin boundaries for daily percentage returns are: $(-\infty, -1.5\%,\, -0.5\%
 
 **Data files** (generated from a known HMM so we can check our results against ground truth):
 
-- [vol_train.csv](../data/vol_train.csv) — 1000 trading days with labeled regimes (for parameter estimation)
-- [vol_test.csv](../data/vol_test.csv) — 500 trading days without labels (for inference)
-- [vol_test_labels.csv](../data/vol_test_labels.csv) — true regimes for the test period (for validation)
+- [vol_train.csv](../data/exercise-3/vol_train.csv) — 1000 trading days with labeled regimes (for parameter estimation)
+- [vol_test.csv](../data/exercise-3/vol_test.csv) — 500 trading days without labels (for inference)
+- [vol_test_labels.csv](../data/exercise-3/vol_test_labels.csv) — true regimes for the test period (for validation)
 
 ---
 
 ## Tasks
 
-### 1. Load and explore the data
+### Load and explore the data
 
-Load your chosen training dataset. Inspect the first few rows and compute basic statistics:
+**Task 1.** Load your chosen training dataset. Inspect the first few rows and compute basic statistics:
 
 - How many time steps are in the training data?
 - How many distinct hidden states and observation symbols are there?
@@ -118,7 +118,7 @@ Here [`enumerate(names)`](https://docs.python.org/3/library/functions.html#enume
 import pandas as pd
 
 # Load training data
-cpg_train_df = pd.read_csv("../data/cpg_train.csv")
+cpg_train_df = pd.read_csv("../data/exercise-3/cpg_train.csv")
 cpg_train_df.head()
 ```
 
@@ -149,8 +149,8 @@ cpg_train_states = cpg_train_df["state"].map(cpg_state_to_idx).tolist()
 cpg_train_obs = cpg_train_df["nucleotide"].map(cpg_obs_to_idx).tolist()
 
 # File paths and column names
-cpg_test_file = "../data/cpg_test.csv"
-cpg_labels_file = "../data/cpg_test_labels.csv"
+cpg_test_file = "../data/exercise-3/cpg_test.csv"
+cpg_labels_file = "../data/exercise-3/cpg_test_labels.csv"
 cpg_obs_col = "nucleotide"
 cpg_state_col = "state"
 ```
@@ -163,7 +163,7 @@ cpg_state_col = "state"
 import pandas as pd
 
 # Load training data
-vol_train_df = pd.read_csv("../data/vol_train.csv")
+vol_train_df = pd.read_csv("../data/exercise-3/vol_train.csv")
 vol_train_df.head()
 ```
 
@@ -194,8 +194,8 @@ vol_train_states = vol_train_df["regime"].map(vol_state_to_idx).tolist()
 vol_train_obs = vol_train_df["return_bin"].map(vol_obs_to_idx).tolist()
 
 # File paths and column names
-vol_test_file = "../data/vol_test.csv"
-vol_labels_file = "../data/vol_test_labels.csv"
+vol_test_file = "../data/exercise-3/vol_test.csv"
+vol_labels_file = "../data/exercise-3/vol_test_labels.csv"
 vol_obs_col = "return_bin"
 vol_state_col = "regime"
 ```
@@ -219,11 +219,11 @@ $$
 
 To use this model, we need to specify the three boxes $i$, $k$, and $o$ from data.
 
-### 2. Estimate the model parameters
+### Estimate the model parameters
 
 An HMM is specified by three objects: an initial distribution $i$, a transition matrix $K$, and an observation matrix $O$. In the credit card exercise, we specified the model parameters by hand. Here, you will **estimate them from labeled training data**. Since the training data includes the true hidden states, we can directly count transitions and emissions — this is called a **supervised** estimation problem (as opposed to *unsupervised* estimation, where the hidden states are unknown and must be inferred jointly with the parameters).
 
-**Task:** Estimate the initial distribution, transition matrix, and observation matrix from the training data by counting:
+**Task 2.** Estimate the initial distribution, transition matrix, and observation matrix from the training data by counting:
 
 a. **Initial distribution** $\hat{i}(x)$: the fraction of time steps spent in state $x$. Formally:
 $$
@@ -397,7 +397,7 @@ We can represent the numerator $p(x_t, \bar{y}_0, \ldots, \bar{y}_t)$ as the fol
 %%| height: 5em
 ```
 
-**Task:** Verify that evaluating this diagram yields exactly the unnormalized filtering distribution $p(x_t, \bar{y}_0, \ldots, \bar{y}_t)$.
+**Task 3.** Verify that evaluating this diagram yields exactly the unnormalized filtering distribution $p(x_t, \bar{y}_0, \ldots, \bar{y}_t)$.
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
@@ -417,7 +417,7 @@ This is exactly the sum-product form of the proposed diagram.
 Therefore, to compute the filtering distribution, it is sufficient to evaluate the diagram using the kernel composition rules and normalize the result.
 
 
-### 3. Deriving the forward algorithm from the string diagram
+### Deriving the forward algorithm from the string diagram
 
 We now derive the key computational tool for HMMs — not by memorizing a formula, but by reading it off the string diagram. The idea is to **evaluate the conditioned diagram from left to right** using the kernel composition rules. 
 
@@ -431,7 +431,7 @@ $$
 p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t(x')}.
 $$
 
-**Task:** Derive the **forward recursion** — express $\alpha_{t+1}$ in terms of $\alpha_{t}$ — by interpreting it as a left-to-right composition in the HMM string diagram. The starting point is
+**Task 4a.** Derive the **forward recursion** — express $\alpha_{t+1}$ in terms of $\alpha_{t}$ — by interpreting it as a left-to-right composition in the HMM string diagram. The starting point is
 
 ``` {.tikz file="graphical-models/hmm-recursion-1.tikz"}
 %%| label: hmm-recursion-1
@@ -475,7 +475,7 @@ $$
 For the **base case**, the same logic applies at $t = 0$: the initial distribution $i$ is copy-composed with $w_0$, giving $\alpha_0 = i \odot w_0$, i.e., $\alpha_0(x) = i(x) \cdot w_0(x)$.
 :::
 
-**Task:** Express the forward recursion for $\alpha_{t+1}$ in terms of matrix and element-wise multiplication. Use the convention that $K$ is the transition matrix with entries $K[x, x'] = k(x' \mid x)$ and $O$ is the observation matrix with entries $O[x, y] = o(y \mid x)$.
+**Task 4b.** Express the forward recursion for $\alpha_{t+1}$ in terms of matrix and element-wise multiplication. Use the convention that $K$ is the transition matrix with entries $K[x, x'] = k(x' \mid x)$ and $O$ is the observation matrix with entries $O[x, y] = o(y \mid x)$.
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
@@ -502,9 +502,9 @@ where $w_{t+1} = O[\,\cdot\,, \bar{y}_{t+1}]$ is column $\bar{y}_{t+1}$ of $O$, 
 
 
 
-### 4. Implement the forward algorithm
+### Implement the forward algorithm
 
-**Task:** Implement the forward algorithm in PyTorch. Your function should take the initial distribution, transition matrix, observation matrix, and a sequence of observations, and return the filtering distribution $p(x_t \mid y_0, \ldots, y_t)$ at each time step.
+**Task 5.** Implement the forward algorithm in PyTorch. Your function should take the initial distribution, transition matrix, observation matrix, and a sequence of observations, and return the filtering distribution $p(x_t \mid y_0, \ldots, y_t)$ at each time step.
 
 ::: {.callout-note title="Note: Numerical stability"}
 The unnormalized $\alpha_t$ values shrink exponentially with $t$ (each step multiplies by probabilities $< 1$). For long sequences, they will underflow to zero. However, since the filtering distribution is obtained by normalizing $\alpha_t$, we are free to **rescale** $\alpha_t$ by any positive constant without affecting the result — only the direction of the vector matters, not its magnitude. In particular, we can **normalize** $\alpha_t$ at every step and use the normalized version as input to the next recursion. The normalized vector is exactly the filtering distribution $p(x_t \mid y_0, \ldots, y_t)$, which is what we want to compute anyway.
@@ -577,9 +577,9 @@ def forward(init, K, O, observations):
 :::
 
 
-### 5. Run inference on the test sequence
+### Run inference on the test sequence
 
-**Task:** Load the test observation sequence (without labels) and run the forward algorithm using the parameters you estimated in Task 2. For each time step $t$, extract the posterior probability of being in state 1 (island / high-vol).
+**Task 6.** Load the test observation sequence (without labels) and run the forward algorithm using the parameters you estimated in Task 2. For each time step $t$, extract the posterior probability of being in state 1 (island / high-vol).
 
 Plot this posterior probability over time. On the same plot, overlay the true hidden states from the labels file (as a step function or shaded regions). Discuss:
 
@@ -702,11 +702,11 @@ The model typically tracks the hidden state well once it has accumulated enough 
 :::
 
 
-### 6. Evaluate inference quality
+### Evaluate inference quality
 
 The forward algorithm returns a full probability distribution over states at each time step, not just a single guess. We consider two ways to evaluate its quality — one that reduces the posterior to a point estimate, and one that evaluates the posterior directly.
 
-**Task:** Compute the following two metrics and interpret the results.
+**Task 7.** Compute the following two metrics and interpret the results.
 
 a. **MAP accuracy.** The simplest summary of the posterior is the **maximum a posteriori (MAP) estimate**: at each time step, predict the state $\hat x_t$ with the highest posterior probability. The **accuracy** is the fraction of time steps where this prediction matches the true state $x_t^*$:
 $$
