@@ -242,6 +242,12 @@ window.Quarto = {
  <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Hidden Markov models</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -344,7 +350,7 @@ window.Quarto = {
 <p>In this chapter, we learn how to interpret string diagrams as probability distributions. This lets us manipulate complex models visually, without tedious algebra. By the end, you will be able to read the following diagram as a probability distribution and sample from it by writing a probabilistic program that follows the structure of the diagram.</p>
 <div id="fire-alarm" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/b606ab507ea06786558ffabef915b5eb395ce000.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/e7963493d2df06141936495d3408820624190920.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>A string diagram representing a causal model for a fire alarm.</figcaption>
 </figure>
 </div>
@@ -361,7 +367,7 @@ f(y \mid x) = p(y \mid x) = p(y \mid x, w).
 <p>We represent a kernel <span class="math inline">\(f : X \kernel Y\)</span> as a box with an input wire <span class="math inline">\(X\)</span> and an output wire <span class="math inline">\(Y\)</span>:</p>
 <div id="Kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/60d4f9a401e1b84996ced01605ea6af2fb242f9a.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/362ac44462502b9a97cb65a06d91998e468a6896.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A kernel <span class="math inline">\(f : X \kernel Y\)</span>.</figcaption>
 </figure>
 </div>
@@ -371,7 +377,7 @@ f(y \mid x) = p(y \mid x) = p(y \mid x, w).
 <p>Given a second kernel <span class="math inline">\(g : Y \kernel Z\)</span>, we can feed the output of <span class="math inline">\(f\)</span> into <span class="math inline">\(g\)</span> to get a new kernel <span class="math inline">\((f \then g) : X \kernel Z\)</span>. This is called the <strong>sequential composition</strong> of <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>. The symbol <span class="math inline">\(\then \,\)</span> is pronounced “then”: in the expression <span class="math inline">\(f \then g\)</span>, the input is processed first by <span class="math inline">\(f\)</span>, then by <span class="math inline">\(g\)</span>.</p>
 <div id="Sequential composite kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/88df33de011f712a868a7b72de2b976a573b3806.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/3ee0674fe07d4973ec558e8611f06f0fd8b3dfc2.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Sequential composition of kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : Y \kernel Z\)</span>.</figcaption>
 </figure>
 </div>
@@ -406,7 +412,7 @@ f(y \mid x) = p(y \mid x) = p(y \mid x, w).
 <p>Since composing with the identity has no effect, we can think of a wire labeled <span class="math inline">\(X\)</span> as the identity kernel <span class="math inline">\(\id_X\)</span>. In particular, stretching or shortening a wire doesn’t change the meaning of the diagram.</p>
 <div id="Identity kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/8542a84ab0ba65d50cb140d6ee1a939b34402b3f.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/1aff7cda9488cb946bd97461e59ff51971ac3a28.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A wire labeled by <span class="math inline">\(X\)</span> may be interpreted as the identity kernel <span class="math inline">\(\id_X : X \kernel X\)</span>.</figcaption>
 </figure>
 </div>
@@ -415,7 +421,7 @@ f(y \mid x) = p(y \mid x) = p(y \mid x, w).
 <p><span class="theorem-title"><strong>Example 2.4</strong></span> Consider a probability kernel <span class="math inline">\(k : X \kernel X\)</span> whose input and output are the same set <span class="math inline">\(X\)</span>. We think of <span class="math inline">\(X\)</span> as a state space. Then <span class="math inline">\(k\)</span> describes a system that randomly hops between states: at each time step <span class="math inline">\(t\)</span>, the system moves from state <span class="math inline">\(x_t\)</span> to state <span class="math inline">\(x_{t+1}\)</span> with probability <span class="math inline">\(k(x_{t+1} \mid x_t)\)</span>. This is called a <strong>Markov chain</strong> and can be represented as the following string diagram:</p>
 <div id="Markov chain" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/c8bff627b0f1bfafa02ff6a1bbdb818fee8dfa2f.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/605057a3b9fa75aa430070e75fefc8513ede41c1.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A Markov chain with transition kernel <span class="math inline">\(k : X \kernel X\)</span>.</figcaption>
 </figure>
 </div>
@@ -430,7 +436,7 @@ k^2(x_{t+2} \mid x_t) = \sum_{x_{t+1}} k(x_{t+2} \mid x_{t+1}) \, k(x_{t+1} \mid
 <p>Next, we can place two kernels <span class="math inline">\(f_1 : X_1 \kernel Y_1\)</span> and <span class="math inline">\(f_2 : X_2 \kernel Y_2\)</span> side by side to get a new kernel <span class="math inline">\((f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2\)</span>. This is the <strong>parallel composition</strong> of <span class="math inline">\(f_1\)</span> and <span class="math inline">\(f_2\)</span>. It represents the joint behavior of two independent processes.</p>
 <div id="Parallel composite kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/f0516830345e6cd4513d2d04d2a03a64cfc9002c.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/514bee74197936ea6f94e9a0d063cf9c65633b3a.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>Parallel composition of kernels <span class="math inline">\(f_1 : X_1 \kernel Y_1\)</span> and <span class="math inline">\(f_2 : X_2 \kernel Y_2\)</span>.</figcaption>
 </figure>
 </div>
@@ -456,7 +462,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>Using products, we can represent kernels with multiple inputs and outputs. For example, we draw a kernel <span class="math inline">\(f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2\)</span> as a box with two input wires <span class="math inline">\(X_1, X_2\)</span> and two output wires <span class="math inline">\(Y_1, Y_2\)</span>:</p>
 <div id="Multi-input multi-output kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/7aa92c8e1efa894f4bd81705dd1b2d87c05b417f.svg" style="height:4em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/5c0390d28b1df321517a1216d092bbb13981ecdb.svg" style="height:4em" class="figure-img"></p>
 <figcaption>A kernel <span class="math inline">\(f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2\)</span>.</figcaption>
 </figure>
 </div>
@@ -464,14 +470,14 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>We also want to draw boxes without input or output wires. There are three basic types:</p>
 <div id="Kernels without inputs or outputs" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/d080e5c75709e52e9bbd7452fa270b16c9ea0b7c.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/5c446a27197683954653b617547e816c480d03c6.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Kernels without inputs or outputs</figcaption>
 </figure>
 </div>
 <p>How should we interpret <span class="math inline">\(m\)</span> as a kernel? Its output set is <span class="math inline">\(X\)</span>, but what is its input set? The idea is to give <span class="math inline">\(m\)</span> a dummy input that carries no information. We represent this dummy input by a special set <span class="math inline">\(I := \{\bullet\}\)</span> containing a single element. Then <span class="math inline">\(m\)</span> is a kernel <span class="math inline">\(m : I \kernel X\)</span>. Since wires labeled by <span class="math inline">\(I\)</span> carry no information, we can drop and insert them freely. In particular, we draw <span class="math inline">\(m\)</span> without an input wire:</p>
 <div id="Kernels without inputs" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/fc7d0af47ebcc839ddb1bb23c3983a61fe437bc5.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/08710cb6bd62cbf9d2c6ca9d2152568edc90248c.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A kernel <span class="math inline">\(m : I \kernel X\)</span> can be drawn without input wires.</figcaption>
 </figure>
 </div>
@@ -486,14 +492,14 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>Composing a measure <span class="math inline">\(m : I \kernel X\)</span> with a test function <span class="math inline">\(t : X \kernel I\)</span> gives a scalar <span class="math inline">\((m \then t) : I \kernel I\)</span> called the <strong>expectation</strong> of <span class="math inline">\(t\)</span> under <span class="math inline">\(m\)</span>:</p>
 <div id="Expectation" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/fd43c23d2bccce211a3456041a81a458f881b2d8.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/c803de5d3ffcd92d9abf6d95796df53366aa7b24.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Composing a measure <span class="math inline">\(m : I \kernel X\)</span> with a test function <span class="math inline">\(t : X \kernel I\)</span> gives the expectation of <span class="math inline">\(t\)</span> under <span class="math inline">\(m\)</span>.</figcaption>
 </figure>
 </div>
 <p>The resulting scalar is computed by summing over all <span class="math inline">\(x \in X\)</span>: <span class="math display">\[
 (m \then t)(\bullet \mid \bullet) = \sum_{x \in X} t(\bullet \mid x) \, m(x \mid \bullet).
 \]</span></p>
-<p>When <span class="math inline">\(m\)</span> is a probability measure and <span class="math inline">\(t\)</span> assigns real-valued weights, this is the usual expectation <span class="math inline">\(\mathbb{E}_{m(x)}[t(x)] := \sum_{x \in X} t(x) \, m(x)\)</span>. We will use this notation freely from now on.</p>
+<p>When <span class="math inline">\(m\)</span> is a probability measure and <span class="math inline">\(t\)</span> assigns real-valued weights, this is the usual expectation <span class="math display">\[\mathbb{E}_{m(x)}[t(x)] := \sum_{x \in X} t(x) \, m(x).\]</span></p>
 </section>
 <section id="crossing-wires" class="level3" data-number="2.1.4">
 <h3 data-number="2.1.4" class="anchored" data-anchor-id="crossing-wires"><span class="header-section-number">2.1.4</span> Crossing wires</h3>
@@ -507,7 +513,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>In string diagrams, we represent <span class="math inline">\(\swap_{X,Y}\)</span> as crossing wires:</p>
 <div id="Swap kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/d452d992ea0bd3a301f85784fe650a1e6cc74da2.svg" style="height:3.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/1ca84ba283309088275f246ec335d8135c93421c.svg" style="height:3.5em" class="figure-img"></p>
 <figcaption>The swap kernel <span class="math inline">\(\swap_{X,Y}\)</span> is drawn as crossing wires.</figcaption>
 </figure>
 </div>
@@ -515,7 +521,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p><strong>Swapping twice is the identity.</strong> If we swap the wires and swap them back, we get the original ordering:</p>
 <div id="Swapping twice is the identity" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/f30a766c2d42f4ad74e9fffcee1fad211a51197c.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/5e2716ada0224422b1154d19a6c1a7905bc52f99.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Swapping twice is the same as doing nothing.</figcaption>
 </figure>
 </div>
@@ -523,7 +529,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p><strong>Boxes can be moved through swaps.</strong> If we place two independent kernels <span class="math inline">\(f : X_1 \kernel Y_1\)</span> and <span class="math inline">\(g : X_2 \kernel Y_2\)</span> in parallel and then swap the outputs, we get the same result as first swapping the inputs and then applying the kernels in the opposite order (verify this by direct calculation).</p>
 <div id="Boxes can be moved through swaps" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/de64879e65514076c6ff1005b9a97f377838c64e.svg" style="height:5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/58783ce3e46da606f8485afab0c6b9ea5bd443ed.svg" style="height:5em" class="figure-img"></p>
 <figcaption>Boxes can be moved through swaps.</figcaption>
 </figure>
 </div>
@@ -539,7 +545,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>The copy kernel duplicates its input: given <span class="math inline">\(x\)</span>, it outputs the pair <span class="math inline">\((x, x)\)</span> with probability 1. The delete kernel discards its input: it sends every <span class="math inline">\(x\)</span> to the dummy output <span class="math inline">\(\bullet\)</span> with probability 1. In string diagrams, we draw copy as a splitting node and delete as a terminating node:</p>
 <div id="Copy and delete kernels" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/f8d7c3590279ed003b84d934d9e4d6a349654e8e.svg" style="height:3.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/7c86faadebfb95b5085b93804c902fa24d4d344d.svg" style="height:3.5em" class="figure-img"></p>
 <figcaption>The copy kernel <span class="math inline">\(\cp_X\)</span> duplicates its input, while the delete kernel <span class="math inline">\(\del_X\)</span> discards its input.</figcaption>
 </figure>
 </div>
@@ -547,41 +553,41 @@ p(y_1, y_2 \mid x_1, x_2)
 <p><strong>Copy then delete is the identity.</strong> If we copy a wire and immediately delete one of the copies, we recover the original wire:</p>
 <div id="Copy then delete is the identity" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/c409685aaafa924ef6176c114ecd3587ec220858.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/519c62f062edb2c7f851613867e94a25b7dd0575.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Copying a wire and then deleting one of the copies does nothing.</figcaption>
 </figure>
 </div>
 <p><strong>Copy is associative.</strong> Copying a wire and then copying one of the resulting wires gives the same result regardless of which copy we split further:</p>
 <div id="Copy is associative" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/ecd76bfbec23e6de3c88fd390b75e6b4a2de596d.svg" style="height:3em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/f3f8876c75f23d8bc79062ec61dc485c9bccd85d.svg" style="height:3em" class="figure-img"></p>
 <figcaption>When copying twice, it does not matter which copy we split further.</figcaption>
 </figure>
 </div>
 <p>Since copying is associative, there is a unique way to produce <span class="math inline">\(n\)</span> copies of a wire, no matter how the binary splittings are arranged. We can therefore draw an <span class="math inline">\(n\)</span>-fold copy as a single node with <span class="math inline">\(n\)</span> outgoing wires:</p>
 <div id="n-fold copy" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/710e8220f30e6b8e84d206ad5c045f27a24bdaa9.svg" style="height:3.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/8178ce2476d30c443f9a57eeaed04db217ad7886.svg" style="height:3.5em" class="figure-img"></p>
 <figcaption>An <span class="math inline">\(n\)</span>-fold copy can be drawn as a single node with <span class="math inline">\(n\)</span> outgoing wires.</figcaption>
 </figure>
 </div>
 <p><strong>Copy is commutative.</strong> Copying and then swapping the two outputs is the same as just copying. This reflects the fact that the two copies are identical — there is no distinction between the “first” and “second” copy.</p>
 <div id="Copy is commutative" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/1754c685fd3bbbd5b29201c9596da77c65fbb118.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/bfbca74bbdab637907a008ac28d777b922ed6264.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Copying and then swapping the outputs is the same as just copying.</figcaption>
 </figure>
 </div>
 <p><strong>Compatibility with bundling.</strong> Copying and deleting on a product <span class="math inline">\(X_1 \otimes X_2\)</span> can be done wire by wire. Deleting a pair amounts to deleting each component. Copying a pair amounts to copying each component and rearranging the wires so that the two copies of <span class="math inline">\(X_1\)</span> are adjacent and the two copies of <span class="math inline">\(X_2\)</span> are adjacent:</p>
 <div id="Delete on products" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/2827fde5f582c97aa4dd12c8e0e0e5dc5fa9d826.svg" style="height:3em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/770a7d5733a504e2bd7f82eb31149053715cabc9.svg" style="height:3em" class="figure-img"></p>
 <figcaption>Deleting a product amounts to deleting each component independently.</figcaption>
 </figure>
 </div>
 <div id="Copy on products" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/a9e0c03d3c288524ada074ecae616f80eaf7765d.svg" style="height:6em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/1a6e84af3a3ac8fcec95a49a58d65496a342b65e.svg" style="height:6em" class="figure-img"></p>
 <figcaption>Copying a product amounts to copying each component and then rearranging the wires.</figcaption>
 </figure>
 </div>
@@ -591,7 +597,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>Consider two kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : X \kernel Z\)</span> that both depend on <span class="math inline">\(X\)</span>. To feed the same <span class="math inline">\(x\)</span> to both <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>, we first copy the input wire and then apply <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> in parallel:</p>
 <div id="Variable sharing" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/b4ddee17b6fd0d7ed965abc0788fcde85dcb1f1a.svg" style="height:5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/c1483e69eab1ac6661143b07df3bf3bad929017f.svg" style="height:5em" class="figure-img"></p>
 <figcaption>Feeding the same value into two kernels <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>.</figcaption>
 </figure>
 </div>
@@ -599,17 +605,20 @@ p(y_1, y_2 \mid x_1, x_2)
 (\cp_X \then (f \otimes g))(y, z \mid x) = \sum_{x', x''} f(y \mid x') \, g(z \mid x'') \, \ivmark{x' = x'' = x} = f(y \mid x) \, g(z \mid x).
 \]</span></p>
 <p>Notice how the Iverson bracket in the copy kernel <strong>enforces equality</strong> <span class="math inline">\(x' = x'' = x\)</span>, collapsing the sum. The result is the product <span class="math inline">\(f(y \mid x) \, g(z \mid x)\)</span> — meaning <span class="math inline">\(Y\)</span> and <span class="math inline">\(Z\)</span> are conditionally independent given <span class="math inline">\(X\)</span>. This pattern is the graphical definition of conditional independence. We will return to this point later.</p>
-<p>Another common pattern is composing two kernels while retaining the intermediate output via copying. We call this <strong>copy composition</strong>:</p>
+<p>Another common pattern is composing two kernels while retaining the intermediate output via copying. We call this <strong>copy composition</strong>, denoted <span class="math inline">\(f \odot g\)</span>:</p>
 <div id="Copy composition" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/5ef8fe98ae26f82c529ed3f5a73143033abaee67.svg" style="height:4.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/0b4c960982557f9a3f422b3c4a0b1500ecf7291e.svg" style="height:4.5em" class="figure-img"></p>
 <figcaption>Copy composition of kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : Y \kernel Z\)</span>.</figcaption>
 </figure>
 </div>
-<p>Evaluating this composite shows that copy composition acts like the chain rule for conditional probabilities: <span class="math display">\[
-(f \then \cp_Y \then (\id_Y \otimes g))(y,z \mid x)
-= \sum_{y', y''} \, \ivmark{y' = y'' = y} \, f(y' \mid x) \, g(z \mid y'')
-= f(y \mid x) \, g(z \mid y).
+<p>Evaluating this composite shows that copy composition <span class="math inline">\(f \odot g\)</span> acts like the chain rule for conditional probabilities: <span class="math display">\[
+\begin{aligned}
+(f \odot g)(y, z \mid x)
+&amp;= (f \then \cp_Y \then (\id_Y \otimes g))(y, z \mid x) \\
+&amp;= \sum_{y', y''} \, \ivmark{y' = y'' = y} \, f(y' \mid x) \, g(z \mid y'')  \\
+&amp;= f(y \mid x) \, g(z \mid y).
+\end{aligned}
 \]</span></p>
 </section>
 <section id="delete-marginalizes" class="level4" data-number="2.1.5.2">
@@ -617,17 +626,17 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>The delete kernel gives us a way to <strong>marginalize out</strong> a variable. Composing a kernel <span class="math inline">\(f : X \kernel Y\)</span> with <span class="math inline">\(\del_Y\)</span> sums over all possible output values: <span class="math display">\[
 (f \then \del_Y)(\bullet \mid x) = \sum_{y \in Y} \del_Y(\bullet \mid y) \, f(y \mid x) = \sum_{y \in Y} f(y \mid x).
 \]</span></p>
-<p>If <span class="math inline">\(f\)</span> is a probability kernel, this sum equals 1, so deleting the output is the same as deleting the input. This is precisely the normalization condition from <a href="#def-discrete-kernel" class="quarto-xref">Definition&nbsp;<span>2.1</span></a>.</p>
+<p>If <span class="math inline">\(f\)</span> is a probability kernel, this sum equals 1, so deleting the output is the same as deleting the input. This is precisely the normalization condition from <a href="#def-discrete-kernel">Definition&nbsp;2.1</a>.</p>
 <div id="Normalized kernels" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/d636a7819b42d2e909fbe1fe7b7a21009cc34e9a.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/25da860a0b8a2faf3d23d41e3721186af483bd24.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A kernel <span class="math inline">\(f : X \kernel Y\)</span> is normalized if deleting its output is the same as deleting its input.</figcaption>
 </figure>
 </div>
 <p>More generally, if <span class="math inline">\(f : X \kernel Y \otimes Z\)</span> is a kernel with two outputs, then deleting <span class="math inline">\(Y\)</span> gives the <strong>marginal</strong> on <span class="math inline">\(Z\)</span>:</p>
 <div id="Marginal kernels" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/5ad28b222c220c09b4eb7a464a248f7a70c1aa27.svg" style="height:3.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/8e5dd6d2273d2b5c7fb66eaf3e57eebe7c545923.svg" style="height:3.5em" class="figure-img"></p>
 <figcaption>Deleting an output of a kernel gives the marginal on the remaining outputs.</figcaption>
 </figure>
 </div>
@@ -635,7 +644,7 @@ p(y_1, y_2 \mid x_1, x_2)
 (f \then (\del_Y \otimes \id_Z))(z \mid x) = \sum_{y \in Y} f(y, z \mid x).
 \]</span></p>
 <div id="exm-hidden-markov-model" class="theorem example">
-<p><span class="theorem-title"><strong>Example 2.8</strong></span> In a Markov chain (<a href="#exm-markov-chain" class="quarto-xref">Example&nbsp;<span>2.1</span></a>), we observe the state directly at each time step. A <strong>hidden Markov model</strong> (HMM) introduces a separation between the system’s internal state and what we can measure: the state <span class="math inline">\(X\)</span> evolves as before, but we never see it directly. Instead, at each time step we receive a noisy observation <span class="math inline">\(O\)</span> that depends on the current state. The model is built from three kernels:</p>
+<p><span class="theorem-title"><strong>Example 2.8</strong></span> In a Markov chain (<a href="#exm-markov-chain">Example&nbsp;2.4</a>), we observe the state directly at each time step. A <strong>hidden Markov model</strong> (HMM) introduces a separation between the system’s internal state and what we can measure: the state <span class="math inline">\(X\)</span> evolves as before, but we never see it directly. Instead, at each time step we receive a noisy observation <span class="math inline">\(O\)</span> that depends on the current state. The model is built from three kernels:</p>
 <ul>
 <li>An <strong>initial distribution</strong> <span class="math inline">\(i : I \kernel X\)</span>, a measure on <span class="math inline">\(X\)</span> specifying the probability of each starting state.</li>
 <li>A <strong>transition kernel</strong> <span class="math inline">\(k : X \kernel X\)</span>, the same as in a Markov chain, describing how the hidden state evolves from one time step to the next.</li>
@@ -644,11 +653,11 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>At each time step, the state wire is copied: one copy feeds into the next transition, and the other is passed to the observation kernel. The observation wires are outputs of the model. The state wires between transitions are internal — they are marginalized out when we compute the distribution over observations.</p>
 <div id="Hidden Markov model" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/ae10b76ab043fdfa58aacb7c6d8a803f49a78eea.svg" style="height:5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/8952ae040a0736a9f40d7c6cf0459a860c346dfe.svg" style="height:5em" class="figure-img"></p>
 <figcaption>A hidden Markov model with initial distribution <span class="math inline">\(i : I \kernel X\)</span>, transition kernel <span class="math inline">\(k : X \kernel X\)</span>, and observation kernel <span class="math inline">\(o : X \kernel O\)</span>.</figcaption>
 </figure>
 </div>
-<p>Hidden Markov models are widely used in speech recognition, natural language processing, bioinformatics (e.g., gene finding and sequence alignment), and signal processing. The key computational tasks — computing the likelihood of an observation sequence, inferring the most likely hidden state sequence, and learning the model parameters — can all be performed efficiently using the sum-pushing techniques we discuss in the next section. Later in the course, we will encounter the same diagrammatic structure with continuous state spaces and general (non-discrete) kernels, where it describes <strong>state-space models</strong> used in tracking, control, and time-series analysis.</p>
+<p>Hidden Markov models are widely used in speech recognition, natural language processing, bioinformatics (e.g., gene finding and sequence alignment), and signal processing. The key computational tasks — computing the likelihood of an observation sequence, inferring the most likely hidden state sequence, and learning the model parameters — can all be performed efficiently using the sum-pushing techniques we discuss in the next section. You can derive one of these algorithms on your own in <a href="../exercises/3-hidden-markov-models.html">Exercise 3</a>. Later in the course, we will encounter the same diagrammatic structure with continuous state spaces and general (non-discrete) kernels, where it describes <strong>state-space models</strong> used in tracking, control, and time-series analysis.</p>
 </div>
 </section>
 </section>
@@ -667,7 +676,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>Deterministic kernels are characterized by two properties: they can be <strong>copied</strong> and they are <strong>normalized</strong>.</p>
 <div id="def-copyable-kernel" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 2.10</strong></span> We say that a kernel <span class="math inline">\(f : X \kernel Y\)</span> is <strong>copyable</strong> if applying <span class="math inline">\(f\)</span> and then copying the output is the same as first copying the input and then applying <span class="math inline">\(f\)</span> to each copy independently:</p>
-<img src="graphical-models_files/mediabag/0a44030aa1b698e1b7d29795ba22c53664edcf4f.svg" style="height:5em">
+<img src="graphical-models_files/mediabag/61e7eb7e9da3836336916ec1b10622be50cfd3c1.svg" style="height:5em">
 <p>In symbols, <span class="math inline">\(f\)</span> is copyable when <span class="math inline">\(f \then \cp_Y = \cp_X \then (f \otimes f)\)</span>.</p>
 </div>
 <p>A kernel is copyable precisely when it always produces the same output for a given input. In that case, copying the output is the same as running the process twice on the same input. This fails for genuinely random kernels: running a random process twice may produce different outputs, so copying after the fact is <em>not</em> the same as running two independent copies.</p>
@@ -692,7 +701,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>We now have all the ingredients to interpret a string diagram as a probability distribution. A string diagram describes a composition of kernels, so once we specify each box, we can compute the resulting kernel by applying the composition rules. Let us illustrate this with the fire alarm model:</p>
 <div id="fire-alarm" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/b606ab507ea06786558ffabef915b5eb395ce000.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/e7963493d2df06141936495d3408820624190920.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>A string diagram representing a causal model for a fire alarm.</figcaption>
 </figure>
 </div>
@@ -702,7 +711,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>A string diagram can be parsed as a composition of kernels in many different ways. For example, consider a chain of three kernels.</p>
 <div id="Multiple parsings" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/6ca7b97932e61bd4823e74224311eb4db403e9ba.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/2378ee1642632c918059f0661a5ed5549f287390.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A chain of three kernels can be parsed in two ways.</figcaption>
 </figure>
 </div>
@@ -710,7 +719,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>A second ambiguity arises when we have both sequential and parallel composition.</p>
 <div id="Interchange law" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/b1f8b99243bd6157507d0d0f6d0f4c58d876e0f2.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/9b4aafec3617da366eb8ba4079e193ebfff0b116.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>The choice between first composing in sequence, then parallel, or conversely does not matter.</figcaption>
 </figure>
 </div>
@@ -719,7 +728,7 @@ p(y_1, y_2 \mid x_1, x_2)
 \]</span></p>
 <p>Together with the properties of swap, copy, and delete established in the previous section, associativity and interchange ensure that all parsings of a string diagram yield the same kernel.</p>
 <div id="rem-smc" class="proof remark">
-<p><span class="proof-title"><em>Remark 2.1</em>. </span>Technically, discrete kernels form a <em>symmetric monoidal category</em> with a copy-delete structure. A theorem from category theory guarantees that string diagrams provide a faithful syntax for reasoning about composites in such categories — meaning two diagrams represent the same kernel if and only if one can be deformed into the other.</p>
+<p><span class="proof-title"><em>Remark 2.1</em>. </span>The properties of sequential and parallel composition, together with the laws for swap, copy, and delete introduced in the previous section, are precisely the axioms of a <strong>CD-category</strong> (a symmetric monoidal category with a copy-delete structure). In other words, we have secretly introduced all the CD-category axioms — just without the jargon. Discrete kernels form a CD-category, and a theorem from category theory guarantees that string diagrams provide a faithful syntax for reasoning in any CD-category: two diagrams represent the same kernel if and only if one can be deformed into the other. See <span class="citation" data-cites="LorenzCausal2023">Lorenz and Tull (<a href="../references.html#ref-LorenzCausal2023" role="doc-biblioref">2023</a>)</span> for the definition of CD-categories and an accessible account of how discrete kernels fit into this framework.</p>
 </div>
 </section>
 <section id="sum-product-form" class="level3" data-number="2.2.2">
@@ -727,11 +736,11 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>A useful standard form is obtained by performing all marginalization at the end. We can achieve this by replacing every sequential composition with a copy composition followed by a delete, and then moving all the deletes to the end of the diagram. For the fire alarm model, this gives:</p>
 <div id=" Fire alarm with deletes at the end" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/f808cd293928c8bb47750dd63d803127a7025fab.svg" style="height:8em" class="figure-img"></p>
+<p><img src="graphical-models_files/mediabag/c11899b8a901d728bd87a7fdcb4b7bf48526e0b7.svg" style="height:8em" class="figure-img"></p>
 <figcaption>The fire alarm model can be rewritten so that all delete kernels are at the end.</figcaption>
 </figure>
 </div>
-<p>To evaluate this diagram, recall that copy composition produces a product of kernels with shared variables (the copy nodes enforce equality via Iverson brackets), and that delete sums out a variable. Combining these, we get the <strong>sum-product form</strong>: <span class="math display">\[
+<p>To evaluate this diagram, notice that it can be viewed as a copy composition of all the boxes, followed by deleting the unobserved variables. Recall that copy composition produces a product of kernels with shared variables (the copy nodes enforce equality via Iverson brackets), and that delete sums out a variable. Combining these, we get the <strong>sum-product form</strong>: <span class="math display">\[
 p(x_s, x_a) = \sum_{x_f, x_l} f(x_f \mid \bullet) \, s(x_s \mid x_f) \, p(x_l \mid x_f) \, t(x_a \mid x_s, x_l),
 \]</span> where the subscripts denote which wire the variable corresponds to. In general, any string diagram of probability kernels evaluates to an expression of this form: <span class="math display">\[
 \sum_{\text{internal}} \prod_{i} f_i(\text{outputs}_i \mid \text{inputs}_i),
@@ -743,7 +752,7 @@ p(x_s, x_a) = \sum_{x_f, x_l} f(x_f \mid \bullet) \, s(x_s \mid x_f) \, p(x_l \m
 <ul>
 <li><strong>Sequential composition</strong> is matrix multiplication.</li>
 <li><strong>Parallel composition</strong> is the tensor (Kronecker) product.</li>
-<li><strong>Copy composition</strong> is an element-wise product with shared indices.</li>
+<li><strong>Copy composition</strong> is an element-wise (Hadamard) product with shared indices.</li>
 <li><strong>Delete</strong> sums out an index.</li>
 </ul>
 <p>We can therefore evaluate any string diagram by performing a sequence of such operations. The order in which we perform these operations does not affect the final result, but it can dramatically affect the computational cost.</p>
@@ -818,78 +827,96 @@ P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(x_i).
 </section>
 <section id="comparison-to-other-approaches" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="comparison-to-other-approaches"><span class="header-section-number">2.4</span> Comparison to other approaches</h2>
-<p>There are several well-known frameworks for representing probabilistic models, each with its own strengths. Here we compare string diagrams to three common alternatives.</p>
+<p>We briefly compare string diagrams to three common frameworks for representing probabilistic models. For an in-depth treatment, see <span class="citation" data-cites="KollerPGMs2009">Koller and Friedman (<a href="../references.html#ref-KollerPGMs2009" role="doc-biblioref">2009</a>)</span>.</p>
 <section id="bayesian-networks" class="level3" data-number="2.4.1">
 <h3 data-number="2.4.1" class="anchored" data-anchor-id="bayesian-networks"><span class="header-section-number">2.4.1</span> Bayesian networks</h3>
-<p>A <strong>Bayesian network</strong> represents a joint distribution over a set of random variables using a directed acyclic graph (DAG). Each node corresponds to a variable and is equipped with a conditional probability distribution (CPD) that specifies the distribution of that variable given its parents. The joint distribution factors as a product of these CPDs: <span class="math display">\[
+<p>A <a href="https://en.wikipedia.org/wiki/Bayesian_network"><strong>Bayesian network</strong></a> represents a joint distribution using a directed acyclic graph (DAG). Each node is a random variable with a conditional probability distribution given its parents, and the joint distribution factors as <span class="math display">\[
 p(x_1, \ldots, x_n) = \prod_{i=1}^{n} p(x_i \mid \text{parents}(x_i)).
 \]</span></p>
-<!-- [DAG representing fire alarm.] -->
-<p>Bayesian networks have one clear practical advantage: they are <strong>easier to draw</strong>. Each node is simply a variable, and each arrow represents a direct dependence. There is no need to name the mechanisms, draw copy or delete nodes, or route wires. This simplicity reflects the fact that DAGs carry less information — they record <em>which</em> variables depend on which, but not <em>how</em> the dependencies are implemented. For quick sketches and high-level model specification, this is often all that is needed.</p>
-<p>Our string diagrams encompass Bayesian networks as a special case. A Bayesian network corresponds to a string diagram with no global input, where each box has exactly one output wire that is either fed into downstream boxes or sent to the global output. Comparing the product above to the sum-product form from the previous section confirms this: in a Bayesian network, every variable appears as an output wire of some box, and the internal variables are those that are not observed.</p>
-<p>However, string diagrams are strictly more expressive than standard Bayesian networks:</p>
-<div class="half-width">
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Aspect</th>
-<th>String diagrams</th>
-<th>Bayesian networks</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Global inputs</td>
-<td>Yes</td>
-<td>No</td>
-</tr>
-<tr class="even">
-<td>Multiple outputs per box</td>
-<td>Yes</td>
-<td>No</td>
-</tr>
-<tr class="odd">
-<td>Partial observation (some outputs deleted)</td>
-<td>Yes</td>
-<td>No</td>
-</tr>
-</tbody>
-</table>
+<p>For example, the fire alarm model becomes:</p>
+<div id="Bayesian network for fire alarm" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/dfc049e4d1aa2cc38b2426667c722a5422abf321.svg" style="height:4.5em" class="figure-img"></p>
+<figcaption>A Bayesian network representing the fire alarm model.</figcaption>
+</figure>
 </div>
-<p>Bayesian networks can be extended to support some of these features — for instance, by adding context variables or hidden nodes — but these extensions go beyond the standard definition.</p>
-<p>The extra expressiveness of string diagrams comes with deeper structural advantages.</p>
-<p>First, DAGs are <strong>not compositional</strong>. You cannot take a subgraph and treat it as a single node in a larger network. In string diagrams, any sub-diagram can be wrapped into a box, producing a new kernel that can be plugged into other diagrams. This compositional structure makes it easy to build complex models from reusable components. String diagrams also enforce typing of variables and capture patterns of reuse — for instance, the same kernel <span class="math inline">\(f\)</span> can appear in several places in a diagram, making it clear that the same mechanism is applied repeatedly.</p>
-<p>Second, DAGs <strong>cannot distinguish between certain factorizations</strong>. Two different causal mechanisms can lead to the same DAG structure. String diagrams, by contrast, record the full compositional structure — including which variables are shared and how — so distinct factorizations produce visibly different diagrams.</p>
+<p>Bayesian networks are <strong>easier to draw</strong> — each node is a variable, each arrow a direct dependence — with no need to name mechanisms or route wires. This simplicity reflects the fact that DAGs record <em>which</em> variables depend on which, but not <em>how</em>.</p>
+<p>String diagrams encompass Bayesian networks as a special case: a Bayesian network corresponds to a string diagram with no global input where each box has exactly one output wire. However, string diagrams are more expressive and more structured in several ways.</p>
+<p><strong>Multiple outputs.</strong> In a Bayesian network, each node produces exactly one variable. This can force artificial factorizations. Recall the genetic model from <a href="../chapters/intro.html">Chapter 1</a>, where box <span class="math inline">\(t\)</span> jointly generates the genotypes of both twins — a single mechanism that naturally produces two correlated outputs depending on zygosity. In a Bayesian network, one would have to designate one twin as a “parent” of the other or introduce auxiliary nodes, obscuring the actual biological mechanism.</p>
+<p><strong>Hidden auxiliary variables.</strong> A kernel can internally use randomness that does not appear as an output wire. In the twins example, zygosity is sampled inside box <span class="math inline">\(t\)</span> but never exposed — it is an instrumental variable internal to the mechanism. In a Bayesian network, every random variable must be an explicit node, so zygosity would have to appear in the graph even though it plays no role downstream.</p>
+<p><strong>Observed vs.&nbsp;unobserved.</strong> In a string diagram, the output wires explicitly mark which variables are observed; internal wires are automatically marginalized out. A DAG does not distinguish observed from latent variables — this information must be supplied separately (e.g., by shading nodes).</p>
+<p><strong>Global inputs.</strong> String diagrams naturally support kernels with inputs, representing conditional models. Bayesian networks only describe joint distributions.</p>
+<p><strong>Compositionality.</strong> DAGs are not compositional: you cannot take a subgraph and treat it as a single node in a larger network. In string diagrams, any sub-diagram can be wrapped into a box, producing a new kernel that can be plugged into other diagrams. This makes it easy to build complex models from reusable components.</p>
+<p><strong>Typing and templating.</strong> Each wire in a string diagram carries a type (its label set), and each box declares the types of its inputs and outputs. Moreover, the same box can appear multiple times in a diagram, making it explicit that the same mechanism is reused — as with the transition kernel <span class="math inline">\(k\)</span> in a Markov chain or the observation kernel <span class="math inline">\(o\)</span> in an HMM. DAGs have no analogue of this: each node is a separate variable, so shared structure must be stated informally.</p>
+<p><strong>Named mechanisms.</strong> DAG nodes are labeled by variables, not by the mechanisms that produce them. String diagrams label the boxes with mechanisms and the wires with variables, so the full causal story — <em>what</em> is computed and <em>how</em> information flows — is visible in the diagram.</p>
 </section>
 <section id="factor-graphs" class="level3" data-number="2.4.2">
 <h3 data-number="2.4.2" class="anchored" data-anchor-id="factor-graphs"><span class="header-section-number">2.4.2</span> Factor graphs</h3>
-<p>Factor graphs address some of the limitations of Bayesian networks. A factor graph is a bipartite graph with two kinds of nodes: <em>variable nodes</em> (one per random variable) and <em>factor nodes</em> (one per function in the factorization). An edge connects a variable node to a factor node whenever that variable appears as an argument of the factor. The joint distribution is a product of all the factors: <span class="math display">\[
-p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{j} f_j(\text{neighbors}(j)),
-\]</span> where <span class="math inline">\(Z\)</span> is a normalizing constant.</p>
-<p>Many variants of factor graphs exist, mostly originating from the engineering and signal processing communities. A particularly good version is the <strong>Forney-style factor graph</strong> (FFG) (see <span class="citation" data-cites="LoeligerFactorGraphs2004">Loeliger (<a href="../references.html#ref-LoeligerFactorGraphs2004" role="doc-biblioref">2004</a>)</span>). Like string diagrams, FFGs place variables on edges rather than nodes, allow half-edges (which act like global inputs and outputs), and use explicit equality nodes (analogous to our copy kernels). Directed variants can be obtained by adding arrows to the edges. The structure is quite similar to string diagrams, and FFGs support compositionality — a sub-graph can be wrapped into a single factor node.</p>
-<!-- [FFG diagram for fire alarm.] -->
-<p>The main advantage of string diagrams over factor graphs is their role as a <strong>visual proof system</strong>. The coherence theorem (see <a href="#rem-smc" class="quarto-xref">Remark&nbsp;<span>2.1</span></a>) guarantees that string diagrams provide a faithful syntax for reasoning about kernels — any equation that can be derived by deforming diagrams is valid, and conversely. This goes beyond the discrete setting: string diagrams apply to general measure-theoretic kernels and many other mathematical structures (any symmetric monoidal category with the appropriate structure). Results proved diagrammatically transfer automatically to all these settings.</p>
+<p>A <strong>factor graph</strong> is a bipartite graph with variable nodes and factor nodes, where each edge connects a variable to a factor it participates in. The joint distribution is <span class="math display">\[
+p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{j} f_j(\text{neighbors}(j)).
+\]</span></p>
+<p>The <strong>Forney-style factor graph</strong> (FFG) variant (<span class="citation" data-cites="LoeligerFactorGraphs2004">Loeliger (<a href="../references.html#ref-LoeligerFactorGraphs2004" role="doc-biblioref">2004</a>)</span>) is particularly close to string diagrams: it places variables on edges, allows half-edges (global inputs/outputs), and uses explicit equality nodes (analogous to copy kernels). FFGs also support compositionality.</p>
+<div id="Factor graph for fire alarm" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="graphical-models_files/mediabag/c395071ec7447aacfe8eca40efae62d1025248af.svg" style="height:7em" class="figure-img"></p>
+<figcaption>A Forney-style factor graph representing the fire alarm model.</figcaption>
+</figure>
+</div>
+<p>The main advantage of string diagrams over factor graphs is their role as a <strong>visual proof system</strong>. As noted in <a href="#rem-smc" class="quarto-xref">Remark&nbsp;<span>2.1</span></a>, a theorem from category theory guarantees that any equation derived by deforming string diagrams is valid. This extends beyond the discrete setting to general measure-theoretic kernels and other mathematical structures.</p>
 </section>
 <section id="undirected-graphical-models" class="level3" data-number="2.4.3">
 <h3 data-number="2.4.3" class="anchored" data-anchor-id="undirected-graphical-models"><span class="header-section-number">2.4.3</span> Undirected graphical models</h3>
-<p>An <strong>undirected graphical model</strong> (or <strong>Markov random field</strong>) represents a distribution using an undirected graph. Each node is a random variable, and the joint distribution factors over the cliques of the graph: <span class="math display">\[
+<p>An <strong>undirected graphical model</strong> (Markov random field) factors a distribution over the cliques of an undirected graph: <span class="math display">\[
 p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{c \in \text{cliques}} \phi_c(x_c),
-\]</span> where each <span class="math inline">\(\phi_c\)</span> is a non-negative <strong>potential function</strong> and <span class="math inline">\(Z = \sum_{x_1, \ldots, x_n} \prod_c \phi_c(x_c)\)</span> is the normalizing constant.</p>
-<p>Unlike Bayesian networks, undirected models do not impose acyclicity, which makes them natural for modeling symmetric interactions (e.g., in image processing or physics). However, the potential functions are typically unnormalized — the normalizing constant <span class="math inline">\(Z\)</span> must be computed separately, and this computation is often intractable. By contrast, our string diagrams of probability kernels are normalized by construction, so the sum-product form directly gives a probability distribution without any additional normalization step.</p>
+\]</span> where each <span class="math inline">\(\phi_c\)</span> is a non-negative potential function and <span class="math inline">\(Z\)</span> is the normalizing constant. Undirected models naturally handle symmetric interactions (e.g., in image processing or physics), but the normalizing constant <span class="math inline">\(Z\)</span> is often intractable. By contrast, our string diagrams of probability kernels are normalized by construction.</p>
 </section>
 </section>
 <section id="bibliographic-notes" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="bibliographic-notes">Bibliographic notes</h2>
-<!-- Mention Fong, Jacobs, Fritz. Also mention Jacobs' book "Structured probabilistic reasoning". -->
+<p>Bayesian networks were introduced by <span class="citation" data-cites="PearlReasoning1988">Pearl (<a href="../references.html#ref-PearlReasoning1988" role="doc-biblioref">1988</a>)</span> as a framework for probabilistic reasoning in artificial intelligence. Pearl later developed the theory of causal inference using directed graphical models in <span class="citation" data-cites="Pearl2009">Pearl (<a href="../references.html#ref-Pearl2009" role="doc-biblioref">2009</a>)</span>, where interventions and counterfactuals are formalized on top of the Bayesian network structure. Around the same time, <span class="citation" data-cites="SpirtesCausation2000">Spirtes, Glymour, and Scheines (<a href="../references.html#ref-SpirtesCausation2000" role="doc-biblioref">2000</a>)</span> developed complementary methods for discovering causal structure from data using conditional independence constraints. A good introduction to Bayesian networks can be found in <span class="citation" data-cites="RussellArtificial2021">Russell and Norvig (<a href="../references.html#ref-RussellArtificial2021" role="doc-biblioref">2021</a>)</span>. For a more detailed treatment of exact inference, see <span class="citation" data-cites="DarwicheBayesianNetworks2009">Darwiche (<a href="../references.html#ref-DarwicheBayesianNetworks2009" role="doc-biblioref">2009</a>)</span>. For a general account of probabilistic graphical models, see <span class="citation" data-cites="KollerPGMs2009">Koller and Friedman (<a href="../references.html#ref-KollerPGMs2009" role="doc-biblioref">2009</a>)</span>.</p>
+<p>The use of categories of kernels to represent probabilistic models goes back to <span class="citation" data-cites="LawvereProbabilistic1962">Lawvere (<a href="../references.html#ref-LawvereProbabilistic1962" role="doc-biblioref">1962</a>)</span> and was further explored by <span class="citation" data-cites="FongCausal2013">Fong (<a href="../references.html#ref-FongCausal2013" role="doc-biblioref">2013</a>)</span> and <span class="citation" data-cites="ChoDisintegration2019">Cho and Jacobs (<a href="../references.html#ref-ChoDisintegration2019" role="doc-biblioref">2019</a>)</span>. A seminal paper by <span class="citation" data-cites="FritzSynthetic2020">Fritz (<a href="../references.html#ref-FritzSynthetic2020" role="doc-biblioref">2020</a>)</span> developed these ideas systematically and provides a detailed account of their history. A good introduction to causal modeling using string diagrams of discrete kernels can be found in <span class="citation" data-cites="LorenzCausal2023">Lorenz and Tull (<a href="../references.html#ref-LorenzCausal2023" role="doc-biblioref">2023</a>)</span>. See also the work-in-progress book by <span class="citation" data-cites="JacobsReasoning">Jacobs (<a href="../references.html#ref-JacobsReasoning" role="doc-biblioref">n.d.</a>)</span> for a comprehensive treatment of the categorical structure of discrete kernels and its applications to probabilistic reasoning.</p>
 
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-ChoDisintegration2019" class="csl-entry" role="listitem">
+Cho, Kenta, and Bart Jacobs. 2019. <span>“Disintegration and Bayesian Inversion via String Diagrams.”</span> <em>Mathematical Structures in Computer Science</em> 29 (7): 938–71. <a href="https://doi.org/10.1017/S0960129518000488">https://doi.org/10.1017/S0960129518000488</a>.
+</div>
 <div id="ref-DarwicheBayesianNetworks2009" class="csl-entry" role="listitem">
-Darwiche, Adnan. 2009. <span>“Modeling and Reasoning with Bayesian Networks,”</span> April. https://doi.org/<a href="https://doi.org/10.1017/CBO9780511811357">https://doi.org/10.1017/CBO9780511811357</a>.
+Darwiche, Adnan. 2009. <span>“Modeling and Reasoning with Bayesian Networks,”</span> April. <a href="https://doi.org/10.1017/CBO9780511811357">https://doi.org/10.1017/CBO9780511811357</a>.
+</div>
+<div id="ref-FongCausal2013" class="csl-entry" role="listitem">
+Fong, Brendan. 2013. <span>“Causal Theories: A Categorical Perspective on Bayesian Networks.”</span> <a href="https://doi.org/10.48550/arXiv.1301.6201">https://doi.org/10.48550/arXiv.1301.6201</a>.
+</div>
+<div id="ref-FritzSynthetic2020" class="csl-entry" role="listitem">
+Fritz, Tobias. 2020. <span>“A Synthetic Approach to Markov Kernels, Conditional Independence and Theorems on Sufficient Statistics.”</span> <em>Advances in Mathematics</em> 370 (August): 107239. <a href="https://doi.org/10.1016/j.aim.2020.107239">https://doi.org/10.1016/j.aim.2020.107239</a>.
+</div>
+<div id="ref-JacobsReasoning" class="csl-entry" role="listitem">
+Jacobs, Bart. n.d. <em>Structured Probabilistic Reasoning</em>. <a href="https://www.cs.ru.nl/B.Jacobs/PAPERS/ProbabilisticReasoning.pdf">https://www.cs.ru.nl/B.Jacobs/PAPERS/ProbabilisticReasoning.pdf</a>.
+</div>
+<div id="ref-KollerPGMs2009" class="csl-entry" role="listitem">
+Koller, Daphne, and Nir Friedman. 2009. <em>Probabilistic Graphical Models: Principles and Techniques</em>. MIT Press.
+</div>
+<div id="ref-LawvereProbabilistic1962" class="csl-entry" role="listitem">
+Lawvere, F. William. 1962. <span>“The Category of Probabilistic Mappings.”</span> <a href="https://lawverearchives.com/wp-content/uploads/2025/07/1962.probmap.pdf">https://lawverearchives.com/wp-content/uploads/2025/07/1962.probmap.pdf</a>.
 </div>
 <div id="ref-LoeligerFactorGraphs2004" class="csl-entry" role="listitem">
-Loeliger, H. 2004. <span>“An Introduction to Factor Graphs.”</span> <em>IEEE Signal Processing Magazine</em> 21 (1): 28–41. https://doi.org/<a href="https://doi.org/10.1109/MSP.2004.1267047">https://doi.org/10.1109/MSP.2004.1267047</a>.
+Loeliger, H. 2004. <span>“An Introduction to Factor Graphs.”</span> <em>IEEE Signal Processing Magazine</em> 21 (1): 28–41. <a href="https://doi.org/10.1109/MSP.2004.1267047">https://doi.org/10.1109/MSP.2004.1267047</a>.
+</div>
+<div id="ref-LorenzCausal2023" class="csl-entry" role="listitem">
+Lorenz, Robin, and Sean Tull. 2023. <span>“Causal Models in String Diagrams.”</span> <a href="https://doi.org/10.48550/arXiv.2304.07638">https://doi.org/10.48550/arXiv.2304.07638</a>.
+</div>
+<div id="ref-PearlReasoning1988" class="csl-entry" role="listitem">
+Pearl, Judea. 1988. <em>Probabilistic Reasoning in Intelligent Systems</em>. Elsevier. <a href="https://doi.org/10.1016/C2009-0-27609-4">https://doi.org/10.1016/C2009-0-27609-4</a>.
+</div>
+<div id="ref-Pearl2009" class="csl-entry" role="listitem">
+———. 2009. <em>Causality: Models, Reasoning, and Inference</em>. Cambridge University Press. <a href="https://doi.org/10.1017/CBO9780511803161">https://doi.org/10.1017/CBO9780511803161</a>.
+</div>
+<div id="ref-RussellArtificial2021" class="csl-entry" role="listitem">
+Russell, Stuart J, and Peter Norvig. 2021. <em>Artificial Intelligence: A Modern Approach</em>. 4th ed. Pearson.
+</div>
+<div id="ref-SpirtesCausation2000" class="csl-entry" role="listitem">
+Spirtes, Peter, Clark Glymour, and Richard Scheines. 2000. <em>Causation, Prediction, and Search</em>. 2nd ed. MIT Press.
 </div>
 </div>
 </section>

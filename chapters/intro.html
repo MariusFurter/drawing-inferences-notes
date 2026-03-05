@@ -222,6 +222,12 @@ window.Quarto = {
  <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Hidden Markov models</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -429,7 +435,7 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <p>We will now describe a convenient way to build and reason about generative models using <strong>string diagrams</strong>. This lets us manipulate complex models visually, without tedious algebra. Two examples of string diagrams are shown below. The one on the left represents a typical causal model. The one on the right illustrates other syntactic possibilities.</p>
 <div id="string-diagrams" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="intro_files/mediabag/f68d71ee048fdc6dc1bbf5f8b68bc09fe59ad0ee.svg" style="height:7.5em" class="figure-img"></p>
+<p><img src="intro_files/mediabag/2800096c83c63f0c9eb941436dd5ce867bbedb1f.svg" style="height:7.5em" class="figure-img"></p>
 <figcaption>Two examples of string diagrams.</figcaption>
 </figure>
 </div>
@@ -437,7 +443,7 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <p>Boxes can have any number of input and output wires. We think of boxes with no inputs as <strong>generators</strong> and boxes with no outputs as <strong>evaluators</strong>. Wires are allowed to cross. The point where this happens is called a <strong>swap</strong>. Moreover, the black <strong>copy</strong> and <strong>delete</strong> nodes allow us to split and terminate wires. You should think of copy nodes as perfectly duplicating the information in the wire, while delete nodes throw the information away. Here is a summary of the visual elements used to construct string diagrams:</p>
 <div id="string-diagram-elements" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="intro_files/mediabag/72afb1257e133f50548256fb835842677fcc6103.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="intro_files/mediabag/31dffa87b5051a48c44eea0382651f03f9fba0c7.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>The visual elements used to construct string diagrams.</figcaption>
 </figure>
 </div>
@@ -445,21 +451,21 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <p>A key feature of string diagrams is that only their connectivity matters for determining their meaning. For instance, the following diagrams are considered the same:</p>
 <div id="deformations" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="intro_files/mediabag/367c4d230b9265ba1a84e0da27d22e46d45e897c.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="intro_files/mediabag/4cb76249379d6924fbca1c522225c6153a3081cd.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>These string diagrams that are considered the same because they can be deformed into each other without breaking any connections.</figcaption>
 </figure>
 </div>
 <p>A good way to imagine the allowed deformations is to think of the wires as rubber bands and the boxes as solid tiles. The wires are pinned to the boxes and to the perimeter of the diagram, but they can be freely stretched and bent in between. We can now slide the boxes around as long as we don’t break the anchor points. One rule we must respect is that our deformations should not introduce backwards flow of information. In other words, we should not move a box to the left of any of its inputs. For example, the following deformation is not valid:</p>
 <div id="invalid-deformation" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="intro_files/mediabag/463a200e60b976e641eaa5ff9f183c4862d6ae94.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="intro_files/mediabag/b4082c995800588b7aa491e4eeb5faf8e716aa55.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>An invalid deformation of a string diagram that introduces backwards flow of information.</figcaption>
 </figure>
 </div>
 <p>Finally, string diagrams can be used for calculations. We can manipulate them according to certain rules to derive new diagrams that represent the same process. For instance, the following identities always hold:</p>
 <div id="example-identities" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="intro_files/mediabag/cc0c5f893e9aa74356ae9c0cc04203538583c075.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="intro_files/mediabag/bececce2a017b79a12962d48417a883e9b61f3c8.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Some identities that hold for string diagrams.</figcaption>
 </figure>
 </div>
@@ -467,7 +473,7 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <p>Sometimes certain identities hold for specific types of boxes. For instance, the following identity holds for any box <span class="math inline">\(f\)</span> that is normalized, i.e.&nbsp;represents a conditional probability distribution:</p>
 <div id="normalization-identity" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="intro_files/mediabag/8fd1fec56b263f269c1e32528f32bef94ead7c77.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="intro_files/mediabag/23ec469ff078b3fd354f79c33aea554f2d3baaf5.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>An identity that holds for any normalized box <span class="math inline">\(f\)</span>.</figcaption>
 </figure>
 </div>
@@ -475,7 +481,7 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <p>We will see more examples of ways to calculate with string diagrams in the next chapter. For now, we can use these three to calculate what happens to the fire alarm diagram when we delete the bottom output and simplify:</p>
 <div id="fire-alarm-deletion" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="intro_files/mediabag/c2be84ecbd27197766fe92a84b4177b01b482d24.svg" style="height:11em" class="figure-img"></p>
+<p><img src="intro_files/mediabag/2a5d01db038b3fdbfe76be0db98e47f3713ef3b2.svg" style="height:11em" class="figure-img"></p>
 <figcaption>Deleting the bottom output of the fire alarm diagram and simplifying.</figcaption>
 </figure>
 </div>
@@ -531,7 +537,7 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <p>We next draw the structure of the generative model as a string diagram. The diagram should reflect the causal structure of the family tree and the laws of heredity.</p>
 <div id="family-tree" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="intro_files/mediabag/660395e85566227baa76296ee6904a4774be4dba.svg" style="height:6em" class="figure-img"></p>
+<p><img src="intro_files/mediabag/b368890210600c5eba521c4e10efac52b2a78bb8.svg" style="height:6em" class="figure-img"></p>
 <figcaption>A string diagram representing a generative model for the family tree.</figcaption>
 </figure>
 </div>
