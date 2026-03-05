@@ -209,7 +209,9 @@ $$
 (m \then t)(\bullet \mid \bullet) = \sum_{x \in X} t(\bullet \mid x) \, m(x \mid \bullet).
 $$
 
-When $m$ is a probability measure and $t$ assigns real-valued weights, this is the usual expectation $\mathbb{E}_{m(x)}[t(x)] := \sum_{x \in X} t(x) \, m(x)$. We will use this notation freely from now on.
+When $m$ is a probability measure and $t$ assigns real-valued weights, this is the usual expectation 
+$$\mathbb{E}_{m(x)}[t(x)] := \sum_{x \in X} t(x) \, m(x).$$
+
 
 ### Crossing wires
 Next, we define a kernel that **swaps** wires.
@@ -337,7 +339,7 @@ $$
 
 Notice how the Iverson bracket in the copy kernel **enforces equality** $x' = x'' = x$, collapsing the sum. The result is the product $f(y \mid x) \, g(z \mid x)$ — meaning $Y$ and $Z$ are conditionally independent given $X$. This pattern is the graphical definition of conditional independence. We will return to this point later.
 
-Another common pattern is composing two kernels while retaining the intermediate output via copying. We call this **copy composition**:
+Another common pattern is composing two kernels while retaining the intermediate output via copying. We call this **copy composition**, denoted $f \odot g$:
 
 ``` {.tikz file="graphical-models/copy-composition.tikz"}
 %%| label: Copy composition
@@ -345,13 +347,15 @@ Another common pattern is composing two kernels while retaining the intermediate
 %%| height: 4.5em
 ```
 
-Evaluating this composite shows that copy composition acts like the chain rule for conditional probabilities:
+Evaluating this composite shows that copy composition $f \odot g$ acts like the chain rule for conditional probabilities:
 $$
-(f \then \cp_Y \then (\id_Y \otimes g))(y,z \mid x) 
-= \sum_{y', y''} \, \ivmark{y' = y'' = y} \, f(y' \mid x) \, g(z \mid y'') 
-= f(y \mid x) \, g(z \mid y).
+\begin{aligned}
+(f \odot g)(y, z \mid x) 
+&= (f \then \cp_Y \then (\id_Y \otimes g))(y, z \mid x) \\
+&= \sum_{y', y''} \, \ivmark{y' = y'' = y} \, f(y' \mid x) \, g(z \mid y'')  \\
+&= f(y \mid x) \, g(z \mid y).
+\end{aligned}
 $$
-
 
 #### Delete marginalizes
 
@@ -397,7 +401,7 @@ At each time step, the state wire is copied: one copy feeds into the next transi
 %%| height: 5em
 ```
 
-Hidden Markov models are widely used in speech recognition, natural language processing, bioinformatics (e.g., gene finding and sequence alignment), and signal processing. The key computational tasks — computing the likelihood of an observation sequence, inferring the most likely hidden state sequence, and learning the model parameters — can all be performed efficiently using the sum-pushing techniques we discuss in the next section. Later in the course, we will encounter the same diagrammatic structure with continuous state spaces and general (non-discrete) kernels, where it describes **state-space models** used in tracking, control, and time-series analysis.
+Hidden Markov models are widely used in speech recognition, natural language processing, bioinformatics (e.g., gene finding and sequence alignment), and signal processing. The key computational tasks — computing the likelihood of an observation sequence, inferring the most likely hidden state sequence, and learning the model parameters — can all be performed efficiently using the sum-pushing techniques we discuss in the next section. You can derive one of these algorithms on your own in [Exercise 3](../exercises/3-hidden-markov-models.qmd). Later in the course, we will encounter the same diagrammatic structure with continuous state spaces and general (non-discrete) kernels, where it describes **state-space models** used in tracking, control, and time-series analysis.
 :::
 
 ### Deterministic kernels
@@ -495,7 +499,7 @@ $$
 Together with the properties of swap, copy, and delete established in the previous section, associativity and interchange ensure that all parsings of a string diagram yield the same kernel.
 
 :::{#rem-smc}
-Technically, discrete kernels form a *symmetric monoidal category* with a copy-delete structure. A theorem from category theory guarantees that string diagrams provide a faithful syntax for reasoning about composites in such categories — meaning two diagrams represent the same kernel if and only if one can be deformed into the other.
+The properties of sequential and parallel composition, together with the laws for swap, copy, and delete introduced in the previous section, are precisely the axioms of a **CD-category** (a symmetric monoidal category with a copy-delete structure). In other words, we have secretly introduced all the CD-category axioms — just without the jargon. Discrete kernels form a CD-category, and a theorem from category theory guarantees that string diagrams provide a faithful syntax for reasoning in any CD-category: two diagrams represent the same kernel if and only if one can be deformed into the other. See @LorenzCausal2023 for the definition of CD-categories and an accessible account of how discrete kernels fit into this framework.
 :::
 
 ### Sum-product form
@@ -508,7 +512,7 @@ A useful standard form is obtained by performing all marginalization at the end.
 %%| height: 8em
 ```
 
-To evaluate this diagram, recall that copy composition produces a product of kernels with shared variables (the copy nodes enforce equality via Iverson brackets), and that delete sums out a variable. Combining these, we get the **sum-product form**:
+To evaluate this diagram, notice that it can be viewed as a copy composition of all the boxes, followed by deleting the unobserved variables. Recall that copy composition produces a product of kernels with shared variables (the copy nodes enforce equality via Iverson brackets), and that delete sums out a variable. Combining these, we get the **sum-product form**:
 $$
 p(x_s, x_a) = \sum_{x_f, x_l} f(x_f \mid \bullet) \, s(x_s \mid x_f) \, p(x_l \mid x_f) \, t(x_a \mid x_s, x_l),
 $$
@@ -524,7 +528,7 @@ Each composition rule translates directly into a tensor operation. If we represe
 
 - **Sequential composition** is matrix multiplication.
 - **Parallel composition** is the tensor (Kronecker) product.
-- **Copy composition** is an element-wise product with shared indices.
+- **Copy composition** is an element-wise (Hadamard) product with shared indices.
 - **Delete** sums out an index.
 
 We can therefore evaluate any string diagram by performing a sequence of such operations. The order in which we perform these operations does not affect the final result, but it can dramatically affect the computational cost.
@@ -631,63 +635,67 @@ This is precisely what we do when we sample from a string diagram and count how 
 
 ## Comparison to other approaches
 
-There are several well-known frameworks for representing probabilistic models, each with its own strengths. Here we compare string diagrams to three common alternatives.
+We briefly compare string diagrams to three common frameworks for representing probabilistic models. For an in-depth treatment, see @KollerPGMs2009.
 
 ### Bayesian networks
 
-A **Bayesian network** represents a joint distribution over a set of random variables using a directed acyclic graph (DAG). Each node corresponds to a variable and is equipped with a conditional probability distribution (CPD) that specifies the distribution of that variable given its parents. The joint distribution factors as a product of these CPDs:
+A [**Bayesian network**](https://en.wikipedia.org/wiki/Bayesian_network) represents a joint distribution using a directed acyclic graph (DAG). Each node is a random variable with a conditional probability distribution given its parents, and the joint distribution factors as
 $$
 p(x_1, \ldots, x_n) = \prod_{i=1}^{n} p(x_i \mid \text{parents}(x_i)).
 $$
 
-<!-- [DAG representing fire alarm.] -->
+For example, the fire alarm model becomes:
+``` {.tikz file="graphical-models/bn-fire-alarm.tikz"}
+%%| label: Bayesian network for fire alarm
+%%| fig-cap: A Bayesian network representing the fire alarm model.
+%%| height: 4.5em
+```
 
-Bayesian networks have one clear practical advantage: they are **easier to draw**. Each node is simply a variable, and each arrow represents a direct dependence. There is no need to name the mechanisms, draw copy or delete nodes, or route wires. This simplicity reflects the fact that DAGs carry less information — they record *which* variables depend on which, but not *how* the dependencies are implemented. For quick sketches and high-level model specification, this is often all that is needed.
+Bayesian networks are **easier to draw** — each node is a variable, each arrow a direct dependence — with no need to name mechanisms or route wires. This simplicity reflects the fact that DAGs record *which* variables depend on which, but not *how*.
 
-Our string diagrams encompass Bayesian networks as a special case. A Bayesian network corresponds to a string diagram with no global input, where each box has exactly one output wire that is either fed into downstream boxes or sent to the global output. Comparing the product above to the sum-product form from the previous section confirms this: in a Bayesian network, every variable appears as an output wire of some box, and the internal variables are those that are not observed.
+String diagrams encompass Bayesian networks as a special case: a Bayesian network corresponds to a string diagram with no global input where each box has exactly one output wire. However, string diagrams are more expressive and more structured in several ways.
 
-However, string diagrams are strictly more expressive than standard Bayesian networks:
+**Multiple outputs.** In a Bayesian network, each node produces exactly one variable. This can force artificial factorizations. Recall the genetic model from [Chapter 1](intro.qmd), where box $t$ jointly generates the genotypes of both twins — a single mechanism that naturally produces two correlated outputs depending on zygosity. In a Bayesian network, one would have to designate one twin as a "parent" of the other or introduce auxiliary nodes, obscuring the actual biological mechanism.
 
-::: {.half-width}
-| Aspect | String diagrams | Bayesian networks |
-|---|---|---|
-| Global inputs | Yes | No |
-| Multiple outputs per box | Yes | No |
-| Partial observation (some outputs deleted) | Yes | No |
-:::
+**Hidden auxiliary variables.** A kernel can internally use randomness that does not appear as an output wire. In the twins example, zygosity is sampled inside box $t$ but never exposed — it is an instrumental variable internal to the mechanism. In a Bayesian network, every random variable must be an explicit node, so zygosity would have to appear in the graph even though it plays no role downstream.
 
-Bayesian networks can be extended to support some of these features — for instance, by adding context variables or hidden nodes — but these extensions go beyond the standard definition.
+**Observed vs. unobserved.** In a string diagram, the output wires explicitly mark which variables are observed; internal wires are automatically marginalized out. A DAG does not distinguish observed from latent variables — this information must be supplied separately (e.g., by shading nodes).
 
-The extra expressiveness of string diagrams comes with deeper structural advantages.
+**Global inputs.** String diagrams naturally support kernels with inputs, representing conditional models. Bayesian networks only describe joint distributions.
 
-First, DAGs are **not compositional**. You cannot take a subgraph and treat it as a single node in a larger network. In string diagrams, any sub-diagram can be wrapped into a box, producing a new kernel that can be plugged into other diagrams. This compositional structure makes it easy to build complex models from reusable components. String diagrams also enforce typing of variables and capture patterns of reuse — for instance, the same kernel $f$ can appear in several places in a diagram, making it clear that the same mechanism is applied repeatedly.
+**Compositionality.** DAGs are not compositional: you cannot take a subgraph and treat it as a single node in a larger network. In string diagrams, any sub-diagram can be wrapped into a box, producing a new kernel that can be plugged into other diagrams. This makes it easy to build complex models from reusable components.
 
-Second, DAGs **cannot distinguish between certain factorizations**. Two different causal mechanisms can lead to the same DAG structure. String diagrams, by contrast, record the full compositional structure — including which variables are shared and how — so distinct factorizations produce visibly different diagrams.
+**Typing and templating.** Each wire in a string diagram carries a type (its label set), and each box declares the types of its inputs and outputs. Moreover, the same box can appear multiple times in a diagram, making it explicit that the same mechanism is reused — as with the transition kernel $k$ in a Markov chain or the observation kernel $o$ in an HMM. DAGs have no analogue of this: each node is a separate variable, so shared structure must be stated informally.
+
+**Named mechanisms.** DAG nodes are labeled by variables, not by the mechanisms that produce them. String diagrams label the boxes with mechanisms and the wires with variables, so the full causal story — *what* is computed and *how* information flows — is visible in the diagram.
 
 ### Factor graphs
 
-Factor graphs address some of the limitations of Bayesian networks. A factor graph is a bipartite graph with two kinds of nodes: *variable nodes* (one per random variable) and *factor nodes* (one per function in the factorization). An edge connects a variable node to a factor node whenever that variable appears as an argument of the factor. The joint distribution is a product of all the factors:
+A **factor graph** is a bipartite graph with variable nodes and factor nodes, where each edge connects a variable to a factor it participates in. The joint distribution is
 $$
-p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{j} f_j(\text{neighbors}(j)),
+p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{j} f_j(\text{neighbors}(j)).
 $$
-where $Z$ is a normalizing constant.
 
-Many variants of factor graphs exist, mostly originating from the engineering and signal processing communities. A particularly good version is the **Forney-style factor graph** (FFG) (see @LoeligerFactorGraphs2004). Like string diagrams, FFGs place variables on edges rather than nodes, allow half-edges (which act like global inputs and outputs), and use explicit equality nodes (analogous to our copy kernels). Directed variants can be obtained by adding arrows to the edges. The structure is quite similar to string diagrams, and FFGs support compositionality — a sub-graph can be wrapped into a single factor node.
+The **Forney-style factor graph** (FFG) variant (@LoeligerFactorGraphs2004) is particularly close to string diagrams: it places variables on edges, allows half-edges (global inputs/outputs), and uses explicit equality nodes (analogous to copy kernels). FFGs also support compositionality.
 
-<!-- [FFG diagram for fire alarm.] -->
+``` {.tikz file="graphical-models/fg-fire-alarm.tikz"}
+%%| label: Factor graph for fire alarm
+%%| fig-cap: A Forney-style factor graph representing the fire alarm model.
+%%| height: 7em
+```
 
-The main advantage of string diagrams over factor graphs is their role as a **visual proof system**. The coherence theorem (see @rem-smc) guarantees that string diagrams provide a faithful syntax for reasoning about kernels — any equation that can be derived by deforming diagrams is valid, and conversely. This goes beyond the discrete setting: string diagrams apply to general measure-theoretic kernels and many other mathematical structures (any symmetric monoidal category with the appropriate structure). Results proved diagrammatically transfer automatically to all these settings.
+The main advantage of string diagrams over factor graphs is their role as a **visual proof system**. As noted in @rem-smc, a theorem from category theory guarantees that any equation derived by deforming string diagrams is valid. This extends beyond the discrete setting to general measure-theoretic kernels and other mathematical structures.
 
 ### Undirected graphical models
 
-An **undirected graphical model** (or **Markov random field**) represents a distribution using an undirected graph. Each node is a random variable, and the joint distribution factors over the cliques of the graph:
+An **undirected graphical model** (Markov random field) factors a distribution over the cliques of an undirected graph:
 $$
 p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{c \in \text{cliques}} \phi_c(x_c),
 $$
-where each $\phi_c$ is a non-negative **potential function** and $Z = \sum_{x_1, \ldots, x_n} \prod_c \phi_c(x_c)$ is the normalizing constant.
-
-Unlike Bayesian networks, undirected models do not impose acyclicity, which makes them natural for modeling symmetric interactions (e.g., in image processing or physics). However, the potential functions are typically unnormalized — the normalizing constant $Z$ must be computed separately, and this computation is often intractable. By contrast, our string diagrams of probability kernels are normalized by construction, so the sum-product form directly gives a probability distribution without any additional normalization step.
+where each $\phi_c$ is a non-negative potential function and $Z$ is the normalizing constant. Undirected models naturally handle symmetric interactions (e.g., in image processing or physics), but the normalizing constant $Z$ is often intractable. By contrast, our string diagrams of probability kernels are normalized by construction.
 
 ## Bibliographic notes {.unnumbered}
 
-<!-- Mention Fong, Jacobs, Fritz. Also mention Jacobs' book "Structured probabilistic reasoning". -->
+Bayesian networks were introduced by @PearlReasoning1988 as a framework for probabilistic reasoning in artificial intelligence. Pearl later developed the theory of causal inference using directed graphical models in @Pearl2009, where interventions and counterfactuals are formalized on top of the Bayesian network structure. Around the same time, @SpirtesCausation2000 developed complementary methods for discovering causal structure from data using conditional independence constraints. A good introduction to Bayesian networks can be found in @RussellArtificial2021. For a more detailed treatment of exact inference, see @DarwicheBayesianNetworks2009. For a general account of probabilistic graphical models, see @KollerPGMs2009.
+
+The use of categories of kernels to represent probabilistic models goes back to @LawvereProbabilistic1962 and was further explored by @FongCausal2013 and @ChoDisintegration2019. A seminal paper by @FritzSynthetic2020 developed these ideas systematically and provides a detailed account of their history. A good introduction to causal modeling using string diagrams of discrete kernels can be found in @LorenzCausal2023. See also the work-in-progress book by @JacobsReasoning for a comprehensive treatment of the categorical structure of discrete kernels and its applications to probabilistic reasoning. 

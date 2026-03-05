@@ -263,7 +263,7 @@ local tikz = {
             header_includes = stringify(hi)
           end
         end
-        local tex_code = '\\documentclass{standalone}\n\\usepackage{tikz}\n'
+        local tex_code = '\\documentclass[border=2pt]{standalone}\n\\usepackage{tikz}\n'
           .. header_includes
           .. additional .. '\n'
           .. '\\begin{document}\n'

@@ -20,6 +20,7 @@
 \tikzstyle{small mix right}=[fill=white, draw=black, shape=signal, signal to=east, signal pointer angle=130, minimum height=0.75cm, minimum width=0.25cm, inner sep=0.1cm, tikzit category=Triangles, thick]
 \tikzstyle{medium mix right}=[fill=white, draw=black, shape=signal, signal to=east, signal pointer angle=135, minimum height=1cm, minimum width=0.25cm, inner sep=0.1cm, tikzit category=Triangles, thick]
 \tikzstyle{large mix right}=[fill=white, draw=black, shape=signal, signal to=east, signal pointer angle=140, minimum height=1.5cm, minimum width=0.25cm, inner sep=0.1cm, tikzit category=Triangles, thick]
+\tikzstyle{square box}=[fill=white, draw=black, shape=rectangle, tikzit category=Boxes, thick, minimum width=0.5cm, minimum height=0.5cm]
 
 % Edge styles
 \tikzstyle{edge}=[-, thick]

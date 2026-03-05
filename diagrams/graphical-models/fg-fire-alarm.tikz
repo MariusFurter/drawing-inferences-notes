@@ -1,0 +1,26 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=square box] (0) at (-3, 0) {$f$};
+		\node [style=square box] (1) at (0, 0) {$=$};
+		\node [style=square box] (2) at (0, 2) {$s$};
+		\node [style=square box] (3) at (0, -2) {$p$};
+		\node [style=square box] (4) at (3, -2) {$t$};
+		\node [style=square box] (5) at (3, 2) {$=$};
+		\node [style=none] (6) at (5, 2) {};
+		\node [style=none] (7) at (5, -2) {};
+		\node [style=none] (8) at (-1.5, 0.5) {$F$};
+		\node [style=none] (10) at (1.5, -1.5) {$L$};
+		\node [style=none] (11) at (4.5, 2.5) {$S$};
+		\node [style=none] (12) at (4.5, -1.5) {$A$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (2) to (1);
+		\draw [style=edge] (1) to (3);
+		\draw [style=edge] (3) to (4);
+		\draw [style=edge] (4) to (7.center);
+		\draw [style=edge] (5) to (6.center);
+		\draw [style=edge] (5) to (4);
+		\draw [style=edge] (2) to (5);
+		\draw [style=edge] (0) to (1);
+	\end{pgfonlayer}
+\end{tikzpicture}

@@ -24,6 +24,9 @@ end
 -- Parse a theorem title string like "Definition 2.1" or "Theorem 3 (Name)".
 -- Returns (type_name, chapter_prefix, local_number) or nil.
 local function parse_title(text)
+  -- Normalize non-breaking spaces (UTF-8: \xc2\xa0) to regular spaces,
+  -- since Quarto cross-references use &nbsp; between type name and number.
+  text = text:gsub("\xc2\xa0", " ")
   -- With chapter numbering: "Type Ch.N" or "Type Ch.N (Name)"
   local type_name, ch, num = text:match("^(%a+)%s+(%d+%.)(%d+)")
   if type_name then
@@ -87,15 +90,23 @@ function Pandoc(doc)
 
   renumber(doc.blocks)
 
-  -- Second pass: update cross-reference links to use the new shared numbers
+  -- Second pass: update cross-reference links to use the new shared numbers.
+  -- We emit raw HTML because Quarto's post-processing would otherwise
+  -- overwrite the link text with its own (per-type) numbering.
   doc = doc:walk({
     Link = function(link)
       local target_id = link.target:match("^#(.+)$")
       if target_id and id_to_number[target_id] then
         local text = pandoc.utils.stringify(link)
-        local type_name = parse_title(text)
-        if type_name then
-          link.content = {pandoc.Str(type_name .. "\u{a0}" .. id_to_number[target_id])}
+        -- Normalize non-breaking spaces (UTF-8 \xc2\xa0) to regular spaces.
+        text = text:gsub("\xc2\xa0", " ")
+        -- Extract the type name (first word, ASCII letters only).
+        local type_name = text:match("^([A-Za-z]+)")
+        if type_name and theorem_types:includes(type_name:lower()) then
+          return pandoc.RawInline("html",
+            '<a href="#' .. target_id .. '">'
+            .. type_name .. '&nbsp;' .. id_to_number[target_id]
+            .. '</a>')
         end
       end
       return link
