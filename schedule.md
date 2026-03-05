@@ -21,7 +21,8 @@ March 6:
 
 March 13:
 
-- Conditioning and Likelihood weighting
+- Conditioning and Likelihood weighting.
+- Conditional independence test.
 - Intervening
 - Derive classical causal stuff
 - Exercise: Something causal.

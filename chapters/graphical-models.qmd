@@ -657,11 +657,11 @@ String diagrams encompass Bayesian networks as a special case: a Bayesian networ
 
 **Multiple outputs.** In a Bayesian network, each node produces exactly one variable. This can force artificial factorizations. Recall the genetic model from [Chapter 1](intro.qmd), where box $t$ jointly generates the genotypes of both twins — a single mechanism that naturally produces two correlated outputs depending on zygosity. In a Bayesian network, one would have to designate one twin as a "parent" of the other or introduce auxiliary nodes, obscuring the actual biological mechanism.
 
-**Hidden auxiliary variables.** A kernel can internally use randomness that does not appear as an output wire. In the twins example, zygosity is sampled inside box $t$ but never exposed — it is an instrumental variable internal to the mechanism. In a Bayesian network, every random variable must be an explicit node, so zygosity would have to appear in the graph even though it plays no role downstream.
-
 **Observed vs. unobserved.** In a string diagram, the output wires explicitly mark which variables are observed; internal wires are automatically marginalized out. A DAG does not distinguish observed from latent variables — this information must be supplied separately (e.g., by shading nodes).
 
 **Global inputs.** String diagrams naturally support kernels with inputs, representing conditional models. Bayesian networks only describe joint distributions.
+
+**Hidden auxiliary variables.** A box in a string diagram can internally use randomness that does not appear as an output wire. In the twins example, zygosity is sampled inside box $t$ but never exposed — it is an instrumental variable internal to the mechanism. In a Bayesian network, every random variable must be an explicit node, so zygosity would have to appear in the graph even though it plays no role downstream.
 
 **Compositionality.** DAGs are not compositional: you cannot take a subgraph and treat it as a single node in a larger network. In string diagrams, any sub-diagram can be wrapped into a box, producing a new kernel that can be plugged into other diagrams. This makes it easy to build complex models from reusable components.
 
@@ -676,7 +676,7 @@ $$
 p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{j} f_j(\text{neighbors}(j)).
 $$
 
-The **Forney-style factor graph** (FFG) variant (@LoeligerFactorGraphs2004) is particularly close to string diagrams: it places variables on edges, allows half-edges (global inputs/outputs), and uses explicit equality nodes (analogous to copy kernels). FFGs also support compositionality.
+The **Forney-style factor graph** (FFG) variant (@LoeligerFactorGraphs2004) is particularly close to string diagrams: it places variables on edges, allows half-edges (global inputs/outputs), and uses explicit equality nodes (analogous to copy nodes). FFGs also support compositionality.
 
 ``` {.tikz file="graphical-models/fg-fire-alarm.tikz"}
 %%| label: Factor graph for fire alarm
@@ -692,7 +692,7 @@ An **undirected graphical model** (Markov random field) factors a distribution o
 $$
 p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{c \in \text{cliques}} \phi_c(x_c),
 $$
-where each $\phi_c$ is a non-negative potential function and $Z$ is the normalizing constant. Undirected models naturally handle symmetric interactions (e.g., in image processing or physics), but the normalizing constant $Z$ is often intractable. By contrast, our string diagrams of probability kernels are normalized by construction.
+where each $\phi_c$ is a non-negative potential function and $Z$ is the normalizing constant. Undirected models naturally handle symmetric interactions (e.g., in image processing or physics), but the normalizing constant $Z$ is often intractable. In the discrete setting, it is possible to represent an undirected model as a string diagram with "backwards" wires. However, this does not extend neatly to the continuous setting.
 
 ## Bibliographic notes {.unnumbered}
 
