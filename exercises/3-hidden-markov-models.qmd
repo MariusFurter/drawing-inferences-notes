@@ -14,6 +14,16 @@ $$
 
 ## Introduction
 
+::: {.callout-note collapse="true" title="Prerequisites: Python libraries"}
+This exercise uses three Python libraries:
+
+- [**pandas**](https://pandas.pydata.org/) — for loading and exploring tabular data.
+- [**PyTorch**](https://pytorch.org/) — for tensor operations (matrix multiplication, element-wise products). A short tutorial can be found in the [Appendix](../appendix/pytorch.qmd).
+- [**matplotlib**](https://matplotlib.org/) — for plotting results.
+
+If any of these are not installed, run `pip install pandas torch matplotlib` in your terminal.
+:::
+
 In Exercises 1 and 2, we approximated posteriors by sampling. Here, we compute them **exactly**. We will **derive** the classical **forward algorithm** by systematically parsing the HMM string diagram from left to right. The algorithm emerges directly from the kernel composition rules; there is no need to prove that it is correct. This is a powerful example of how the diagrammatic language can guide us to the right algorithm.
 
 ### Choose your application
@@ -31,13 +41,13 @@ Detecting CpG islands from raw DNA sequence is a classic application of HMMs in 
 - **Hidden state** $X = \{0, 1\}$, with two states:
     - $0$ = non-island
     - $1$ = island
-- **Observation** $O = \{\text{A},\, \text{C},\, \text{G},\, \text{T}\}$ (encoded as $0, 1, 2, 3$)
+- **Observation** $Y = \{\text{A},\, \text{C},\, \text{G},\, \text{T}\}$ (encoded as $0, 1, 2, 3$)
 
-**Data files** (in the `data/` folder):
+**Data files** (generated from a known HMM so we can check our results against ground truth):
 
-- `cpg_train.csv` — 2000 nucleotide positions with labeled hidden states (for parameter estimation)
-- `cpg_test.csv` — 500 nucleotide positions without labels (for inference)
-- `cpg_test_labels.csv` — true hidden states for the test sequence (for validation)
+- [cpg_train.csv](../data/cpg_train.csv) — 2000 nucleotide positions with labeled hidden states (for parameter estimation)
+- [cpg_test.csv](../data/cpg_test.csv) — 500 nucleotide positions without labels (for inference)
+- [cpg_test_labels.csv](../data/cpg_test_labels.csv) — true hidden states for the test sequence (for validation)
 
 #### Application B: Volatility regime detection in financial markets {.unnumbered}
 
@@ -48,16 +58,16 @@ Detecting CpG islands from raw DNA sequence is a classic application of HMMs in 
 - **Hidden state** $X = \{0, 1\}$, with two regimes:
     - $0$ = low volatility
     - $1$ = high volatility
-- **Observation** $O = \{0, 1, 2, 3, 4\}$, five bins for daily returns:
+- **Observation** $Y = \{0, 1, 2, 3, 4\}$, five bins for daily returns:
     - $0$ = large drop, $1$ = small drop, $2$ = flat, $3$ = small gain, $4$ = large gain
 
 The bin boundaries for daily percentage returns are: $(-\infty, -1.5\%,\, -0.5\%,\, 0.5\%,\, 1.5\%,\, +\infty)$.
 
-**Data files** (in the `data/` folder):
+**Data files** (generated from a known HMM so we can check our results against ground truth):
 
-- `vol_train.csv` — 1000 trading days with labeled regimes (for parameter estimation)
-- `vol_test.csv` — 500 trading days without labels (for inference)
-- `vol_test_labels.csv` — true regimes for the test period (for validation)
+- [vol_train.csv](../data/vol_train.csv) — 1000 trading days with labeled regimes (for parameter estimation)
+- [vol_test.csv](../data/vol_test.csv) — 500 trading days without labels (for inference)
+- [vol_test_labels.csv](../data/vol_test_labels.csv) — true regimes for the test period (for validation)
 
 ---
 
@@ -83,6 +93,24 @@ Load your chosen training dataset. Inspect the first few rows and compute basic 
 - **Convert to list:** [`df["col"].tolist()`](https://pandas.pydata.org/docs/reference/api/pandas.Series.tolist.html) converts a column to a Python list.
 :::
 
+::: {.callout-note collapse="true" title="Hint: Encoding categorical values as integers"}
+The raw data contains categorical labels like `"island"` / `"non-island"` or `"A"` / `"C"` / `"G"` / `"T"`. We need to convert these to integers $0, 1, 2, \ldots$ for two reasons:
+
+1. **Indexing into matrices.** Our transition matrix $K$ and observation matrix $O$ are 2-D tensors whose rows and columns are numbered $0, 1, \ldots$ If state `"island"` is encoded as `1`, we can directly write `K[1, 0]` to look up the transition probability from island to non-island — no string comparison needed.
+
+2. **Tensor compatibility.** PyTorch tensors store numbers, not strings. Converting once at the start lets us work with tensors throughout.
+
+The standard way to build such a mapping in Python is with a **dictionary**:
+
+```python
+names = ["non-island", "island"]
+name_to_idx = {name: i for i, name in enumerate(names)}
+# Result: {"non-island": 0, "island": 1}
+```
+
+Here [`enumerate(names)`](https://docs.python.org/3/library/functions.html#enumerate) pairs each element with its position: `(0, "non-island"), (1, "island"), etc.` The `{... for ...}` syntax is a [dictionary comprehension](https://docs.python.org/3/tutorial/datastructures.html#dictionaries) — it builds a dictionary in one line. You can then apply this mapping to a pandas column with `df["col"].map(name_to_idx)`, which replaces each string with its integer code.
+:::
+
 ::: {.callout-tip collapse="true" title="Solution — Application A (CpG islands)"}
 
 ```{python}
@@ -103,6 +131,8 @@ print(f"Observations:  {cpg_train_df['nucleotide'].nunique()} — {cpg_train_df[
 print(f"\nState fractions:")
 print(cpg_train_df["state"].value_counts(normalize=True).to_string())
 ```
+
+We now encode the categorical labels as integers so they can be used as indices into our matrices. For example, `cpg_state_to_idx["island"]` returns `1`, so we can look up the initial probability of being in an island as `init[1]`.
 
 ```{python}
 #| code-fold: false
@@ -147,6 +177,8 @@ print(f"\nRegime fractions:")
 print(vol_train_df["regime"].value_counts(normalize=True).to_string())
 ```
 
+We now encode the categorical labels as integers so they can be used as indices into our matrices. For example, `vol_obs_to_idx["large_drop"]` returns `0`, so observation matrix entry `O[x, 0]` gives the probability of a large drop in regime `x`.
+
 ```{python}
 #| code-fold: false
 # Define names and mappings
@@ -176,20 +208,20 @@ The training data has a sequential structure: a hidden state evolves over time, 
 
 ``` {.tikz file="graphical-models/hidden-markov-model.tikz"}
 %%| label: hmm-diagram
-%%| fig-cap: "A hidden Markov model with initial distribution $i : I \kernel X$, transition kernel $k : X \kernel X$, and observation kernel $o : X \kernel O$."
+%%| fig-cap: "A hidden Markov model with initial distribution $i : I \kernel X$, transition kernel $k : X \kernel X$, and observation kernel $o : X \kernel Y$."
 %%| height: 5em
 ```
 
-The model is built from three kernels: an **initial distribution** $i : I \kernel X$ specifying the probability of each starting state, a **transition kernel** $k : X \kernel X$ describing how the hidden state evolves, and an **observation kernel** $o : X \kernel O$ producing a noisy observation from the current state. The sum-product form of the joint distribution represented by the diagram is:
+The model is built from three kernels: an **initial distribution** $i : I \kernel X$ specifying the probability of each starting state, a **transition kernel** $k : X \kernel X$ describing how the hidden state evolves, and an **observation kernel** $o : X \kernel Y$ producing a noisy observation from the current state. The sum-product form of the joint distribution represented by the diagram is:
 $$
-p(x_t, y_0, \ldots, y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \left( \prod_{j=0}^{t} o(y_j \mid x_j) \right) \left( \prod_{k=0}^{t-1} k(x_{k+1} \mid x_k) \right) .
+p(x_t, y_0, \ldots, y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \left( \prod_{s=0}^{t} o(y_s \mid x_s) \right) \left( \prod_{s=0}^{t-1} k(x_{s+1} \mid x_s) \right) .
 $$
 
 To use this model, we need to specify the three boxes $i$, $k$, and $o$ from data.
 
 ### 2. Estimate the model parameters
 
-An HMM is specified by three objects: an initial distribution $i$, a transition matrix $K$, and an observation matrix $O$. In the credit card exercise, we specified the model parameters by hand. Here, you will **estimate them from labeled training data**. Since the training data includes the true hidden states, this is a supervised estimation problem.
+An HMM is specified by three objects: an initial distribution $i$, a transition matrix $K$, and an observation matrix $O$. In the credit card exercise, we specified the model parameters by hand. Here, you will **estimate them from labeled training data**. Since the training data includes the true hidden states, we can directly count transitions and emissions — this is called a **supervised** estimation problem (as opposed to *unsupervised* estimation, where the hidden states are unknown and must be inferred jointly with the parameters).
 
 **Task:** Estimate the initial distribution, transition matrix, and observation matrix from the training data by counting:
 
@@ -210,14 +242,14 @@ $$
 
 Print the estimated matrices. Do the values make intuitive sense for your application?
 
+**Matrix layout convention.** Store the transition kernel as a matrix $K$ of shape `(n_states, n_states)` with entry $K[x, x'] = k(x' \mid x)$, and the observation kernel as a matrix $O$ of shape `(n_states, n_obs)` with entry $O[x, y] = o(y \mid x)$. Each row is a probability distribution and sums to 1. This convention is chosen so that **sequential composition corresponds to matrix multiplication**: if $f : A \kernel B$ and $g : B \kernel C$ are two kernels with matrices $F$ and $G$, then the matrix of $f \then g$ is the ordinary matrix product $FG$. In Python, this means we can write `f @ g` using the `@` operator.
+
 ::: {.callout-note title="Note: Why add 1 to every count?"}
 Adding 1 to each count before normalizing ensures that no entry is ever exactly zero — even for transitions or emissions that happen not to appear in the training data. A zero entry would be problematic: once the model assigns probability 0 to a transition, no amount of evidence can recover from it. The "count $+\, 1$" rule is a natural solution that treats every event as having been observed at least once. We will see later, when we study conjugate distributions, that this formula has a precise Bayesian justification: it corresponds to the posterior mean under a uniform (flat) Dirichlet prior.
 :::
 
-::: {.callout-note collapse="true" title="Hint"}
-Use PyTorch tensors for all matrices. 
-
-**Matrix layout:** The transition matrix $K$ has shape `(n_states, n_states)` where `K[x, x']` $= k(x' \mid x)$. The observation matrix $O$ has shape `(n_states, n_obs)` where `O[x, y]` $= o(y \mid x)$. Each row is a probability distribution and should sum to 1.
+::: {.callout-note collapse="true" title="Hint: Step-by-step instructions"}
+Use PyTorch tensors for all matrices.
 
 Here is a step-by-step approach:
 
@@ -357,7 +389,7 @@ $$
 p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{p(x_t, \bar{y}_0, \ldots, \bar{y}_t)}{\sum_{x_t} p(x_t, \bar{y}_0, \ldots, \bar{y}_t)}.
 $$
 
-We can represent the numerator $p(x_t, \bar{y}_0, \ldots, \bar{y}_t)$ as the following diagram, where $w_t(x) = o(\bar{y}_t \mid x)$ is the **observation weight** function.
+We can represent the numerator $p(x_t, \bar{y}_0, \ldots, \bar{y}_t)$ as the following diagram, where $w_t(x) = o(\bar{y}_t \mid x)$ is the **observation weight** function — the likelihood of the observed value $\bar{y}_t$ viewed as a function of the hidden state $x$. Note that $w_t$ is a test function (a kernel $X \kernel I$), not a probability distribution over $X$: its values need not sum to $1$.
 
 ``` {.tikz file="graphical-models/hmm-conditioned.tikz"}
 %%| label: hmm-conditioned-diagram
@@ -382,10 +414,7 @@ $$
 This is exactly the sum-product form of the proposed diagram.
 :::
 
-Therefore, to compute the filtering distribution, it is sufficient to evaluate the diagram using the kernel composition rules and normalize the result. In particular, we can represent composition rules as tensor operations: 
-
-- **Sequential composition** $(f \then g)$ becomes **matrix multiplication**.
-- **Copy composition** becomes **element-wise multiplication**.
+Therefore, to compute the filtering distribution, it is sufficient to evaluate the diagram using the kernel composition rules and normalize the result.
 
 
 ### 3. Deriving the forward algorithm from the string diagram
@@ -433,7 +462,7 @@ In components: $(\alpha_t \then k)(x') = \sum_{x} k(x' \mid x)\, \alpha_t(x)$.
 %%| height: 5em
 ```
 
-Copy composition multiplies element-wise (we write $\odot$ for element-wise multiplication), giving:
+Copy composition multiplies element-wise (we write $\odot$ for entry-by-entry multiplication: $(u \odot v)(x) := u(x) \cdot v(x)$), giving:
 $$
 ((\alpha_t \then k) \odot w_{t+1})(x') = (\alpha_t \then k)(x') \cdot w_{t+1}(x').
 $$
@@ -484,17 +513,24 @@ The unnormalized $\alpha_t$ values shrink exponentially with $t$ (each step mult
 ::: {.callout-note collapse="true" title="Hint: Step-by-step instructions"}
 Write a function `forward(init, K, O, observations)` that returns a tensor of shape `(T, n_states)` containing the filtering distribution at each time step.
 
+The key PyTorch operations are:
+
+- `*` — element-wise multiplication of tensors of the same shape.
+- `@` — matrix multiplication (or vector–matrix product when the left operand is 1-D).
+- `tensor.sum()` — sum of all elements.
+
 1. **Initialization.** Create a tensor `filtering` of shape `(T, n_states)` to store the results. Set `T = len(observations)`.
 
-2. **Base case.** Compute the observation weight vector `w_0 = O[:, observations[0]]` and form `alpha = init * w_0`. Normalize: `alpha = alpha / alpha.sum()`. Store `filtering[0] = alpha`.
+2. **Base case.** Compute the observation weight vector `w_0 = O[:, observations[0]]` (column `observations[0]` of the observation matrix) and form `alpha = init * w_0` (element-wise multiplication). Normalize: `alpha = alpha / alpha.sum()`. Store `filtering[0] = alpha`.
 
 3. **Recursion.** For each `t` in `1, ..., T-1`:
-    a. **Predict:** compute `alpha = alpha @ K` (row vector times transition matrix).
-    b. **Update:** compute `alpha = alpha * O[:, observations[t]]` (Hadamard product with observation weights).
+    a. **Predict:** compute `alpha = alpha @ K` (row vector times transition matrix). Here `@` is Python's [matrix multiplication operator](https://docs.python.org/3/reference/expressions.html#binary-arithmetic-operations).
+    b. **Update:** compute `alpha = alpha * O[:, observations[t]]` (element-wise multiplication with the observation weight vector).
     c. **Normalize:** compute `alpha = alpha / alpha.sum()`.
     d. Store `filtering[t] = alpha`.
 
 4. Return `filtering`.
+
 :::
 
 
@@ -551,6 +587,20 @@ Plot this posterior probability over time. On the same plot, overlay the true hi
 - Where does it do well? Where does it struggle?
 - What happens at the boundaries when the hidden state switches?
 
+::: {.callout-note collapse="true" title="Hint: Step-by-step instructions"}
+1. **Load the test data.** Use `pd.read_csv()` to load the test observations and the true labels from their respective CSV files.
+
+2. **Convert observations to a tensor.** Map the observation column to integer codes (using the same mapping dictionary from Task 1) and convert to a PyTorch tensor with [`torch.tensor()`](https://pytorch.org/docs/stable/generated/torch.tensor.html). For example: `test_obs = torch.tensor(test_df["col"].map(mapping).tolist())`.
+
+3. **Run the forward algorithm.** Call `forward(init, K, O, test_obs)` with the parameters estimated in Task 2. This returns a tensor of shape `(T, n_states)`.
+
+4. **Extract the posterior for state 1.** Index the filtering result as `filtering[:, 1]` to get a 1-D tensor of length $T$.
+
+5. **Plot.** Use [matplotlib](https://matplotlib.org/stable/tutorials/introductory/pyplot.html) to create a figure. Two useful functions:
+    - [`ax.plot(x, y)`](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html) draws a line plot.
+    - [`ax.fill_between(x, y1, y2, where=mask)`](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.fill_between.html) shades the region between `y1` and `y2` wherever `mask` is `True` — use this to highlight the positions where the true state is 1.
+:::
+
 ::: {.callout-tip collapse="true" title="Solution — Application A (CpG islands)"}
 
 Load the test sequence and true labels:
@@ -569,7 +619,7 @@ Run the forward algorithm:
 ```{python}
 #| code-fold: false
 cpg_filtering = forward(cpg_init, cpg_K, cpg_O, cpg_test_obs)
-cpg_p_state1 = cpg_filtering[:, 1].numpy()
+cpg_p_state1 = cpg_filtering[:, 1]
 ```
 
 Plot the filtering distribution against the true hidden states:
@@ -619,7 +669,7 @@ Run the forward algorithm:
 ```{python}
 #| code-fold: false
 vol_filtering = forward(vol_init, vol_K, vol_O, vol_test_obs)
-vol_p_state1 = vol_filtering[:, 1].numpy()
+vol_p_state1 = vol_filtering[:, 1]
 ```
 
 Plot the filtering distribution against the true hidden states:
@@ -669,6 +719,14 @@ $$
 \mathcal{L} = -\frac{1}{T} \sum_{t=0}^{T-1} \log p(x_t^* \mid \bar{y}_{0:t}),
 $$
 where $x_t^*$ is the true state at time $t$. This measures how many nats^[A **nat** (natural unit of information) is the information-theoretic unit obtained when using the natural logarithm. One nat equals the amount of information gained by observing an event of probability $1/e$. If we used $\log_2$ instead, the unit would be **bits**.] of surprise the model experiences on average when seeing the true state. It is a **proper scoring rule**: it is minimized if and only if the predicted probabilities match the true conditional probabilities. Unlike accuracy, log-loss rewards well-calibrated uncertainty — a model that assigns 90% to the correct state scores better than one that assigns 60%, even though both get the MAP estimate right. Note that log-loss does not have an intuitive absolute scale (unlike accuracy, where 95% is immediately interpretable). Its main value is in **comparing models**: a lower log-loss means one model's posteriors are closer to the truth than another's.
+
+::: {.callout-note collapse="true" title="Hint: Step-by-step instructions"}
+1. **MAP predictions.** Use [`tensor.argmax(dim=1)`](https://pytorch.org/docs/stable/generated/torch.argmax.html) on the `filtering` tensor to get the most likely state at each time step. This returns a 1-D tensor of predicted state indices.
+
+2. **Accuracy.** Compare the predictions to the true states element-wise: `(predicted == true_states)` gives a boolean tensor. Convert to float with `.float()`, take the `.mean()`, and extract the Python number with `.item()`.
+
+3. **Log-loss.** You need the predicted probability assigned to the *true* state at each time step. The expression `filtering[range(T), true_states]` picks out `filtering[t, true_states[t]]` for every `t` in one vectorized operation. Once you have this 1-D tensor of probabilities, apply `torch.log()`, negate, and take the `.mean()`.
+:::
 
 ::: {.callout-tip collapse="true" title="Solution — Application A (CpG islands)"}
 
