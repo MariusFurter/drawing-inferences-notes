@@ -20,7 +20,8 @@ book:
   chapters:
     - index.qmd
     - chapters/intro.qmd
-    - chapters/graphical-models.qmd
+    - chapters/discrete-graphical-models.qmd
+    #- chapters/conditioning-intervening.qmd
     - part: "Exercises"
       chapters:
         - exercises/1-classic-puzzles.qmd

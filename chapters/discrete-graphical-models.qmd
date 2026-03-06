@@ -10,7 +10,7 @@ $$
 $$
 :::
 
-# Graphical models
+# Discrete graphical models
 In this chapter, we learn how to interpret string diagrams as probability distributions. This lets us manipulate complex models visually, without tedious algebra. By the end, you will be able to read the following diagram as a probability distribution and sample from it by writing a probabilistic program that follows the structure of the diagram.
 
 ``` {.tikz file="index/fire-alarm.tikz"}
@@ -212,6 +212,16 @@ $$
 When $m$ is a probability measure and $t$ assigns real-valued weights, this is the usual expectation 
 $$\mathbb{E}_{m(x)}[t(x)] := \sum_{x \in X} t(x) \, m(x).$$
 
+::: {#exm-expectation-events}
+
+Let $t : X \kernel I$ be the indicator function of an event $E \subseteq X$, defined by $t_E(\bullet \mid x) := \ivmark{x \in E}$. Then $(m \then t_E)(\bullet \mid \bullet)$ is the total measure of $E$:
+$$ 
+\sum_{x \in X} \ivmark{x \in E} \, m(x \mid \bullet) = \sum_{x \in E} m(x \mid \bullet).
+$$
+
+In particular, if $m$ is a probability measure, then $(m \then t_E)$ is the probability of $E$. This means that kernels are completely determined by their expectations on all test functions. 
+
+:::
 
 ### Crossing wires
 Next, we define a kernel that **swaps** wires.

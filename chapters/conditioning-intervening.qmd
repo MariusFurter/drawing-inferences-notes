@@ -1,0 +1,90 @@
+::: {.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+ \def\swap{\mathsf{swap}}
+ \def\id{\mathsf{id}}
+ \def\cp{\mathsf{copy}}
+ \def\del{\mathsf{del}}
+ \def\ivmark#1{[\![#1]\!]}
+$$
+:::
+
+# Conditioning and Intervening
+
+Conditioning and intervening are update operations on models. Both can be expressed by intuitive graphical manipulations of string diagrams.
+
+Conditioning: New generative process once certain outputs have been observed.
+
+Intervening: New generative process once certain outputs have been forced to take specific values. Only makes sense if model structure has causal content, ie we expect that exchanging one mechanism for another will be faithfully reflected in reality.
+
+## Conditioning
+
+::: {#def-conditioned-kernel}
+
+Let $g : X \otimes Y \kernel U \otimes W$ be a discrete kernel. 
+
+**Pre-conditioning on input:** $g_{\mid X=\bar x} : Y \kernel U \otimes W$ to be $g$ with fixed value $\bar x$:
+$$
+g_{\mid X=\bar x}(u,w \mid y) := g(u,w \mid \bar x, y).
+$$
+
+**Pre-conditioning on output:** $g_{\mid U=\bar u} : X \otimes Y \kernel W$ to be $g$ with fixed value $\bar u$:
+$$
+g_{\mid U=\bar u}(w \mid x,y) := g(\bar u,w \mid x,y).
+$$
+
+More generally, we define $g_{\mid U} : X \otimes Y \kernel W$ to be the kernel that takes $u$ as an input and outputs $g_{\mid U=u}$:
+$$
+g_{\mid U}(w \mid x,y) := g(u,w \mid x,y).
+$$
+
+
+Pre-conditioning on inputs preserves normalization. Pre-conditioning on outputs does not preserve normalization.
+:::
+
+Given a string diagram, we can condition on an observation $U = \bar u$ as follows:
+
+1. Delete all wires that carry $U$.
+2. Replace any boxes $g$ that take $U$ as input or output by their pre-conditioned versions $g_{\mid U=\bar u}$.
+3. Normalize the resulting diagram.
+
+This procedure is justified by applying the definition of conditional distribution to the sum-product expression for the diagram.
+
+To condition on several variables, repeat the procedure for each variable. The order of conditioning does not matter.
+
+It is also possible to view the conditioned model as taking $U = \bar u$ as a new input. In this case, we perform the same steps as above, but a afterwards feed $U$ as in input to all preconditioned boxes.
+
+[Maybe discuss non-uniqueness of conditionals. But this would require the abstract definition that may be superfluous.]
+
+### Conditional independence
+
+::: {#def-conditional-independence}
+
+Graphical definition of conditional independence.
+
+:::
+
+Consider a string diagram of probability kernels [does this hold more generally? where is this assumption used?]. To check if $U$ and $W$ are conditionally independent given $X$ do the following:
+
+1. Delete all outputs except $U$ and $W$.
+2. Reduce to normal form (by applying delete axioms)
+3. Delete all wires that carry $X$. (equivalently, pre-condition on $X$)
+4. Check if $U$ and $W$ are disconnected in the resulting diagram.
+
+[Does order of 2 and 3 matter?]
+
+This procedure works for general string diagrams, as shown by @FritzDSeparation2023.
+
+## Intervening
+
+General intervention of box $f$: Replace $f$ with $f'$. Interventions preserve normalization if $f$ and $f'$ are normalized kernels.
+
+Usually, we consider two special types of interventions:
+
+- **Do** intervention: Replace $f : X \kernel Y$ with $\del_X \then \delta_{\bar y}$, where $\delta_{\bar y}$ is the kernel that outputs $\bar y$ with probability 1.
+
+- **Soft** intervention: Replace $f : X \kernel Y$ with $\del_X \then m$, where $m : I \kernel Y$ is a probability distribution over $Y$.
+
+Both of these delete the input wires of $f$ and fix $Y$ to a specific value (do) or distribution (soft).
+
