@@ -21,6 +21,8 @@ Intervening: New generative process once certain outputs have been forced to tak
 
 ## Conditioning
 
+[The following is all about conditioning on points. Should we also discuss conditioning on general events?]
+
 ::: {#def-conditioned-kernel}
 
 Let $g : X \otimes Y \kernel U \otimes W$ be a discrete kernel. 
@@ -115,6 +117,19 @@ After all boxes have been traversed:
 2. Return weighted sample $([y_1, \ldots, y_n] w)$.
 
 Given $N$ weighted samples ([y_1^k, \ldots, y_n^k] w^k), evaluate a test function $t$ by $\frac{1}{N} \sum_k w^k t(y_1^k, \ldots, y_n^k)$.
+
+Compare to rejection sampling: 
+For $g : X \kernel Y \otimes Z$, write 
+$$g_{\mid Z = \bar z}(y \mid x) = g(y, \bar z \mid x) = \sum_{z} \ivmark{z = \bar z} g(y,z \mid x)$$
+
+[Diagram comparing the two factorizations.]
+
+Hence, we can also sample from the pre-conditioned kernel by drawing samples from $g$ and weighting all samples not satisfying $z = \bar z$ with zero. Computing weighted averages
+$$
+    g_{\mid Z = \bar z} \then t = \frac{1}{N} \sum_{i=1}^N \ivmark{z_i = \bar z} t(y_i) = \frac{1}{N} \sum_{i : z_i = \bar z} t(y_i).
+$$
+
+shows that this procedure is equivalent to rejecting samples that do not satisfy the condition $Z = \bar z$.
 
 ## Intervening
 
