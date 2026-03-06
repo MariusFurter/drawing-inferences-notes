@@ -6,6 +6,7 @@ $$
  \def\id{\mathsf{id}}
  \def\cp{\mathsf{copy}}
  \def\del{\mathsf{del}}
+ \def\supp{\mathsf{supp}}
  \def\ivmark#1{[\![#1]\!]}
 $$
 :::
@@ -55,8 +56,6 @@ To condition on several variables, repeat the procedure for each variable. The o
 
 It is also possible to view the conditioned model as taking $U = \bar u$ as a new input. In this case, we perform the same steps as above, but a afterwards feed $U$ as in input to all preconditioned boxes.
 
-[Maybe discuss non-uniqueness of conditionals. But this would require the abstract definition that may be superfluous.]
-
 ### Conditional independence
 
 ::: {#def-conditional-independence}
@@ -75,6 +74,47 @@ Consider a string diagram of probability kernels [does this hold more generally?
 [Does order of 2 and 3 matter?]
 
 This procedure works for general string diagrams, as shown by @FritzDSeparation2023.
+
+### Sampling from non-normalized kernels
+
+Let $g : X \kernel Y$ be a discrete kernel. As long as there are no $x \in X$ with $g(- \mid x) = 0$, we can write 
+$$g(y \mid x) = w(x) \, g'(y \mid x)$$
+
+where $w(x) := \sum_{y \in Y} g(y \mid x)$ and $g'(y \mid x) = \frac{g(y \mi x)}{w(x)}$ is a probability kernel. Kernels that can be written in this way are said to have full support. In string diagrams, this corresponds to writing
+
+[Diagram]
+
+We call boxes of the form $w : X \kernel I$ **weights**.
+
+Using this representation to evaluate a test function $t : Y \to I$, we observe that
+$$
+    (g \then t)(\bullet \mid x) = \sum_{y \in Y} t(y) \, g(y \mid x) =  \sum_{y \in Y} w(x) t(y) \, g'(y \mid x).
+$$
+
+By the Law of Large numbers, we can approximate $(g \then t)$ by sampling $y_i \sim g'(- \mid x)$ and computing the weighted average 
+$$
+    (g \then t)(\bullet \mid x) \approx \frac{1}{n} \sum_{i=1}^n w(x_i) t(y_i).
+$$
+
+Hence, sampling from $g$ can be realized by drawing **weighted samples** $(y_i, w(x_i))$ where $y_i \sim g'(-\mid x_i)$ and computing weighted averages.
+
+More generally, suppose we are given a string diagram consisting of probability kernels $f_i$ and weights $w_j$. For example, such diagrams arise from pre-conditioning. One can also convert a diagram of general kernels to this form as long as they have full support.
+
+When evaluating a test function $t$, we can move all the weights to the right and view them as being composed in parallel with the test function. Hence the result is equivalent to evaluating $\left( \prod_j w_j \right) \, t$ against the diagram containing only the $f_i$. 
+
+[Diagram illustrating this idea.]
+
+This justifies the following weighted sampling procedure:
+
+Follow the wires of the diagram from left to right:
+1. For each probability kernel $f_i : X_i \kernel Y_i$, given input $x_i$, sample $y_i \sim f_i( - \mid x_i)$.
+2. For each weight $w_j : X_j \kernel I$, record $w_j(x_j)$.
+
+After all boxes have been traversed:
+1. Multiply all accumulated weights $w = \prod_j w_j(x_j)$.
+2. Return weighted sample $([y_1, \ldots, y_n] w)$.
+
+Given $N$ weighted samples ([y_1^k, \ldots, y_n^k] w^k), evaluate a test function $t$ by $\frac{1}{N} \sum_k w^k t(y_1^k, \ldots, y_n^k)$.
 
 ## Intervening
 
