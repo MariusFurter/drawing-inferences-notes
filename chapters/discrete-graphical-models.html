@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>2&nbsp; Graphical models – Drawing Inferences</title>
+<title>2&nbsp; Discrete graphical models – Drawing Inferences</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -174,7 +174,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/graphical-models.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/discrete-graphical-models.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -217,8 +217,8 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/graphical-models.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></span></a>
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -244,8 +244,14 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../exercises/3-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Exercise 3: Hidden Markov models</span></a>
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
   </div>
 </li>
       </ul>
@@ -319,7 +325,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></h1>
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></h1>
 </div>
 
 
@@ -350,7 +356,7 @@ window.Quarto = {
 <p>In this chapter, we learn how to interpret string diagrams as probability distributions. This lets us manipulate complex models visually, without tedious algebra. By the end, you will be able to read the following diagram as a probability distribution and sample from it by writing a probabilistic program that follows the structure of the diagram.</p>
 <div id="fire-alarm" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/e7963493d2df06141936495d3408820624190920.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/e7963493d2df06141936495d3408820624190920.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>A string diagram representing a causal model for a fire alarm.</figcaption>
 </figure>
 </div>
@@ -367,7 +373,7 @@ f(y \mid x) = p(y \mid x) = p(y \mid x, w).
 <p>We represent a kernel <span class="math inline">\(f : X \kernel Y\)</span> as a box with an input wire <span class="math inline">\(X\)</span> and an output wire <span class="math inline">\(Y\)</span>:</p>
 <div id="Kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/362ac44462502b9a97cb65a06d91998e468a6896.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/362ac44462502b9a97cb65a06d91998e468a6896.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A kernel <span class="math inline">\(f : X \kernel Y\)</span>.</figcaption>
 </figure>
 </div>
@@ -377,7 +383,7 @@ f(y \mid x) = p(y \mid x) = p(y \mid x, w).
 <p>Given a second kernel <span class="math inline">\(g : Y \kernel Z\)</span>, we can feed the output of <span class="math inline">\(f\)</span> into <span class="math inline">\(g\)</span> to get a new kernel <span class="math inline">\((f \then g) : X \kernel Z\)</span>. This is called the <strong>sequential composition</strong> of <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>. The symbol <span class="math inline">\(\then \,\)</span> is pronounced “then”: in the expression <span class="math inline">\(f \then g\)</span>, the input is processed first by <span class="math inline">\(f\)</span>, then by <span class="math inline">\(g\)</span>.</p>
 <div id="Sequential composite kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/3ee0674fe07d4973ec558e8611f06f0fd8b3dfc2.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/3ee0674fe07d4973ec558e8611f06f0fd8b3dfc2.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Sequential composition of kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : Y \kernel Z\)</span>.</figcaption>
 </figure>
 </div>
@@ -412,7 +418,7 @@ f(y \mid x) = p(y \mid x) = p(y \mid x, w).
 <p>Since composing with the identity has no effect, we can think of a wire labeled <span class="math inline">\(X\)</span> as the identity kernel <span class="math inline">\(\id_X\)</span>. In particular, stretching or shortening a wire doesn’t change the meaning of the diagram.</p>
 <div id="Identity kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/1aff7cda9488cb946bd97461e59ff51971ac3a28.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/1aff7cda9488cb946bd97461e59ff51971ac3a28.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A wire labeled by <span class="math inline">\(X\)</span> may be interpreted as the identity kernel <span class="math inline">\(\id_X : X \kernel X\)</span>.</figcaption>
 </figure>
 </div>
@@ -421,7 +427,7 @@ f(y \mid x) = p(y \mid x) = p(y \mid x, w).
 <p><span class="theorem-title"><strong>Example 2.4</strong></span> Consider a probability kernel <span class="math inline">\(k : X \kernel X\)</span> whose input and output are the same set <span class="math inline">\(X\)</span>. We think of <span class="math inline">\(X\)</span> as a state space. Then <span class="math inline">\(k\)</span> describes a system that randomly hops between states: at each time step <span class="math inline">\(t\)</span>, the system moves from state <span class="math inline">\(x_t\)</span> to state <span class="math inline">\(x_{t+1}\)</span> with probability <span class="math inline">\(k(x_{t+1} \mid x_t)\)</span>. This is called a <strong>Markov chain</strong> and can be represented as the following string diagram:</p>
 <div id="Markov chain" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/605057a3b9fa75aa430070e75fefc8513ede41c1.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/605057a3b9fa75aa430070e75fefc8513ede41c1.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A Markov chain with transition kernel <span class="math inline">\(k : X \kernel X\)</span>.</figcaption>
 </figure>
 </div>
@@ -436,7 +442,7 @@ k^2(x_{t+2} \mid x_t) = \sum_{x_{t+1}} k(x_{t+2} \mid x_{t+1}) \, k(x_{t+1} \mid
 <p>Next, we can place two kernels <span class="math inline">\(f_1 : X_1 \kernel Y_1\)</span> and <span class="math inline">\(f_2 : X_2 \kernel Y_2\)</span> side by side to get a new kernel <span class="math inline">\((f_1 \otimes f_2) : X_1 \times X_2 \kernel Y_1 \times Y_2\)</span>. This is the <strong>parallel composition</strong> of <span class="math inline">\(f_1\)</span> and <span class="math inline">\(f_2\)</span>. It represents the joint behavior of two independent processes.</p>
 <div id="Parallel composite kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/514bee74197936ea6f94e9a0d063cf9c65633b3a.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/514bee74197936ea6f94e9a0d063cf9c65633b3a.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>Parallel composition of kernels <span class="math inline">\(f_1 : X_1 \kernel Y_1\)</span> and <span class="math inline">\(f_2 : X_2 \kernel Y_2\)</span>.</figcaption>
 </figure>
 </div>
@@ -462,7 +468,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>Using products, we can represent kernels with multiple inputs and outputs. For example, we draw a kernel <span class="math inline">\(f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2\)</span> as a box with two input wires <span class="math inline">\(X_1, X_2\)</span> and two output wires <span class="math inline">\(Y_1, Y_2\)</span>:</p>
 <div id="Multi-input multi-output kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/5c0390d28b1df321517a1216d092bbb13981ecdb.svg" style="height:4em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/5c0390d28b1df321517a1216d092bbb13981ecdb.svg" style="height:4em" class="figure-img"></p>
 <figcaption>A kernel <span class="math inline">\(f : X_1 \otimes X_2 \kernel Y_1 \otimes Y_2\)</span>.</figcaption>
 </figure>
 </div>
@@ -470,14 +476,14 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>We also want to draw boxes without input or output wires. There are three basic types:</p>
 <div id="Kernels without inputs or outputs" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/5c446a27197683954653b617547e816c480d03c6.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/5c446a27197683954653b617547e816c480d03c6.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Kernels without inputs or outputs</figcaption>
 </figure>
 </div>
 <p>How should we interpret <span class="math inline">\(m\)</span> as a kernel? Its output set is <span class="math inline">\(X\)</span>, but what is its input set? The idea is to give <span class="math inline">\(m\)</span> a dummy input that carries no information. We represent this dummy input by a special set <span class="math inline">\(I := \{\bullet\}\)</span> containing a single element. Then <span class="math inline">\(m\)</span> is a kernel <span class="math inline">\(m : I \kernel X\)</span>. Since wires labeled by <span class="math inline">\(I\)</span> carry no information, we can drop and insert them freely. In particular, we draw <span class="math inline">\(m\)</span> without an input wire:</p>
 <div id="Kernels without inputs" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/08710cb6bd62cbf9d2c6ca9d2152568edc90248c.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/08710cb6bd62cbf9d2c6ca9d2152568edc90248c.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A kernel <span class="math inline">\(m : I \kernel X\)</span> can be drawn without input wires.</figcaption>
 </figure>
 </div>
@@ -492,7 +498,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>Composing a measure <span class="math inline">\(m : I \kernel X\)</span> with a test function <span class="math inline">\(t : X \kernel I\)</span> gives a scalar <span class="math inline">\((m \then t) : I \kernel I\)</span> called the <strong>expectation</strong> of <span class="math inline">\(t\)</span> under <span class="math inline">\(m\)</span>:</p>
 <div id="Expectation" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/c803de5d3ffcd92d9abf6d95796df53366aa7b24.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/c803de5d3ffcd92d9abf6d95796df53366aa7b24.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Composing a measure <span class="math inline">\(m : I \kernel X\)</span> with a test function <span class="math inline">\(t : X \kernel I\)</span> gives the expectation of <span class="math inline">\(t\)</span> under <span class="math inline">\(m\)</span>.</figcaption>
 </figure>
 </div>
@@ -500,12 +506,18 @@ p(y_1, y_2 \mid x_1, x_2)
 (m \then t)(\bullet \mid \bullet) = \sum_{x \in X} t(\bullet \mid x) \, m(x \mid \bullet).
 \]</span></p>
 <p>When <span class="math inline">\(m\)</span> is a probability measure and <span class="math inline">\(t\)</span> assigns real-valued weights, this is the usual expectation <span class="math display">\[\mathbb{E}_{m(x)}[t(x)] := \sum_{x \in X} t(x) \, m(x).\]</span></p>
+<div id="exm-expectation-events" class="theorem example">
+<p><span class="theorem-title"><strong>Example 2.6</strong></span> Let <span class="math inline">\(t : X \kernel I\)</span> be the indicator function of an event <span class="math inline">\(E \subseteq X\)</span>, defined by <span class="math inline">\(t_E(\bullet \mid x) := \ivmark{x \in E}\)</span>. Then <span class="math inline">\((m \then t_E)(\bullet \mid \bullet)\)</span> is the total measure of <span class="math inline">\(E\)</span>: <span class="math display">\[
+\sum_{x \in X} \ivmark{x \in E} \, m(x \mid \bullet) = \sum_{x \in E} m(x \mid \bullet).
+\]</span></p>
+<p>In particular, if <span class="math inline">\(m\)</span> is a probability measure, then <span class="math inline">\((m \then t_E)\)</span> is the probability of <span class="math inline">\(E\)</span>. This means that kernels are completely determined by their expectations on all test functions.</p>
+</div>
 </section>
 <section id="crossing-wires" class="level3" data-number="2.1.4">
 <h3 data-number="2.1.4" class="anchored" data-anchor-id="crossing-wires"><span class="header-section-number">2.1.4</span> Crossing wires</h3>
 <p>Next, we define a kernel that <strong>swaps</strong> wires.</p>
 <div id="def-swap-kernel" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 2.6</strong></span> For each pair of finite sets <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, we define the <strong>swap kernel</strong> <span class="math inline">\(\swap_{X,Y} : X \otimes Y \kernel Y \otimes X\)</span> by <span class="math display">\[
+<p><span class="theorem-title"><strong>Definition 2.7</strong></span> For each pair of finite sets <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, we define the <strong>swap kernel</strong> <span class="math inline">\(\swap_{X,Y} : X \otimes Y \kernel Y \otimes X\)</span> by <span class="math display">\[
 \swap_{X,Y}(y', x' \mid x, y) := \ivmark{(x', y') = (x, y)}.
 \]</span></p>
 <p>In other words, <span class="math inline">\(\swap_{X,Y}\)</span> is a deterministic kernel that takes a pair <span class="math inline">\((x, y)\)</span> and returns the swapped pair <span class="math inline">\((y, x)\)</span> with probability 1.</p>
@@ -513,7 +525,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>In string diagrams, we represent <span class="math inline">\(\swap_{X,Y}\)</span> as crossing wires:</p>
 <div id="Swap kernel" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/1ca84ba283309088275f246ec335d8135c93421c.svg" style="height:3.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/1ca84ba283309088275f246ec335d8135c93421c.svg" style="height:3.5em" class="figure-img"></p>
 <figcaption>The swap kernel <span class="math inline">\(\swap_{X,Y}\)</span> is drawn as crossing wires.</figcaption>
 </figure>
 </div>
@@ -521,7 +533,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p><strong>Swapping twice is the identity.</strong> If we swap the wires and swap them back, we get the original ordering:</p>
 <div id="Swapping twice is the identity" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/5e2716ada0224422b1154d19a6c1a7905bc52f99.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/5e2716ada0224422b1154d19a6c1a7905bc52f99.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Swapping twice is the same as doing nothing.</figcaption>
 </figure>
 </div>
@@ -529,7 +541,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p><strong>Boxes can be moved through swaps.</strong> If we place two independent kernels <span class="math inline">\(f : X_1 \kernel Y_1\)</span> and <span class="math inline">\(g : X_2 \kernel Y_2\)</span> in parallel and then swap the outputs, we get the same result as first swapping the inputs and then applying the kernels in the opposite order (verify this by direct calculation).</p>
 <div id="Boxes can be moved through swaps" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/58783ce3e46da606f8485afab0c6b9ea5bd443ed.svg" style="height:5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/58783ce3e46da606f8485afab0c6b9ea5bd443ed.svg" style="height:5em" class="figure-img"></p>
 <figcaption>Boxes can be moved through swaps.</figcaption>
 </figure>
 </div>
@@ -538,14 +550,14 @@ p(y_1, y_2 \mid x_1, x_2)
 <h3 data-number="2.1.5" class="anchored" data-anchor-id="copying-and-deleting"><span class="header-section-number">2.1.5</span> Copying and deleting</h3>
 <p>We now introduce kernels that allow us to split and terminate wires. This is crucial for managing the information flow in our models.</p>
 <div id="def-copy-delete-kernels" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 2.7</strong></span> For each set <span class="math inline">\(X\)</span>, the <strong>copy kernel</strong> <span class="math inline">\(\cp_X : X \kernel X \otimes X\)</span> and <strong>delete kernel</strong> <span class="math inline">\(\del_X : X \kernel I\)</span> are defined by <span class="math display">\[
+<p><span class="theorem-title"><strong>Definition 2.8</strong></span> For each set <span class="math inline">\(X\)</span>, the <strong>copy kernel</strong> <span class="math inline">\(\cp_X : X \kernel X \otimes X\)</span> and <strong>delete kernel</strong> <span class="math inline">\(\del_X : X \kernel I\)</span> are defined by <span class="math display">\[
 \cp_X(x', x'' \mid x) := \ivmark{x' = x'' = x}, \qquad \del_X(\bullet \mid x) := 1.
 \]</span></p>
 </div>
 <p>The copy kernel duplicates its input: given <span class="math inline">\(x\)</span>, it outputs the pair <span class="math inline">\((x, x)\)</span> with probability 1. The delete kernel discards its input: it sends every <span class="math inline">\(x\)</span> to the dummy output <span class="math inline">\(\bullet\)</span> with probability 1. In string diagrams, we draw copy as a splitting node and delete as a terminating node:</p>
 <div id="Copy and delete kernels" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/7c86faadebfb95b5085b93804c902fa24d4d344d.svg" style="height:3.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/7c86faadebfb95b5085b93804c902fa24d4d344d.svg" style="height:3.5em" class="figure-img"></p>
 <figcaption>The copy kernel <span class="math inline">\(\cp_X\)</span> duplicates its input, while the delete kernel <span class="math inline">\(\del_X\)</span> discards its input.</figcaption>
 </figure>
 </div>
@@ -553,41 +565,41 @@ p(y_1, y_2 \mid x_1, x_2)
 <p><strong>Copy then delete is the identity.</strong> If we copy a wire and immediately delete one of the copies, we recover the original wire:</p>
 <div id="Copy then delete is the identity" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/519c62f062edb2c7f851613867e94a25b7dd0575.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/519c62f062edb2c7f851613867e94a25b7dd0575.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Copying a wire and then deleting one of the copies does nothing.</figcaption>
 </figure>
 </div>
 <p><strong>Copy is associative.</strong> Copying a wire and then copying one of the resulting wires gives the same result regardless of which copy we split further:</p>
 <div id="Copy is associative" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/f3f8876c75f23d8bc79062ec61dc485c9bccd85d.svg" style="height:3em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/f3f8876c75f23d8bc79062ec61dc485c9bccd85d.svg" style="height:3em" class="figure-img"></p>
 <figcaption>When copying twice, it does not matter which copy we split further.</figcaption>
 </figure>
 </div>
 <p>Since copying is associative, there is a unique way to produce <span class="math inline">\(n\)</span> copies of a wire, no matter how the binary splittings are arranged. We can therefore draw an <span class="math inline">\(n\)</span>-fold copy as a single node with <span class="math inline">\(n\)</span> outgoing wires:</p>
 <div id="n-fold copy" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/8178ce2476d30c443f9a57eeaed04db217ad7886.svg" style="height:3.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/8178ce2476d30c443f9a57eeaed04db217ad7886.svg" style="height:3.5em" class="figure-img"></p>
 <figcaption>An <span class="math inline">\(n\)</span>-fold copy can be drawn as a single node with <span class="math inline">\(n\)</span> outgoing wires.</figcaption>
 </figure>
 </div>
 <p><strong>Copy is commutative.</strong> Copying and then swapping the two outputs is the same as just copying. This reflects the fact that the two copies are identical — there is no distinction between the “first” and “second” copy.</p>
 <div id="Copy is commutative" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/bfbca74bbdab637907a008ac28d777b922ed6264.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/bfbca74bbdab637907a008ac28d777b922ed6264.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>Copying and then swapping the outputs is the same as just copying.</figcaption>
 </figure>
 </div>
 <p><strong>Compatibility with bundling.</strong> Copying and deleting on a product <span class="math inline">\(X_1 \otimes X_2\)</span> can be done wire by wire. Deleting a pair amounts to deleting each component. Copying a pair amounts to copying each component and rearranging the wires so that the two copies of <span class="math inline">\(X_1\)</span> are adjacent and the two copies of <span class="math inline">\(X_2\)</span> are adjacent:</p>
 <div id="Delete on products" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/770a7d5733a504e2bd7f82eb31149053715cabc9.svg" style="height:3em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/770a7d5733a504e2bd7f82eb31149053715cabc9.svg" style="height:3em" class="figure-img"></p>
 <figcaption>Deleting a product amounts to deleting each component independently.</figcaption>
 </figure>
 </div>
 <div id="Copy on products" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/1a6e84af3a3ac8fcec95a49a58d65496a342b65e.svg" style="height:6em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/1a6e84af3a3ac8fcec95a49a58d65496a342b65e.svg" style="height:6em" class="figure-img"></p>
 <figcaption>Copying a product amounts to copying each component and then rearranging the wires.</figcaption>
 </figure>
 </div>
@@ -597,7 +609,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>Consider two kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : X \kernel Z\)</span> that both depend on <span class="math inline">\(X\)</span>. To feed the same <span class="math inline">\(x\)</span> to both <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>, we first copy the input wire and then apply <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> in parallel:</p>
 <div id="Variable sharing" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/c1483e69eab1ac6661143b07df3bf3bad929017f.svg" style="height:5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/c1483e69eab1ac6661143b07df3bf3bad929017f.svg" style="height:5em" class="figure-img"></p>
 <figcaption>Feeding the same value into two kernels <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span>.</figcaption>
 </figure>
 </div>
@@ -608,7 +620,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>Another common pattern is composing two kernels while retaining the intermediate output via copying. We call this <strong>copy composition</strong>, denoted <span class="math inline">\(f \odot g\)</span>:</p>
 <div id="Copy composition" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/0b4c960982557f9a3f422b3c4a0b1500ecf7291e.svg" style="height:4.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/0b4c960982557f9a3f422b3c4a0b1500ecf7291e.svg" style="height:4.5em" class="figure-img"></p>
 <figcaption>Copy composition of kernels <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : Y \kernel Z\)</span>.</figcaption>
 </figure>
 </div>
@@ -629,14 +641,14 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>If <span class="math inline">\(f\)</span> is a probability kernel, this sum equals 1, so deleting the output is the same as deleting the input. This is precisely the normalization condition from <a href="#def-discrete-kernel">Definition&nbsp;2.1</a>.</p>
 <div id="Normalized kernels" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/25da860a0b8a2faf3d23d41e3721186af483bd24.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/25da860a0b8a2faf3d23d41e3721186af483bd24.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A kernel <span class="math inline">\(f : X \kernel Y\)</span> is normalized if deleting its output is the same as deleting its input.</figcaption>
 </figure>
 </div>
 <p>More generally, if <span class="math inline">\(f : X \kernel Y \otimes Z\)</span> is a kernel with two outputs, then deleting <span class="math inline">\(Y\)</span> gives the <strong>marginal</strong> on <span class="math inline">\(Z\)</span>:</p>
 <div id="Marginal kernels" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/8e5dd6d2273d2b5c7fb66eaf3e57eebe7c545923.svg" style="height:3.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/8e5dd6d2273d2b5c7fb66eaf3e57eebe7c545923.svg" style="height:3.5em" class="figure-img"></p>
 <figcaption>Deleting an output of a kernel gives the marginal on the remaining outputs.</figcaption>
 </figure>
 </div>
@@ -644,7 +656,7 @@ p(y_1, y_2 \mid x_1, x_2)
 (f \then (\del_Y \otimes \id_Z))(z \mid x) = \sum_{y \in Y} f(y, z \mid x).
 \]</span></p>
 <div id="exm-hidden-markov-model" class="theorem example">
-<p><span class="theorem-title"><strong>Example 2.8</strong></span> In a Markov chain (<a href="#exm-markov-chain">Example&nbsp;2.4</a>), we observe the state directly at each time step. A <strong>hidden Markov model</strong> (HMM) introduces a separation between the system’s internal state and what we can measure: the state <span class="math inline">\(X\)</span> evolves as before, but we never see it directly. Instead, at each time step we receive a noisy observation <span class="math inline">\(O\)</span> that depends on the current state. The model is built from three kernels:</p>
+<p><span class="theorem-title"><strong>Example 2.9</strong></span> In a Markov chain (<a href="#exm-markov-chain">Example&nbsp;2.4</a>), we observe the state directly at each time step. A <strong>hidden Markov model</strong> (HMM) introduces a separation between the system’s internal state and what we can measure: the state <span class="math inline">\(X\)</span> evolves as before, but we never see it directly. Instead, at each time step we receive a noisy observation <span class="math inline">\(O\)</span> that depends on the current state. The model is built from three kernels:</p>
 <ul>
 <li>An <strong>initial distribution</strong> <span class="math inline">\(i : I \kernel X\)</span>, a measure on <span class="math inline">\(X\)</span> specifying the probability of each starting state.</li>
 <li>A <strong>transition kernel</strong> <span class="math inline">\(k : X \kernel X\)</span>, the same as in a Markov chain, describing how the hidden state evolves from one time step to the next.</li>
@@ -653,11 +665,11 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>At each time step, the state wire is copied: one copy feeds into the next transition, and the other is passed to the observation kernel. The observation wires are outputs of the model. The state wires between transitions are internal — they are marginalized out when we compute the distribution over observations.</p>
 <div id="Hidden Markov model" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/8952ae040a0736a9f40d7c6cf0459a860c346dfe.svg" style="height:5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/8952ae040a0736a9f40d7c6cf0459a860c346dfe.svg" style="height:5em" class="figure-img"></p>
 <figcaption>A hidden Markov model with initial distribution <span class="math inline">\(i : I \kernel X\)</span>, transition kernel <span class="math inline">\(k : X \kernel X\)</span>, and observation kernel <span class="math inline">\(o : X \kernel O\)</span>.</figcaption>
 </figure>
 </div>
-<p>Hidden Markov models are widely used in speech recognition, natural language processing, bioinformatics (e.g., gene finding and sequence alignment), and signal processing. The key computational tasks — computing the likelihood of an observation sequence, inferring the most likely hidden state sequence, and learning the model parameters — can all be performed efficiently using the sum-pushing techniques we discuss in the next section. You can derive one of these algorithms on your own in <a href="../exercises/3-hidden-markov-models.html">Exercise 3</a>. Later in the course, we will encounter the same diagrammatic structure with continuous state spaces and general (non-discrete) kernels, where it describes <strong>state-space models</strong> used in tracking, control, and time-series analysis.</p>
+<p>Hidden Markov models are widely used in speech recognition, natural language processing, bioinformatics (e.g., gene finding and sequence alignment), and signal processing. The key computational tasks — computing the likelihood of an observation sequence, inferring the most likely hidden state sequence, and learning the model parameters — can all be performed efficiently using the sum-pushing techniques we discuss in the next section. You can derive one of these algorithms on your own in <a href="../exercises/4-hidden-markov-models.html">Exercise 4</a>. Later in the course, we will encounter the same diagrammatic structure with continuous state spaces and general (non-discrete) kernels, where it describes <strong>state-space models</strong> used in tracking, control, and time-series analysis.</p>
 </div>
 </section>
 </section>
@@ -665,7 +677,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <h3 data-number="2.1.6" class="anchored" data-anchor-id="deterministic-kernels"><span class="header-section-number">2.1.6</span> Deterministic kernels</h3>
 <p>Any function <span class="math inline">\(f : X \to Y\)</span> between finite sets can be viewed as a kernel. The idea is that a deterministic function is a special case of a random function — one that always produces the same output.</p>
 <div id="def-deterministic-kernel" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 2.9</strong></span> Given a function <span class="math inline">\(f : X \to Y\)</span>, the corresponding <strong>deterministic kernel</strong> <span class="math inline">\(\bar{f} : X \kernel Y\)</span> is defined by <span class="math display">\[
+<p><span class="theorem-title"><strong>Definition 2.10</strong></span> Given a function <span class="math inline">\(f : X \to Y\)</span>, the corresponding <strong>deterministic kernel</strong> <span class="math inline">\(\bar{f} : X \kernel Y\)</span> is defined by <span class="math display">\[
 \bar{f}(y \mid x) := \ivmark{y = f(x)}.
 \]</span></p>
 <p>In other words, <span class="math inline">\(\bar{f}\)</span> maps <span class="math inline">\(x\)</span> to <span class="math inline">\(f(x)\)</span> with probability 1.</p>
@@ -675,14 +687,14 @@ p(y_1, y_2 \mid x_1, x_2)
 \]</span></p>
 <p>Deterministic kernels are characterized by two properties: they can be <strong>copied</strong> and they are <strong>normalized</strong>.</p>
 <div id="def-copyable-kernel" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 2.10</strong></span> We say that a kernel <span class="math inline">\(f : X \kernel Y\)</span> is <strong>copyable</strong> if applying <span class="math inline">\(f\)</span> and then copying the output is the same as first copying the input and then applying <span class="math inline">\(f\)</span> to each copy independently:</p>
-<img src="graphical-models_files/mediabag/61e7eb7e9da3836336916ec1b10622be50cfd3c1.svg" style="height:5em">
+<p><span class="theorem-title"><strong>Definition 2.11</strong></span> We say that a kernel <span class="math inline">\(f : X \kernel Y\)</span> is <strong>copyable</strong> if applying <span class="math inline">\(f\)</span> and then copying the output is the same as first copying the input and then applying <span class="math inline">\(f\)</span> to each copy independently:</p>
+<img src="discrete-graphical-models_files/mediabag/61e7eb7e9da3836336916ec1b10622be50cfd3c1.svg" style="height:5em">
 <p>In symbols, <span class="math inline">\(f\)</span> is copyable when <span class="math inline">\(f \then \cp_Y = \cp_X \then (f \otimes f)\)</span>.</p>
 </div>
 <p>A kernel is copyable precisely when it always produces the same output for a given input. In that case, copying the output is the same as running the process twice on the same input. This fails for genuinely random kernels: running a random process twice may produce different outputs, so copying after the fact is <em>not</em> the same as running two independent copies.</p>
 <p>The following proposition makes this precise.</p>
 <div id="prp-copyable-kernel" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 2.11</strong></span> A discrete kernel is copyable if and only if it arises from a deterministic function. In other words, <span class="math inline">\(f : X \kernel Y\)</span> is copyable if and only if there exists a function <span class="math inline">\(g : X \to Y\)</span> such that <span class="math inline">\(f = \bar{g}\)</span>.</p>
+<p><span class="theorem-title"><strong>Proposition 2.12</strong></span> A discrete kernel is copyable if and only if it arises from a deterministic function. In other words, <span class="math inline">\(f : X \kernel Y\)</span> is copyable if and only if there exists a function <span class="math inline">\(g : X \to Y\)</span> such that <span class="math inline">\(f = \bar{g}\)</span>.</p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span>We expand both sides and set them equal. The left-hand side gives: <span class="math display">\[
@@ -701,7 +713,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>We now have all the ingredients to interpret a string diagram as a probability distribution. A string diagram describes a composition of kernels, so once we specify each box, we can compute the resulting kernel by applying the composition rules. Let us illustrate this with the fire alarm model:</p>
 <div id="fire-alarm" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/e7963493d2df06141936495d3408820624190920.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/e7963493d2df06141936495d3408820624190920.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>A string diagram representing a causal model for a fire alarm.</figcaption>
 </figure>
 </div>
@@ -711,7 +723,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>A string diagram can be parsed as a composition of kernels in many different ways. For example, consider a chain of three kernels.</p>
 <div id="Multiple parsings" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/2378ee1642632c918059f0661a5ed5549f287390.svg" style="height:2.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/2378ee1642632c918059f0661a5ed5549f287390.svg" style="height:2.5em" class="figure-img"></p>
 <figcaption>A chain of three kernels can be parsed in two ways.</figcaption>
 </figure>
 </div>
@@ -719,7 +731,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>A second ambiguity arises when we have both sequential and parallel composition.</p>
 <div id="Interchange law" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/9b4aafec3617da366eb8ba4079e193ebfff0b116.svg" style="height:5.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/9b4aafec3617da366eb8ba4079e193ebfff0b116.svg" style="height:5.5em" class="figure-img"></p>
 <figcaption>The choice between first composing in sequence, then parallel, or conversely does not matter.</figcaption>
 </figure>
 </div>
@@ -736,7 +748,7 @@ p(y_1, y_2 \mid x_1, x_2)
 <p>A useful standard form is obtained by performing all marginalization at the end. We can achieve this by replacing every sequential composition with a copy composition followed by a delete, and then moving all the deletes to the end of the diagram. For the fire alarm model, this gives:</p>
 <div id=" Fire alarm with deletes at the end" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/c11899b8a901d728bd87a7fdcb4b7bf48526e0b7.svg" style="height:8em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/c11899b8a901d728bd87a7fdcb4b7bf48526e0b7.svg" style="height:8em" class="figure-img"></p>
 <figcaption>The fire alarm model can be rewritten so that all delete kernels are at the end.</figcaption>
 </figure>
 </div>
@@ -836,16 +848,16 @@ p(x_1, \ldots, x_n) = \prod_{i=1}^{n} p(x_i \mid \text{parents}(x_i)).
 <p>For example, the fire alarm model becomes:</p>
 <div id="Bayesian network for fire alarm" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/dfc049e4d1aa2cc38b2426667c722a5422abf321.svg" style="height:4.5em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/dfc049e4d1aa2cc38b2426667c722a5422abf321.svg" style="height:4.5em" class="figure-img"></p>
 <figcaption>A Bayesian network representing the fire alarm model.</figcaption>
 </figure>
 </div>
 <p>Bayesian networks are <strong>easier to draw</strong> — each node is a variable, each arrow a direct dependence — with no need to name mechanisms or route wires. This simplicity reflects the fact that DAGs record <em>which</em> variables depend on which, but not <em>how</em>.</p>
 <p>String diagrams encompass Bayesian networks as a special case: a Bayesian network corresponds to a string diagram with no global input where each box has exactly one output wire. However, string diagrams are more expressive and more structured in several ways.</p>
 <p><strong>Multiple outputs.</strong> In a Bayesian network, each node produces exactly one variable. This can force artificial factorizations. Recall the genetic model from <a href="../chapters/intro.html">Chapter 1</a>, where box <span class="math inline">\(t\)</span> jointly generates the genotypes of both twins — a single mechanism that naturally produces two correlated outputs depending on zygosity. In a Bayesian network, one would have to designate one twin as a “parent” of the other or introduce auxiliary nodes, obscuring the actual biological mechanism.</p>
-<p><strong>Hidden auxiliary variables.</strong> A kernel can internally use randomness that does not appear as an output wire. In the twins example, zygosity is sampled inside box <span class="math inline">\(t\)</span> but never exposed — it is an instrumental variable internal to the mechanism. In a Bayesian network, every random variable must be an explicit node, so zygosity would have to appear in the graph even though it plays no role downstream.</p>
 <p><strong>Observed vs.&nbsp;unobserved.</strong> In a string diagram, the output wires explicitly mark which variables are observed; internal wires are automatically marginalized out. A DAG does not distinguish observed from latent variables — this information must be supplied separately (e.g., by shading nodes).</p>
 <p><strong>Global inputs.</strong> String diagrams naturally support kernels with inputs, representing conditional models. Bayesian networks only describe joint distributions.</p>
+<p><strong>Hidden auxiliary variables.</strong> A box in a string diagram can internally use randomness that does not appear as an output wire. In the twins example, zygosity is sampled inside box <span class="math inline">\(t\)</span> but never exposed — it is an instrumental variable internal to the mechanism. In a Bayesian network, every random variable must be an explicit node, so zygosity would have to appear in the graph even though it plays no role downstream.</p>
 <p><strong>Compositionality.</strong> DAGs are not compositional: you cannot take a subgraph and treat it as a single node in a larger network. In string diagrams, any sub-diagram can be wrapped into a box, producing a new kernel that can be plugged into other diagrams. This makes it easy to build complex models from reusable components.</p>
 <p><strong>Typing and templating.</strong> Each wire in a string diagram carries a type (its label set), and each box declares the types of its inputs and outputs. Moreover, the same box can appear multiple times in a diagram, making it explicit that the same mechanism is reused — as with the transition kernel <span class="math inline">\(k\)</span> in a Markov chain or the observation kernel <span class="math inline">\(o\)</span> in an HMM. DAGs have no analogue of this: each node is a separate variable, so shared structure must be stated informally.</p>
 <p><strong>Named mechanisms.</strong> DAG nodes are labeled by variables, not by the mechanisms that produce them. String diagrams label the boxes with mechanisms and the wires with variables, so the full causal story — <em>what</em> is computed and <em>how</em> information flows — is visible in the diagram.</p>
@@ -855,10 +867,10 @@ p(x_1, \ldots, x_n) = \prod_{i=1}^{n} p(x_i \mid \text{parents}(x_i)).
 <p>A <strong>factor graph</strong> is a bipartite graph with variable nodes and factor nodes, where each edge connects a variable to a factor it participates in. The joint distribution is <span class="math display">\[
 p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{j} f_j(\text{neighbors}(j)).
 \]</span></p>
-<p>The <strong>Forney-style factor graph</strong> (FFG) variant (<span class="citation" data-cites="LoeligerFactorGraphs2004">Loeliger (<a href="../references.html#ref-LoeligerFactorGraphs2004" role="doc-biblioref">2004</a>)</span>) is particularly close to string diagrams: it places variables on edges, allows half-edges (global inputs/outputs), and uses explicit equality nodes (analogous to copy kernels). FFGs also support compositionality.</p>
+<p>The <strong>Forney-style factor graph</strong> (FFG) variant (<span class="citation" data-cites="LoeligerFactorGraphs2004">Loeliger (<a href="../references.html#ref-LoeligerFactorGraphs2004" role="doc-biblioref">2004</a>)</span>) is particularly close to string diagrams: it places variables on edges, allows half-edges (global inputs/outputs), and uses explicit equality nodes (analogous to copy nodes). FFGs also support compositionality.</p>
 <div id="Factor graph for fire alarm" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="graphical-models_files/mediabag/c395071ec7447aacfe8eca40efae62d1025248af.svg" style="height:7em" class="figure-img"></p>
+<p><img src="discrete-graphical-models_files/mediabag/c395071ec7447aacfe8eca40efae62d1025248af.svg" style="height:7em" class="figure-img"></p>
 <figcaption>A Forney-style factor graph representing the fire alarm model.</figcaption>
 </figure>
 </div>
@@ -868,7 +880,7 @@ p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{j} f_j(\text{neighbors}(j)).
 <h3 data-number="2.4.3" class="anchored" data-anchor-id="undirected-graphical-models"><span class="header-section-number">2.4.3</span> Undirected graphical models</h3>
 <p>An <strong>undirected graphical model</strong> (Markov random field) factors a distribution over the cliques of an undirected graph: <span class="math display">\[
 p(x_1, \ldots, x_n) = \frac{1}{Z} \prod_{c \in \text{cliques}} \phi_c(x_c),
-\]</span> where each <span class="math inline">\(\phi_c\)</span> is a non-negative potential function and <span class="math inline">\(Z\)</span> is the normalizing constant. Undirected models naturally handle symmetric interactions (e.g., in image processing or physics), but the normalizing constant <span class="math inline">\(Z\)</span> is often intractable. By contrast, our string diagrams of probability kernels are normalized by construction.</p>
+\]</span> where each <span class="math inline">\(\phi_c\)</span> is a non-negative potential function and <span class="math inline">\(Z\)</span> is the normalizing constant. Undirected models naturally handle symmetric interactions (e.g., in image processing or physics), but the normalizing constant <span class="math inline">\(Z\)</span> is often intractable. In the discrete setting, it is possible to represent an undirected model as a string diagram with “backwards” wires. However, this does not extend neatly to the continuous setting.</p>
 </section>
 </section>
 <section id="bibliographic-notes" class="level2 unnumbered">

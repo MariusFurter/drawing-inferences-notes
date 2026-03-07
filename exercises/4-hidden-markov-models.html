@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Exercise 3: Hidden Markov models – Drawing Inferences</title>
+<title>Exercise 4: Hidden Markov models – Drawing Inferences</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -86,7 +86,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../appendix/pytorch.html" rel="next">
-<link href="../exercises/2-credit-card.html" rel="prev">
+<link href="../exercises/3-stroke-prediction.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -177,7 +177,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/3-hidden-markov-models.html">Exercise 3: Hidden Markov models</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/4-hidden-markov-models.html">Exercise 4: Hidden Markov models</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -220,8 +220,8 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/graphical-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graphical models</span></span></a>
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -247,8 +247,14 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../exercises/3-hidden-markov-models.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Exercise 3: Hidden Markov models</span></a>
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
   </div>
 </li>
       </ul>
@@ -307,9 +313,9 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/3-hidden-markov-models.html">Exercise 3: Hidden Markov models</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/4-hidden-markov-models.html">Exercise 4: Hidden Markov models</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Exercise 3: Hidden Markov models</h1>
+<h1 class="title">Exercise 4: Hidden Markov models</h1>
 </div>
 
 
@@ -380,9 +386,9 @@ window.Quarto = {
 </ul>
 <p><strong>Data files</strong> (generated from a known HMM so we can check our results against ground truth):</p>
 <ul>
-<li><a href="../data/exercise-3/cpg_train.csv">cpg_train.csv</a> — 2000 nucleotide positions with labeled hidden states (for parameter estimation)</li>
-<li><a href="../data/exercise-3/cpg_test.csv">cpg_test.csv</a> — 500 nucleotide positions without labels (for inference)</li>
-<li><a href="../data/exercise-3/cpg_test_labels.csv">cpg_test_labels.csv</a> — true hidden states for the test sequence (for validation)</li>
+<li><a href="../data/exercise-4/cpg_train.csv">cpg_train.csv</a> — 2000 nucleotide positions with labeled hidden states (for parameter estimation)</li>
+<li><a href="../data/exercise-4/cpg_test.csv">cpg_test.csv</a> — 500 nucleotide positions without labels (for inference)</li>
+<li><a href="../data/exercise-4/cpg_test_labels.csv">cpg_test_labels.csv</a> — true hidden states for the test sequence (for validation)</li>
 </ul>
 </section>
 <section id="application-b-volatility-regime-detection-in-financial-markets" class="level4 unnumbered">
@@ -403,9 +409,9 @@ window.Quarto = {
 <p>The bin boundaries for daily percentage returns are: <span class="math inline">\((-\infty, -1.5\%,\, -0.5\%,\, 0.5\%,\, 1.5\%,\, +\infty)\)</span>.</p>
 <p><strong>Data files</strong> (generated from a known HMM so we can check our results against ground truth):</p>
 <ul>
-<li><a href="../data/exercise-3/vol_train.csv">vol_train.csv</a> — 1000 trading days with labeled regimes (for parameter estimation)</li>
-<li><a href="../data/exercise-3/vol_test.csv">vol_test.csv</a> — 500 trading days without labels (for inference)</li>
-<li><a href="../data/exercise-3/vol_test_labels.csv">vol_test_labels.csv</a> — true regimes for the test period (for validation)</li>
+<li><a href="../data/exercise-4/vol_train.csv">vol_train.csv</a> — 1000 trading days with labeled regimes (for parameter estimation)</li>
+<li><a href="../data/exercise-4/vol_test.csv">vol_test.csv</a> — 500 trading days without labels (for inference)</li>
+<li><a href="../data/exercise-4/vol_test_labels.csv">vol_test_labels.csv</a> — true regimes for the test period (for validation)</li>
 </ul>
 <hr>
 </section>
@@ -483,13 +489,13 @@ window.Quarto = {
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="350c4759" class="cell" data-execution_count="1">
+<div id="a460723c" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load training data</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>cpg_train_df <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-3/cpg_train.csv"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>cpg_train_df <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-4/cpg_train.csv"</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>cpg_train_df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="44">
+<div class="cell-output cell-output-display" data-execution_count="1">
 <div>
 
 
@@ -539,7 +545,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div id="d7845b25" class="cell" data-execution_count="2">
+<div id="ab37275f" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Basic statistics</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Time steps:    </span><span class="sc">{</span><span class="bu">len</span>(cpg_train_df)<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Hidden states: </span><span class="sc">{</span>cpg_train_df[<span class="st">'state'</span>]<span class="sc">.</span>nunique()<span class="sc">}</span><span class="ss"> — </span><span class="sc">{</span>cpg_train_df[<span class="st">'state'</span>]<span class="sc">.</span>unique()<span class="sc">.</span>tolist()<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -558,7 +564,7 @@ island        0.2305</code></pre>
 </div>
 </div>
 <p>We now encode the categorical labels as integers so they can be used as indices into our matrices. For example, <code>cpg_state_to_idx["island"]</code> returns <code>1</code>, so we can look up the initial probability of being in an island as <code>init[1]</code>.</p>
-<div id="34f9f3e1" class="cell" data-execution_count="3">
+<div id="b87a1ac6" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define names and mappings</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>cpg_state_names <span class="op">=</span> [<span class="st">"non-island"</span>, <span class="st">"island"</span>]</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>cpg_obs_names <span class="op">=</span> [<span class="st">"A"</span>, <span class="st">"C"</span>, <span class="st">"G"</span>, <span class="st">"T"</span>]</span>
@@ -572,8 +578,8 @@ island        0.2305</code></pre>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>cpg_train_obs <span class="op">=</span> cpg_train_df[<span class="st">"nucleotide"</span>].<span class="bu">map</span>(cpg_obs_to_idx).tolist()</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># File paths and column names</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>cpg_test_file <span class="op">=</span> <span class="st">"../data/exercise-3/cpg_test.csv"</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>cpg_labels_file <span class="op">=</span> <span class="st">"../data/exercise-3/cpg_test_labels.csv"</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>cpg_test_file <span class="op">=</span> <span class="st">"../data/exercise-4/cpg_test.csv"</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>cpg_labels_file <span class="op">=</span> <span class="st">"../data/exercise-4/cpg_test_labels.csv"</span></span>
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>cpg_obs_col <span class="op">=</span> <span class="st">"nucleotide"</span></span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>cpg_state_col <span class="op">=</span> <span class="st">"state"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -592,13 +598,13 @@ island        0.2305</code></pre>
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="b4f419d3" class="cell" data-execution_count="4">
+<div id="08f2a167" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load training data</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>vol_train_df <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-3/vol_train.csv"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>vol_train_df <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-4/vol_train.csv"</span>)</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>vol_train_df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="47">
+<div class="cell-output cell-output-display" data-execution_count="4">
 <div>
 
 
@@ -648,7 +654,7 @@ island        0.2305</code></pre>
 </div>
 </div>
 </div>
-<div id="b65c0519" class="cell" data-execution_count="5">
+<div id="efb1c3a6" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Basic statistics</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Time steps:    </span><span class="sc">{</span><span class="bu">len</span>(vol_train_df)<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Hidden states: </span><span class="sc">{</span>vol_train_df[<span class="st">'regime'</span>]<span class="sc">.</span>nunique()<span class="sc">}</span><span class="ss"> — </span><span class="sc">{</span>vol_train_df[<span class="st">'regime'</span>]<span class="sc">.</span>unique()<span class="sc">.</span>tolist()<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -667,7 +673,7 @@ high_vol    0.266</code></pre>
 </div>
 </div>
 <p>We now encode the categorical labels as integers so they can be used as indices into our matrices. For example, <code>vol_obs_to_idx["large_drop"]</code> returns <code>0</code>, so observation matrix entry <code>O[x, 0]</code> gives the probability of a large drop in regime <code>x</code>.</p>
-<div id="36c80014" class="cell" data-execution_count="6">
+<div id="3d92561c" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define names and mappings</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>vol_state_names <span class="op">=</span> [<span class="st">"low_vol"</span>, <span class="st">"high_vol"</span>]</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>vol_obs_names <span class="op">=</span> [<span class="st">"large_drop"</span>, <span class="st">"small_drop"</span>, <span class="st">"flat"</span>, <span class="st">"small_gain"</span>, <span class="st">"large_gain"</span>]</span>
@@ -681,8 +687,8 @@ high_vol    0.266</code></pre>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>vol_train_obs <span class="op">=</span> vol_train_df[<span class="st">"return_bin"</span>].<span class="bu">map</span>(vol_obs_to_idx).tolist()</span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># File paths and column names</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>vol_test_file <span class="op">=</span> <span class="st">"../data/exercise-3/vol_test.csv"</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>vol_labels_file <span class="op">=</span> <span class="st">"../data/exercise-3/vol_test_labels.csv"</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>vol_test_file <span class="op">=</span> <span class="st">"../data/exercise-4/vol_test.csv"</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>vol_labels_file <span class="op">=</span> <span class="st">"../data/exercise-4/vol_test_labels.csv"</span></span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>vol_obs_col <span class="op">=</span> <span class="st">"return_bin"</span></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>vol_state_col <span class="op">=</span> <span class="st">"regime"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -695,7 +701,7 @@ high_vol    0.266</code></pre>
 <p>The training data has a sequential structure: a hidden state evolves over time, and at each time step we observe a noisy signal that depends on the current state. This is exactly the setup of a <strong>hidden Markov model</strong> (HMM). Recall the structure from the course notes:</p>
 <div id="hmm-diagram" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="3-hidden-markov-models_files/mediabag/8952ae040a0736a9f40d7c6cf0459a860c346dfe.svg" style="height:5em" class="figure-img"></p>
+<p><img src="4-hidden-markov-models_files/mediabag/8952ae040a0736a9f40d7c6cf0459a860c346dfe.svg" style="height:5em" class="figure-img"></p>
 <figcaption>“A hidden Markov model with initial distribution <span class="math inline">\(i : I \kernel X\)</span>, transition kernel <span class="math inline">\(k : X \kernel X\)</span>, and observation kernel <span class="math inline">\(o : X \kernel Y\)</span>.”</figcaption>
 </figure>
 </div>
@@ -769,7 +775,7 @@ p(x_t, y_0, \ldots, y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \left( \prod_{s=0}
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>We estimate the initial distribution from the state frequencies in the training data:</p>
-<div id="59544fe3" class="cell" data-execution_count="7">
+<div id="b8e3f9f9" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>cpg_init <span class="op">=</span> torch.zeros(cpg_n_states)</span>
@@ -787,7 +793,7 @@ p(x_t, y_0, \ldots, y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \left( \prod_{s=0}
 </div>
 </div>
 <p>Next, we count the state-to-state transitions and add 1 to every cell before normalizing:</p>
-<div id="a6d62c83" class="cell" data-execution_count="8">
+<div id="4aff6fc9" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>cpg_trans_counts <span class="op">=</span> torch.ones(cpg_n_states, cpg_n_states)  <span class="co"># +1 smoothing</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(cpg_train_states) <span class="op">-</span> <span class="dv">1</span>):</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    cpg_trans_counts[cpg_train_states[t], cpg_train_states[t <span class="op">+</span> <span class="dv">1</span>]] <span class="op">+=</span> <span class="dv">1</span></span>
@@ -807,7 +813,7 @@ p(x_t, y_0, \ldots, y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \left( \prod_{s=0}
 </div>
 <p>Both rows are dominated by the diagonal — the chain is “sticky,” staying in each state for many consecutive positions. This is expected: CpG islands and non-island regions span hundreds of nucleotides.</p>
 <p>Finally, we estimate the observation matrix in the same way:</p>
-<div id="290c4a70" class="cell" data-execution_count="9">
+<div id="5244be5f" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>cpg_obs_counts <span class="op">=</span> torch.ones(cpg_n_states, cpg_n_obs)  <span class="co"># +1 smoothing</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(cpg_train_states)):</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    cpg_obs_counts[cpg_train_states[t], cpg_train_obs[t]] <span class="op">+=</span> <span class="dv">1</span></span>
@@ -843,7 +849,7 @@ p(x_t, y_0, \ldots, y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \left( \prod_{s=0}
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>We estimate the initial distribution from the regime frequencies in the training data:</p>
-<div id="575126e0" class="cell" data-execution_count="10">
+<div id="0de50254" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>vol_init <span class="op">=</span> torch.zeros(vol_n_states)</span>
@@ -861,7 +867,7 @@ p(x_t, y_0, \ldots, y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \left( \prod_{s=0}
 </div>
 </div>
 <p>Next, we count the regime-to-regime transitions and add 1 to every cell before normalizing:</p>
-<div id="d3012259" class="cell" data-execution_count="11">
+<div id="061c5d3b" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>vol_trans_counts <span class="op">=</span> torch.ones(vol_n_states, vol_n_states)  <span class="co"># +1 smoothing</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(vol_train_states) <span class="op">-</span> <span class="dv">1</span>):</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    vol_trans_counts[vol_train_states[t], vol_train_states[t <span class="op">+</span> <span class="dv">1</span>]] <span class="op">+=</span> <span class="dv">1</span></span>
@@ -881,7 +887,7 @@ p(x_t, y_0, \ldots, y_t) = \sum_{x_0, \ldots, x_{t-1}} i(x_0) \left( \prod_{s=0}
 </div>
 <p>Both regimes are sticky, but the high-volatility regime should have a somewhat higher exit probability — turbulent periods tend to be shorter than calm ones.</p>
 <p>Finally, we estimate the observation matrix in the same way:</p>
-<div id="cfa7d912" class="cell" data-execution_count="12">
+<div id="8d4e231c" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>vol_obs_counts <span class="op">=</span> torch.ones(vol_n_states, vol_n_obs)  <span class="co"># +1 smoothing</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(vol_train_states)):</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    vol_obs_counts[vol_train_states[t], vol_train_obs[t]] <span class="op">+=</span> <span class="dv">1</span></span>
@@ -921,7 +927,7 @@ p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{p(x_t, \bar{y}_0, \ldots, \bar{
 <p>We can represent the numerator <span class="math inline">\(p(x_t, \bar{y}_0, \ldots, \bar{y}_t)\)</span> as the following diagram, where <span class="math inline">\(w_t(x) = o(\bar{y}_t \mid x)\)</span> is the <strong>observation weight</strong> function — the likelihood of the observed value <span class="math inline">\(\bar{y}_t\)</span> viewed as a function of the hidden state <span class="math inline">\(x\)</span>. Note that <span class="math inline">\(w_t\)</span> is a test function (a kernel <span class="math inline">\(X \kernel I\)</span>), not a probability distribution over <span class="math inline">\(X\)</span>: its values need not sum to <span class="math inline">\(1\)</span>.</p>
 <div id="hmm-conditioned-diagram" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="3-hidden-markov-models_files/mediabag/61f6662a654c24683ea9b780a7a11ac1e3d20ad1.svg" style="height:5em" class="figure-img"></p>
+<p><img src="4-hidden-markov-models_files/mediabag/61f6662a654c24683ea9b780a7a11ac1e3d20ad1.svg" style="height:5em" class="figure-img"></p>
 <figcaption>“The HMM with observations fixed to <span class="math inline">\(\bar{y}_0, \bar{y}_1, \bar{y}_2, \ldots\,\)</span>: each observation kernel <span class="math inline">\(o\)</span> is replaced by the weight function <span class="math inline">\(w_t(x) = o(\bar{y}_t \mid x)\)</span>.”</figcaption>
 </figure>
 </div>
@@ -960,7 +966,7 @@ p(x_t, \bar y_0, \ldots, \bar y_t)
 p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t(x')}.
 \]</span></p>
 <p><strong>Task 4a.</strong> Derive the <strong>forward recursion</strong> — express <span class="math inline">\(\alpha_{t+1}\)</span> in terms of <span class="math inline">\(\alpha_{t}\)</span> — by interpreting it as a left-to-right composition in the HMM string diagram. The starting point is</p>
-<img src="3-hidden-markov-models_files/mediabag/f19aee3725443d025d94ef35ca5abaee469b205f.svg" style="height:5em">
+<img src="4-hidden-markov-models_files/mediabag/f19aee3725443d025d94ef35ca5abaee469b205f.svg" style="height:5em">
 <div class="callout callout-style-default callout-note callout-titled" title="Hint">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -991,10 +997,10 @@ p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t
 <div class="callout-body-container callout-body">
 <p>We read the recursion directly from the conditioned diagram by identifying the two operations that advance from time <span class="math inline">\(t\)</span> to time <span class="math inline">\(t+1\)</span>.</p>
 <p><strong>Step 1: Sequential composition with <span class="math inline">\(k\)</span> (predict).</strong> The belief vector <span class="math inline">\(\alpha_t\)</span> is connected to the transition kernel <span class="math inline">\(k\)</span> by an internal wire over which we sum. This is sequential composition <span class="math inline">\(\alpha_t \then k\)</span>, which propagates the belief forward through the transition:</p>
-<img src="3-hidden-markov-models_files/mediabag/bae455c10e5d9d545dd975baa6e3300b100d5bbd.svg" style="height:5em">
+<img src="4-hidden-markov-models_files/mediabag/bae455c10e5d9d545dd975baa6e3300b100d5bbd.svg" style="height:5em">
 <p>In components: <span class="math inline">\((\alpha_t \then k)(x') = \sum_{x} k(x' \mid x)\, \alpha_t(x)\)</span>.</p>
 <p><strong>Step 2: Copy composition with <span class="math inline">\(w_{t+1}\)</span> (update).</strong> The state wire at time <span class="math inline">\(t{+}1\)</span> is copied: one copy feeds into the observation weight <span class="math inline">\(w_{t+1}\)</span>, and the other continues as the output. This is the copy composition of <span class="math inline">\(\alpha_t \then k\)</span> with <span class="math inline">\(w_{t+1}\)</span>:</p>
-<img src="3-hidden-markov-models_files/mediabag/737ea9f8f730b087052a8d04586369b43f8e7b60.svg" style="height:5em">
+<img src="4-hidden-markov-models_files/mediabag/737ea9f8f730b087052a8d04586369b43f8e7b60.svg" style="height:5em">
 <p>Copy composition multiplies element-wise (we write <span class="math inline">\(\odot\)</span> for entry-by-entry multiplication: <span class="math inline">\((u \odot v)(x) := u(x) \cdot v(x)\)</span>), giving: <span class="math display">\[
 ((\alpha_t \then k) \odot w_{t+1})(x') = (\alpha_t \then k)(x') \cdot w_{t+1}(x').
 \]</span></p>
@@ -1096,7 +1102,7 @@ p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t
 </div>
 <div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="c5146223" class="cell" data-execution_count="13">
+<div id="f4d576af" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(init, K, O, observations):</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run the forward algorithm.</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1184,7 +1190,7 @@ p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t
 <div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Load the test sequence and true labels:</p>
-<div id="d3a8b2a9" class="cell" data-execution_count="14">
+<div id="81649c15" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cpg_test_df <span class="op">=</span> pd.read_csv(cpg_test_file)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>cpg_test_obs <span class="op">=</span> torch.tensor(cpg_test_df[cpg_obs_col].<span class="bu">map</span>(cpg_obs_to_idx).tolist())</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1192,7 +1198,7 @@ p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>cpg_true_states <span class="op">=</span> cpg_labels_df[cpg_state_col].<span class="bu">map</span>(cpg_state_to_idx).tolist()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Run the forward algorithm:</p>
-<div id="5b7e5dd3" class="cell" data-execution_count="15">
+<div id="8a1c6fcc" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>cpg_filtering <span class="op">=</span> forward(cpg_init, cpg_K, cpg_O, cpg_test_obs)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>cpg_p_state1 <span class="op">=</span> cpg_filtering[:, <span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -1224,7 +1230,7 @@ p(x_t \mid \bar{y}_0, \ldots, \bar{y}_t) = \frac{\alpha_t(x)}{\sum_{x'} \alpha_t
 <div id="fig-forward-cpg" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-forward-cpg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="3-hidden-markov-models_files/figure-html/fig-forward-cpg-output-1.png" width="1142" height="324" class="figure-img">
+<img src="4-hidden-markov-models_files/figure-html/fig-forward-cpg-output-1.png" width="1142" height="324" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-forward-cpg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: CpG application: posterior probability of being in a CpG island (blue) overlaid with the true state (orange shading).
@@ -1250,7 +1256,7 @@ Figure&nbsp;1: CpG application: posterior probability of being in a CpG island (
 <div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Load the test sequence and true labels:</p>
-<div id="d3dd0912" class="cell" data-execution_count="17">
+<div id="419c021e" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>vol_test_df <span class="op">=</span> pd.read_csv(vol_test_file)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>vol_test_obs <span class="op">=</span> torch.tensor(vol_test_df[vol_obs_col].<span class="bu">map</span>(vol_obs_to_idx).tolist())</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1258,7 +1264,7 @@ Figure&nbsp;1: CpG application: posterior probability of being in a CpG island (
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>vol_true_states <span class="op">=</span> vol_labels_df[vol_state_col].<span class="bu">map</span>(vol_state_to_idx).tolist()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Run the forward algorithm:</p>
-<div id="4b6da20e" class="cell" data-execution_count="18">
+<div id="3b6551fe" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>vol_filtering <span class="op">=</span> forward(vol_init, vol_K, vol_O, vol_test_obs)</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>vol_p_state1 <span class="op">=</span> vol_filtering[:, <span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -1290,7 +1296,7 @@ Figure&nbsp;1: CpG application: posterior probability of being in a CpG island (
 <div id="fig-forward-vol" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-forward-vol-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="3-hidden-markov-models_files/figure-html/fig-forward-vol-output-1.png" width="1142" height="324" class="figure-img">
+<img src="4-hidden-markov-models_files/figure-html/fig-forward-vol-output-1.png" width="1142" height="324" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-forward-vol-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2: Volatility application: posterior probability of the high-volatility regime (blue) overlaid with the true regime (orange shading).
@@ -1348,7 +1354,7 @@ Figure&nbsp;2: Volatility application: posterior probability of the high-volatil
 </div>
 <div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="6bfda107" class="cell" data-execution_count="20">
+<div id="805faca2" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>cpg_true_tensor <span class="op">=</span> torch.tensor(cpg_true_states)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co"># (a) MAP accuracy</span></span>
@@ -1380,7 +1386,7 @@ Log-loss:     0.6091 nats</code></pre>
 </div>
 <div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="0b3a25cc" class="cell" data-execution_count="21">
+<div id="14c3e0a4" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>vol_true_tensor <span class="op">=</span> torch.tensor(vol_true_states)</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co"># (a) MAP accuracy</span></span>
@@ -1823,8 +1829,8 @@ Hamilton, James D. 1989. <span>“A New Approach to the Economic Analysis of Non
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../exercises/2-credit-card.html" class="pagination-link" aria-label="Exercise 2: Credit card fraud detection">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exercise 2: Credit card fraud detection</span>
+      <a href="../exercises/3-stroke-prediction.html" class="pagination-link" aria-label="Exercise 3: Stroke prediction">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exercise 3: Stroke prediction</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
