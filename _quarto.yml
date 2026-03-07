@@ -26,7 +26,8 @@ book:
       chapters:
         - exercises/1-classic-puzzles.qmd
         - exercises/2-credit-card.qmd
-        - exercises/3-hidden-markov-models.qmd
+        - exercises/3-stroke-prediction.qmd
+        - exercises/4-hidden-markov-models.qmd
     - part: "Appendix"
       chapters:
         - appendix/pytorch.qmd

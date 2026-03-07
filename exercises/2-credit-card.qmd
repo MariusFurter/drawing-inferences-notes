@@ -157,7 +157,7 @@ Use rejection sampling to estimate the posterior probability of fraud given the 
 
 **Task:** For each scenario, report the **estimated posterior probability** $p(F = 1 \mid \text{evidence})$, the **acceptance rate** (fraction of samples that matched the evidence), and the **standard deviation** of your estimator (see below).
 
-* **Scenario A (The False Alarm):** A location anomaly and unusual time are observed, but nothing else suspicious.
+* **Scenario A:** A location anomaly and unusual time are observed, but nothing else suspicious.
   * Evidence: $L = 1, \, U = 1, \, H = 0, \, A = 0$.
 
 * **Scenario B (Explaining Away):** Same observations as Scenario A, but we also learn the user is traveling.

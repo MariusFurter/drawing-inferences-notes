@@ -45,9 +45,9 @@ Detecting CpG islands from raw DNA sequence is a classic application of HMMs in 
 
 **Data files** (generated from a known HMM so we can check our results against ground truth):
 
-- [cpg_train.csv](../data/exercise-3/cpg_train.csv) — 2000 nucleotide positions with labeled hidden states (for parameter estimation)
-- [cpg_test.csv](../data/exercise-3/cpg_test.csv) — 500 nucleotide positions without labels (for inference)
-- [cpg_test_labels.csv](../data/exercise-3/cpg_test_labels.csv) — true hidden states for the test sequence (for validation)
+- [cpg_train.csv](../data/exercise-4/cpg_train.csv) — 2000 nucleotide positions with labeled hidden states (for parameter estimation)
+- [cpg_test.csv](../data/exercise-4/cpg_test.csv) — 500 nucleotide positions without labels (for inference)
+- [cpg_test_labels.csv](../data/exercise-4/cpg_test_labels.csv) — true hidden states for the test sequence (for validation)
 
 #### Application B: Volatility regime detection in financial markets {.unnumbered}
 
@@ -65,9 +65,9 @@ The bin boundaries for daily percentage returns are: $(-\infty, -1.5\%,\, -0.5\%
 
 **Data files** (generated from a known HMM so we can check our results against ground truth):
 
-- [vol_train.csv](../data/exercise-3/vol_train.csv) — 1000 trading days with labeled regimes (for parameter estimation)
-- [vol_test.csv](../data/exercise-3/vol_test.csv) — 500 trading days without labels (for inference)
-- [vol_test_labels.csv](../data/exercise-3/vol_test_labels.csv) — true regimes for the test period (for validation)
+- [vol_train.csv](../data/exercise-4/vol_train.csv) — 1000 trading days with labeled regimes (for parameter estimation)
+- [vol_test.csv](../data/exercise-4/vol_test.csv) — 500 trading days without labels (for inference)
+- [vol_test_labels.csv](../data/exercise-4/vol_test_labels.csv) — true regimes for the test period (for validation)
 
 ---
 
@@ -114,11 +114,11 @@ Here [`enumerate(names)`](https://docs.python.org/3/library/functions.html#enume
 ::: {.callout-tip collapse="true" title="Solution — Application A (CpG islands)"}
 
 ```{python}
-#| code-fold: false
+# | code-fold: false
 import pandas as pd
 
 # Load training data
-cpg_train_df = pd.read_csv("../data/exercise-3/cpg_train.csv")
+cpg_train_df = pd.read_csv("../data/exercise-4/cpg_train.csv")
 cpg_train_df.head()
 ```
 
@@ -149,8 +149,8 @@ cpg_train_states = cpg_train_df["state"].map(cpg_state_to_idx).tolist()
 cpg_train_obs = cpg_train_df["nucleotide"].map(cpg_obs_to_idx).tolist()
 
 # File paths and column names
-cpg_test_file = "../data/exercise-3/cpg_test.csv"
-cpg_labels_file = "../data/exercise-3/cpg_test_labels.csv"
+cpg_test_file = "../data/exercise-4/cpg_test.csv"
+cpg_labels_file = "../data/exercise-4/cpg_test_labels.csv"
 cpg_obs_col = "nucleotide"
 cpg_state_col = "state"
 ```
@@ -163,7 +163,7 @@ cpg_state_col = "state"
 import pandas as pd
 
 # Load training data
-vol_train_df = pd.read_csv("../data/exercise-3/vol_train.csv")
+vol_train_df = pd.read_csv("../data/exercise-4/vol_train.csv")
 vol_train_df.head()
 ```
 
@@ -194,8 +194,8 @@ vol_train_states = vol_train_df["regime"].map(vol_state_to_idx).tolist()
 vol_train_obs = vol_train_df["return_bin"].map(vol_obs_to_idx).tolist()
 
 # File paths and column names
-vol_test_file = "../data/exercise-3/vol_test.csv"
-vol_labels_file = "../data/exercise-3/vol_test_labels.csv"
+vol_test_file = "../data/exercise-4/vol_test.csv"
+vol_labels_file = "../data/exercise-4/vol_test_labels.csv"
 vol_obs_col = "return_bin"
 vol_state_col = "regime"
 ```
