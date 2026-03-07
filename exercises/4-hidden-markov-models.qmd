@@ -10,7 +10,7 @@ $$
 $$
 :::
 
-# Exercise 3: Hidden Markov models {.unnumbered}
+# Exercise 4: Hidden Markov models {.unnumbered}
 
 ## Introduction
 
