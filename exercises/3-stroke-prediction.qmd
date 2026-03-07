@@ -24,7 +24,7 @@ This exercise uses the following Python libraries:
 If any of these are not installed, run `pip install torch pandas matplotlib` in your terminal.
 :::
 
-In the previous exercises, we built generative models by specifying the probabilities by hand, using physical laws (heredity) or domain intuition (fraud). In practice, we rarely know the right probabilities. Instead, we **learn them from data**.
+So far in the course, we built generative models by specifying the probabilities by hand, using physical laws (heredity) or domain intuition (fraud). In practice, we rarely know the right probabilities. Instead, we **learn them from data**.
 
 This exercise bridges the gap. We will:
 
@@ -43,7 +43,7 @@ The original dataset has been pre-processed into five discrete variables:
 
 | Variable | Values | Encoding |
 |----------|--------|----------|
-| `age` | young, middle, senior | 0, 1, 2 &ensp;(boundaries: 35, 65) |
+| `age` | young (<35), middle (35-65), senior (>65) | 0, 1, 2 |
 | `smoking` | non-smoker, smoker, unknown | 0, 1, 2 |
 | `hypertension` | no, yes | 0, 1 |
 | `heart_disease` | no, yes | 0, 1 |
@@ -64,7 +64,7 @@ Before touching the data, we think about **model structure**: which variables sh
 
 #### Causal model
 
-**Task 1a.** Consider the five variables above. We will use the following causal structure for the rest of this exercise:
+The first model follows the causal story of how strokes arise. We place each variable downstream of the factors that *cause* it: age and lifestyle come first, they lead to chronic conditions like hypertension and heart disease, and all of these jointly influence stroke risk. This mirrors how a physician thinks about disease progression, and it lets the model capture the real dependencies between risk factors.
 
 - **Generators** (root variables):
     - $\mathsf{age} : I \kernel \text{Age}$
@@ -74,13 +74,13 @@ Before touching the data, we think about **model structure**: which variables sh
     - $\mathsf{heart} : \text{Age} \otimes \text{Hyp} \kernel \text{Heart}$
     - $\mathsf{stroke} : \text{Age} \otimes \text{Hyp} \otimes \text{Heart} \otimes \text{Smoking} \kernel \text{Stroke}$
 
-Draw the **string diagram** for this model. Then explain briefly why each dependency might make sense from a medical perspective. Why is `smoking` a root variable rather than a child of `age`? Why does `stroke` depend on all four other variables?
+**Task 1a.** Draw the **string diagram** for this model. Then explain briefly why each dependency might make sense from a medical perspective. Why is `smoking` a root variable rather than a child of `age`? Why does `stroke` depend on all four other variables?
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
 [Causal model string diagram to be added.]
 
-- **Age** and **smoking** are modeled as root variables (generators) because they are largely *exogenous*, not caused by the other medical conditions in the model. While smoking rates do vary with age in the general population, this is a demographic correlation rather than a causal effect: age does not *cause* someone to smoke in the way it causes hypertension. Treating them as independent roots keeps the model simple.
+- **Age** and **smoking** are modeled as root variables (generators) because they are largely *exogenous* (not caused by the other medical conditions in the model). While smoking rates do vary with age in the general population, this is a demographic correlation rather than a causal effect: age does not *cause* someone to smoke in the way it causes hypertension. Treating them as independent roots keeps the model simple.
 
 - **Hypertension depends on age** because blood pressure tends to rise with age due to arterial stiffening, one of the strongest and best-established risk factors.
 
@@ -91,7 +91,9 @@ Draw the **string diagram** for this model. Then explain briefly why each depend
 Note that smoking does *not* appear as an input to the hypertension or heart disease kernels, even though it contributes to both in reality. Including it would increase kernel sizes without much benefit given our limited data.
 :::
 
-The causal model's stroke kernel has $3 \times 2 \times 2 \times 3 = 36$ input combinations, so we need to estimate a conditional distribution for each one from our ~4000 training patients.
+The price of this richer structure shows up at estimation time. The stroke kernel has $3 \times 2 \times 2 \times 3 = 36$ input combinations, and we need to estimate a separate conditional distribution for each one from our ~4000 training patients. The data is split across all 36 cells, so some combinations will have very few observations, leading to noisy estimates. 
+
+This is a general tension with causal models: the more faithfully we represent dependencies, the more parameters we need, and the more data it takes to estimate them reliably. Later in the course, we will see ways to parametrize kernels more compactly, which will largely alleviate this problem.
 
 #### Naive Bayes model
 
@@ -101,6 +103,13 @@ A classic simplification is the **naive Bayes** model, which reverses the direct
 - Four **feature kernels** $g_1, \ldots, g_4$, each mapping stroke status to one feature:
     - $g_1 : \text{Stroke} \kernel \text{Age}$, $\;g_2 : \text{Stroke} \kernel \text{Smoking}$, $\;g_3 : \text{Stroke} \kernel \text{Hyp}$, $\;g_4 : \text{Stroke} \kernel \text{Heart}$.
 
+This may look strange at first: stroke doesn't *cause* someone to be old or to smoke. But remember that a string diagram defines a **joint distribution** over all its output variables via composition of kernels — it does not have to follow the causal direction. The naive Bayes decomposition is a perfectly valid generative model for the joint distribution over all five variables; it just isn't causally faithful.
+
+The big advantage of this approach is that every kernel is tiny: each one conditions on stroke status alone ($|\text{Stroke}| = 2$), so estimation requires only two conditional distributions regardless of how many features the model has. This sidesteps the data-fragmentation problem of the causal model entirely.
+
+The downside is the independence assumption baked into the structure. The naive Bayes model assumes that all features are **conditionally independent** given stroke status. This is a strong assumption and rarely satisfied in practice. For instance, age causes hypertension, which in turn causes heart disease, so these features are far from independent even if stroke status is known. We will see the effect of this in Task 3.
+
+
 **Task 1b.** Draw the string diagram for the naive Bayes model.
 
 ::: {.callout-tip collapse="true" title="Solution"}
@@ -109,7 +118,7 @@ A classic simplification is the **naive Bayes** model, which reverses the direct
 
 :::
 
-**Task 1c.** Compute the **joint distribution** $p(\text{stroke}, \text{age}, \text{smoking}, \text{hyp}, \text{heart})$ represented by the naive Bayes string diagram. Evaluate the diagram using the composition rules from the course notes.
+**Task 1c.** Compute the **joint distribution** $p(s, a, k, h, d)$ represented by the naive Bayes string diagram, writing $s$ for stroke, $a$ for age, $k$ for smoking, $h$ for hypertension, and $d$ for heart disease. Evaluate the diagram using the composition rules from the course notes.
 
 ::: {.callout-note collapse="true" title="Hint"}
 Interpret the diagram as iterated copy-composition: the generator $\mathsf{prior}$ produces a measure on $\text{Stroke}$, which is then copy-composed with each feature kernel in turn. Equivalently, you can derive the same factorization by repeated application of the chain rule.
@@ -129,19 +138,13 @@ $$
 
 Repeating for all four feature kernels:
 $$
-p(s, a, k, h, d) \;=\; \mathsf{prior}(s) \;\cdot\; g_1(a \mid s) \;\cdot\; g_2(k \mid s) \;\cdot\; g_3(h \mid s) \;\cdot\; g_4(d \mid s),
+p(s, a, k, h, d) \;=\; \mathsf{prior}(s) \;\cdot\; g_1(a \mid s) \;\cdot\; g_2(k \mid s) \;\cdot\; g_3(h \mid s) \;\cdot\; g_4(d \mid s).
 $$
 
-where $s$ = stroke, $a$ = age, $k$ = smoking, $h$ = hyp, $d$ = heart. This is the **naive Bayes factorization**: the joint distribution is a product of the prior $\mathsf{prior}(s)$ and four independent likelihoods, each conditioned only on stroke status.
+This is the **naive Bayes factorization**: the joint distribution is a product of the prior $\mathsf{prior}(s)$ and four independent likelihoods, each conditioned only on stroke status.
 :::
 
-**Task 1d.** Using the joint from Task 1c, derive the **posterior** $p(\text{stroke} = 1 \mid \overline{\text{age}}, \overline{\text{smoking}}, \overline{\text{hyp}}, \overline{\text{heart}})$, the probability of stroke given observed feature values. What happens to the formula when some features are **not observed**?
-
-This situation arises naturally in a diagnostic setting: a doctor may know a patient's age and blood pressure but not yet have their full medical history. A useful model should still be able to estimate stroke risk from whatever information is currently available.
-
-::: {.callout-note collapse="true" title="Hint"}
-Condition by fixing the observed values and normalizing. For unobserved features, think about what happens in the string diagram when you **delete** an output wire: copying then deleting gives the identity ($\cp \then \del = \id$), and composing a kernel with delete gives delete ($g_j \then \del = \del$), since kernel rows sum to 1.
-:::
+**Task 1d.** Using the joint from Task 1c, derive the **posterior** $p(S = 1 \mid \bar{a}, \bar{k}, \bar{h}, \bar{d})$, the probability of stroke given observed feature values.
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
@@ -154,13 +157,26 @@ $$
 p(s \mid \bar{a}, \bar{k}, \bar{h}, \bar{d})
 \;=\; \frac{\mathsf{prior}(s) \cdot g_1(\bar{a} \mid s) \cdot g_2(\bar{k} \mid s) \cdot g_3(\bar{h} \mid s) \cdot g_4(\bar{d} \mid s)}{\sum_{s'} \mathsf{prior}(s') \cdot g_1(\bar{a} \mid s') \cdot g_2(\bar{k} \mid s') \cdot g_3(\bar{h} \mid s') \cdot g_4(\bar{d} \mid s')}.
 $$
+:::
 
-Now suppose only a subset of features are observed. In the string diagram, marginalizing over an unobserved output $X_j$ corresponds to **deleting** that wire. But each wire passes through a copy and then a kernel $g_j$: copying then deleting does nothing ($\cp \then \del = \id$), and composing a normalized kernel with delete gives $g_j \then \del = \del$ (since rows sum to 1). So the entire branch for an unobserved feature vanishes.
+**Task 1e.** What happens to the posterior formula when some features are **not observed**?
+
+This situation arises naturally in a diagnostic setting: a doctor may know a patient's age and blood pressure but not yet have their full medical history. A useful model should still be able to estimate stroke risk from whatever information is currently available.
+
+::: {.callout-note collapse="true" title="Hint"}
+Think about what happens in the string diagram when you **delete** an output wire: copying then deleting gives the identity ($\cp \then \del = \id$), and composing a kernel with delete gives delete ($g_j \then \del = \del$), since kernel rows sum to 1.
+:::
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+Marginalizing over an unobserved output $X_j$ in the string diagram corresponds to **deleting** that wire. But each wire passes through a copy and then a kernel $g_j$: copying then deleting does nothing ($\cp \then \del = \id$), and composing a normalized kernel with delete gives $g_j \then \del = \del$ (since rows sum to 1). So the entire branch for an unobserved feature vanishes.
+
+[Add diagram illustrating this.]
 
 If the observed features are $\{j_1, \ldots, j_m\}$, the posterior simplifies to:
 $$
 p(s \mid \bar{x}_{j_1}, \ldots, \bar{x}_{j_m})
-\;=\; \frac{\mathsf{prior}(s) \prod_{k=1}^{m} g_{j_k}(\bar{x}_{j_k} \mid s)}{\sum_{s'} \mathsf{prior}(s') \prod_{k=1}^{m} g_{j_k}(\bar{x}_{j_k} \mid s')}.
+\;=\; \frac{\mathsf{prior}(s) \prod_{i=1}^{m} g_{j_i}(\bar{x}_{j_i} \mid s)}{\sum_{s'} \mathsf{prior}(s') \prod_{i=1}^{m} g_{j_i}(\bar{x}_{j_i} \mid s')}.
 $$
 
 Unobserved features simply drop out of the product. This is a key advantage of the naive Bayes model: **partial observations are handled for free**.
@@ -175,7 +191,15 @@ $$
 
 where $|Y|$ is the number of output categories. Laplace smoothing ensures no outcome receives probability zero. Without it, a single unseen combination would force the entire product to zero. We will see later in the course that this has a Bayesian justification: it corresponds to placing a uniform prior on the probabilities.
 
-**Task 2a.** Load the training data from [`stroke_train_prepared.csv`](../data/exercise-3/stroke_train_prepared.csv). How many patients are in the dataset? How many had a stroke?
+**Task 2a.** Load the training data from [`stroke_train_prepared.csv`](../data/exercise-3/stroke_train_prepared.csv). How many patients are in the dataset? How many had a stroke? Are there any missing values?
+
+We use [pandas](https://pandas.pydata.org/) to work with tabular data (see the [10-minute intro](https://pandas.pydata.org/docs/user_guide/10min.html) if you haven't used it before). The key operations: 
+
+- [`pd.read_csv(path)`](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html) loads a CSV into a `DataFrame`,
+- [`df.head()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.head.html) shows the first rows
+- `len(df)` counts rows,
+- `df["col"].sum()` and `df["col"].mean()` give the count and fraction of 1s in a binary column.
+- `df.isnull().sum()` counts missing entries per column.
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
@@ -187,24 +211,42 @@ import pandas as pd
 df = pd.read_csv("../data/exercise-3/stroke_train_prepared.csv")
 print(f"Patients: {len(df)}")
 print(f"Strokes:  {df['stroke'].sum()} ({df['stroke'].mean():.1%})")
+print(f"\nMissing values:\n{df.isnull().sum().to_string()}")
 df.head()
 ```
 
 :::
 
-**Task 2b (optional — challenging).** Implement a function `estimate_kernel(df, input_cols, output_col, input_sizes, n_output)` that estimates a kernel from the data using the Laplace-smoothed formula above. *If you prefer, you may skip this task and use the implementation provided in the solution below.*
+**Task 2b (optional — challenging).** Implement a function `estimate_kernel` that takes the training DataFrame and estimates a single kernel using the Laplace-smoothed formula above. *If you prefer, you may skip this task and use the implementation provided in the solution below.*
 
-It should return:
+The arguments are:
 
-- A **kernel tensor** of shape `(*input_sizes, n_output)` where entry `[x1,...,xk, y]` is the estimated $\hat{f}(y \mid x_1, \ldots, x_k)$.
-- A **counts tensor** of shape `(*input_sizes)` with the number of training cases per input combination (before smoothing).
+- `df` — the training DataFrame.
+- `input_cols` — a list of column names for the input (parent) variables, e.g. `["age"]` or `["age", "hypertension"]`. For a generator (no parents), pass an empty list `[]`.
+- `output_col` — the column name of the output variable, e.g. `"hypertension"`.
+- `input_sizes` — a list giving the number of categories for each input variable, e.g. `[3]` for age (young/middle/senior) or `[3, 2]` for age × hypertension. Empty list `[]` for a generator.
+- `n_output` — the number of output categories, e.g. `2` for hypertension (no/yes).
 
-For a generator (no inputs), return a probability vector of shape `(n_output,)` and the total count.
+The function should return two things:
 
-::: {.callout-note collapse="true" title="Hint"}
-**Counting approach:** Create a zero tensor of shape `(*input_sizes, n_output)`. For each row in the DataFrame, increment `raw[x1, ..., xk, y]` by 1. You can do this with a loop over rows, or vectorized using `torch.Tensor.index_put_` with `accumulate=True`. Then apply Laplace smoothing: add 1 to every cell, and divide by (row total + $|Y|$).
+- A **kernel tensor** whose entry at position `[x1, ..., xk, y]` is the estimated probability $\hat{f}(y \mid x_1, \ldots, x_k)$. For a generator, this is just a probability vector of length `n_output`.
+- A **counts tensor** recording how many training patients fell into each input combination (before smoothing). For a generator, just return the total count as an integer.
 
-**Generator case:** When `input_cols` is empty, just count how often each output value appears and normalize.
+::: {.callout-note collapse="true" title="Hint: Step-by-step approach"}
+
+**Generator case** (no inputs): Count how often each output value appears (e.g., how many patients had stroke = 0 vs. stroke = 1). Apply Laplace smoothing and normalize to get a probability vector.
+
+**Kernel case** (one or more inputs):
+
+1. **Create a count tensor** of zeros with shape `(*input_sizes, n_output)`. For example, `estimate_kernel(df, ["age"], "hypertension", [3], 2)` gives shape `(3, 2)` — one row per age category, one column per hypertension status.
+
+2. **Count occurrences.** Loop over the rows of the DataFrame. For each row, read the input and output values and increment the corresponding entry. For instance, a row with `age=2, hypertension=1` increments `counts[2, 1]`.
+
+3. **Apply Laplace smoothing.** Add 1 to every cell of the count tensor.
+
+4. **Normalize.** Divide each row by its sum so the entries along the output dimension sum to 1. This gives the estimated conditional probabilities.
+
+The counts tensor (before smoothing) records how many data points informed each row — useful for spotting unreliable estimates.
 :::
 
 ::: {.callout-tip collapse="true" title="Solution"}
@@ -212,68 +254,57 @@ For a generator (no inputs), return a probability vector of shape `(n_output,)` 
 ```{python}
 #| code-fold: false
 def estimate_kernel(df, input_cols, output_col, input_sizes, n_output):
-    """Estimate a kernel from data with Laplace smoothing.
-
-    Args:
-        df:          DataFrame with integer-encoded columns
-        input_cols:  list of input column names (empty for generators)
-        output_col:  output column name
-        input_sizes: number of categories for each input variable
-        n_output:    number of output categories
-
-    Returns:
-        kernel: tensor of shape (*input_sizes, n_output) with
-                kernel[x1,...,xk,y] = estimated P(Y=y | X1=x1,...,Xk=xk)
-        counts: tensor of shape (*input_sizes) with training counts
-                per input combination (before smoothing)
-    """
-    cols = input_cols + [output_col]
-    sub = df[cols].dropna()
-
+    """Estimate a kernel from data with Laplace smoothing."""
+    # Generator case: no inputs, just count output values
     if len(input_cols) == 0:
-        raw = torch.zeros(n_output)
+        counts = torch.zeros(n_output)
         for y in range(n_output):
-            raw[y] = (sub[output_col] == y).sum()
-        total = int(raw.sum().item())
-        return (raw + 1) / (total + n_output), total
+            counts[y] = (df[output_col] == y).sum()
+        total = int(counts.sum().item())
+        return (counts + 1) / (total + n_output), total
 
+    # Kernel case: count (input, output) combinations
     shape = list(input_sizes) + [n_output]
-    raw = torch.zeros(shape)
-    idx = [torch.tensor(sub[c].astype(int).values) for c in input_cols]
-    idx.append(torch.tensor(sub[output_col].astype(int).values))
-    raw.index_put_(idx, torch.ones(len(sub)), accumulate=True)
+    counts = torch.zeros(shape)
+    for _, row in df.iterrows():
+        inputs = [int(row[c]) for c in input_cols]
+        output = int(row[output_col])
+        counts[tuple(inputs + [output])] += 1
 
-    counts = raw.sum(dim=-1).int()
-    kernel = (raw + 1) / (counts.unsqueeze(-1) + n_output)
-    return kernel, counts
+    # Laplace smoothing: add 1 to every cell, then normalize
+    input_counts = counts.sum(dim=-1)  # has shape (*input_sizes)
+    smoothed = counts + 1
+    # unsqueeze restores the output dim so we can divide each row by its total
+    kernel = smoothed / (input_counts.unsqueeze(-1) + n_output)
+    return kernel, input_counts.int()
 ```
 
 :::
 
 
-**Task 2c.** Use `estimate_kernel` to estimate every kernel in **both** models. For each kernel, print the estimated conditional distribution and the number of training cases per input combination.
+**Task 2c.** Use `estimate_kernel` to estimate every kernel in **both** models (causal and naive Bayes). For each kernel, print the estimated conditional distribution and the number of training cases per input combination.
 
-Store the number of categories for each variable:
-
-```{python}
-#| code-fold: false
+::: {.callout-note collapse="true" title="Hint"}
+First, define the number of categories for each variable:
+```python
 n_age, n_smoking, n_hyp, n_heart, n_stroke = 3, 3, 2, 2, 2
 ```
 
-::: {.callout-note collapse="true" title="Hint"}
-Store the kernels for each model in a dictionary. For example, the naive Bayes age kernel:
+Call `estimate_kernel` once for every box in each string diagram. Store the results in a dictionary for each model.
+
+For the **causal model**, the structure from Task 1a tells you which columns are inputs to each kernel. For example, the hypertension kernel takes age as input:
 ```python
-nb_age, nb_age_n = estimate_kernel(
-    df, ["stroke"], "age", [n_stroke], n_age)
-# nb_age[s, a] = estimated P(Age=a | Stroke=s)
+causal["hyp"] = estimate_kernel(
+    df, ["age"], "hypertension", [n_age], n_hyp)
 ```
 
-For the causal model, use the structure from Task 1a. For example:
+For the **naive Bayes model**, every feature kernel has stroke as its only input:
 ```python
-causal_hyp, causal_hyp_n = estimate_kernel(
-    df, ["age"], "hypertension", [n_age], n_hyp)
-# causal_hyp[a, h] = estimated P(Hyp=h | Age=a)
+nb["age"] = estimate_kernel(
+    df, ["stroke"], "age", [n_stroke], n_age)
 ```
+
+Generators have no inputs — pass empty lists for `input_cols` and `input_sizes`.
 :::
 
 ::: {.callout-tip collapse="true" title="Solution: Causal model"}
@@ -281,6 +312,8 @@ causal_hyp, causal_hyp_n = estimate_kernel(
 ```{python}
 #| code-fold: false
 torch.set_printoptions(precision=4, sci_mode=False)
+
+n_age, n_smoking, n_hyp, n_heart, n_stroke = 3, 3, 2, 2, 2
 
 causal = {}
 causal["age"] = estimate_kernel(df, [], "age", [], n_age)
@@ -298,7 +331,10 @@ A **generator** is just a probability vector:
 
 ```{python}
 age_k, age_n = causal["age"]
-print(f"age generator: {age_k}  (estimated from {age_n} patients)")
+print(f"age generator: {age_k}  (n={age_n})")
+
+smoking_k, smoking_n = causal["smoking"]
+print(f"smoking generator: {smoking_k}  (n={smoking_n})")
 ```
 
 A kernel with one input is a matrix whose rows are conditional distributions:
@@ -310,17 +346,29 @@ print(hyp_k)
 print("counts:", hyp_n)
 ```
 
-The stroke kernel has shape $(3, 2, 2, 3, 2)$:
+A kernel with two inputs is a higher-dimensional tensor:
+
+```{python}
+heart_k, heart_n = causal["heart"]
+print("heart | age, hyp  (shape", tuple(heart_k.shape), "):")
+print(heart_k)
+print("counts:", heart_n)
+```
+
+The stroke kernel has shape $(3, 2, 2, 3, 2)$ — one dimension per input variable, plus the output. Printing the full tensor would be unwieldy, so we inspect a single slice and the training counts:
 
 ```{python}
 stroke_k, stroke_n = causal["stroke"]
-print("stroke | age, hyp, heart, smoking  (shape", tuple(stroke_k.shape), "):\n")
-print("Training counts per input combination:")
+print("stroke kernel shape:", tuple(stroke_k.shape))
+print("\nSlice for senior (age=2), hypertensive (hyp=1):")
+print("  heart=0:", stroke_k[2, 1, 0])
+print("  heart=1:", stroke_k[2, 1, 1])
+print("\nTraining counts per input combination (shape", tuple(stroke_n.shape), "):")
 print(stroke_n)
 print(f"\nmin count = {stroke_n.min().item()}, max = {stroke_n.max().item()}")
 ```
 
-Some input combinations have very few training cases, so those kernel estimates will be unreliable.
+Some input combinations have very few training cases. When there are 0 cases, the estimate defaults to a uniform distribution due to Laplace smoothing, meaning the model will make a 50/50 guess for stroke risk.
 
 :::
 
@@ -336,7 +384,7 @@ nb["hyp"]     = estimate_kernel(df, ["stroke"], "hypertension", [n_stroke], n_hy
 nb["heart"]   = estimate_kernel(df, ["stroke"], "heart_disease", [n_stroke], n_heart)
 ```
 
-Every feature kernel has shape $(2, k)$, with two rows (stroke=0, stroke=1):
+Every feature kernel has shape $(2, \ldots)$ — two rows, one per stroke status:
 
 ```{python}
 feature_names = {
@@ -355,10 +403,10 @@ for name, labels in feature_names.items():
     print()
 ```
 
-Every NB kernel is estimated from the same two groups: ~3889 non-stroke and ~199 stroke patients. In contrast, the causal stroke kernel splits the data across 36 combinations, some with very few cases.
+Notice that every NB kernel is estimated from the same two groups: all ~3889 non-stroke and all ~199 stroke patients.
 :::
 
-**Task 2d.** Compare the sample sizes between the two models. Which model has more data per kernel estimate? Why? What are the consequences for estimation reliability?
+**Task 2d.** Compare the training counts between the two models. How many data points inform each row of the causal stroke kernel versus each row of a naive Bayes feature kernel? What are the consequences for estimation reliability?
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
@@ -371,27 +419,26 @@ The trade-off: the naive Bayes model has stable estimates but assumes features a
 
 ### Task 3. Sample and predict
 
-We now use the estimated models to predict stroke risk for individual patients.
+We now use the estimated models to predict stroke risk for individual patients. For the **naive Bayes** model, we derived a closed-form posterior in Task 1d, so we can compute exact predictions.
 
-For the **naive Bayes** model, we derived a closed-form posterior in Task 1d, so we can compute exact predictions. For the **causal model**, exact conditioning on *partial* evidence is harder (it requires marginalizing over unobserved variables). Instead, we use the same approach as in Exercise 2: **sample from the joint distribution, then filter**. This is rejection sampling, and it works for any graphical model regardless of its structure.
-
-**Task 3a.** Implement a function `predict_nb(evidence, nb)` that computes $p(\text{stroke}=1 \mid \text{evidence})$ using the naive Bayes posterior from Task 1d. The function should accept a dictionary of observed features, allowing partial evidence (unobserved features are simply omitted from the dictionary).
+**Task 3a.** Implement a function `predict_nb` that computes $p(s=1 \mid \text{evidence})$ using the naive Bayes posterior from Task 1d. The function should accept a dictionary of observed features, allowing partial evidence (unobserved features are simply not listed).
 
 ::: {.callout-note collapse="true" title="Hint"}
-For each stroke status $s \in \{0, 1\}$, compute the unnormalized score: $\text{score}[s] = \text{prior}[s] \times \prod_{j \in \text{observed}} \text{kernel}_j[s, x_j]$. Then normalize: $p(\text{stroke}=1) = \text{score}[1] / (\text{score}[0] + \text{score}[1])$.
+For each stroke status $s \in \{0, 1\}$, compute the unnormalized score
+$$\text{score}(s) = \mathsf{prior}(s) \cdot \prod_{j \in \text{observed}} g_j(\bar{x}_j \mid s).$$
+Then normalize: $p(s=1 \mid \text{evidence}) = \text{score}(1) \,/\, (\text{score}(0) + \text{score}(1))$.
 :::
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
 ```{python}
 #| code-fold: false
-def predict_nb(evidence, nb):
+def predict_nb(evidence):
     """Compute P(stroke=1 | evidence) using the naive Bayes model.
 
     Args:
         evidence: dict mapping feature names to integer values,
                   e.g. {"age": 2, "hyp": 1}. Unobserved features omitted.
-        nb:       dict of estimated NB kernels.
 
     Returns:
         P(stroke=1 | evidence) as a float.
@@ -406,21 +453,25 @@ def predict_nb(evidence, nb):
 
 :::
 
-**Task 3b.** Implement a function `sample_causal(causal, N)` that draws `N` samples from the **joint distribution** of the causal model by **sampling according to the structure of the string diagram**: sample each variable in the left-to-right order of the diagram, feeding parent values into child kernels.
+For the **causal model**, exact conditioning on *partial* evidence is harder since it requires marginalizing over unobserved variables. Instead, we use a rejection sampling approach. This works for any graphical model regardless of its structure.
 
-In Exercise 2, you sampled from the credit card model by calling each box function following the causal structure of the string diagram. The same idea applies here, except the boxes are *estimated kernel tensors* rather than hand-specified functions. Use `torch.distributions.Categorical` to sample from each kernel.
-
-The key pattern: if a kernel `k` has shape `(*input_sizes, n_output)`, then `k[parent_values]` selects the conditional distribution for each sample. For example, if `hyp_k` has shape `(3, 2)` (one row per age category), then `hyp_k[age]` gathers the right row for each of the `N` samples, producing a tensor of shape `(N, 2)` that `Categorical` can sample from.
+**Task 3b.** Implement a function `sample_causal` that draws `N` samples from the **joint distribution** of the causal model by sampling according to the structure of the string diagram. Sample each variable in left-to-right order, feeding parent values into child kernels. Use [`torch.distributions.Categorical`](https://pytorch.org/docs/stable/distributions.html#categorical) to sample from each kernel.
 
 ::: {.callout-note collapse="true" title="Hint"}
-Follow the left-to-right order of the string diagram:
+**Generators** (no parents) are probability vectors, so you can sample directly:
+```python
+age_k, _ = causal["age"]
+age = Categorical(probs=age_k).sample((N,))  # shape (N,)
+```
 
-1. Sample the two generators (`age`, `smoking`), which have no parents.
-2. Sample `hyp` given `age`.
-3. Sample `heart` given `age` and `hyp`.
-4. Sample `stroke` given all four parents.
+**Downstream variables** have parent inputs. Index into the kernel tensor with the parent samples to select the right conditional distribution for each of the `N` samples:
+```python
+hyp_k, _ = causal["hyp"]       # shape (3, 2): rows indexed by age
+hyp = Categorical(probs=hyp_k[age]).sample()  # shape (N,)
+```
+Here `hyp_k[age]` gathers one row per sample (shape `(N, 2)`), and `Categorical` samples from each row. For multiple parents, use multiple indices: `heart_k[age, hyp]`.
 
-Return a dictionary mapping variable names to tensors of shape `(N,)`.
+Process all five variables according to the order in the string diagram, and return a dictionary mapping variable names to tensors of shape `(N,)`.
 :::
 
 ::: {.callout-tip collapse="true" title="Solution"}
@@ -430,12 +481,11 @@ Return a dictionary mapping variable names to tensors of shape `(N,)`.
 from torch.distributions import Categorical
 
 
-def sample_causal(causal, N):
+def sample_causal(N):
     """Draw N samples from the causal model by sampling according to the string diagram.
 
     Args:
-        causal: dict of estimated kernels from Task 2.
-        N:      number of samples.
+        N: number of samples.
 
     Returns:
         dict mapping variable names to integer tensors of shape (N,).
@@ -462,9 +512,9 @@ def sample_causal(causal, N):
 Each line mirrors a box in the string diagram: generators produce root variables, and each downstream kernel receives its parent values as indices. The vectorized indexing `hyp_k[age]` selects one row per sample, so no Python loop is needed.
 :::
 
-**Task 3c.** Use rejection sampling to estimate $p(\text{stroke}=1 \mid \text{evidence})$ from the causal model, and compare with the exact naive Bayes predictions.
+**Task 3c.** Use rejection sampling to estimate $p(s=1 \mid \text{evidence})$ from the causal model, and compare with the exact naive Bayes predictions.
 
-The following `rejection_sample` function is similar to the one from Exercise 2 (see there for a detailed explanation). The main difference is that it takes a `sample_fn` argument, making it reusable across different models.
+The following `rejection_sample` function is similar to the one from Exercise 2. The main difference is that it takes a `sample_fn` argument, making it reusable across different models.
 
 ::: {.callout-note collapse="true" title="Provided: `rejection_sample` function"}
 
@@ -517,30 +567,26 @@ Compute predictions for the following patient profiles:
 | B (young healthy) | young (0) | non-smoker (0) | no (0) | no (0) |
 | C (partial: age + smoking only) | senior (2) | smoker (1) | — | — |
 
-::: {.callout-note collapse="true" title="Hint"}
-Use `rejection_sample` with `sample_causal` for the causal model. Partial evidence (Scenario C) is handled automatically: just include fewer variables in the evidence dictionary. For the naive Bayes model, use the exact `predict_nb` from Task 3a.
-:::
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
 ```{python}
-#| code-fold: false
+# | code-fold: false
 scenarios = {
     "A (high-risk senior)": {"age": 2, "smoking": 1, "hyp": 1, "heart": 1},
-    "B (young healthy)":    {"age": 0, "smoking": 0, "hyp": 0, "heart": 0},
-    "C (senior smoker)":    {"age": 2, "smoking": 1},
+    "B (young healthy)": {"age": 0, "smoking": 0, "hyp": 0, "heart": 0},
+    "C (senior smoker)": {"age": 2, "smoking": 1},
 }
 
-N = 500_000
-sample_fn = lambda N: sample_causal(causal, N)
+N = 1_000_000
 
 print(f"{'Scenario':<25s}  {'Causal':>10s}  {'Accept%':>9s}  {'NB (exact)':>11s}")
 print("-" * 60)
 
 for label, evidence in scenarios.items():
-    p_causal, acc = rejection_sample(sample_fn, evidence, {"stroke": 1}, N)
-    p_nb = predict_nb(evidence, nb)
-    print(f"{label:<25s}  {p_causal:>10.4f}  {acc:>8.2%}  {p_nb:>11.4f}")
+    p_causal, acc = rejection_sample(sample_causal, evidence, {"stroke": 1}, N)
+    p_nb = predict_nb(evidence)
+    print(f"{label:<25s}  {p_causal:>10.4f}  {acc:>9.2%}  {p_nb:>11.4f}")
 ```
 
 **Observations:**
@@ -555,7 +601,7 @@ for label, evidence in scenarios.items():
 
     In the **naive Bayes model**, each feature independently contributes a likelihood ratio favoring stroke: seniors are more likely to have strokes (age ratio), hypertensive patients are more likely (hyp ratio), patients with heart disease are more likely (heart ratio), and smokers slightly more likely (smoking ratio). These ratios **multiply**. But the features are correlated: age *causes* hypertension, which *causes* heart disease. The naive Bayes model counts the effect of age three times: once directly, once through its effect on hypertension, and once through its effect on heart disease. This **double-counting** inflates the posterior.
 
-    The causal model avoids this because its structure captures the dependencies between variables. When we sample and filter, correlated risk factors are not counted multiple times.
+    The **causal model** avoids this because its structure explicitly represents these dependencies. Hypertension is modeled as a child of age, so the stroke kernel conditions on both age and hypertension *jointly* — it does not treat them as independent evidence. The model "knows" that a hypertensive senior is not doubly surprising, because hypertension is expected given old age.
 
 - **Acceptance rates.** Notice how the acceptance rate drops as we condition on more variables (Scenario A vs. C). For rare combinations, we may need more samples to get reliable estimates. This is a fundamental limitation of rejection sampling that we will revisit later in the course.
 
@@ -563,101 +609,76 @@ for label, evidence in scenarios.items():
 
 ### Task 4. Evaluate on the test set
 
-**Task 4a.** Load the test data from [`stroke_test_prepared.csv`](../data/exercise-3/stroke_test_prepared.csv). For every test patient, compute the predicted stroke probability using both models. Then report the **average predicted probability** for:
+We now evaluate both models on held-out test data using **log-loss** (also called cross-entropy loss):
+$$
+\mathcal{L} = -\frac{1}{T} \sum_{t=1}^{T} \log p(s_t \mid a_t, k_t, h_t, d_t),
+$$
+where $s_t$ is the true stroke status of test patient $t$ and $p(s_t \mid \ldots)$ is the probability the model assigns to the true outcome. Log-loss measures how many nats^[A **nat** (natural unit of information) is the information-theoretic unit obtained when using the natural logarithm. One nat equals the amount of information gained by observing an event of probability $1/e$. If we used $\log_2$ instead, the unit would be **bits**.] of surprise the model experiences on learning the true value on average. Its main value is in **comparing models**: a lower log-loss means one model's predictions are closer to reality than another's.
 
-- Patients who actually had a stroke.
-- Patients who did not have a stroke.
+**Task 4a.** Load the test data from [`stroke_test_prepared.csv`](../data/exercise-3/stroke_test_prepared.csv). For every test patient, compute the predicted stroke probability using both models, and report the **log-loss** for each model.
 
-Does each model assign higher average probability to actual stroke patients?
-
-::: {.callout-note collapse="true" title="Hint"}
-For naive Bayes, use `predict_nb` with all four features. For the causal model, rather than calling `rejection_sample` separately for each of the 1022 test patients (which would be slow), sample one large batch from the causal model and compute the stroke rate for each of the 36 unique input combinations. Then look up each test patient's combination.
-:::
-
-::: {.callout-note collapse="true" title="Note: Direct kernel lookup"}
-Since each test patient has values for *all* four input variables of the stroke kernel, one could also read off $p(\text{stroke} \mid \text{age}, \text{hyp}, \text{heart}, \text{smoking})$ directly from the estimated kernel tensor without any sampling. We will see in the chapter on conditioning why this makes sense. Here, we use the sampling approach because it works in general, including for partial evidence where not all parent values are observed.
-:::
+- For the **naive Bayes** model, use `predict_nb` with all four features.
+- For the **causal model**, we need $p(s \mid a, k, h, d)$ for each test patient. This value is given by the kernel $\mathsf{stroke}(s \mid a, k, h, d)$, which is exactly what the estimated kernel `stroke_k[a, h, d, k, s]` provides. When we cover conditioning in graphical models later in the course, we will understand why we can ignore the rest of the diagram.
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
+We begin by loading the test data and inspecting its size and stroke prevalence:
+
 ```{python}
 #| code-fold: false
+import math
+
 test = pd.read_csv("../data/exercise-3/stroke_test_prepared.csv")
 print(f"Test set: {len(test)} patients, {test['stroke'].sum()} strokes"
       f" ({test['stroke'].mean():.1%})")
 ```
 
-For the NB model, we use the exact formula. For the causal model, we sample a large batch and compute the stroke rate for each unique combination of parent values:
+Compute log-loss for the **naive Bayes** model using the exact posterior:
 
 ```{python}
 #| code-fold: false
-# Sample a large batch from the causal model
-N_eval = 1_000_000
-samples = sample_causal(causal, N_eval)
-
-# For each unique (age, hyp, heart, smoking) combo, compute P(stroke=1)
-causal_lookup = {}
-for a in range(n_age):
-    for h in range(n_hyp):
-        for d in range(n_heart):
-            for k in range(n_smoking):
-                mask = ((samples["age"] == a) & (samples["hyp"] == h) &
-                        (samples["heart"] == d) & (samples["smoking"] == k))
-                n_match = mask.sum().item()
-                if n_match > 0:
-                    causal_lookup[(a, h, d, k)] = (
-                        samples["stroke"][mask].float().mean().item())
-
-# Compute predictions for each test patient
-nb_probs = []
-causal_probs = []
-
+nb_ll = 0.0
 for _, row in test.iterrows():
-    a = int(row["age"])
-    h = int(row["hypertension"])
-    d = int(row["heart_disease"])
-    k = int(row["smoking"])
+    a, k, h, d, s = (int(row[c]) for c in
+                      ["age", "smoking", "hypertension", "heart_disease", "stroke"])
+    p_nb = predict_nb({"age": a, "smoking": k, "hyp": h, "heart": d})
+    nb_ll -= math.log(p_nb if s == 1 else 1 - p_nb)
 
-    nb_probs.append(predict_nb(
-        {"age": a, "smoking": k, "hyp": h, "heart": d}, nb))
-    causal_probs.append(causal_lookup.get((a, h, d, k), float("nan")))
-
-test["nb_prob"] = nb_probs
-test["causal_prob"] = causal_probs
+nb_logloss = nb_ll / len(test)
 ```
+
+Compute log-loss for the **causal model** by looking up the stroke kernel directly:
 
 ```{python}
 #| code-fold: false
-stroke_mask = test["stroke"] == 1
+stroke_k, _ = causal["stroke"]
 
-print(f"{'Group':<20s}  {'NB':>10s}  {'Causal':>10s}  {'Count':>6s}")
-print("-" * 52)
-for label, mask in [("Actual stroke=1", stroke_mask),
-                    ("Actual stroke=0", ~stroke_mask)]:
-    nb_mean = test.loc[mask, "nb_prob"].mean()
-    ca_mean = test.loc[mask, "causal_prob"].mean()
-    print(f"{label:<20s}  {nb_mean:>10.4f}  {ca_mean:>10.4f}  {mask.sum():>6d}")
+causal_ll = 0.0
+for _, row in test.iterrows():
+    a, k, h, d, s = (int(row[c]) for c in
+                      ["age", "smoking", "hypertension", "heart_disease", "stroke"])
+    causal_ll -= math.log(stroke_k[a, h, d, k, s].item())
+
+causal_logloss = causal_ll / len(test)
 ```
 
-Both models assign higher average predicted probability to actual stroke patients, confirming they have learned useful patterns from the data.
+```{python}
+print(f"Log-loss (naive Bayes): {nb_logloss:.4f} nats")
+print(f"Log-loss (causal):      {causal_logloss:.4f} nats")
+```
+
 :::
 
-**Task 4b.** Reflect on the comparison between the two models:
-
-- Which model's predictions are more **spread out** (larger gap between the two groups)?
-- Which model's probabilities are more **realistic** (well-calibrated)?
-- When might you prefer one model over the other?
+**Task 4b.** Which model achieves lower log-loss? Can you explain why? When might you prefer one model over the other?
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
-The **naive Bayes** model typically shows a wider separation between the two groups. However, as we saw in Task 3c, its probabilities tend to be inflated due to double-counting of correlated features. The wider gap partly reflects this overconfidence rather than genuinely better discrimination.
-
-The **causal model** produces more realistic (better-calibrated) probabilities but with noisier estimates, since the stroke kernel splits the data across 36 input combinations.
+The **causal model** achieves a lower log-loss, meaning its predicted probabilities are closer to the true outcomes on average. This is consistent with the Task 3c observation: the naive Bayes model's independence assumption causes it to double-count correlated risk factors, inflating stroke probabilities for high-risk patients. Since log-loss penalizes overconfident wrong predictions harshly — assigning high stroke probability to a patient who did not have a stroke incurs a large penalty — this miscalibration hurts the naive Bayes score.
 
 **When to prefer each model:**
 
-- **Naive Bayes** is the better choice when the goal is *ranking* patients by risk (e.g., deciding who to screen first), when data is limited, or when simplicity matters. It's fast, easy to implement, and its estimates are stable. It also gives exact answers via a closed-form formula.
-- The **causal model** is preferable when *calibrated probabilities* matter (e.g., communicating risk to a patient), when you have enough data for reliable kernel estimates, or when you want to reason about *interventions*, e.g., "what would happen to this patient's stroke risk if we treated their hypertension?" The causal structure supports this kind of reasoning; the naive Bayes model does not. The cost is that predictions require sampling, which introduces noise, though this becomes negligible with enough samples.
+- **Naive Bayes** is the better choice when data is limited, when simplicity matters, or when the goal is *ranking* patients by risk (e.g., deciding who to screen first). It's fast, easy to implement, and its estimates are stable. It also gives exact answers via a closed-form formula and handles partial evidence naturally.
+- The **causal model** is preferable when *calibrated probabilities* matter (e.g., communicating risk to a patient), when you have enough data for reliable kernel estimates, or when you want to reason about *interventions*, e.g., "what would happen to this patient's stroke risk if we treated their hypertension?" The causal structure supports this kind of reasoning; the naive Bayes model does not.
 
 :::
 
