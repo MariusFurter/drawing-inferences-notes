@@ -60,9 +60,9 @@ diagram:
 bibliography: references.bib
 
 format:
-  pdf:
-    documentclass: scrbook
-    include-in-header: theme/custom-macros.tex
+  # pdf:
+  #   documentclass: scrbook
+  #   include-in-header: theme/custom-macros.tex
   html:
     theme:
       light: [cosmo, theme/custom-light.scss]

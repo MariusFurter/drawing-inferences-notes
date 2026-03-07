@@ -1,0 +1,27 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (0) at (-2, 0) {$\mathsf{prior}$};
+		\node [style=black node] (1) at (0, 0) {};
+		\node [style=small box] (2) at (2, 3) {$g_1$};
+		\node [style=small box] (3) at (2, 1.25) {$g_2$};
+		\node [style=small box] (4) at (2, -1.25) {$g_3$};
+		\node [style=small box] (5) at (2, -3) {$g_4$};
+		\node [style=none] (6) at (3.5, 3) {};
+		\node [style=none] (7) at (3.5, 1.25) {};
+		\node [style=none] (8) at (3.5, -1.25) {};
+		\node [style=none] (9) at (3.5, -3) {};
+		\node [style=none] (10) at (3.5, 0) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (0) to (1);
+		\draw [style=edge, in=180, out=90, looseness=0.75] (1) to (2);
+		\draw [style=edge, in=180, out=60] (1) to (3);
+		\draw [style=edge, in=180, out=-60] (1) to (4);
+		\draw [style=edge, in=-180, out=-90, looseness=0.75] (1) to (5);
+		\draw [style=edge] (2) to (6.center);
+		\draw [style=edge] (3) to (7.center);
+		\draw [style=edge] (4) to (8.center);
+		\draw [style=edge] (5) to (9.center);
+		\draw [style=edge] (1) to (10.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

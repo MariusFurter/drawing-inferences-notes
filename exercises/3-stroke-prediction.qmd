@@ -78,7 +78,12 @@ The first model follows the causal story of how strokes arise. We place each var
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
-[Causal model string diagram to be added.]
+We start by drawing the string diagram. For simplicity, we only output the stroke variable.
+
+``` {.tikz file="../diagrams/stroke-prediction/stroke-causal.tikz"}
+%%| label: Causal model for stroke prediction
+%%| height : 6.5em
+```
 
 - **Age** and **smoking** are modeled as root variables (generators) because they are largely *exogenous* (not caused by the other medical conditions in the model). While smoking rates do vary with age in the general population, this is a demographic correlation rather than a causal effect: age does not *cause* someone to smoke in the way it causes hypertension. Treating them as independent roots keeps the model simple.
 
@@ -114,7 +119,10 @@ The downside is the independence assumption baked into the structure. The naive 
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
-[Naive Bayes string diagram to be added — the key structure is: the generator $\mathsf{prior}$ produces $\text{Stroke}$, which is copied four times, and each copy is fed into one of the four feature kernels $g_1, g_2, g_3, g_4$.]
+``` {.tikz file="../diagrams/stroke-prediction/stroke-nb.tikz"}
+%%| label: Naive Bayes model for stroke prediction
+%%| height : 7em
+```
 
 :::
 
@@ -169,9 +177,13 @@ Think about what happens in the string diagram when you **delete** an output wir
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
-Marginalizing over an unobserved output $X_j$ in the string diagram corresponds to **deleting** that wire. But each wire passes through a copy and then a kernel $g_j$: copying then deleting does nothing ($\cp \then \del = \id$), and composing a normalized kernel with delete gives $g_j \then \del = \del$ (since rows sum to 1). So the entire branch for an unobserved feature vanishes.
+Marginalizing over an unobserved output $X_j$ in the string diagram corresponds to **deleting** that wire. But deleting the output of $g_j$ is the same as deleting its input, since $g_j$ is a probability kernel. Finally, copying then deleting does nothing, so the entire branch for an unobserved feature vanishes. This is illustrated for $X_2$ in the diagram below:
 
-[Add diagram illustrating this.]
+``` {.tikz file="../diagrams/stroke-prediction/stroke-nb-del.tikz"}
+%%| label: Deleting an unobserved feature in the naive Bayes model
+%%| height : 7em
+```
+
 
 If the observed features are $\{j_1, \ldots, j_m\}$, the posterior simplifies to:
 $$
@@ -179,7 +191,7 @@ p(s \mid \bar{x}_{j_1}, \ldots, \bar{x}_{j_m})
 \;=\; \frac{\mathsf{prior}(s) \prod_{i=1}^{m} g_{j_i}(\bar{x}_{j_i} \mid s)}{\sum_{s'} \mathsf{prior}(s') \prod_{i=1}^{m} g_{j_i}(\bar{x}_{j_i} \mid s')}.
 $$
 
-Unobserved features simply drop out of the product. This is a key advantage of the naive Bayes model: **partial observations are handled for free**.
+Unobserved features simply drop out of the product. This is a key advantage of the naive Bayes model: all marginals can be computed as a simple product of the observed features. In contrast, the marginals of the causal model do not have this simple form. They require taking into account all kernels and summing over unobserved variables.
 :::
 
 ### Task 2. Estimate the kernels

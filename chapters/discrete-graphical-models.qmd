@@ -411,7 +411,7 @@ At each time step, the state wire is copied: one copy feeds into the next transi
 %%| height: 5em
 ```
 
-Hidden Markov models are widely used in speech recognition, natural language processing, bioinformatics (e.g., gene finding and sequence alignment), and signal processing. The key computational tasks — computing the likelihood of an observation sequence, inferring the most likely hidden state sequence, and learning the model parameters — can all be performed efficiently using the sum-pushing techniques we discuss in the next section. You can derive one of these algorithms on your own in [Exercise 3](../exercises/3-hidden-markov-models.qmd). Later in the course, we will encounter the same diagrammatic structure with continuous state spaces and general (non-discrete) kernels, where it describes **state-space models** used in tracking, control, and time-series analysis.
+Hidden Markov models are widely used in speech recognition, natural language processing, bioinformatics (e.g., gene finding and sequence alignment), and signal processing. The key computational tasks — computing the likelihood of an observation sequence, inferring the most likely hidden state sequence, and learning the model parameters — can all be performed efficiently using the sum-pushing techniques we discuss in the next section. You can derive one of these algorithms on your own in [Exercise 4](../exercises/4-hidden-markov-models.qmd). Later in the course, we will encounter the same diagrammatic structure with continuous state spaces and general (non-discrete) kernels, where it describes **state-space models** used in tracking, control, and time-series analysis.
 :::
 
 ### Deterministic kernels
