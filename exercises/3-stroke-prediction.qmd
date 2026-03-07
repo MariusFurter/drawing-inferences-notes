@@ -82,7 +82,7 @@ We start by drawing the string diagram. For simplicity, we only output the strok
 
 ``` {.tikz file="../diagrams/stroke-prediction/stroke-causal.tikz"}
 %%| label: Causal model for stroke prediction
-%%| height : 6.5em
+%%| height: 10em
 ```
 
 - **Age** and **smoking** are modeled as root variables (generators) because they are largely *exogenous* (not caused by the other medical conditions in the model). While smoking rates do vary with age in the general population, this is a demographic correlation rather than a causal effect: age does not *cause* someone to smoke in the way it causes hypertension. Treating them as independent roots keeps the model simple.
@@ -121,7 +121,7 @@ The downside is the independence assumption baked into the structure. The naive 
 
 ``` {.tikz file="../diagrams/stroke-prediction/stroke-nb.tikz"}
 %%| label: Naive Bayes model for stroke prediction
-%%| height : 7em
+%%| height: 11em
 ```
 
 :::
@@ -181,7 +181,7 @@ Marginalizing over an unobserved output $X_j$ in the string diagram corresponds 
 
 ``` {.tikz file="../diagrams/stroke-prediction/stroke-nb-del.tikz"}
 %%| label: Deleting an unobserved feature in the naive Bayes model
-%%| height : 7em
+%%| height: 11em
 ```
 
 
