@@ -85,7 +85,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../exercises/1-classic-puzzles.html" rel="next">
+<link href="../chapters/conditioning.html" rel="next">
 <link href="../chapters/intro.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -219,6 +219,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -495,6 +501,8 @@ p(y_1, y_2 \mid x_1, x_2)
 <li>A kernel <span class="math inline">\(t : X \kernel I\)</span> assigns each <span class="math inline">\(x \in X\)</span> a non-negative number <span class="math inline">\(t(\bullet \mid x)\)</span>. We think of <span class="math inline">\(t\)</span> as a <strong>test function</strong> on <span class="math inline">\(X\)</span>.</li>
 <li>A kernel <span class="math inline">\(s : I \kernel I\)</span> is a single non-negative number <span class="math inline">\(s(\bullet \mid \bullet)\)</span>. We think of <span class="math inline">\(s\)</span> as a <strong>scalar</strong>.</li>
 </ul>
+<!-- Note the delta state $\delta_{\bar x}(x \mid bullet) = \ivmark{x = \bar x}$ somewhere and observe that precomposing $\delta_{\bar x} \then f(y \mid x) = f(y \mid \bar x)$ fixes the inputs of $f$ to $\bar x$-->
+<!-- Introduce convention of leaving out $\bullet$ when clear form context. -->
 <p>Composing a measure <span class="math inline">\(m : I \kernel X\)</span> with a test function <span class="math inline">\(t : X \kernel I\)</span> gives a scalar <span class="math inline">\((m \then t) : I \kernel I\)</span> called the <strong>expectation</strong> of <span class="math inline">\(t\)</span> under <span class="math inline">\(m\)</span>:</p>
 <div id="Expectation" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -1347,8 +1355,8 @@ Spirtes, Peter, Clark Glymour, and Richard Scheines. 2000. <em>Causation, Predic
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../exercises/1-classic-puzzles.html" class="pagination-link" aria-label="Exercise 1: Classic puzzles">
-        <span class="nav-page-text">Exercise 1: Classic puzzles</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../chapters/conditioning.html" class="pagination-link" aria-label="Conditioning">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

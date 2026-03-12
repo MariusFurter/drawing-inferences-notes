@@ -204,12 +204,6 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
-  </div>
-</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -448,7 +442,7 @@ window.Quarto = {
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>We start by drawing the string diagram. For simplicity, we only output the stroke variable.</p>
-<img src="3-stroke-prediction_files/mediabag/7e0d03e47f363d8583983ab51c1e310e25b603e8.svg" style="height:10em">
+<img src="3-stroke-prediction_files/mediabag/7e0d03e47f363d8583983ab51c1e310e25b603e8.svg" class="img-fluid">
 <ul>
 <li><p><strong>Age</strong> and <strong>smoking</strong> are modeled as root variables (generators) because they are largely <em>exogenous</em> (not caused by the other medical conditions in the model). While smoking rates do vary with age in the general population, this is a demographic correlation rather than a causal effect: age does not <em>cause</em> someone to smoke in the way it causes hypertension. Treating them as independent roots keeps the model simple.</p></li>
 <li><p><strong>Hypertension depends on age</strong> because blood pressure tends to rise with age due to arterial stiffening, one of the strongest and best-established risk factors.</p></li>
@@ -488,7 +482,7 @@ window.Quarto = {
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<img src="3-stroke-prediction_files/mediabag/aef7c44716da1696a25d15d034bcdf6b050cce10.svg" style="height:11em">
+<img src="3-stroke-prediction_files/mediabag/aef7c44716da1696a25d15d034bcdf6b050cce10.svg" class="img-fluid">
 </div>
 </div>
 </div>
@@ -587,7 +581,7 @@ p(s \mid \bar{a}, \bar{k}, \bar{h}, \bar{d})
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Marginalizing over an unobserved output <span class="math inline">\(X_j\)</span> in the string diagram corresponds to <strong>deleting</strong> that wire. But deleting the output of <span class="math inline">\(g_j\)</span> is the same as deleting its input, since <span class="math inline">\(g_j\)</span> is a probability kernel. Finally, copying then deleting does nothing, so the entire branch for an unobserved feature vanishes. This is illustrated for <span class="math inline">\(X_2\)</span> in the diagram below:</p>
-<img src="3-stroke-prediction_files/mediabag/7acec9097214fc3f15a20cc2b0109565592b0202.svg" style="height:11em">
+<img src="3-stroke-prediction_files/mediabag/7acec9097214fc3f15a20cc2b0109565592b0202.svg" class="img-fluid">
 <p>If the observed features are <span class="math inline">\(\{j_1, \ldots, j_m\}\)</span>, the posterior simplifies to: <span class="math display">\[
 p(s \mid \bar{x}_{j_1}, \ldots, \bar{x}_{j_m})
 \;=\; \frac{\mathsf{prior}(s) \prod_{i=1}^{m} g_{j_i}(\bar{x}_{j_i} \mid s)}{\sum_{s'} \mathsf{prior}(s') \prod_{i=1}^{m} g_{j_i}(\bar{x}_{j_i} \mid s')}.
@@ -625,7 +619,7 @@ p(s \mid \bar{x}_{j_1}, \ldots, \bar{x}_{j_m})
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="11bf7745" class="cell" data-execution_count="1">
+<div id="75d00dd0" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -645,7 +639,7 @@ hypertension     0
 heart_disease    0
 stroke           0</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="126">
+<div class="cell-output cell-output-display" data-execution_count="176">
 <div>
 
 
@@ -760,7 +754,7 @@ stroke           0</code></pre>
 </div>
 <div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="c7c8c715" class="cell" data-execution_count="2">
+<div id="0e689c1c" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> estimate_kernel(df, input_cols, output_col, input_sizes, n_output):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Estimate a kernel from data with Laplace smoothing."""</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generator case: no inputs, just count output values</span></span>
@@ -827,7 +821,7 @@ stroke           0</code></pre>
 </div>
 <div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="388672ef" class="cell" data-execution_count="3">
+<div id="9bfd83f5" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>torch.set_printoptions(precision<span class="op">=</span><span class="dv">4</span>, sci_mode<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>n_age, n_smoking, n_hyp, n_heart, n_stroke <span class="op">=</span> <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span></span>
@@ -844,7 +838,7 @@ stroke           0</code></pre>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"stroke"</span>, [n_age, n_hyp, n_heart, n_smoking], n_stroke)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>A <strong>generator</strong> is just a probability vector:</p>
-<div id="f1abf90c" class="cell" data-execution_count="4">
+<div id="970eab75" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>age_k, age_n <span class="op">=</span> causal[<span class="st">"age"</span>]</span>
@@ -859,7 +853,7 @@ smoking generator: tensor([0.3671, 0.3278, 0.3051])  (n=4088)</code></pre>
 </div>
 </div>
 <p>A kernel with one input is a matrix whose rows are conditional distributions:</p>
-<div id="1b1b9c15" class="cell" data-execution_count="5">
+<div id="03fb399a" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>hyp_k, hyp_n <span class="op">=</span> causal[<span class="st">"hyp"</span>]</span>
@@ -876,7 +870,7 @@ counts: tensor([1461, 1800,  827], dtype=torch.int32)</code></pre>
 </div>
 </div>
 <p>A kernel with two inputs is a higher-dimensional tensor:</p>
-<div id="24c21490" class="cell" data-execution_count="6">
+<div id="d306fac4" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>heart_k, heart_n <span class="op">=</span> causal[<span class="st">"heart"</span>]</span>
@@ -900,7 +894,7 @@ counts: tensor([[1444,   17],
 </div>
 </div>
 <p>The stroke kernel has shape <span class="math inline">\((3, 2, 2, 3, 2)\)</span> — one dimension per input variable, plus the output. Printing the full tensor would be unwieldy, so we inspect a single slice and the training counts:</p>
-<div id="e89f6794" class="cell" data-execution_count="7">
+<div id="e7edd2c6" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>stroke_k, stroke_n <span class="op">=</span> causal[<span class="st">"stroke"</span>]</span>
@@ -963,7 +957,7 @@ min count = 0, max = 725</code></pre>
 </div>
 <div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="c4fd7ba2" class="cell" data-execution_count="8">
+<div id="7ba4f295" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>nb <span class="op">=</span> {}</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>nb[<span class="st">"prior"</span>]   <span class="op">=</span> estimate_kernel(df, [], <span class="st">"stroke"</span>, [], n_stroke)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>nb[<span class="st">"age"</span>]     <span class="op">=</span> estimate_kernel(df, [<span class="st">"stroke"</span>], <span class="st">"age"</span>, [n_stroke], n_age)</span>
@@ -972,7 +966,7 @@ min count = 0, max = 725</code></pre>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>nb[<span class="st">"heart"</span>]   <span class="op">=</span> estimate_kernel(df, [<span class="st">"stroke"</span>], <span class="st">"heart_disease"</span>, [n_stroke], n_heart)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Every feature kernel has shape <span class="math inline">\((2, \ldots)\)</span> — two rows, one per stroke status:</p>
-<div id="3ce40216" class="cell" data-execution_count="9">
+<div id="ea132948" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>feature_names <span class="op">=</span> {</span>
@@ -1069,7 +1063,7 @@ heart | stroke  (shape (2, 2)):
 </div>
 <div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="1f67f274" class="cell" data-execution_count="10">
+<div id="622d2900" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> predict_nb(evidence):</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute P(stroke=1 | evidence) using the naive Bayes model.</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1127,7 +1121,7 @@ heart | stroke  (shape (2, 2)):
 </div>
 <div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="d4c9a552" class="cell" data-execution_count="11">
+<div id="8e6e22f5" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.distributions <span class="im">import</span> Categorical</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1176,7 +1170,7 @@ heart | stroke  (shape (2, 2)):
 </div>
 <div id="callout-20" class="callout-20-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="254e9f3f" class="cell" data-execution_count="12">
+<div id="852c3aa2" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rejection_sample(sample_fn, evidence, target, N):</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Estimate P(target | evidence) by rejection sampling.</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1263,7 +1257,7 @@ heart | stroke  (shape (2, 2)):
 </div>
 <div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="b226ff4c" class="cell" data-execution_count="13">
+<div id="d8b2d91b" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>scenarios <span class="op">=</span> {</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"A (high-risk senior)"</span>: {<span class="st">"age"</span>: <span class="dv">2</span>, <span class="st">"smoking"</span>: <span class="dv">1</span>, <span class="st">"hyp"</span>: <span class="dv">1</span>, <span class="st">"heart"</span>: <span class="dv">1</span>},</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"B (young healthy)"</span>: {<span class="st">"age"</span>: <span class="dv">0</span>, <span class="st">"smoking"</span>: <span class="dv">0</span>, <span class="st">"hyp"</span>: <span class="dv">0</span>, <span class="st">"heart"</span>: <span class="dv">0</span>},</span>
@@ -1282,9 +1276,9 @@ heart | stroke  (shape (2, 2)):
 <div class="cell-output cell-output-stdout">
 <pre><code>Scenario                       Causal    Accept%   NB (exact)
 ------------------------------------------------------------
-A (high-risk senior)           0.2978      0.30%       0.7461
-B (young healthy)              0.0020     12.93%       0.0009
-C (senior smoker)              0.1558      6.63%       0.1978</code></pre>
+A (high-risk senior)           0.2819      0.30%       0.7461
+B (young healthy)              0.0023     12.95%       0.0009
+C (senior smoker)              0.1592      6.63%       0.1978</code></pre>
 </div>
 </div>
 <p><strong>Observations:</strong></p>
@@ -1324,7 +1318,7 @@ C (senior smoker)              0.1558      6.63%       0.1978</code></pre>
 <div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>We begin by loading the test data and inspecting its size and stroke prevalence:</p>
-<div id="622cd1e5" class="cell" data-execution_count="14">
+<div id="6d22ceba" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-3/stroke_test_prepared.csv"</span>)</span>
@@ -1335,7 +1329,7 @@ C (senior smoker)              0.1558      6.63%       0.1978</code></pre>
 </div>
 </div>
 <p>Compute log-loss for the <strong>naive Bayes</strong> model using the exact posterior:</p>
-<div id="b10f3fd2" class="cell" data-execution_count="15">
+<div id="bd6e6212" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>nb_ll <span class="op">=</span> <span class="fl">0.0</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> test.iterrows():</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    a, k, h, d, s <span class="op">=</span> (<span class="bu">int</span>(row[c]) <span class="cf">for</span> c <span class="kw">in</span></span>
@@ -1346,7 +1340,7 @@ C (senior smoker)              0.1558      6.63%       0.1978</code></pre>
 <span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>nb_logloss <span class="op">=</span> nb_ll <span class="op">/</span> <span class="bu">len</span>(test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Compute log-loss for the <strong>causal model</strong> by looking up the stroke kernel directly:</p>
-<div id="2b50247a" class="cell" data-execution_count="16">
+<div id="3ef99ea9" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>stroke_k, _ <span class="op">=</span> causal[<span class="st">"stroke"</span>]</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>causal_ll <span class="op">=</span> <span class="fl">0.0</span></span>
@@ -1357,7 +1351,7 @@ C (senior smoker)              0.1558      6.63%       0.1978</code></pre>
 <span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>causal_logloss <span class="op">=</span> causal_ll <span class="op">/</span> <span class="bu">len</span>(test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="37294fdc" class="cell" data-execution_count="17">
+<div id="55f4aca4" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Log-loss (naive Bayes): </span><span class="sc">{</span>nb_logloss<span class="sc">:.4f}</span><span class="ss"> nats"</span>)</span>
@@ -1442,12 +1436,12 @@ Log-loss (causal):      0.1633 nats</code></pre>
 </div>
 <div id="callout-25" class="callout-25-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="f7bfafdb" class="cell" data-execution_count="18">
+<div id="301a608d" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>raw <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-3/stroke_train.csv"</span>)</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>raw.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="143">
+<div class="cell-output cell-output-display" data-execution_count="193">
 <div>
 
 
@@ -1551,7 +1545,7 @@ Log-loss (causal):      0.1633 nats</code></pre>
 </div>
 </div>
 </div>
-<div id="f6459828" class="cell" data-execution_count="19">
+<div id="d6a89ead" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Patients: </span><span class="sc">{</span><span class="bu">len</span>(raw)<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Strokes:  </span><span class="sc">{</span>raw[<span class="st">'stroke'</span>]<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>raw[<span class="st">'stroke'</span>]<span class="sc">.</span>mean()<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>missing <span class="op">=</span> raw.isnull().<span class="bu">sum</span>()</span>
@@ -1595,7 +1589,7 @@ stroke                 0</code></pre>
 </div>
 <div id="callout-26" class="callout-26-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="14f9d0b4" class="cell" data-execution_count="20">
+<div id="83d98e8a" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">2</span>))</span>
@@ -1640,7 +1634,7 @@ stroke                 0</code></pre>
 </table>
 <p>35 separates young adults from middle-aged patients. 65 is the standard threshold for “senior” in medical literature.</p>
 <p>We use <a href="https://pandas.pydata.org/docs/reference/api/pandas.cut.html"><code>pd.cut()</code></a> to assign each value to a bin:</p>
-<div id="f9789103" class="cell" data-execution_count="21">
+<div id="90f3d40f" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>raw[<span class="st">"age_bin"</span>] <span class="op">=</span> pd.cut(</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    raw[<span class="st">"age"</span>], bins<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">35</span>, <span class="dv">65</span>, <span class="bu">float</span>(<span class="st">"inf"</span>)],</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>], right<span class="op">=</span><span class="va">False</span></span>
@@ -1674,7 +1668,7 @@ Name: count, dtype: int64</code></pre>
 </div>
 <div id="callout-27" class="callout-27-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="b463c2fd" class="cell" data-execution_count="22">
+<div id="04df2d0f" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Raw smoking categories:"</span>)</span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(raw[<span class="st">"smoking_status"</span>].value_counts().to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1686,7 +1680,7 @@ formerly smoked     714
 smokes              626</code></pre>
 </div>
 </div>
-<div id="28d46523" class="cell" data-execution_count="23">
+<div id="bfbe647b" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>smoking_map <span class="op">=</span> {</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"never smoked"</span>: <span class="dv">0</span>,     <span class="co"># non-smoker</span></span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"formerly smoked"</span>: <span class="dv">1</span>,  <span class="co"># smoker</span></span>
@@ -1726,12 +1720,12 @@ Name: count, dtype: int64</code></pre>
 </div>
 <div id="callout-28" class="callout-28-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="f87da499" class="cell" data-execution_count="24">
+<div id="e1fbd0aa" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>prepared <span class="op">=</span> raw[[<span class="st">"age_bin"</span>, <span class="st">"smoking"</span>, <span class="st">"hypertension"</span>, <span class="st">"heart_disease"</span>, <span class="st">"stroke"</span>]].copy()</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>prepared.columns <span class="op">=</span> [<span class="st">"age"</span>, <span class="st">"smoking"</span>, <span class="st">"hypertension"</span>, <span class="st">"heart_disease"</span>, <span class="st">"stroke"</span>]</span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>prepared.head(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="149">
+<div class="cell-output cell-output-display" data-execution_count="199">
 <div>
 
 
@@ -1833,7 +1827,7 @@ Name: count, dtype: int64</code></pre>
 </div>
 </div>
 </div>
-<div id="ec9443a3" class="cell" data-execution_count="25">
+<div id="bbe7490e" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify all values are valid integers</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> prepared.columns:</span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">dict</span>(prepared[col].value_counts().sort_index())<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
