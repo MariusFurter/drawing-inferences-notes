@@ -121,7 +121,7 @@ where $a$, $b$, and $c$ are kernels. In diagrams:
 By bundling, this definition applies equally when $U$, $V$, and $W$ each consist of multiple variables.
 :::
 
-The factorization says that $g$ generates $W$ first (given input $X$), then generates $U$ and $V$ independently by feeding $X$ and $W$ into separate kernels $a$ and $b$. In particular, conditioning on $W$ makes $U$ and $V$ independent. To see this, apply the pre-conditioning procedure to $g$ to fix $W = \bar w$ and note that the resulting diagram factors into two separate parts generating $U$ and $V$. Therefore, once $W$ is known, learning $V$ tells us nothing new about $U$, and vice versa.
+The factorization says that $g$ generates $W$ first (given input $X$), then generates $U$ and $V$ independently by feeding $W$ into separate kernels $a$ and $b$. In particular, conditioning on $W$ makes $U$ and $V$ independent. To see this, apply the pre-conditioning procedure to $g$ to fix $W = \bar w$ and note that the resulting diagram factors into two separate parts generating $U$ and $V$. Therefore, once $W$ is known, learning $V$ tells us nothing new about $U$, and vice versa.
 
 ### Graphical test for conditional independence
 
@@ -142,7 +142,7 @@ Recall the structure of a hidden Markov model:
 %%| height: 5.5em
 ```
 
-We will show that $(X_2 \perp Y_1 \mid X_1)$. Then means that if we know the current state $X_1$, the observation $Y_1$ tells us nothing about $X_2$. First, we pull out $X_1$ and $X_2$ as an output, and delete all other outputs except $X_1$, $X_2$, and $Y_1$:
+We will show that $(X_2 \perp Y_1 \mid X_1)$. This means that if we know the current state $X_1$, the observation $Y_1$ tells us nothing about $X_2$. First, we pull out $X_1$ and $X_2$ as outputs, and delete all other outputs except $X_1$, $X_2$, and $Y_1$:
 
 ``` {.tikz file="conditioning/hmm-1.tikz"}
 %%| label: Hidden Markov model
@@ -171,7 +171,7 @@ You can experiment with other choices of $U$, $W$, and $X$ to find other conditi
 
 :::
 
-When the string diagram represents a Bayesian network (i.e., each box has a single output), this procedure is equivalent to the classic [d-separation criterion](https://en.wikipedia.org/wiki/Bayesian_network#d-separation). However, the string diagrammatic criterion both simpler and more general. Its soundness for was established by @FritzDSeparation2023. Importantly, the result applies for the non-discrete kernels we introduce later in the course, even though we cannot always pre-condition on individual points in that setting.
+When the string diagram represents a Bayesian network (i.e., each box has a single output), this procedure is equivalent to the classic [d-separation criterion](https://en.wikipedia.org/wiki/Bayesian_network#d-separation). However, the string diagrammatic criterion is both simpler and more general. Its soundness was established by @FritzDSeparation2023. Importantly, the result applies for the non-discrete kernels we introduce later in the course, even though we cannot always pre-condition on individual points in that setting.
 
 ## Weighted sampling
 
@@ -367,7 +367,7 @@ If we fully specify $t : M \kernel T_1 \otimes T_2$, we can compute these new ke
 4. Compute weight $w^{(k)} = w(m^{(k)})$.
 5. Return weighted sample $((b^{(k)},t_2^{(k)}), w^{(k)})$.
 
-However, writing down $t$ requires some effort. In rejection sampling, we were able to bypass this by simply implementing the generative process. To get explicit probabilities, one needs to statify by zygosity $Z$ (0: monoyogous, 1: dizygous) by combining the chain rule and marginalization:
+However, writing down $t$ requires some effort. In rejection sampling, we were able to bypass this by simply implementing the generative process. To get explicit probabilities, one needs to stratify by zygosity $Z$ (0: monozygous, 1: dizygous) by combining the chain rule and marginalization:
 
 $$p(t_1,t_2 \mid m) = p(t_1,t_2 \mid m, Z = 0) \, p(Z = 0) + p(t_1,t_2 \mid m, Z = 1) \, p(Z = 1).$$
 
