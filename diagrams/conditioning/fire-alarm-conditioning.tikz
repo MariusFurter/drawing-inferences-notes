@@ -1,0 +1,25 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (20) at (-4, 0) {$f$};
+		\node [style=small box] (21) at (-0.25, 1) {$s_{\mid S = \bar s}$};
+		\node [style=small box] (22) at (-0.75, -1) {$p$};
+		\node [style=small box] (23) at (2.25, -1) {$t_{\mid S = \bar s}$};
+		\node [style=black node] (24) at (-2.25, 0) {};
+		\node [style=none] (26) at (4, -1) {};
+		\node [style=none] (27) at (-1.25, 1) {};
+		\node [style=none] (28) at (-1.25, -1) {};
+		\node [style=none] (29) at (1.75, -1) {};
+		\node [style=none] (33) at (-2.75, 0.5) {$F$};
+		\node [style=none] (35) at (0.5, -1.5) {$L$};
+		\node [style=none] (36) at (3.75, -1.5) {$A$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (20) to (24);
+		\draw [style=edge, bend left=45] (24) to (27.center);
+		\draw [style=edge, bend right=45] (24) to (28.center);
+		\draw [style=edge] (29.center) to (22);
+		\draw [style=edge] (23) to (26.center);
+		\draw [style=edge] (27.center) to (21);
+		\draw [style=edge] (28.center) to (22);
+	\end{pgfonlayer}
+\end{tikzpicture}

@@ -19,36 +19,36 @@ We begin by describing conditioning in terms of two basic operations: evaluating
 
 ## Conditioning as testing and normalizing
 
-Recall from the previous chapter that composing a kernel $g : X \kernel Z$ with a test function $t_E : Z \kernel I$ for an event $E \subseteq Z$ gives the probability of $E$:
+Recall from the [Introduction](intro.qmd) that the conditional probability of $Y = y$ given an event $E \subseteq Z$ with $p(E) > 0$ is
 $$
-(g \then t_E)(\bullet \mid x) = \sum_{z \in E} g(z \mid x).
-$$
-
-Conditioning combines this evaluation with normalization. Suppose we have a kernel $g : X \kernel Y \otimes Z$ with two outputs and we observe that $Z$ lies in some event $E \subseteq Z$. The conditioned kernel $g_{\mid E} : X \kernel Y$ should give us the posterior distribution over $Y$:
-
-1. **Evaluate on $E$** — sum $g(y, z \mid x)$ over all $z \in E$. This gives the unnormalized kernel $\tilde{g}_E(y \mid x) := \sum_{z \in E} g(y, z \mid x)$.
-2. **Normalize** — divide by the total weight $\sum_{y} \tilde{g}_E(y \mid x)$ so that the result is again a probability kernel.
-
-The normalization constant depends on the input $x$: different inputs may make the event $E$ more or less likely. The result is:
-$$
-g_{\mid E}(y \mid x) = \frac{\sum_{z \in E} g(y, z \mid x)}{\sum_{y' \in Y} \sum_{z \in E} g(y', z \mid x)}.
+p(y \mid E) = \frac{p(y, E)}{p(E)}.
 $$
 
-### Proportionality
+We now show how to compute both the numerator and the denominator from a kernel using operations from the previous chapter, and combine them to define the **conditioned kernel**.
 
-When conditioning, we often want to work with unnormalized expressions and defer normalization to the end. The **proportionality** notation makes this convenient. We write $f(y \mid x) \propto h(y \mid x)$ if $h$ can be written as $h(y \mid x) = w(x) \, f(y \mid x)$ for some function $w : X \to \mathbb{R}_{\geq 0}$. In other words, $f$ and $h$ differ only by a factor that depends on $x$ but not on $y$. In diagrams:
+Suppose we have a kernel $g : X \kernel Y \otimes Z$ with two outputs and we observe that $Z$ lies in some event $E \subseteq Z$.
 
-``` {.tikz file="conditioning/propto.tikz"} 
-%%| label: Proportionality
-%%| fig-cap: Proportionality notation for kernels.
-%%| height: 4.5em
-```
+**Numerator.** Composing the $Z$-output of $g$ with the test function $t_E : Z \kernel I$ for $E$ gives the unnormalized kernel
+$$
+\tilde{g}_E(y \mid x) := (g \then (\id_Y \otimes t_E))(y \mid x) = \sum_{z \in E} g(y, z \mid x),
+$$
+which records, for each $y$, the total weight of outcomes where $Z \in E$.
 
-Proportionality is useful because many operations — such as pre-conditioning on outputs — produce unnormalized kernels, yet we only need the normalized version at the end. Moreover, since sampling is self-normalizing (drawing a sample automatically respects the correct proportions), we usually do not need to compute the normalization constant explicitly when sampling from a conditioned model.
+**Denominator.** Further marginalizing over $Y$ by composing with $\del_Y$ gives the total probability of $E$:
+$$
+(\tilde{g}_E \then \del_Y)(\bullet \mid x) = \sum_{y \in Y} \tilde{g}_E(y \mid x) = \sum_{y \in Y} \sum_{z \in E} g(y, z \mid x).
+$$
+
+**Conditioning.** Dividing the numerator by the denominator normalizes $\tilde{g}_E$ into a probability kernel — the conditioned kernel $g_{\mid E} : X \kernel Y$:
+$$
+g_{\mid E}(y \mid x) = \frac{\tilde{g}_E(y \mid x)}{\sum_{y'} \tilde{g}_E(y' \mid x)} = \frac{\sum_{z \in E} g(y, z \mid x)}{\sum_{y' \in Y} \sum_{z \in E} g(y', z \mid x)}.
+$$
+
+Since the denominator does not depend on $y$, we will often abbreviate this as $g_{\mid E}(y \mid x) \propto \tilde{g}_E(y \mid x)$. Note that the normalization constant depends on the input $x$: different inputs may make the event $E$ more or less likely.
 
 ## Conditioning on points {#sec-conditioning-on-points}
 
-The most common form of conditioning is fixing a variable to a specific observed value — conditioning on a point. For discrete kernels, there is a convenient graphical procedure for this. The same procedure will also extend to non-discrete kernels with densities later in the course, even though individual points have probability zero in that setting.
+The most common form of conditioning fixes a variable to a specific observed value, known as conditioning on a point. For discrete kernels, there is a convenient graphical procedure for this. The same procedure will also extend to non-discrete kernels with densities later in the course, even though individual points have probability zero in that setting.
 
 ### Pre-conditioned kernels
 
@@ -74,7 +74,7 @@ g_{\mid U}(w \mid u, x,y) := g(u,w \mid x,y).
 $$
 :::
 
-Pre-conditioning on an input is harmless: it simply specializes the kernel to a particular input value, and the result remains a probability kernel. Pre-conditioning on an output is selects only those outcomes where $U = \bar u$, which generally reduces the total weight. The result is therefore an unnormalized kernel.
+Pre-conditioning on an input is harmless: it simply specializes the kernel to a particular input value, and the result remains a probability kernel. Pre-conditioning on an output selects only those outcomes where $U = \bar u$, which generally reduces the total weight. The result is therefore an unnormalized kernel.
 
 ### Graphical procedure
 
@@ -88,7 +88,11 @@ This procedure is justified by applying the definition of conditional probabilit
 $$
 p(u, w) = \sum_{\text{internal}} \prod_i f_i(\text{outputs}_i \mid \text{inputs}_i).
 $$
-Conditioning on $U = \bar u$ means computing $p(w \mid \bar u) = p(\bar u, w) / p(\bar u)$. In the sum-product expression, fixing $U = \bar u$ amounts to replacing each factor that involves $U$ by its value at $\bar u$ — which is precisely pre-conditioning the corresponding box. The denominator $p(\bar u) = \sum_w p(\bar u, w)$ provides the normalization.
+Conditioning on $U = \bar u$ means computing $p(w \mid \bar u) = p(\bar u, w) / p(\bar u)$. In the sum-product expression, fixing $U = \bar u$ amounts to replacing each factor that involves $U$ by its value at $\bar u$, which is precisely pre-conditioning the corresponding box. The denominator $p(\bar u) = \sum_w p(\bar u, w)$ provides the normalization.
+
+::: {#exm-conditioning-fire-alarm}
+
+:::
 
 **Conditioning on multiple variables.** To condition on several variables, repeat the procedure for each one. The order does not matter: conditioning on $U = \bar u$ and then on $V = \bar v$ gives the same result as conditioning on $V = \bar v$ and then on $U = \bar u$, because both yield the same sum-product expression with $U$ and $V$ fixed.
 
@@ -128,17 +132,21 @@ String diagrams make it easy to read off conditional independence relationships 
 1. **Delete irrelevant outputs.** Delete all output wires except those carrying $U$, $W$, and $X$.
 2. **Simplify.** Reduce the diagram to normal form by applying the delete axioms.
 3. **Condition on $X$.** Delete all wires carrying $X$ (equivalently, pre-condition on $X$).
-4. **Check for disconnection.** If $U$ and $W$ are disconnected in the resulting diagram — meaning there is no undirected path of wires and boxes connecting any wire in $U$ to any wire in $W$ — then $U$ and $W$ are conditionally independent given $X$.
+4. **Check for disconnection.** If $U$ and $W$ are disconnected in the resulting diagram (meaning there is no undirected path of wires and boxes connecting any wire in $U$ to any wire in $W$), then $U$ and $W$ are conditionally independent given $X$.
 
-This graphical test is closely related to **d-separation** in Bayesian networks. Its soundness for string diagrams of probability kernels was established by @FritzDSeparation2023. Importantly, the result applies quite generally — it will also work for the non-discrete kernels we introduce later in the course, even though we cannot always pre-condition on individual points in that setting.
+::: {#exm-hmm-conditional-independence}
+
+:::
+
+When the string diagram represents a Bayesian network, this procedure is equivalent to the classic [**d-separation** criterion](https://en.wikipedia.org/wiki/Bayesian_network#d-separation). However, the string diagrammatic criterion is simpler. Its soundness for string diagrams of probability kernels was established by @FritzDSeparation2023. Importantly, the result applies quite generally: it also works for the non-discrete kernels we introduce later in the course, even though we cannot always pre-condition on individual points in that setting.
 
 ## Weighted sampling
 
-Conditioning produces unnormalized kernels: the pre-conditioned boxes generally do not sum to one. How can we still draw useful samples? The key idea is to factor each unnormalized kernel into a probability kernel — which we can sample from — and a weight that records how far the kernel is from being normalized. We first explain this factorization, then show how it leads to **importance sampling**: a method for estimating expectations by drawing weighted samples. Next, we extend the idea to full string diagrams and show that sampling from a diagram of factored kernels reduces to the single-kernel case. Finally, we recover rejection sampling as the special case where the weights are 0 or 1.
+Conditioning produces unnormalized kernels: the pre-conditioned boxes generally do not sum to one, so we cannot sample from them directly. The key idea is to factor each unnormalized kernel into a probability kernel (which we can sample from) and a weight that records how far the kernel is from being normalized. We first explain this factorization, then show how it leads to **importance sampling**: a method for estimating expectations by drawing weighted samples. Next, we extend the idea to full string diagrams and show that sampling from a diagram of factored kernels reduces to the single-kernel case. Finally, we recover rejection sampling as the special case where the weights are 0 or 1.
 
 ### Factoring kernels
 
-Let $g : X \kernel Y$ be a discrete kernel — not necessarily normalized. Any probability kernel $q : X \kernel Y$ with $q(y \mid x) > 0$ whenever $g(y \mid x) > 0$ gives a factorization of $g$ into a **weight** and a probability kernel:
+Let $g : X \kernel Y$ be a discrete kernel, not necessarily normalized. Any probability kernel $q : X \kernel Y$ with $q(y \mid x) > 0$ whenever $g(y \mid x) > 0$ gives a factorization of $g$ into a **weight** and a probability kernel:
 $$
 g(y \mid x) = w(y, x) \, q(y \mid x), \qquad w(y, x) := \frac{g(y \mid x)}{q(y \mid x)}.
 $$
@@ -151,7 +159,7 @@ When $q(y \mid x) = 0$, we set $w(y, x) := 0$. The product $w \cdot q$ is still 
 %%| height: 4.5em
 ```
 
-We call $q$ the **proposal** and $w : X \otimes Y \kernel I$ the **weight**. Each choice of proposal yields a different but equally valid factorization. We will see that the factorization implies that sampling from $g$ can be replaced by sampling from $q$ and recording the weight $w(y, x)$ as a side-product. Note that in the special case where $g$ has no outputs, it is trivially in factored form with $q = \del_X$ and $w = g$.
+We call $q$ the **proposal** and $w : X \otimes Y \kernel I$ the **weight**. Each choice of proposal yields a different but equally valid factorization. We will see that sampling from $g$ can be replaced by sampling from $q$ and recording the weight $w(y, x)$ as a side-product. Note that if $g$ has no outputs, it is trivially in factored form with $q = \del_X$ and $w = g$.
 
 
 A canonical choice is to normalize $g$ directly:
@@ -195,7 +203,7 @@ The key observation is that we can *move all the weights to the right* of the di
 %%| height: 6em
 ```
 
-Here $q$ is a probability kernel composed of all the $f_i$, followed by a parallel product of all the weights $w_j$. By definition, this can be computed by $\prod_{j=1}^m w_j(x_j)$, where $x_j$ is the input to $w_j$. The internal structure of $q$ can include passing wires, if necessary. 
+Here $q$ is a probability kernel composed of all the $f_i$, followed by a parallel product of all the weights $w_j$. The total weight is then $\prod_{j=1}^m w_j(x_j)$, where $x_j$ is the input to $w_j$. The internal structure of $q$ may include passing wires where needed. 
 
 This means we can view any diagram with weights as a single factored kernel, and importance sampling applies directly. Instead of computing the product of all the weights at the end, we can record each weight sequentially as we move through the diagram. This gives the following procedure:
 
@@ -205,17 +213,21 @@ This means we can view any diagram with weights as a single factored kernel, and
 2. **Output** the total weight $w = \prod_j w_j(x_j)$ and the output values $y$.
 3. **Estimate** the expectation from $N$ runs: $\frac{1}{N} \sum_{k=1}^N w^{(k)} \, t(y^{(k)})$.
 
-**Using IS to sample from a conditioned model.** Now consider the situation after conditioning. Pre-conditioning a kernel $g : X \kernel Y \otimes Z$ on $Z = \bar z$ gives the unnormalized kernel $g_{\mid Z = \bar z}(y \mid x) = g(y, \bar z \mid x)$. The conditional expectation of a test function $t$ is:
+**Using importance sampling for a conditioned model.** Now consider the situation after conditioning. Pre-conditioning a kernel $g : X \kernel Y \otimes Z$ on $Z = \bar z$ gives the unnormalized kernel $g_{\mid Z = \bar z}(y \mid x) = g(y, \bar z \mid x)$. The conditional expectation of a test function $t$ is:
 $$
 \mathbb{E}_{g(y \mid \bar z, x)}[ \, t(y) \,] = \sum_{y} t(y) \, g(y \mid \bar z, x) = \frac{\sum_y t(y) \, g_{\mid Z = \bar z}(y \mid x)}{\sum_{y'} g_{\mid Z = \bar z}(y' \mid x)} = \frac{\mathbb{E}_{g_{\mid Z = \bar z}}[\, t(y) \,]}{\mathbb{E}_{g_{\mid Z = \bar z}}[\, 1 \,]}.
 $$
 
-Each expectation can be estimated by importance sampling using the procedure above. Taking the ratio of the two IS estimates gives:
+Each expectation can be estimated by importance sampling using the procedure above. Taking the ratio of the two estimates gives:
 $$
 \sum_{y} t(y) \, g(y \mid \bar z, x) \approx \frac{\sum_{i=1}^N w(y_i, x) \, t(y_i)}{\sum_{i=1}^N w(y_i, x)}.
 $$
 
 In the context of Bayesian networks, this procedure is known as **likelihood weighting**.
+
+::: {#exm-likelihood-weighting-fire-alarm}
+
+:::
 
 ### Rejection sampling as a special case 
 
@@ -226,7 +238,7 @@ $$
 g_{\mid Z = \bar z}(y \mid x) = g(y, \bar z \mid x) = \sum_{z} \, \ivmark{z = \bar z} \, g(y, z \mid x).
 $$
 
-Here, the Iverson bracket $\ivmark{z = \bar z}$ is a weight $w_{\bar z}$ that equals 1 when the condition is satisfied and 0 otherwise.
+Here the Iverson bracket $\ivmark{z = \bar z}$ acts as a weight that equals 1 when the condition is satisfied and 0 otherwise.
 
 ``` {.tikz file="conditioning/rejection-sampling.tikz"}
 %%| label: Rejection sampling factorization
@@ -240,4 +252,4 @@ $$
 
 This is precisely rejection sampling: draw from the unconditioned model and reject samples that do not match the observed data. The same idea applies when conditioning on multiple variables.
 
-Rejection sampling is conceptually simple, but much less efficient than importance sampling directly from the preconditioned model. The reason is that if a sample does not match the observation exactly, it contributes nothing to the estimate. In contrast, importance sampling from the preconditioned model uses all samples, albeit with different weights.
+Rejection sampling is conceptually simple but much less efficient than importance sampling from the pre-conditioned model. If a sample does not match the observation exactly, it contributes nothing to the estimate. In contrast, importance sampling from the pre-conditioned model uses every sample, albeit with different weights.
