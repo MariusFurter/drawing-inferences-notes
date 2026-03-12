@@ -15,40 +15,11 @@ $$
 
 In the [Introduction](intro.qmd), we described Bayesian inference as a two-step process: build a generative model, then condition on observed data. In the [previous chapter](discrete-graphical-models.qmd), we learned how to build generative models by composing kernels into string diagrams. Now we turn to the second step: **conditioning**, which updates a model to account for the fact that certain outputs have been observed. The result is a new generative process that produces only outcomes compatible with the observations.
 
-We begin by describing conditioning in terms of two basic operations: evaluating and normalizing. We then introduce a graphical procedure for conditioning on specific observed values by modifying individual boxes in a string diagram. Next, we define conditional independence and show how to read it off from the diagram structure. Finally, we discuss how to sample from conditioned models using weighted sampling.
+We begin by introducing a graphical procedure for conditioning on specific observed values by modifying individual boxes in a string diagram. Next, we define conditional independence and show how to read it off from the diagram structure. Finally, we discuss how to sample from conditioned models using weighted sampling.
 
-## Conditioning as testing and normalizing
+## Conditioning on observations
 
-Recall from the [Introduction](intro.qmd) that the conditional probability of $Y = y$ given an event $E \subseteq Z$ with $p(E) > 0$ is
-$$
-p(y \mid E) = \frac{p(y, E)}{p(E)}.
-$$
-
-We now show how to compute both the numerator and the denominator from a kernel using operations from the previous chapter, and combine them to define the **conditioned kernel**.
-
-Suppose we have a kernel $g : X \kernel Y \otimes Z$ with two outputs and we observe that $Z$ lies in some event $E \subseteq Z$.
-
-**Numerator.** Composing the $Z$-output of $g$ with the test function $t_E : Z \kernel I$ for $E$ gives the unnormalized kernel
-$$
-\tilde{g}_E(y \mid x) := (g \then (\id_Y \otimes t_E))(y \mid x) = \sum_{z \in E} g(y, z \mid x),
-$$
-which records, for each $y$, the total weight of outcomes where $Z \in E$.
-
-**Denominator.** Further marginalizing over $Y$ by composing with $\del_Y$ gives the total probability of $E$:
-$$
-(\tilde{g}_E \then \del_Y)(\bullet \mid x) = \sum_{y \in Y} \tilde{g}_E(y \mid x) = \sum_{y \in Y} \sum_{z \in E} g(y, z \mid x).
-$$
-
-**Conditioning.** Dividing the numerator by the denominator normalizes $\tilde{g}_E$ into a probability kernel — the conditioned kernel $g_{\mid E} : X \kernel Y$:
-$$
-g_{\mid E}(y \mid x) = \frac{\tilde{g}_E(y \mid x)}{\sum_{y'} \tilde{g}_E(y' \mid x)} = \frac{\sum_{z \in E} g(y, z \mid x)}{\sum_{y' \in Y} \sum_{z \in E} g(y', z \mid x)}.
-$$
-
-Since the denominator does not depend on $y$, we will often abbreviate this as $g_{\mid E}(y \mid x) \propto \tilde{g}_E(y \mid x)$. Note that the normalization constant depends on the input $x$: different inputs may make the event $E$ more or less likely.
-
-## Conditioning on points {#sec-conditioning-on-points}
-
-The most common form of conditioning fixes a variable to a specific observed value, known as conditioning on a point. For discrete kernels, there is a convenient graphical procedure for this. The same procedure will also extend to non-discrete kernels with densities later in the course, even though individual points have probability zero in that setting.
+The most common form of conditioning fixes a variable to a specific observed value. For discrete kernels, there is a convenient graphical procedure for this. The same procedure will also extend to non-discrete kernels with densities later in the course, even though individual points have probability zero in that setting.
 
 ### Pre-conditioned kernels
 
@@ -67,11 +38,6 @@ $$
 $$
 g_{\mid U=\bar u}(w \mid x,y) := g(\bar u,w \mid x,y).
 $$
-
-More generally, we define $g_{\mid U} : U \otimes X \otimes Y \kernel W$ to be the kernel that takes $u$ as a new input and returns the corresponding pre-conditioned kernel:
-$$
-g_{\mid U}(w \mid u, x,y) := g(u,w \mid x,y).
-$$
 :::
 
 Pre-conditioning on an input is harmless: it simply specializes the kernel to a particular input value, and the result remains a probability kernel. Pre-conditioning on an output selects only those outcomes where $U = \bar u$, which generally reduces the total weight. The result is therefore an unnormalized kernel.
@@ -88,42 +54,74 @@ This procedure is justified by applying the definition of conditional probabilit
 $$
 p(u, w) = \sum_{\text{internal}} \prod_i f_i(\text{outputs}_i \mid \text{inputs}_i).
 $$
+
 Conditioning on $U = \bar u$ means computing $p(w \mid \bar u) = p(\bar u, w) / p(\bar u)$. In the sum-product expression, fixing $U = \bar u$ amounts to replacing each factor that involves $U$ by its value at $\bar u$, which is precisely pre-conditioning the corresponding box. The denominator $p(\bar u) = \sum_w p(\bar u, w)$ provides the normalization.
 
 ::: {#exm-conditioning-fire-alarm}
+Recall the fire alarm causal model:
+
+``` {.tikz file="index/fire-alarm.tikz"}
+%%| label: Fire alarm model
+%%| fig-cap: A causal model for a fire alarm.
+%%| height: 5.5em
+```
+
+Pre-conditioning on the observation $S = \bar s$ yields the following diagram:
+
+``` {.tikz file="conditioning/fire-alarm-conditioning.tikz"}
+%%| label: Fire alarm model conditioned
+%%| fig-cap: Fire alarm model conditioned on $S = \bar s$.
+%%| height: 5.5em
+```
 
 :::
 
 **Conditioning on multiple variables.** To condition on several variables, repeat the procedure for each one. The order does not matter: conditioning on $U = \bar u$ and then on $V = \bar v$ gives the same result as conditioning on $V = \bar v$ and then on $U = \bar u$, because both yield the same sum-product expression with $U$ and $V$ fixed.
 
-**Alternative view: observed values as inputs.** It is sometimes useful to view the conditioned model as taking the observed value $\bar u$ as a new input rather than a fixed constant. In this case, we perform the same first two steps as above (remove the wire and pre-condition affected boxes), but instead of fixing $\bar u$ we feed $U$ as an input to all pre-conditioned boxes. The result is a kernel that maps $U$ to the (unnormalized) distribution over the remaining outputs. This perspective is helpful when we want to study how the posterior changes as a function of the observed data.
+**Alternative view: observed values as inputs.** Often it is useful to think about how the pre-conditioned model depends on the choice of $\bar u$. To do this, we can view the observed value $\bar u$ as an input to the pre-conditioned boxes rather than a fixed constant. For pre-conditioned kernels where $U$ was an input, this recovers the original kernel $g$. For pre-conditioned kernels where $U$ was an output, this gives the new kernel $g_{\mid U}(w \mid x,y,\bar u) := g_{\mid U = \bar u}(w \mid x, y) = g(\bar u, w \mid x, y)$.
+
+::: {#exm-conditioning-fire-alarm-inputs}
+
+Viewing the observed value of $S$ as an input gives the following diagram for the fire alarm model:
+
+``` {.tikz file="conditioning/fire-alarm-conditioning-inputs.tikz"}
+%%| label: Fire alarm model conditioned with inputs
+%%| fig-cap: Fire alarm model conditioned on $S$, viewed as an input.
+%%| height: 7.5em
+```
+
+Note that with the new inputs, $t_{\mid S = \bar s}(a \mid \bar s, l) = t(a \mid \bar s, l)$ and $s_{\mid S = \bar s}(\bullet \mid \bar s, f) = s(\bar s \mid f)$.
+
+:::
+
+**Conditioning on general events.** More generally, one can condition on an event $E \subseteq Z$ rather than a single point. Recall from the [Introduction](intro.qmd) that the conditional probability of $Y = y$ given $E$ with $p(E) > 0$ is
+$$
+p(y \mid E) = \frac{p(y, E)}{p(E)}.
+$$
+Both the numerator $p(y, E) = \sum_{z \in E} p(y, z)$ and the denominator $p(E) = \sum_y p(y, E)$ can be estimated from the joint distribution, so this reduces to computing joint and marginal probabilities from the model.
 
 ## Conditional independence {#sec-conditional-independence}
 
-Conditional independence is the structural property that makes large models tractable. It says that once we know a certain set of variables, some other variables become irrelevant to each other. We already encountered this idea informally in the [Introduction](intro.qmd); now we give a precise definition in terms of string diagrams.
+Conditional independence is the structural property that makes large models tractable. It says that once we know a certain set of variables, some other variables become irrelevant to each other. We already encountered this idea informally in the [Introduction](intro.qmd). We now give a precise definition in terms of kernels.
 
 ::: {#def-conditional-independence}
 
-Let $U, W, X$ be disjoint sets of output variables of a model $g$. We say that $U$ and $W$ are **conditionally independent given $X$**, denoted $(U \perp W \mid X)$, if $g$ can be written in the following form:
+Let $U, V, W$ be disjoint sets of output variables of a kernel $g$ with input $X$. We say that $U$ and $V$ are **conditionally independent given $W$**, denoted $(U \perp V \mid W)$, if $g$ can be written in the following form:
 $$
-g(u, w, x) = a(u \mid x) \, b(w \mid x) \, c(x),
+g(u, v, w \mid x) = a(u \mid w) \, b(v \mid w) \, c(w \mid x),
 $$
 where $a$, $b$, and $c$ are kernels. In diagrams:
 
 ``` {.tikz file="conditioning/conditional-independence.tikz"}
 %%| label: Conditional independence
-%%| fig-cap: Conditional independence of $U$ and $W$ given $X$.
+%%| fig-cap: Conditional independence of $U$ and $V$ given $W$.
 %%| height: 6.5em
 ```
 
-By bundling, this definition applies equally when $U$, $W$, and $X$ each consist of multiple variables.
+By bundling, this definition applies equally when $U$, $V$, and $W$ each consist of multiple variables.
 :::
 
-The factorization says that $g$ generates $X$ first, then generates $U$ and $W$ independently by feeding $X$ into separate kernels $a$ and $b$. In particular, conditioning on $X$ makes $U$ and $W$ independent:
-$$
-g(u, w \mid x) = \frac{g(u, w, x)}{g(x)} = \frac{a(u \mid x) \, b(w \mid x) \, c(x)}{c(x)} = a(u \mid x) \, b(w \mid x).
-$$
-Therefore, once $X$ is known, learning $W$ tells us nothing new about $U$, and vice versa.
+The factorization says that $g$ generates $W$ first (given input $X$), then generates $U$ and $V$ independently by feeding $X$ and $W$ into separate kernels $a$ and $b$. In particular, conditioning on $W$ makes $U$ and $V$ independent. To see this, apply the pre-conditioning procedure to $g$ to fix $W = \bar w$ and note that the resulting diagram factors into two separate parts generating $U$ and $V$. Therefore, once $W$ is known, learning $V$ tells us nothing new about $U$, and vice versa.
 
 ### Graphical test for conditional independence
 
@@ -136,9 +134,44 @@ String diagrams make it easy to read off conditional independence relationships 
 
 ::: {#exm-hmm-conditional-independence}
 
+Recall the structure of a hidden Markov model:
+
+``` {.tikz file="conditioning/hmm.tikz"}
+%%| label: Hidden Markov model
+%%| fig-cap: A hidden Markov model.
+%%| height: 5.5em
+```
+
+We will show that $(X_2 \perp Y_1 \mid X_1)$. Then means that if we know the current state $X_1$, the observation $Y_1$ tells us nothing about $X_2$. First, we pull out $X_1$ and $X_2$ as an output, and delete all other outputs except $X_1$, $X_2$, and $Y_1$:
+
+``` {.tikz file="conditioning/hmm-1.tikz"}
+%%| label: Hidden Markov model
+%%| fig-cap: A hidden Markov model.
+%%| height: 8em
+```
+
+We can then simplify the diagram by applying the delete axioms:
+
+``` {.tikz file="conditioning/hmm-2.tikz"}
+%%| label: Hidden Markov model
+%%| fig-cap: A hidden Markov model.
+%%| height: 8em
+```
+
+Finally, we delete the wire carrying $X_1$ to condition on $X_1$:
+
+``` {.tikz file="conditioning/hmm-3.tikz"}
+%%| label: Hidden Markov model
+%%| fig-cap: A hidden Markov model.
+%%| height: 5.5em
+```
+Since $X_2$ and $Y_1$ are disconnected in the resulting diagram, we conclude that $(X_2 \perp Y_1 \mid X_1)$. In this case, directly removing the wire carrying $X_1$ disconnects the diagram, even before simplification. However, in more complex diagrams, the disconnection may only become apparent after simplification.
+
+You can experiment with other choices of $U$, $W$, and $X$ to find other conditional independence relationships in the model. For example, you can check that $(X_2 \perp X_0 \mid X_1)$, but not necessarily $(Y_2 \perp Y_0 \mid Y_1)$.
+
 :::
 
-When the string diagram represents a Bayesian network, this procedure is equivalent to the classic [**d-separation** criterion](https://en.wikipedia.org/wiki/Bayesian_network#d-separation). However, the string diagrammatic criterion is simpler. Its soundness for string diagrams of probability kernels was established by @FritzDSeparation2023. Importantly, the result applies quite generally: it also works for the non-discrete kernels we introduce later in the course, even though we cannot always pre-condition on individual points in that setting.
+When the string diagram represents a Bayesian network (i.e., each box has a single output), this procedure is equivalent to the classic [d-separation criterion](https://en.wikipedia.org/wiki/Bayesian_network#d-separation). However, the string diagrammatic criterion both simpler and more general. Its soundness for was established by @FritzDSeparation2023. Importantly, the result applies for the non-discrete kernels we introduce later in the course, even though we cannot always pre-condition on individual points in that setting.
 
 ## Weighted sampling
 
@@ -225,8 +258,120 @@ $$
 
 In the context of Bayesian networks, this procedure is known as **likelihood weighting**.
 
-::: {#exm-likelihood-weighting-fire-alarm}
 
+::: {#exm-likelihood-twins}
+
+Recall the [twins model](intro.qmd#problem-risk-for-unborn-twins) from the Introduction:
+
+``` {.tikz file="conditioning/family-tree.tikz"}
+%%| label: family-tree
+%%| fig-cap: A string diagram representing a generative model for the family tree.
+%%| height: 5em
+```
+
+In that problem, we conditioned on the brother $B$ being unaffected (0). This corresponds to sampling from the pre-conditioned model:
+
+``` {.tikz file="conditioning/family-tree-brother.tikz"}
+%%| label: family-tree-brother
+%%| fig-cap: Family tree conditioned on $B = 0$.
+%%| height: 5em
+```
+
+The importance sampling procedure for this model is as follows. For $k = 1, \ldots, N$:
+
+1. Sample $m^{(k)} \sim m(-)$
+2. Compute weight $w_s^{(k)} = s_{\mid B = 0}(\bullet \mid m^{k}) = s(0 \mid m^{(k)})$
+3. Sample $(t_1,t_2)^{(k)} \sim t(- \mid m^{(k)})$
+4. Return weighted sample $((t_1,t_2)^{(k)}, w_s^{(k)})$
+
+Hence, as long as we condition on a variable that is the only output of a box, we can simply substitute the sampling step with a corresponding weighting step. For this to work, one needs to know the exact probability specification of the kernel in question.
+
+Let us implement this in PyTorch. Recall from the [Introduction](intro.qmd) that the model uses binary variables (0 = unaffected, 1 = affected/carrier) with all inheritance and zygosity probabilities equal to $1/2$. The key difference from the original model is that instead of writing a function `gen_s(M)` that samples $B$, we write a function `w_s(M)` that returns the probability of $B = 0$, given the genotype of the mother $m \in M$.
+
+```{python}
+#| code-fold: false
+import torch
+from torch.distributions import Bernoulli
+
+def gen_m(N):
+    return Bernoulli(torch.tensor(0.5)).sample((N,))
+
+def w_s(M):
+    return 1 - 0.5 * M  # p(0 | M=0) = 1 and p(0 | M=1) = 0.5.
+
+def gen_t(M):
+    is_MZ = Bernoulli(torch.tensor(0.5)).sample(M.shape)
+    p_inherit = 0.5 * M
+    T1 = Bernoulli(p_inherit).sample()
+    T2 = torch.where(is_MZ == 1, T1, Bernoulli(p_inherit).sample())
+    return T1, T2
+```
+
+Now we use these functions to define a weighted sampling function that implements the importance sampling procedure above.
+
+```{python}
+#| code-fold: false
+def weighted_sample(N):
+    M = gen_m(N)                # 1. Sample mother
+    w = w_s(M)                  # 2. Weight = s(0 | M)
+    T1, T2 = gen_t(M)           # 3. Sample twins
+    return T1, T2, w
+```
+
+The weighted samples that this provides can be used to estimate expectations of test functions by taking weighted averages:
+$$\sum_{y} t(y) \, g(y \mid \bar z, x) \approx \frac{\sum_{i=1}^N w(y_i, x) \, t(y_i)}{\sum_{i=1}^N w(y_i, x)}$$
+
+In particular, we can estimate the conditional probabilities by choosing appropriate indicator functions.
+
+```{python}
+N = 100_000
+torch.manual_seed(42)
+
+T1, T2, w = weighted_sample(N)
+
+at_least_one = ((T1 == 1) | (T2 == 1)).float()
+both = ((T1 == 1) & (T2 == 1)).float()
+
+p_at_least_one = (w * at_least_one).sum() / w.sum()
+p_both = (w * both).sum() / w.sum()
+
+print(
+    f"P(at least one affected | B=0) = {p_at_least_one.item():.4f}  (exact: {5/24:.4f})"
+)
+print(f"P(both affected | B=0)         = {p_both.item():.4f}  (exact: {1/8:.4f})")
+```
+
+:::
+
+::: {#exm-likelihood-twins-2}
+
+A less common pattern that requires more work is when we condition on a variable that is not the only output of a box. For example, we could condition on $T_1 = 1$ to get the following diagram:
+
+``` {.tikz file="conditioning/family-tree-twin1.tikz"}
+%%| label: family-tree-twin1
+%%| fig-cap: Family tree conditioned on $T_1 = 1$.
+%%| height: 5em
+```
+
+Note that the box $t_{\mid T_1 = 1}$ is not normalized, yet still produces an output. To sample from it, we must find a way to write it as
+
+$$t_{\mid T_1 = 1}(t_2 \mid m) = w(t_2, m) \, q(t_2 \mid m),$$
+
+where $q$ is a probability kernel. In the section on factoring kernels, we saw that a reasonable choice is to set $w(m) := \sum_{t_2} t_{\mid T_1 = 1}(t_2 \mid m)$ and $q(t_2 \mid m) = t_{\mid T_1 = 1}(t_2 \mid m) / w(m)$.
+
+If we fully specify $t : M \kernel T_1 \otimes T_2$, we can compute these new kernels and apply the following weighted sampling procedure: For $k = 1, \ldots, N$:
+
+1. Sample $m^{(k)} \sim m(-)$.
+2. Sample $b^{(k)} \sim b(- \mid m^{(k)})$.
+3. Sample $t_2^{(k)} \sim q(- \mid m^{(k)})$.
+4. Compute weight $w^{(k)} = w(m^{(k)})$.
+5. Return weighted sample $((b^{(k)},t_2^{(k)}), w^{(k)})$.
+
+However, writing down $t$ requires some effort. In rejection sampling, we were able to bypass this by simply implementing the generative process. To get explicit probabilities, one needs to statify by zygosity $Z$ (0: monoyogous, 1: dizygous) by combining the chain rule and marginalization:
+
+$$p(t_1,t_2 \mid m) = p(t_1,t_2 \mid m, Z = 0) \, p(Z = 0) + p(t_1,t_2 \mid m, Z = 1) \, p(Z = 1).$$
+
+Using this, one can compute the quantities required to implement the importance sampler. Alternatively, one could find another representation of the same process that makes $T_1$ the only output of a box, so that we can apply the simpler procedure from the previous example.
 :::
 
 ### Rejection sampling as a special case 

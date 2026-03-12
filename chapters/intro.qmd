@@ -304,14 +304,13 @@ For now, we will approximate the solution by sampling from a probabilistic progr
 The idea is to write a program that randomly simulates the process of generating the family tree according to the laws of heredity.  We can then run this program many times to get a large sample of possible family trees, and use this sample to estimate the probability that one or both twins are affected. The following Python code implements the generative process of each box in the string diagram:
 
 ```{python}
-# | label: family-boxes
-# | fig-cap: Python functions implementing the generative process of each box.
-# | code-fold: false
+#| label: family-boxes
+#| fig-cap: Python functions implementing the generative process of each box.
+#| code-fold: false
 def gen_m():
     # generate mother II2
     II2 = random.choice(["xX", "XX"])
     return II2
-
 
 def gen_s(II2):
     # generate son III1
@@ -320,7 +319,6 @@ def gen_s(II2):
     elif II2 == "XX":
         III1 = "XY"
     return III1
-
 
 def gen_t(II2):
     # generate twins
@@ -350,7 +348,6 @@ We can now assemble these functions according structure of the string diagram. N
 # | fig-cap: A Python program that simulates the family tree.
 # | code-fold: false
 import random
-
 
 def family():
     II2 = gen_m()

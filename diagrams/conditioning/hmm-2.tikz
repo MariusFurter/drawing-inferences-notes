@@ -1,0 +1,29 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (0) at (-4.25, 0) {$k$};
+		\node [style=small box] (1) at (-1.25, 0) {$k$};
+		\node [style=small box] (6) at (-1.25, -2) {$o$};
+		\node [style=none] (15) at (0.5, -2) {};
+		\node [style=small box] (21) at (-6.75, 0) {$i$};
+		\node [style=none] (22) at (-5.5, 0) {};
+		\node [style=none] (26) at (-5.5, 0.75) {$X_0$};
+		\node [style=none] (29) at (0, -1.45) {$Y_1$};
+		\node [style=none] (30) at (0, 0.55) {$X_2$};
+		\node [style=none] (34) at (0.5, 0) {};
+		\node [style=black node] (36) at (-2.75, 0) {};
+		\node [style=none] (37) at (0, 2.55) {$X_1$};
+		\node [style=none] (38) at (-1.75, 2) {};
+		\node [style=none] (39) at (0.5, 2) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=rightarrow edge] (6) to (15.center);
+		\draw [style=edge] (22.center) to (0);
+		\draw [style=edge] (21) to (22.center);
+		\draw [style=edge, in=-180, out=90] (36) to (38.center);
+		\draw [style=directed edge] (38.center) to (39.center);
+		\draw [style=edge] (0) to (36);
+		\draw [style=edge] (36) to (1);
+		\draw [style=edge, in=180, out=-90, looseness=1.25] (36) to (6);
+		\draw [style=directed edge] (1) to (34.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
