@@ -1,0 +1,27 @@
+::: {.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+ \def\swap{\mathsf{swap}}
+ \def\id{\mathsf{id}}
+ \def\cp{\mathsf{copy}}
+ \def\del{\mathsf{del}}
+ \def\supp{\mathsf{supp}}
+ \def\ivmark#1{[\![#1]\!]}
+$$
+:::
+
+# Intervening
+
+Intervening: New generative process once certain outputs have been forced to take specific values. Only makes sense if model structure has causal content, ie we expect that exchanging one mechanism for another will be faithfully reflected in reality.
+
+General intervention of box $f$: Replace $f$ with $f'$. Interventions preserve normalization if $f$ and $f'$ are normalized kernels.
+
+Usually, we consider two special types of interventions:
+
+- **Do** intervention: Replace $f : X \kernel Y$ with $\del_X \then \delta_{\bar y}$, where $\delta_{\bar y}$ is the kernel that outputs $\bar y$ with probability 1.
+
+- **Soft** intervention: Replace $f : X \kernel Y$ with $\del_X \then m$, where $m : I \kernel Y$ is a probability distribution over $Y$.
+
+Both of these delete the input wires of $f$ and fix $Y$ to a specific value (do) or distribution (soft).
+

@@ -1,0 +1,26 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (0) at (2.75, 0) {$g$};
+		\node [style=box node] (1) at (5, -0.5) {$w_{\bar z}$};
+		\node [style=none] (2) at (3.25, 0.5) {};
+		\node [style=none] (3) at (3.25, -0.5) {};
+		\node [style=none] (4) at (6, 0.5) {};
+		\node [style=none] (5) at (1, 0) {};
+		\node [style=none] (6) at (1.5, 0.5) {$X$};
+		\node [style=none] (7) at (5.5, 1) {$Y$};
+		\node [style=none] (8) at (3.75, -1) {$Z$};
+		\node [style=small box] (9) at (-3, 0) {$g_{\mid Z = \bar z}$};
+		\node [style=none] (10) at (-5, 0) {};
+		\node [style=none] (11) at (-1, 0) {};
+		\node [style=none] (12) at (0, 0) {$=$};
+		\node [style=none] (13) at (-4.75, 0.5) {$X$};
+		\node [style=none] (14) at (-1.25, 0.5) {$Y$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (5.center) to (0);
+		\draw [style=edge] (2.center) to (4.center);
+		\draw [style=edge] (3.center) to (1);
+		\draw [style=edge] (10.center) to (9);
+		\draw [style=edge] (9) to (11.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

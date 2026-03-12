@@ -196,6 +196,10 @@ Here is what these three types represent:
 - A kernel $t : X \kernel I$ assigns each $x \in X$ a non-negative number $t(\bullet \mid x)$. We think of $t$ as a **test function** on $X$.
 - A kernel $s : I \kernel I$ is a single non-negative number $s(\bullet \mid \bullet)$. We think of $s$ as a **scalar**.
 
+<!-- Note the delta state $\delta_{\bar x}(x \mid bullet) = \ivmark{x = \bar x}$ somewhere and observe that precomposing $\delta_{\bar x} \then f(y \mid x) = f(y \mid \bar x)$ fixes the inputs of $f$ to $\bar x$-->
+
+<!-- Introduce convention of leaving out $\bullet$ when clear form context. -->
+
 Composing a measure $m : I \kernel X$ with a test function $t : X \kernel I$ gives a scalar $(m \then t) : I \kernel I$ called the **expectation** of $t$ under $m$:
 
 ```{.tikz file="graphical-models/expectation.tikz"}
