@@ -17,23 +17,25 @@ March 6:
 
 - Discrete kernels
 - Exercise:
-  - Hidden Markov model (fit to data / condition / exact computation / computation via sampling (+ resampling))
+  - Stroke: Fitting kernels to data
 
 March 13:
 
 - Conditioning and Likelihood weighting.
 - Conditional independence test.
-- Intervening
-- Derive classical causal stuff
-- Exercise: Something causal.
+- Exercise: HMM
 
 March 20:
+
+- Intervening
+- Derive classical causal stuff
+- Exercise: Something causal
+
+March 27:
 
 - General kernels
 - Importance sampling from prior?
 - Exercise:
-
-March 27:
 
 - MCMC
 - Exercise: Multilevel regression

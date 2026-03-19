@@ -22,6 +22,8 @@ book:
     - chapters/intro.qmd
     - chapters/discrete-graphical-models.qmd
     - chapters/conditioning.qmd
+    - chapters/hybrid-models.qmd
+    #- chapters/parameter-estimation.qmd
     - part: "Exercises"
       chapters:
         - exercises/1-classic-puzzles.qmd

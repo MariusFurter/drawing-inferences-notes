@@ -386,6 +386,8 @@ If $f$ is a probability kernel, this sum equals 1, so deleting the output is the
 %%| height: 2.5em
 ```
 
+<!-- More precisely define this. -->
+
 More generally, if $f : X \kernel Y \otimes Z$ is a kernel with two outputs, then deleting $Y$ gives the **marginal** on $Z$:
 
 ``` {.tikz file="graphical-models/marginal-kernel.tikz"}

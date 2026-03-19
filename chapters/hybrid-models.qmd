@@ -1,0 +1,478 @@
+::: {.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+ \def\swap{\mathsf{swap}}
+ \def\id{\mathsf{id}}
+ \def\cp{\mathsf{copy}}
+ \def\del{\mathsf{del}}
+ \def\supp{\mathsf{supp}}
+ \def\ivmark#1{[\![#1]\!]}
+$$
+:::
+
+# Hybrid models {#sec-hybrid-models}
+
+So far, all our models have lived in the world of finite sets: every wire carried a variable with finitely many values, and every kernel was specified by a finite table of numbers. But many quantities we care about take continuous values. In this chapter, we extend the string-diagrammatic framework to handle continuous and mixed-type variables.
+
+We introduce the theory gradually. First, we sketch how kernels generalize beyond finite sets, and why density functions are the practical tool for specifying them. Then we build up a concrete model — a Swiss health model relating smoking, age, physical activity, BMI, diabetes, and healthcare costs — by introducing three types of regression kernels one at a time. Each kernel is implemented in the `WeightedSampling.torch` framework, which automates the weighted sampling procedure from the [previous chapter](conditioning.qmd). Finally, we compose the pieces into a full graphical model.
+
+<!-- ============================================================ -->
+## General kernels
+<!-- ============================================================ -->
+
+### Motivation
+
+<!-- Why finite tables are not enough. Continuous measurements, counts, mixed-type variables. Preview the Swiss health model variables. -->
+
+### Events {#sec-events}
+
+In the [introduction](intro.qmd) we defined an event as any subset $E \subseteq \Omega$ of a finite sample space $\Omega$, and observed that logical operations on events correspond to set operations: "not $E$" is the complement $E^\text{c}$, "$E_1$ and $E_2$" is the intersection $E_1 \cap E_2$, and "$E_1$ or $E_2$" is the union $E_1 \cup E_2$. 
+
+When the sample space is infinite — say $\Omega = \mathbb{R}$ — we need to be more careful. It turns out that there is no way to consistently assign probabilities to *every* subset of $\mathbb{R}$. Instead, we fix a collection $\mathcal{E}$ of subsets that we agree to treat as events, and only assign probabilities to those.
+
+Which subsets should count? The collection $\mathcal{E}$ should be rich enough that every event we could want to express is included, and it should be closed under the logical operations we rely on:
+
+1. **Tautology and contradiction.** The entire space $\Omega$ ("something happens") and the empty set $\varnothing$ ("nothing happens") are events.
+2. **Complement.** If $E$ is an event, then "not $E$", i.e. $E^\text{c}$, is also an event.
+3. **Sequential unions.** If $E_1, E_2, E_3, \ldots$ is a sequence of events, then $\bigcup_{n=1}^{\infty} E_n$ is also an event.
+
+The third rule says that if each $E_n$ is a meaningful event, then "at least one of them holds" should be a meaningful event too — it is the logical "there exists." Together with complements, it also gives us "all of them hold": by De Morgan's law, $\bigcap_n E_n = \bigl(\bigcup_n E_n^\text{c}\bigr)^\text{c}$, which is the logical "for all." Finite unions and intersections are the special case where all but finitely many $E_n$ are $\Omega$ or $\varnothing$.
+
+A collection $\mathcal{E}$ of subsets of $\Omega$ satisfying these three rules is called a **$\sigma$-algebra**, and its elements are called **events**.
+
+::: {#def-measurable-space}
+A **measurable space** is a pair $(\Omega, \mathcal{E})$ consisting of a set $\Omega$ and a $\sigma$-algebra $\mathcal{E}$ on $\Omega$. We call the elements of $\mathcal{E}$ the **events** of $(\Omega, \mathcal{E})$. When we refer to a measurable space by a single letter, such as $X$, we write $\mathcal{E}_X$ for its $\sigma$-algebra.
+:::
+
+
+::: {#exm-borel}
+## Events on the real line
+On $\Omega = \mathbb{R}$, start with the closed intervals $[a, b]$ for all $a \leq b$ and close under the three rules above. The resulting collection of events is called the **Borel $\sigma$-algebra** $\mathcal{B}(\mathbb{R})$. It contains every open set, closed set, and interval. This is the collection we will always use when a wire carries a real-valued variable.
+:::
+
+### Measures {#sec-measures}
+
+In the [introduction](intro.qmd) we defined a probability measure on a finite set $\Omega$ by two properties: normalization ($p(\varnothing) = 0$ and $p(\Omega) = 1$) and additivity ($p(E_1 \cup E_2) = p(E_1) + p(E_2)$ whenever $E_1$ and $E_2$ are mutually exclusive).
+
+The same idea carries over to a general measurable space $(\Omega, \mathcal{E})$: a probability measure is a function $p : \mathcal{E} \to [0,1]$ that assigns a probability to every event, satisfying normalization and additivity. The one new requirement is that additivity must extend from pairs to sequences of mutually exclusive events: if $E_1, E_2, E_3, \ldots$ are pairwise disjoint, then
+$$
+p\Bigl(\bigcup_{n=1}^{\infty} E_n\Bigr) = \sum_{n=1}^{\infty} p(E_n).
+$$
+
+Why is it reasonable? It is equivalent to requiring that probability be **continuous** at 0: if $E_1 \supseteq E_2 \supseteq E_3 \supseteq \cdots$ is a decreasing sequence of events that shrinks to nothing ($\bigcap_n E_n = \varnothing$), then $p(E_n) \to 0$. In other words, if we iteratively shrink an event until nothing remains, its probability should decrease to zero.
+
+::: {#def-probability-measure}
+A **probability measure** on a measurable space $(\Omega, \mathcal{E})$ is a function $p : \mathcal{E} \to [0,1]$ satisfying:
+
+1. **Normalization.** $p(\varnothing) = 0$ and $p(\Omega) = 1$.
+2. **Countable additivity.** If $E_1, E_2, E_3, \ldots \in \mathcal{E}$ are pairwise disjoint, then $p\bigl(\bigcup_{n=1}^\infty E_n\bigr) = \sum_{n=1}^\infty p(E_n)$.
+
+The triple $(\Omega, \mathcal{E}, p)$ is called a **probability space**.
+:::
+
+### Kernels {#sec-general-kernels}
+
+In the [chapter on discrete graphical models](discrete-graphical-models.qmd) we defined a discrete kernel $f : X \kernel Y$ between finite sets by specifying a non-negative number $f(y \mid x)$ for each input $x \in X$ and output $y \in Y$. We can equivalently describe $f$ in terms of events: for any subset $B \subseteq Y$, set
+$$
+f(B \mid x) := \sum_{y \in B} f(y \mid x).
+$$
+This gives us the total weight that $f$ assigns to the event $B$, given input $x$. The values on individual points are recovered by taking $B = \{y\}$.
+
+The event-based formulation generalizes to infinite spaces where it in no longer possible to assign meaningful values to individual points. Thus, a general kernel $k : X \kernel Y$ assigns a non-negative number $k(B \mid x)$ to each input $x$ and each event $B \in \mathcal{E}_Y$. 
+
+::: {#def-kernel}
+A **kernel** $k : X \kernel Y$ between measurable spaces $(X, \mathcal{E}_X)$ and $(Y, \mathcal{E}_Y)$ assigns to each input $x \in X$ and each event $B \in \mathcal{E}_Y$ a non-negative number $k(B \mid x)$, such that:
+
+1. For each fixed $x \in X$, the function $B \mapsto k(B \mid x)$ is a measure on $(Y, \mathcal{E}_Y)$.
+2. For each fixed $B \in \mathcal{E}_Y$, the function $x \mapsto k(B \mid x)$ is measurable.
+
+If $k(Y \mid x) = 1$ for all $x$, we call $k$ a **probability kernel**. We call $k$ **finite** if there is a uniform bound $r$ such that $k(Y \mid x) \leq r$ for all $x \in X$. We will always assume that kernels are finite.
+:::
+
+Condition 1 is the substantive requirement: each input produces a measure on the output space. Condition 2 is a technical regularity condition ensuring that the kernel interacts well with the $\sigma$-algebras. All kernels we construct in practice will satisfy it automatically, so we will not check it explicitly.
+
+### Density functions {#sec-density-functions}
+
+A convenient way to specify a kernel is through a **density function** that describes how weight is spread across the output space.
+
+**Continuous outputs.** Consider a kernel $k : X \kernel \mathbb{R}$ whose output is a real-valued variable. For each input $x$, suppose we have a non-negative function $y \mapsto l_k(y \mid x)$ whose graph is a curve over the real line. We think of $l_k(y \mid x)$ as the *weight per unit length* that $k$ places near the output value $y$. The total weight assigned to an event $B \in \mathcal{E}_Y$ is then the area under this curve above $B$:
+
+```{python}
+# | label: fig-density-area
+# | fig-cap: "The weight assigned to $B = [a, b]$ is the shaded area under the density curve."
+# | echo: false
+import torch
+import matplotlib.pyplot as plt
+
+# A bimodal density as a mixture of two Gaussians
+d1 = torch.distributions.Normal(-1.0, 0.8)
+d2 = torch.distributions.Normal(2.0, 1.0)
+y = torch.linspace(-4.5, 6.0, 500)
+f = 0.4 * d1.log_prob(y).exp() + 0.6 * d2.log_prob(y).exp()
+
+a, b = 0.5, 3.5
+mask = (y >= a) & (y <= b)
+
+fig, ax = plt.subplots(figsize=(5, 2.5))
+ax.plot(y, f, color="black")
+ax.fill_between(y[mask], f[mask], color="black", alpha=0.25)
+ax.axhline(0, color="black", linewidth=0.5)
+
+# Mark a and b on x-axis
+ax.annotate("$a$", xy=(a, 0), xytext=(a - 0.2, 0.01), ha="center", fontsize=11)
+ax.annotate("$b$", xy=(b, 0), xytext=(b + 0.2, 0.01), ha="center", fontsize=11)
+
+# Label the shaded region
+y_mid = 0.5 * (a + b)
+f_mid = (
+    0.4 * d1.log_prob(torch.tensor(y_mid)).exp()
+    + 0.6 * d2.log_prob(torch.tensor(y_mid)).exp()
+).item()
+ax.text(y_mid, f_mid * 0.45, "$k(B \\mid x)$", ha="center", fontsize=11)
+
+ax.set_xlabel("$y$")
+ax.set_ylabel(r"$l_k(y \mid x)$")
+ax.set_yticks([])
+ax.set_xlim(y[0].item(), y[-1].item())
+ax.spines[["top", "right"]].set_visible(False)
+fig.patch.set_alpha(0)
+ax.patch.set_alpha(0)
+plt.tight_layout()
+plt.show()
+```
+
+Mathematically, this area is given by the
+$$
+k(B \mid x) = \int_B l_k(y \mid x) \, dy.
+$$
+We call $l_k$ the *density* of $k$; the precise definition will follow shortly. For a probability kernel, the total area under the curve equals 1. Note that a single point $\{y\}$ has zero width and therefore zero area: $k(\{y\} \mid x) = 0$. For continuous variables, individual outcomes always have probability zero.
+
+::: {#exm-gaussian-kernel}
+The **Gaussian** (or normal) density with mean $\mu$ and variance $\sigma^2$ is
+$$
+l(y \mid \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\Bigl(-\frac{(y - \mu)^2}{2\sigma^2}\Bigr).
+$$
+We write $\mathsf{Normal}(\mu, \sigma^2)$ for the probability measure with this density — its graph is the familiar bell curve, centered at $\mu$ with spread controlled by $\sigma^2$. Since the total area is 1 for every choice of $(\mu, \sigma^2)$, varying the inputs defines a probability kernel $k : \mathbb{R} \times \mathbb{R}_{>0} \kernel \mathbb{R}$.
+
+```{python}
+# | label: fig-gaussian-density
+# | fig-cap: "The Gaussian density for several inputs $(\\mu, \\sigma^2)$. Changing $\\mu$ shifts the curve; changing $\\sigma^2$ controls its spread."
+# | echo: false
+import torch
+import matplotlib.pyplot as plt
+
+params = [
+    (0.0, 0.5, "solid"),
+    (0.0, 1.0, "dashed"),
+    (2.0, 1.0, "dotted"),
+]
+
+y = torch.linspace(-4.0, 6.0, 400)
+
+fig, ax = plt.subplots(figsize=(5, 2.5))
+for mu, sigma2, ls in params:
+    sigma = sigma2**0.5
+    dist = torch.distributions.Normal(mu, sigma)
+    f = dist.log_prob(y).exp()
+    ax.plot(
+        y, f, color="black", linestyle=ls, label=rf"$\mu={mu:.0f},\;\sigma^2={sigma2}$"
+    )
+
+ax.set_xlabel("$y$")
+ax.set_ylabel(r"$l(y \mid \mu, \sigma^2)$")
+ax.set_yticks([])
+ax.axhline(0, color="black", linewidth=0.5)
+ax.spines[["top", "right"]].set_visible(False)
+ax.legend(frameon=False, fontsize="small")
+fig.patch.set_alpha(0)
+ax.patch.set_alpha(0)
+plt.tight_layout()
+plt.show()
+```
+:::
+
+
+**Discrete outputs.** In the [discrete setting](discrete-graphical-models.qmd), each output value $y$ carries a weight $l_k(y \mid x)$, which we can picture as a bar of that height. The total weight on an event $B$ is the sum of bar heights:
+
+```{python}
+# | label: fig-density-discrete
+# | fig-cap: "For a discrete kernel, the weight on $B$ is the sum of the bar heights at points in $B$."
+# | echo: false
+import matplotlib.pyplot as plt
+
+labels = [r"$y_1$", r"$y_2$", r"$y_3$", r"$y_4$", r"$y_5$", r"$y_6$"]
+heights = [0.15, 0.25, 0.30, 0.10, 0.12, 0.08]
+x = range(len(labels))
+
+# y3, y4, y5 belong to B
+in_B = [False, False, True, True, True, False]
+
+fig, ax = plt.subplots(figsize=(5, 2.5))
+for i in x:
+    color = "black" if in_B[i] else "lightgray"
+    alpha = 0.5 if in_B[i] else 0.4
+    ax.bar(
+        i,
+        heights[i],
+        width=0.5,
+        color=color,
+        alpha=alpha,
+        edgecolor="black",
+        linewidth=0.8,
+    )
+
+# Bracket for B
+b_left, b_right = 2 - 0.35, 4 + 0.35
+bracket_y = -0.08
+ax.annotate(
+    "",
+    xy=(b_left, bracket_y),
+    xytext=(b_right, bracket_y),
+    arrowprops=dict(arrowstyle="|-|", color="black", lw=1.0),
+    annotation_clip=False,
+)
+ax.text(3, bracket_y - 0.03, "$B$", ha="center", va="top", fontsize=11)
+
+ax.set_xticks(list(x))
+ax.set_xticklabels(labels)
+ax.set_ylabel(r"$l_k(y \mid x)$")
+ax.set_yticks([])
+ax.set_xlim(-0.6, len(labels) - 0.4)
+ax.axhline(0, color="black", linewidth=0.5)
+ax.spines[["top", "right"]].set_visible(False)
+fig.patch.set_alpha(0)
+ax.patch.set_alpha(0)
+plt.tight_layout()
+plt.show()
+```
+
+In formulas, the total weight on $B$ is
+$$
+k(B \mid x) = \sum_{y \in B} l_k(y \mid x).
+$$
+This is exactly the formula from the beginning of the previous section: the values $f(y \mid x)$ that defined a discrete kernel in the [chapter on discrete graphical models](discrete-graphical-models.qmd) are precisely its density. Since a discrete kernel is completely determined by its density and vice versa, we treated the two interchangeably in the discrete setting. In the continuous case this identification breaks down, because not all kernels have densities.
+
+**Base measures and densities.** In both cases above, the kernel is determined by integrating a non-negative function against a fixed measure on the output space: Lebesgue measure (length / area) in the continuous case, counting measure (each point has mass 1) in the discrete case. We call this fixed measure the **base measure** and the function the **density**.
+
+::: {#def-density}
+Let $\nu$ be a measure on the output space $Y$. A non-negative function $l_k(y \mid x)$ is a **density** of the kernel $k : X \kernel Y$ with respect to $\nu$ if
+$$
+k(B \mid x) = \int_B l_k(y \mid x) \, \nu(dy)
+$$
+for every $x \in X$ and every event $B \in \mathcal{E}_Y$.
+:::
+
+
+### String diagrams carry over {#sec-string-diagrams-carry-over}
+
+The string-diagrammatic language from the [chapter on discrete graphical models](discrete-graphical-models.qmd) extends to general kernels with almost no changes. We briefly indicate what stays the same and what requires care.
+
+**Deterministic functions.** A measurable function $f : X \to Y$ defines a kernel by
+$$
+k_f(B \mid x) := \ivmark{f(x) \in B},
+$$
+which assigns full weight to the unique output $f(x)$. The structural kernels $\id$, $\swap$, $\cp$, and $\del$ are all deterministic. Hence, their formulas are literally the same as before, with the Iverson bracket $\ivmark{y = f(x)}$ replaced by $\ivmark{f(x) \in B}$.
+
+**Composition.** Sequential composition of $k : X \kernel Y$ and $k' : Y \kernel Z$ is defined by replacing the sum over $Y$ with an integral:
+$$
+(k \then k')(B \mid x) := \int_Y k'(B \mid y) \, k(dy \mid x).
+$$
+When $Y$ is a finite set, the integral reduces to the familiar sum $\sum_{y \in Y} k'(B \mid y)\, k(y \mid x)$. Parallel composition is characterized by its values on product events:
+$$
+(k_1 \otimes k_2)(B_1 \times B_2 \mid x_1, x_2) = k_1(B_1 \mid x_1) \cdot k_2(B_2 \mid x_2).
+$$
+This formula only specifies the kernel on "rectangles" $B_1 \times B_2$, but a standard extension result guarantees that these values determine the kernel on all events in the product space (see the box below for details).
+
+::: {.callout-note collapse="true"}
+## Product $\sigma$-algebras and product measures
+
+When two measurable spaces $(X, \mathcal{E}_X)$ and $(Y, \mathcal{E}_Y)$ are combined, their product space $X \times Y$ carries the **product $\sigma$-algebra** $\mathcal{E}_X \otimes \mathcal{E}_Y$, defined as the smallest $\sigma$-algebra containing all rectangles $B_1 \times B_2$ with $B_1 \in \mathcal{E}_X$ and $B_2 \in \mathcal{E}_Y$. This $\sigma$-algebra contains many events beyond rectangles — for instance, discs in $\mathbb{R}^2$ — but a finite measure that is defined consistently on rectangles extends uniquely to the full product $\sigma$-algebra. This is why the formula for parallel composition, stated only on rectangles, determines the kernel on all product events.
+
+The same principle gives us **product measures**. Given measures $\nu_U$ on $U$ and $\nu_V$ on $V$, the product measure $\nu_U \otimes \nu_V$ is the unique measure on the product space $U \times V$ satisfying
+$$
+(\nu_U \otimes \nu_V)(B_1 \times B_2) = \nu_U(B_1) \cdot \nu_V(B_2).
+$$
+For instance, Lebesgue measure on $\mathbb{R}^2$ (area) is the product of Lebesgue measure on $\mathbb{R}$ (length) with itself. Product measures appear naturally when a kernel has multiple outputs: if each output has a base measure, the joint base measure is their product. This is the setting used in the graphical conditioning formula for multiple outputs below.
+:::
+
+**Algebraic laws.** All the algebraic laws verified in the discrete setting continue to hold for general kernels. The proofs are the same calculations, with sums replaced by integrals. In particular, any two diagrams that could be deformed into each other in the discrete setting still represent the same kernel.
+
+**Conditional independence.** The graphical test for conditional independence from the [conditioning chapter](conditioning.qmd) remains valid for general kernels.
+
+**Graphical conditioning.** Pre-conditioning on an *input* works exactly as before: given a kernel $g : X \otimes Y \kernel U$, fixing $X = \bar{x}$ yields $g_{\mid X = \bar{x}}(B \mid y) := g(B \mid \bar{x}, y)$. This is still a well-defined kernel.
+
+Pre-conditioning on an *output* generalizes the discrete formula from the [conditioning chapter](conditioning.qmd). There, for a discrete kernel $g : X \kernel U \otimes V$, pre-conditioning on $U = \bar{u}$ meant plugging $\bar{u}$ into the first argument: $g_{\mid U = \bar{u}}(v \mid x) = g(\bar{u}, v \mid x)$. Since the values of a discrete kernel are exactly its density with respect to counting measure, this is the same as plugging $\bar{u}$ into the density. The same idea works in general.
+
+Suppose $g : X \kernel U \otimes V$ has density $l_g(u, v \mid x)$ with respect to a product base measure $\nu_U \otimes \nu_V$ (see the box above for what this means). Pre-conditioning on $U = \bar{u}$ plugs $\bar{u}$ into the density, giving the kernel with density $l_g(\bar{u}, v \mid x)$:
+$$
+g_{\mid U = \bar{u}}(B \mid x) = \int_B l_g(\bar{u}, v \mid x) \, \nu_V(dv).
+$$
+
+If $g : X \kernel U$ has density $l_g$ and we fix its only output $U = \bar{u}$, there are no remaining variables to integrate over. The resulting kernel $g_{\mid U = \bar u} : X \kernel I$ assigns each $x \in X$ the **likelihood weight** $l_g(\bar{u} \mid x)$. This is the case that arises most often in practice.
+
+## WeightedSampling.torch {#sec-weighted-sampling-torch}
+
+`WeightedSampling.torch` is a small **probabilistic programming** library that automates the weighted sampling ideas from the [previous chapter](conditioning.qmd). It provides a concise syntax for building models that hides the bookkeeping behind two primitives: `sample` and `observe`. It is the first example of a probabilistic programming framework that we will use.
+
+The library can be installed via pip:
+
+```{.bash}
+pip install git+https://github.com/MariusFurter/WeightedSampling.torch.git
+```
+
+### The `sample` and `observe` primitives {#sec-sample-observe}
+
+**Defining a model.** A model is a Python function decorated with `@model`. Consider a simple scenario: we want to estimate an unknown quantity $\mu$ from a noisy measurement $x$. We place a vague prior on $\mu$ and model the measurement as $\mu$ plus Gaussian noise:
+
+```{python}
+# | echo: true
+# | code-fold : false
+import torch
+import torch.distributions as dist
+from weighted_sampling import model, sample, observe, summary, expectation
+
+
+@model
+def measurement():
+    mu = sample("mu", dist.Normal(0.0, 5.0))
+    x = sample("x", dist.Normal(mu, 0.5))
+
+
+result = measurement(num_particles=5000)
+print(summary(result))
+```
+
+The **`sample`** primitive draws a value from the given distribution, records it under the specified name, and makes it available for subsequent steps. Here `mu` is drawn from $\mathsf{Normal}(0, 25)$, then `x` is drawn from $\mathsf{Normal}(\mu, 0.25)$, so the two variables are dependent. The `num_particles` argument runs 5000 independent copies of the model in parallel. The returned `result` is a dictionary whose keys are the sampled variable names. The `summary` function reads this dictionary and computes the weighted mean, standard deviation, and number of unique particles for each variable. Since there are no observations, all particles have equal weight and the estimates are simple averages over independent forward samples.
+
+**Evaluating results.** For quantities beyond means and standard deviations, the `expectation` function computes the weighted expectation of an arbitrary **test function** $t$. It takes the result dictionary and a function whose argument names match the sampled variables:
+
+```{python}
+# | echo: true
+# | code-fold : false
+E_mu = expectation(result, lambda mu: mu)
+E_mu2 = expectation(result, lambda mu: mu**2)
+var_mu = E_mu2 - E_mu**2
+print(f"E[mu]   = {E_mu.item():.3f}")
+print(f"Var[mu] = {var_mu.item():.3f}")
+```
+
+We can also estimate joint quantities like the covariance between `mu` and `x`, or the probability that `mu` is positive:
+
+```{python}
+# | echo: true
+# | code-fold : false
+cov = expectation(result, lambda mu, x: (mu - E_mu) * (x - expectation(result, lambda x: x)))
+p_pos = expectation(result, lambda mu: (mu > 0).float())
+print(f"Cov[mu, x] = {cov.item():.3f}")
+print(f"P(mu > 0)  = {p_pos.item():.3f}")
+```
+
+**Conditioning with `observe`.** Now suppose we observe that the measurement takes value $3.2$. We replace the second `sample` with an **`observe`**:
+
+```{python}
+# | echo: true
+# | code-fold : false
+@model
+def conditioned_measurement():
+    mu = sample("mu", dist.Normal(0.0, 5.0))
+    observe(3.2, dist.Normal(mu, 0.5))
+
+
+result = conditioned_measurement(num_particles=5000)
+stats = summary(result)
+print(f"E[mu | x=3.2] = {stats['mu']['mean']:.3f} ± {stats['mu']['std']:.3f}")
+```
+
+The `observe` call evaluates the Gaussian density $l(3.2 \mid \mu)$ for each particle's sampled `mu` and uses the result as a weight. Particles whose `mu` is close to $3.2$ receive high weight; those far away receive low weight. Because the observation ($\sigma = 0.5$) is much more informative than the vague prior ($\sigma = 5$), the posterior concentrates near the observed value.
+
+**Behind the scenes.** The two primitives correspond directly to the two operations in the weighted sampling procedure from the previous chapter:
+
+- **`sample`** extends the current sample by drawing from a proposal distribution.
+- **`observe`** evaluates the density at the observed value and multiplies it into the running weight. This is the density-based pre-conditioning from @sec-string-diagrams-carry-over.
+
+The engine runs $N$ independent **particles** in parallel, each maintaining its own sample trace and log-weight. After all particles finish, expectations are estimated with the self-normalized estimator: $\mathbb{E}[t] \approx \sum_i w_i\, t(y_i) \,/\, \sum_i w_i$. When there are no `observe` statements, all weights are equal and this reduces to a simple average over independent samples. For models with many `observe` statements, most particles end up with negligible weight. The engine mitigates this by monitoring the **effective sample size** and, when it drops too low, **resampling** particles in proportion to their weights. This is known as **sequential importance resampling** (SIR).
+
+
+<!-- ============================================================ -->
+## Regression kernels {#sec-regression-kernels}
+<!-- ============================================================ -->
+
+We now introduce three types of **regression kernels** — parametric families of kernels where the distribution of the output depends on the inputs through a linear combination. Each kernel is motivated by a variable in the Swiss health model and follows the same template: health context → mathematical definition → string diagram → implementation.
+
+The parameters appearing below have been calibrated from Swiss Federal Statistical Office (BFS) summary statistics. In the [next chapter](parameter-estimation.qmd), we explain how such parameter estimates are obtained.
+
+### Linear regression kernel {#sec-linear-regression}
+
+<!-- Health context: Smoking S, Age A, Physical Activity P → BMI B.
+     BMI is continuous, influenced by discrete (smoking) and continuous (age, exercise) parents.
+     Math: B | S, A, P ~ N(α₀ + α₁S + α₂A + α₃P, σ²)
+     String diagram: box with three input wires and one output wire.
+     Discussion: continuous output, linear dependence on mixed-type parents, Gaussian noise as approximation. -->
+
+### Logistic regression kernel {#sec-logistic-regression}
+
+<!-- Health context: BMI B → Diabetes D ∈ {0,1}.
+     Binary outcome depends on continuous predictor.
+     Math: P(D=1 | B) = σ(β₀ + β₁B)
+     String diagram: box with one continuous input, one discrete output.
+     Discussion: why a link function is needed (linear predictor can escape [0,1]). Mention probit in passing. -->
+
+### Log-normal regression kernel {#sec-lognormal-regression}
+
+<!-- Health context: Diabetes D, BMI B → Health Costs C.
+     Costs are strictly positive and right-skewed.
+     Math: log C | D, B ~ N(γ₀ + γ₁D + γ₂B, τ²)
+     String diagram: box with mixed inputs, continuous positive output.
+     Discussion: domain constraints via transformation; exp of Gaussian gives log-normal. -->
+
+
+<!-- ============================================================ -->
+## The Swiss health model {#sec-swiss-health-model}
+<!-- ============================================================ -->
+
+We now compose the regression kernels from the previous section into a single graphical model. The model relates six variables: smoking status $S$, age $A$, physical activity $P$, BMI $B$, diabetes $D$, and annual healthcare costs $C$.
+
+### Root distributions
+
+<!-- S ~ Bernoulli(0.27): Swiss smoking rate from SGB.
+     A ~ some distribution calibrated to Swiss adult age distribution.
+     P ~ some distribution calibrated from BFS activity categories.
+     These are I → X kernels (no inputs), matching Chapter 2's treatment. -->
+
+### Composing the full model
+
+<!-- Compose root measures + regression kernels via sequential/parallel composition + copy/swap.
+     Draw the complete string diagram: {S, A, P} → B → D → C, with B also feeding into C.
+     Show how the compositional structure encodes the causal story. -->
+
+``` {.tikz}
+%%| label: fig-swiss-health-model
+%%| fig-cap: String diagram for the Swiss health model.
+%%| height: 8em
+% TODO: draw the composed string diagram
+```
+
+### Forward sampling
+
+<!-- Sample from the composed model in WeightedSampling.torch. Compare generated distributions to Swiss summary statistics (histograms, means, correlations). Validate the pre-fitted model. -->
+
+
+<!-- ============================================================ -->
+## Conditioning in hybrid models {#sec-hybrid-conditioning}
+<!-- ============================================================ -->
+
+### Conditioning on continuous observations
+
+<!-- Extend the graphical conditioning procedure from Chapter 3: pre-condition on density values. Worked example: condition on observed BMI B = b. -->
+
+### Conditioning on discrete observations
+
+<!-- Same as the discrete case. Example: condition on D = 1 (has diabetes). What does this tell us about likely health costs? -->
+
+
+<!-- ============================================================ -->
+## Bibliographic notes {.unnumbered}
+<!-- ============================================================ -->
+
+<!-- References: measure-theoretic probability, generalized linear models, Swiss Health Survey (SGB), WeightedSampling.torch. -->
