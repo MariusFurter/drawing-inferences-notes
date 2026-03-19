@@ -1,0 +1,97 @@
+::: {.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+ \def\swap{\mathsf{swap}}
+ \def\id{\mathsf{id}}
+ \def\cp{\mathsf{copy}}
+ \def\del{\mathsf{del}}
+ \def\supp{\mathsf{supp}}
+ \def\ivmark#1{[\![#1]\!]}
+$$
+:::
+
+# Parameter estimation {#sec-parameter-estimation}
+
+In the [previous chapter](hybrid-models.qmd), we composed a graphical model from regression kernels whose parameters were given as fixed numbers. But where did those numbers come from? In this chapter, we treat parameter estimation as a special case of the conditioning machinery we have already developed: parameters are unknown quantities, and data inform our beliefs about them through Bayes' rule.
+
+We begin by showing how the graphical model from @sec-swiss-health-model can be augmented with parameter nodes to represent uncertainty about the regression coefficients and noise scales. Conditional independence then justifies fitting each regression kernel separately — a key simplification. After working through the full Bayesian treatment, we introduce maximum likelihood and maximum a posteriori estimation as convenient shortcuts and connect them back to the graphical framework.
+
+
+<!-- ============================================================ -->
+## Parameters as random variables
+<!-- ============================================================ -->
+
+### Augmenting the graphical model
+
+<!-- Expand the Swiss health model's string diagram: add parameter wires (θ₁, θ₂, θ₃) feeding into each regression kernel. Each parameter θᵢ gets its own prior distribution. The composed model now has priors on top and data at the bottom. -->
+
+### The full graphical model
+
+<!-- Draw the augmented string diagram: priors → parameters → regression kernels → observations. This is still a Markov kernel; conditioning on observed data yields a posterior over parameters. -->
+
+
+<!-- ============================================================ -->
+## Separate fitting via conditional independence {#sec-separate-fitting}
+<!-- ============================================================ -->
+
+### Why CI matters
+
+<!-- The CI structure of the graphical model implies that, given suitable completeness, the posterior over θ₁ depends only on {S,A,P,B}, not on {D,C}. This means each regression's parameters can be fit independently from the others. Formally: conditional independence ⇒ the joint posterior factors. -->
+
+### Fitting the linear regression kernel
+
+<!-- Prior on (α, σ²). Condition on observed {(Sᵢ,Aᵢ,Pᵢ,Bᵢ)} data. Walk through the posterior via graphical conditioning. Show how to extract the parameters used in Chapter 4 from the posterior. -->
+
+### Fitting the logistic regression kernel
+
+<!-- Prior on β. Condition on observed {(Bᵢ,Dᵢ)}. Posterior via conditioning. No conjugacy; preview the approximation issue. -->
+
+### Fitting the log-normal regression kernel
+
+<!-- Prior on (γ, τ²). Condition on observed {(Dᵢ,Bᵢ,Cᵢ)}. Similar walkthrough. -->
+
+
+<!-- ============================================================ -->
+## Point estimates and approximations {#sec-point-estimates}
+<!-- ============================================================ -->
+
+### Why approximate?
+
+<!-- Full Bayesian posterior is a distribution, not a single number. But in Chapter 4 we plugged in fixed values. This section justifies that shortcut and explores alternatives. -->
+
+### Maximum likelihood estimation (MLE)
+
+<!-- Define MLE as the mode of the likelihood. Show for the linear regression kernel this reduces to ordinary least squares. For logistic regression, iteratively reweighted least squares. -->
+
+### Maximum a posteriori (MAP)
+
+<!-- Add the prior back: MAP = mode of posterior. Discuss regularization interpretation. -->
+
+### Plug-in vs. posterior predictive
+
+<!-- Two uses of the estimate: plug θ̂ into the model (what Chapter 4 did) vs. integrate out θ (full Bayesian prediction). Trade-offs: simplicity vs. calibration. -->
+
+
+<!-- ============================================================ -->
+## Assembling the fitted model {#sec-assembled-model}
+<!-- ============================================================ -->
+
+### From BFS summary statistics to parameter values
+
+<!-- Explain how the specific numbers used in Chapter 4 were obtained: which BFS/SGB tables were consulted, what summary statistics (means, prevalences, cross-tabs) were used, and how they map to the regression coefficients. This is the concrete "worked example" of parameter estimation. -->
+
+### Posterior predictive checks
+
+<!-- Sample from the assembled model and compare generated summary statistics (means, variances, correlations) against the original Swiss data. Diagnose any mismatches. -->
+
+### Preview: from estimation to intervention
+
+<!-- Tease that the fitted model will be used in the next chapter on interventions, where we cut wires in the string diagram to model do-operations. The difference between conditioning and intervening is only meaningful once we have a calibrated model. -->
+
+
+<!-- ============================================================ -->
+## Bibliographic notes {.unnumbered}
+<!-- ============================================================ -->
+
+<!-- References: Bayesian parameter estimation, GLM theory, BFS data sources, conjugate priors, posterior predictive checks. -->
