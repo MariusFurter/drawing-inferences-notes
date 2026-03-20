@@ -33,6 +33,7 @@ book:
     - part: "Appendix"
       chapters:
         - appendix/pytorch.qmd
+        - appendix/WeightedSampling.qmd
     - references.qmd
 
 filters:

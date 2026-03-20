@@ -13,6 +13,8 @@ $$
 
 # Hybrid models {#sec-hybrid-models}
 
+*Work in progress...*
+
 So far, all our models have lived in the world of finite sets: every wire carried a variable with finitely many values, and every kernel was specified by a finite table of numbers. But many quantities we care about take continuous values. In this chapter, we extend the string-diagrammatic framework to handle continuous and mixed-type variables.
 
 We introduce the theory gradually. First, we sketch how kernels generalize beyond finite sets, and why density functions are the practical tool for specifying them. Next, we introduce a small probabilistic programming library, `WeightedSampling.torch`, that automates the weighted sampling procedure from the [previous chapter](conditioning.qmd). We then develop a family of parametric regression kernels — the standard building blocks for models with continuous and mixed-type variables. Finally, we compose these kernels into a concrete Swiss health model and demonstrate forward sampling and conditioning.
@@ -311,89 +313,6 @@ $$
 
 If $g : X \kernel U$ has density $l_g$ and we fix its only output $U = \bar{u}$, there are no remaining variables to integrate over. The resulting kernel $g_{\mid U = \bar u} : X \kernel I$ assigns each $x \in X$ the **likelihood weight** $l_g(\bar{u} \mid x)$. This is the case that arises most often in practice.
 
-## WeightedSampling.torch {#sec-weighted-sampling-torch}
-
-`WeightedSampling.torch` is a small **probabilistic programming** library that automates the weighted sampling ideas from the [previous chapter](conditioning.qmd). It provides a concise syntax for building models that hides the bookkeeping behind two primitives: `sample` and `observe`. It is the first example of a probabilistic programming framework that we will use.
-
-The library can be installed via pip:
-
-```{.bash}
-pip install git+https://github.com/MariusFurter/WeightedSampling.torch.git
-```
-
-### The `sample` and `observe` primitives {#sec-sample-observe}
-
-**Defining a model.** A model is a Python function decorated with `@model`. Consider a simple scenario: we want to estimate an unknown quantity $\mu$ from a noisy measurement $x$. We place a vague prior on $\mu$ and model the measurement as $\mu$ plus Gaussian noise:
-
-```{python}
-# | echo: true
-# | code-fold : false
-import torch
-import torch.distributions as dist
-from weighted_sampling import model, sample, observe, summary, expectation
-
-
-@model
-def measurement():
-    mu = sample("mu", dist.Normal(0.0, 5.0))
-    x = sample("x", dist.Normal(mu, 0.5))
-
-
-result = measurement(num_particles=5000)
-print(summary(result))
-```
-
-The **`sample`** primitive draws a value from the given distribution, records it under the specified name, and makes it available for subsequent steps. Here `mu` is drawn from $\mathsf{Normal}(0, 25)$, then `x` is drawn from $\mathsf{Normal}(\mu, 0.25)$, so the two variables are dependent. The `num_particles` argument runs 5000 independent copies of the model in parallel. The returned `result` is a dictionary whose keys are the sampled variable names. The `summary` function reads this dictionary and computes the weighted mean, standard deviation, and number of unique particles for each variable. Since there are no observations, all particles have equal weight and the estimates are simple averages over independent forward samples.
-
-**Evaluating results.** For quantities beyond means and standard deviations, the `expectation` function computes the weighted expectation of an arbitrary **test function** $t$. It takes the result dictionary and a function whose argument names match the sampled variables:
-
-```{python}
-# | echo: true
-# | code-fold : false
-E_mu = expectation(result, lambda mu: mu)
-E_mu2 = expectation(result, lambda mu: mu**2)
-var_mu = E_mu2 - E_mu**2
-print(f"E[mu]   = {E_mu.item():.3f}")
-print(f"Var[mu] = {var_mu.item():.3f}")
-```
-
-We can also estimate joint quantities like the covariance between `mu` and `x`, or the probability that `mu` is positive:
-
-```{python}
-# | echo: true
-# | code-fold : false
-cov = expectation(result, lambda mu, x: (mu - E_mu) * (x - expectation(result, lambda x: x)))
-p_pos = expectation(result, lambda mu: (mu > 0).float())
-print(f"Cov[mu, x] = {cov.item():.3f}")
-print(f"P(mu > 0)  = {p_pos.item():.3f}")
-```
-
-**Conditioning with `observe`.** Now suppose we observe that the measurement takes value $3.2$. We replace the second `sample` with an **`observe`**:
-
-```{python}
-# | echo: true
-# | code-fold : false
-@model
-def conditioned_measurement():
-    mu = sample("mu", dist.Normal(0.0, 5.0))
-    observe(3.2, dist.Normal(mu, 0.5))
-
-
-result = conditioned_measurement(num_particles=5000)
-stats = summary(result)
-print(f"E[mu | x=3.2] = {stats['mu']['mean']:.3f} ± {stats['mu']['std']:.3f}")
-```
-
-The `observe` call evaluates the Gaussian density $l(3.2 \mid \mu)$ for each particle's sampled `mu` and uses the result as a weight. Particles whose `mu` is close to $3.2$ receive high weight; those far away receive low weight. Because the observation ($\sigma = 0.5$) is much more informative than the vague prior ($\sigma = 5$), the posterior concentrates near the observed value.
-
-**Behind the scenes.** The two primitives correspond directly to the two operations in the weighted sampling procedure from the previous chapter:
-
-- **`sample`** extends the current sample by drawing from a proposal distribution.
-- **`observe`** evaluates the density at the observed value and multiplies it into the running weight. This is the density-based pre-conditioning from @sec-string-diagrams-carry-over.
-
-The engine runs $N$ independent **particles** in parallel, each maintaining its own sample trace and log-weight. After all particles finish, expectations are estimated with the self-normalized estimator: $\mathbb{E}[t] \approx \sum_i w_i\, t(y_i) \,/\, \sum_i w_i$. When there are no `observe` statements, all weights are equal and this reduces to a simple average over independent samples. For models with many `observe` statements, most particles end up with negligible weight. The engine mitigates this by monitoring the **effective sample size** and, when it drops too low, **resampling** particles in proportion to their weights. This is known as **sequential importance resampling** (SIR).
-
-
 
 ## Parametric kernels {#sec-parametric-kernels}
 
@@ -626,6 +545,13 @@ $$
 ### Forward sampling
 
 We implement the full model in `WeightedSampling.torch` by composing the root distributions and regression kernels:
+
+```{python}
+# | code-fold: false
+import torch
+import torch.distributions as dist
+from weighted_sampling import model, sample, observe, summary, expectation
+```
 
 ```{python}
 #| echo: true
