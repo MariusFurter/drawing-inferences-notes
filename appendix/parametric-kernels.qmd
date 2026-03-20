@@ -1,0 +1,3 @@
+<!-- List most useful torch.distributions with domains, parameters, and explanation of when to use them. -->
+
+<!-- List common transformations of inputs and outputs, along with their use cases. -->

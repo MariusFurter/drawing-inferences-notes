@@ -20,7 +20,11 @@ from weighted_sampling import model, sample, observe, summary, expectation
 torch.manual_seed(42)  # for reproducibility
 ```
 
-A typical workflow involves writing a model from `sample` and `observe` primitives, running it to produce weighted particles, and computing posterior expectations from those particles. We introduce the library through progressively richer examples, then cover more advanced features in later sections.
+::: {.callout-warning}
+This package is in early development. If you encounter any bugs, please file an issue on the [GitHub issue tracker](https://github.com/MariusFurter/WeightedSampling.torch/issues).
+:::
+
+A typical workflow involves writing a model from `sample` and `observe` primitives, running it to produce a collection of weighted **particles** (independent random samples, each carrying a weight), and using these to estimate quantities of interest. We introduce the library through progressively richer examples, then cover more advanced features in later sections.
 
 ## Writing models {#sec-write-model}
 
@@ -43,7 +47,7 @@ def measurement():
 
 Here `mu` is drawn from $\mathsf{Normal}(0, 25)$, then `x` is drawn from $\mathsf{Normal}(\mu, 0.25)$. The two variables are dependent because `x` depends on the sampled value of `mu`.
 
-The `@model` decorator makes the function callable with inference parameters. We run it by specifying the number of particles:
+The `@model` decorator makes the function callable with inference parameters (see @sec-inference-params). We run it by specifying the number of particles:
 
 ```{python}
 #| code-fold: false
@@ -68,7 +72,7 @@ result = conditioned_measurement(num_particles=5000)
 print(f"E[mu] = {summary(result)['mu']['mean']:.3f}")
 ```
 
-The `observe` call evaluates the Gaussian density $\ell(3.2 \mid \mu)$ for each particle's sampled `mu` and uses the result as a weight. Particles whose `mu` is close to $3.2$ receive high weight; those far away receive low weight. This is precisely density-based pre-conditioning.
+The `observe` call evaluates the Gaussian density $\ell(3.2 \mid \mu)$ for each particle's sampled `mu` and uses the result as a weight. Particles whose `mu` is close to $3.2$ receive high weight; those far away receive low weight. This is precisely the density-based conditioning from the [conditioning chapter](../chapters/conditioning.qmd).
 
 ::: {.callout-note}
 ### Torch compatibility {#sec-torch-compat}
@@ -84,7 +88,7 @@ This requirement only applies to code that operates on the sampled tensors. Ordi
 
 ### The `@model` decorator {#sec-model-decorator}
 
-The **`@model`** decorator is syntactic sugar for the `run_smc` inference engine. Writing
+The **`@model`** decorator is syntactic sugar for the underlying inference engine (`run_smc` — see @sec-behind-scenes). Writing
 
 ```python
 @model
@@ -132,11 +136,11 @@ The key parameters controlling inference are:
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `num_particles` | 1000 | Number of particles $N$. More particles = better estimates but more computation. |
-| `ess_threshold` | 0.5 | Fraction of $N$ below which resampling triggers. Set to $0$ to disable. |
+| `ess_threshold` | 0.5 | Fraction of $N$ below which resampling triggers (see @sec-resampling). Set to $0$ to disable. |
 
 ### The `SMCResult` object {#sec-smc-result}
 
-Calling a decorated model runs **Sequential Monte Carlo** (SMC) inference and returns an `SMCResult`. This is a dictionary-like object where each `sample` site produces a tensor of shape $(N, \ldots)$:
+Calling a decorated model runs **Sequential Monte Carlo** (SMC) inference and returns an `SMCResult`. This is a dictionary-like object where each `sample` call produces a tensor of shape $(N, \ldots)$:
 
 ```{python}
 #| code-fold: false
@@ -148,7 +152,7 @@ print(f"x shape:      {result['x'].shape}")
 
 Two metadata entries are always present:
 
-- **`result.log_weights`** — log-importance weights, shape $(N,)$.
+- **`result.log_weights`** — log-weights accumulated from `observe` calls, shape $(N,)$.
 - **`result.log_evidence`** — estimate of $\log p(\text{observations})$, useful for model comparison.
 
 When there are no `observe` statements, all log-weights are zero (equal weight).
@@ -187,7 +191,7 @@ def regression_model(data):
         observe(y, dist.Normal(y_hat, 0.3))
 ```
 
-The undecorated `linear_predictor` shares the calling model's context, so its `sample` calls are recorded in the same trace. This pattern makes it easy to compose larger models from smaller building blocks.
+The undecorated `linear_predictor` shares the calling model's context, so its `sample` calls are recorded alongside those of the outer model. This pattern makes it easy to compose larger models from smaller building blocks.
 
 ### Example: Bayesian linear regression {#sec-linreg-basic}
 
@@ -219,7 +223,7 @@ print(f"a = {stats['a']['mean']:.3f} ± {stats['a']['std']:.3f}")
 print(f"b = {stats['b']['mean']:.3f} ± {stats['b']['std']:.3f}")
 ```
 
-The posterior means are close to the true values. We will revisit this example in @sec-behind-scenes to examine how the inference engine handles the eight observations internally.
+The posterior means are close to the true values. We will revisit this example in @sec-behind-scenes to examine how the inference engine handles the five observations internally.
 
 ## Evaluating results {#sec-evaluate-results}
 
@@ -260,8 +264,6 @@ print(f"P(mu > 0)  = {p_pos.item():.3f}")
 
 The weighted particles can be visualized by plotting them with opacity proportional to their weight:
 
-<!-- Fix in package: Resample before step to that resampling does not occur at end. This will give true weighted particles. -->
-
 ```{python}
 import matplotlib.pyplot as plt
 
@@ -270,7 +272,7 @@ result = bayesian_linreg(data, num_particles=5000, ess_threshold=0.01)
 a_samples = result["a"].detach()
 b_samples = result["b"].detach()
 log_w = result["log_weights"].detach()
-weights = torch.exp(log_w - log_w.max())  # normalize so max weight = 1
+weights = torch.exp(log_w - log_w.max())  # normalize so weights in [0, 1]
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 3.5))
 
@@ -281,7 +283,7 @@ for idx in torch.randperm(len(a_samples))[:200]:
         xs,
         (a_samples[idx] * xs + b_samples[idx]).numpy(),
         color="steelblue",
-        alpha=max(0.01, float(weights[idx])) * 0.3,
+        alpha=weights[idx].item() * 0.5,
     )
 ax.plot(xs, true_a * xs + true_b, color="red", linewidth=2, label="True line")
 ax.scatter(xs, ys, color="black", s=25, zorder=5, label="Data")
@@ -290,7 +292,7 @@ ax.legend()
 
 # Right: joint posterior (color ∝ weight)
 ax = axes[1]
-ax.scatter(a_samples, b_samples, c=weights, cmap="Blues", s=8, alpha=0.6)
+ax.scatter(a_samples, b_samples, s=8, alpha=torch.clamp(weights, min=0.05))
 ax.axvline(true_a, color="red", linestyle="--", linewidth=1, label=f"true a = {true_a}")
 ax.axhline(true_b, color="red", linestyle="--", linewidth=1, label=f"true b = {true_b}")
 ax.set(xlabel="a (slope)", ylabel="b (intercept)", title="Joint posterior")
@@ -359,7 +361,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-With 8 observations and no resampling, almost all the weight concentrates on a tiny fraction of the particles. The vast majority contribute essentially nothing to the estimate.
+With 5 observations and no resampling, almost all the weight concentrates on a tiny fraction of the particles. The vast majority contribute essentially nothing to the estimate.
 
 ### Resampling {#sec-resampling}
 
@@ -387,6 +389,8 @@ Resampling prevents weight collapse, but it comes at a cost: many particles beco
 ## Metropolis-Hastings moves {#sec-mh-moves}
 
 When a model has many `observe` statements, resampling causes particles to coalesce. The `move` primitive applies a **Metropolis-Hastings (MH) step** to diversify the particles after each observation. A move proposes new values for specified variables and accepts or rejects the proposal based on the full model density.
+
+<!-- Add note that moves should could leave domain of variable. -->
 
 ### `RandomWalkProposal`
 
@@ -452,9 +456,10 @@ for ax, (res, title) in zip(
         (result_adapt, "AdaptiveProposal"),
     ],
 ):
-    a_s = res["a"].detach().cpu().numpy()
-    b_s = res["b"].detach().cpu().numpy()
-    ax.scatter(a_s, b_s, color="steelblue", s=8, alpha=0.4)
+    a_s = res["a"]
+    b_s = res["b"]
+    weights = torch.exp(res["log_weights"] - res["log_weights"].max())
+    ax.scatter(a_s, b_s, color="steelblue", s=8, alpha=torch.clamp(weights, min=0.05))
     ax.axvline(true_a, color="red", linestyle="--", linewidth=1)
     ax.axhline(true_b, color="red", linestyle="--", linewidth=1)
     ax.set_xlabel("a (slope)")
@@ -466,6 +471,7 @@ plt.tight_layout()
 plt.show()
 ```
 
+<!-- Plot for RW proposal looks strange. -->
 
 ## Discrete Bayesian networks {#sec-discrete-bayes-nets}
 
@@ -532,7 +538,7 @@ The `ImportanceSampler` lets you use a **target** density that is not a standard
 The `target` only needs a `log_prob` method. The `proposal` must support both `sample` and `log_prob`.
 
 ::: {.callout-note}
-The target density can be unnormalized — posterior expectations will still be correct because they use the self-normalized estimator. However, an unnormalized target will make the `log_evidence` estimate unreliable, since it depends on absolute density values.
+The target density can be unnormalized — posterior expectations will still be correct because they use the self-normalized estimator. However, an unnormalized target will invalidate the `log_evidence` estimate, since it depends on absolute density values.
 :::
 
 As an example, suppose we want to use a prior proportional to $e^{-x^4}$, a super-Gaussian density that is not available in `torch.distributions`:

@@ -13,8 +13,6 @@ $$
 
 # Hybrid models {#sec-hybrid-models}
 
-*Work in progress...*
-
 So far, all our models have lived in the world of finite sets: every wire carried a variable with finitely many values, and every kernel was specified by a finite table of numbers. But many quantities we care about take continuous values. In this chapter, we extend the string-diagrammatic framework to handle continuous and mixed-type variables.
 
 We introduce the theory gradually. First, we sketch how kernels generalize beyond finite sets, and why density functions are the practical tool for specifying them. Next, we introduce a small probabilistic programming library, `WeightedSampling.torch`, that automates the weighted sampling procedure from the [previous chapter](conditioning.qmd). We then develop a family of parametric regression kernels — the standard building blocks for models with continuous and mixed-type variables. Finally, we compose these kernels into a concrete Swiss health model and demonstrate forward sampling and conditioning.
@@ -304,7 +302,7 @@ For instance, Lebesgue measure on $\mathbb{R}^2$ (area) is the product of Lebesg
 
 **Graphical conditioning.** Pre-conditioning on an *input* works exactly as before: given a kernel $g : X \otimes Y \kernel U$, fixing $X = \bar{x}$ yields $g_{\mid X = \bar{x}}(B \mid y) := g(B \mid \bar{x}, y)$. This is still a well-defined kernel.
 
-Pre-conditioning on an *output* generalizes the discrete formula from the [conditioning chapter](conditioning.qmd). There, for a discrete kernel $g : X \kernel U \otimes V$, pre-conditioning on $U = \bar{u}$ meant plugging $\bar{u}$ into the first argument: $g_{\mid U = \bar{u}}(v \mid x) = g(\bar{u}, v \mid x)$. Since the values of a discrete kernel are exactly its density with respect to counting measure, this is the same as plugging $\bar{u}$ into the density. The same idea works in general.
+Pre-conditioning on an *output* generalizes the discrete formula from the [conditioning chapter](conditioning.qmd). For a discrete kernel $g : X \kernel U \otimes V$, pre-conditioning on $U = \bar{u}$ meant plugging $\bar{u}$ into the first argument: $g_{\mid U = \bar{u}}(v \mid x) = g(\bar{u}, v \mid x)$. Since the values of a discrete kernel are exactly its density with respect to counting measure, this is the same as plugging $\bar{u}$ into the density. The same idea works in general.
 
 Suppose $g : X \kernel U \otimes V$ has density $l_g(u, v \mid x)$ with respect to a product base measure $\nu_U \otimes \nu_V$ (see the box above for what this means). Pre-conditioning on $U = \bar{u}$ plugs $\bar{u}$ into the density, giving the kernel with density $l_g(\bar{u}, v \mid x)$:
 $$
@@ -313,6 +311,7 @@ $$
 
 If $g : X \kernel U$ has density $l_g$ and we fix its only output $U = \bar{u}$, there are no remaining variables to integrate over. The resulting kernel $g_{\mid U = \bar u} : X \kernel I$ assigns each $x \in X$ the **likelihood weight** $l_g(\bar{u} \mid x)$. This is the case that arises most often in practice.
 
+<!-- Work in progress..
 
 ## Parametric kernels {#sec-parametric-kernels}
 
@@ -437,9 +436,9 @@ k(y \mid x_1, \ldots, x_n) = l_{\mathsf{Poisson}}(y \mid \lambda), \qquad \lambd
 $$
 The output distribution places a probability bar at each non-negative integer, concentrated around $\lambda$: the expected count is $\mathbb{E}[Y \mid x] = \lambda = e^{\eta}$, and the variance equals $\lambda$ as well — so higher counts come with more spread. As with the log-normal kernel, the inputs act multiplicatively: increasing $x_j$ by one unit multiplies the expected count by $e^{\delta_j}$.
 
-<!-- ============================================================ -->
+
 ## The Swiss health model {#sec-swiss-health-model}
-<!-- ============================================================ -->
+
 
 We now apply the framework to a concrete example: a model of Swiss health variables relating lifestyle factors to disease risk and healthcare costs. The model is assembled entirely from the parametric kernels introduced above, composed via the string-diagrammatic operations of @sec-string-diagrams-carry-over. We describe the variables and their relationships, instantiate the kernels with parameters calibrated to Swiss population statistics, and demonstrate forward sampling and conditioning using `WeightedSampling.torch`.
 
@@ -531,9 +530,9 @@ $$
 
 ### Composing the full model
 
-<!-- Compose root measures + regression kernels via sequential/parallel composition + copy/swap.
+Compose root measures + regression kernels via sequential/parallel composition + copy/swap.
      Draw the complete string diagram: {S, A, P} → B → D → C, with B also feeding into C.
-     Show how the compositional structure encodes the causal story. -->
+     Show how the compositional structure encodes the causal story.
 
 ``` {.tikz}
 %%| label: fig-swiss-health-model
@@ -599,15 +598,14 @@ print(f"Median cost (CHF):  {C_vals.median().item():,.0f}")
 
 ### Conditioning on continuous observations {#sec-conditioning-continuous}
 
-<!-- Extend the graphical conditioning procedure from Chapter 3: pre-condition on density values. Worked example: condition on observed BMI B = b. -->
+Extend the graphical conditioning procedure from Chapter 3: pre-condition on density values. Worked example: condition on observed BMI B = b.
 
 ### Conditioning on discrete observations {#sec-conditioning-discrete}
 
-<!-- Same as the discrete case. Example: condition on D = 1 (has diabetes). What does this tell us about likely health costs? -->
+Same as the discrete case. Example: condition on D = 1 (has diabetes). What does this tell us about likely health costs? 
 
-
-<!-- ============================================================ -->
 ## Bibliographic notes {.unnumbered}
-<!-- ============================================================ -->
 
-<!-- References: measure-theoretic probability, generalized linear models, Swiss Health Survey (SGB), WeightedSampling.torch. -->
+References: measure-theoretic probability, generalized linear models, Swiss Health Survey (SGB), WeightedSampling.torch. 
+
+-->
