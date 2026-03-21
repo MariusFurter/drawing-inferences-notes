@@ -1,8 +1,12 @@
 # Exercise 5: Inverse Physics {.unnumbered}
 
-In this exercise, we use the [`WeightedSampling.torch`](../appendix/WeightedSampling.qmd) library to perform Bayesian inference in simple physics models. The key idea: when a forward simulation $f(\theta)$ is **non-injective** — meaning several different parameter values $\theta$ produce the same observation — Bayesian inference recovers the **full set of consistent solutions**, weighted by prior plausibility. 
+A physics simulation maps initial conditions to outcomes — launch a projectile at angle $\theta$ and it lands at range $R(\theta)$. In this exercise we solve the **inverse problem**: given a measured outcome, what were the initial conditions? Using the [`WeightedSampling.torch`](../appendix/WeightedSampling.qmd) library, we:
 
-We work through two scenarios of increasing complexity, each introducing new features of the library.
+1. **Simulate forward** — `sample` unknown parameters from a prior and run the physics to see what outcomes are possible.
+2. **Condition on data** — add an `observe` statement to turn prior samples into **weighted posterior samples** that are consistent with the observation.
+3. **Extract derived quantities** — plug posterior samples into any function and summarize with histograms or expectations.
+
+We work through two scenarios of increasing complexity.
 
 ::: {.callout-note collapse="true" title="Prerequisites: Python libraries"}
 This exercise uses the following libraries:
@@ -161,7 +165,7 @@ def compute_trajectory(v0, theta, g=1.62, n_points=100):
 
 ### Task 1a: Forward simulation
 
-This task introduces the core workflow: define a model with `@model` and `sample`, run it to produce particles, and inspect the result.
+A model with only `sample` statements (no `observe`) draws from the **prior** — our beliefs about the parameters before any data is observed. Running such a model produces unweighted samples that we can use to explore what outcomes the physics allows.
 
 **Part 1.** Write a `@model` function `lunar_launch()` that:
 
@@ -211,24 +215,22 @@ R_obs = 200.0  # m
 def lunar_launch():
     theta = sample("theta", dist.Uniform(0, torch.pi / 2))
     R = compute_range(v0, theta, g=g_moon)
-    return R
 
 result = lunar_launch(num_particles=5000)
 print(summary(result))
 ```
 
-```{python}
-# | code-fold: false
-# Part 2: Plot 10 random trajectories
-fig, ax = plt.subplots(figsize=(8, 4))
+We plot 10 randomly selected trajectories from the prior:
 
+```{python}
+# | code-fold: true
 thetas = result["theta"]
 idx = torch.randperm(len(thetas))[:10]
 
+fig, ax = plt.subplots(figsize=(8, 4))
 for i in idx:
     xs, ys = compute_trajectory(v0, thetas[i], g=g_moon)
     ax.plot(xs, ys, linewidth=1.5)
-
 ax.set_xlabel("Horizontal distance (m)")
 ax.set_ylabel("Height (m)")
 ax.set_ylim(bottom=0)
@@ -236,9 +238,10 @@ plt.tight_layout()
 plt.show()
 ```
 
+We plot a histogram of the prior distribution of ranges, with $R_{\text{obs}}$ marked:
+
 ```{python}
-# | code-fold: false
-# Part 3: Histogram of ranges
+# | code-fold: true
 ranges = compute_range(v0, result["theta"], g=g_moon)
 
 fig, ax = plt.subplots(figsize=(7, 3.5))
@@ -283,7 +286,7 @@ Near the peak ($\theta = \pi/4$), the curve is flat. This means many nearby angl
 
 ### Task 1b: Inferring the launch angle
 
-This task introduces conditioning with `observe`.
+Adding an `observe` statement turns prior samples into **weighted posterior samples** — particles that are consistent with the data receive high weight, while unlikely ones are down-weighted. The resulting collection represents our beliefs *after* seeing the observation.
 
 **Part 1.** Modify your model to condition on the observed range. Add an `observe` statement with a Gaussian likelihood:
 $$
@@ -291,13 +294,13 @@ R_{\text{obs}} \sim \mathsf{Normal}(R(\theta),\; \sigma)
 $$
 where $\sigma = 5.0\;\text{m}$ represents measurement uncertainty and $R_{\text{obs}} = 200\;\text{m}$. Run inference with `num_particles=10000` and use `summary()` to inspect the result.
 
-**Part 2.** Plot a weighted histogram of the posterior over $\theta$. The range equation $R(\theta) = R_{\text{obs}}$ has two exact analytical solutions:
+**Part 2.** The posterior samples carry importance weights. Plot a weighted histogram of the posterior over $\theta$ by passing `weights=...` to `ax.hist`. The range equation $R(\theta) = R_{\text{obs}}$ has two exact analytical solutions:
 $$
 \theta_{\text{low}} = \tfrac{1}{2}\arcsin\!\left(\frac{R_{\text{obs}}\, g}{v_0^2}\right), \qquad \theta_{\text{high}} = \frac{\pi}{2} - \theta_{\text{low}}.
 $$
 Compute these two angles and overlay them on your histogram as vertical dashed lines. What do you notice?
 
-**Part 3.** Use `expectation()` to compute the posterior mean $\mathbb{E}[\theta \mid R_{\text{obs}}]$. Is this a useful summary of the posterior?
+**Part 3.** One way to summarize a distribution is its **mean**. Use `expectation()` to compute $\mathbb{E}[\theta \mid R_{\text{obs}}]$. Is the mean a useful summary here?
 
 **Discussion:** How does the Bayesian posterior relate to the two exact solutions? What happens as the measurement noise $\sigma \to 0$? 
 
@@ -324,7 +327,7 @@ When there are `observe` statements, particles carry importance weights. To plot
 ```python
 thetas = result_cond["theta"]
 log_w = result_cond["log_weights"]
-weights = torch.exp(log_w - log_w.max()) # convert log-weights to normalized weights
+weights = torch.softmax(log_w, dim=0)  # exponentiate and normalize
 ax.hist(thetas, weights=weights, bins=80, density=True, ...)
 ```
 
@@ -367,27 +370,22 @@ print(summary(result_cond))
 
 ```{python}
 # | code-fold: false
-# Part 2: Posterior histogram with exact solutions
+# Part 2: Compute normalized weights and exact solutions
 thetas = result_cond["theta"]
 log_w = result_cond["log_weights"]
-weights = torch.exp(log_w - log_w.max())
+weights = torch.softmax(log_w, dim=0)
 
-# Exact analytical solutions
 theta_low = 0.5 * torch.asin(torch.tensor(R_obs * g_moon / v0**2))
 theta_high = torch.pi / 2 - theta_low
+```
 
+We plot the weighted posterior histogram of $\theta$, with the exact analytical solutions overlaid:
+
+```{python}
+# | code-fold: true
 fig, ax = plt.subplots(figsize=(7, 3.5))
-ax.hist(
-    thetas,
-    weights=weights,
-    bins=80,
-    density=True,
-    color="steelblue",
-    edgecolor="white",
-    linewidth=0.5,
-    alpha=0.8,
-    label="Posterior",
-)
+ax.hist(thetas, weights=weights, bins=80, density=True,
+        color="steelblue", edgecolor="white", linewidth=0.5, alpha=0.8, label="Posterior")
 ax.axvline(float(theta_low), color="darkorange", linestyle="--", linewidth=2,
            label=f"Exact low: θ = {float(theta_low):.2f} rad ({float(theta_low)*180/torch.pi:.0f}°)")
 ax.axvline(float(theta_high), color="red", linestyle="--", linewidth=2,
@@ -408,7 +406,7 @@ E_theta = expectation(result_cond, lambda theta: theta)
 print(f"E[θ] = {E_theta.item():.3f} rad ({E_theta.item()*180/torch.pi:.1f}°)")
 ```
 
-The posterior mean $\mathbb{E}[\theta] \approx \pi/4 \approx 45°$ does not correspond to any physical solution; it is the average of the low-arc ($\sim 27°$) and high-arc ($\sim 63°$) peaks. **For multimodal posteriors, the mean can be misleading.** The histogram is a much better summary.
+The posterior mean $\mathbb{E}[\theta] \approx \pi/4 \approx 45°$ does not correspond to any physical solution; it is the average of the low-arc ($\sim 27°$) and high-arc ($\sim 63°$) peaks. **For multimodal posteriors, the mean can be misleading** — histograms or samples are much more informative.
 
 **Discussion:** The posterior concentrates around $\theta_{\text{low}}$ and $\theta_{\text{high}}$, with a spread controlled by the measurement noise $\sigma$. As $\sigma \to 0$, the posterior peaks sharpen into a pair of delta functions at the exact solutions. With a uniform prior, both modes have roughly equal mass ($P \approx 0.5$ each).
 :::
@@ -416,9 +414,7 @@ The posterior mean $\mathbb{E}[\theta] \approx \pi/4 \approx 45°$ does not corr
 
 ### Task 1c: Joint inference of $v_0$ and $\theta$ {#sec-task-1c}
 
-This task introduces models with multiple unknown parameters and joint posterior analysis.
-
-So far we assumed the launch speed $v_0 = 20\;\text{m/s}$ was known exactly. In practice, the launcher has some variability. Suppose we only know that $v_0$ is somewhere between 15 and 25 m/s.
+So far we assumed the launch speed $v_0 = 20\;\text{m/s}$ was known exactly. In practice, the launcher has some variability. Suppose we only know that $v_0$ is somewhere between 15 and 25 m/s. Adding a second `sample` call gives us a joint posterior over both parameters.
 
 **Part 1.** Write a new model `lunar_launch_joint(R_obs, sigma)` that:
 
@@ -429,19 +425,17 @@ So far we assumed the launch speed $v_0 = 20\;\text{m/s}$ was known exactly. In 
 
 Run the model with $R_{\text{obs}} = 200$, $\sigma = 5.0$, and `num_particles=10000`. Use `summary()` to inspect both parameters.
 
-**Part 2.** Visualize the joint posterior of $(v_0, \theta)$. A good way to summarize a multi-parameter posterior is a **joint plot**: a figure that shows the joint distribution of two parameters as a scatter plot (or 2D density), with the marginal distribution of each parameter along the axes.
+**Part 2.** Visualize the joint posterior of $(v_0, \theta)$ using seaborn's `sns.jointplot()`. Since `jointplot` does not accept importance weights, you first need to **resample**: call `.sample()` on the result to convert the weighted particles into an equally-weighted collection. This draws indices proportional to the importance weights — high-weight particles get duplicated, low-weight ones are dropped.
 
-<!-- Add feature to sample from SMC results object. -->
+What structure do you see in the joint?
 
-Use seaborn's `sns.jointplot()` to create this visualization. Since `jointplot` does not accept importance weights directly, you will first need to **resample** the particles: draw indices proportional to the weights using `torch.multinomial`, then pass the resampled $(v_0, \theta)$ values to seaborn.
-
-What structure do you see in the joint? Are the marginals unimodal or multimodal?
-
-**Part 3.** The posterior over $(v_0, \theta)$ lets us answer operational questions that depend on both parameters jointly. Use `expectation()` to estimate:
+**Part 3.** Posterior samples aren't limited to the parameters themselves — we can plug them into any function to obtain samples of **derived quantities**. Use `expectation()` to estimate:
 
 1. The expected **flight time** $\mathbb{E}[T \mid R_{\text{obs}}]$, where $T = 2 v_0 \sin(\theta) / g$.
 2. The expected **maximum altitude** $\mathbb{E}[h_{\max} \mid R_{\text{obs}}]$, where $h_{\max} = v_0^2 \sin^2(\theta) / (2g)$.
 3. The **probability** that the cargo flies above 100 m: $P(h_{\max} > 100\;\text{m} \mid R_{\text{obs}})$.
+
+To visualize the full posterior over these derived quantities (not just their means), compute $T$ and $h_{\max}$ for the resampled particles and plot histograms.
 
 ::: {.callout-note collapse="true" title="Hint: Step-by-step approach"}
 
@@ -457,21 +451,15 @@ Place this *before* `compute_range`, which now uses the sampled `v0` instead of 
 
 **Part 2 — joint plot with seaborn:**
 
-First extract weights and resample:
+The posterior particles carry importance weights. Since `jointplot` works with unweighted samples, use the `.sample()` method on the result to **resample** — drawing indices proportional to the weights to produce an equally-weighted collection:
 
 ```python
-v0s = result_joint["v0"]
-thetas = result_joint["theta"]
-log_w = result_joint["log_weights"]
-weights = torch.exp(log_w - log_w.max())
-
-# Resample 5000 indices proportional to weights
-idx = torch.multinomial(weights, num_samples=5000, replacement=True)
-v0_resampled = v0s[idx]
-theta_resampled = thetas[idx]
+resampled = result_joint.sample()
+v0_resampled = resampled["v0"]
+theta_resampled = resampled["theta"]
 ```
 
-Resampling converts weighted particles into equally-weighted ones — high-weight particles get duplicated, low-weight ones are dropped. Now pass to seaborn:
+Now pass the unweighted samples to seaborn:
 
 ```python
 import seaborn as sns
@@ -480,7 +468,7 @@ sns.jointplot(x=v0_resampled.numpy(), y=theta_resampled.numpy(), kind="scatter")
 
 Try different `kind` options: `"scatter"`, `"kde"`, `"hex"`.
 
-**Part 3 — joint expectations:**
+**Part 3 — derived quantities from posterior samples:**
 
 The `expectation()` function matches argument names to variable names in the result. To compute a function of multiple variables, use a lambda with matching argument names:
 
@@ -491,6 +479,12 @@ E_T = expectation(result_joint, lambda v0, theta: 2 * v0 * torch.sin(theta) / g_
 For a probability, pass an indicator function:
 ```python
 expectation(result_joint, lambda v0, theta: (h_max_expr > 100).float())
+```
+
+For the histograms, plug the resampled posterior samples into the formulas for $T$ and $h_{\max}$. Each resampled particle gives one sample of the derived quantity:
+```python
+T_samples = 2 * v0_resampled * torch.sin(theta_resampled) / g_moon
+hmax_samples = v0_resampled**2 * torch.sin(theta_resampled)**2 / (2 * g_moon)
 ```
 :::
 
@@ -515,23 +509,27 @@ print(summary(result_joint))
 
 ```{python}
 # | code-fold: false
-# Part 2: Joint plot with seaborn
+# Part 2: Resample particles proportional to weights
 import seaborn as sns
 
-v0s = result_joint["v0"]
-thetas = result_joint["theta"]
-log_w = result_joint["log_weights"]
-weights = torch.exp(log_w - log_w.max())
+resampled = result_joint.sample()
+v0_resampled = resampled["v0"]
+theta_resampled = resampled["theta"]
+```
 
-# Resample particles proportional to weights
-idx = torch.multinomial(weights, num_samples=5000, replacement=True)
-v0_resampled = v0s[idx]
-theta_resampled = thetas[idx]
+We create a joint plot showing the posterior distribution of $(v_0, \theta)$:
 
-sns.jointplot(x=v0_resampled.numpy(), y=theta_resampled.numpy(),
-              kind="scatter", joint_kws={"s": 5, "alpha": 0.3},
-              marginal_kws={"bins": 60},
-              color="steelblue", height=6)
+```{python}
+# | code-fold: true
+sns.jointplot(
+    x=v0_resampled.numpy(),
+    y=theta_resampled.numpy(),
+    kind="scatter",
+    joint_kws={"s": 5, "alpha": 0.3},
+    marginal_kws={"bins": 60},
+    color="steelblue",
+    height=6,
+)
 plt.xlabel("$v_0$ (m/s)")
 plt.ylabel("θ (rad)")
 plt.tight_layout()
@@ -556,16 +554,56 @@ print(f"E[max altitude]  = {E_hmax.item():.1f} m")
 print(f"P(h_max > 100 m) = {P_high.item():.2f}")
 ```
 
+```{python}
+# | code-fold: false
+# Part 3 (continued): Compute derived trajectory quantities
+T_samples = 2 * v0_resampled * torch.sin(theta_resampled) / g_moon
+hmax_samples = v0_resampled**2 * torch.sin(theta_resampled) ** 2 / (2 * g_moon)
+```
+
+We plot histograms of the posterior distributions of flight time and maximum altitude:
+
+```{python}
+# | code-fold: true
+fig, axes = plt.subplots(1, 2, figsize=(7, 3))
+
+axes[0].hist(
+    T_samples.numpy(),
+    bins=60,
+    density=True,
+    color="steelblue",
+    edgecolor="white",
+    linewidth=0.5,
+    alpha=0.8,
+)
+axes[0].set_xlabel("Flight time (s)")
+axes[0].set_ylabel("Density")
+
+axes[1].hist(
+    hmax_samples.numpy(),
+    bins=60,
+    density=True,
+    color="steelblue",
+    edgecolor="white",
+    linewidth=0.5,
+    alpha=0.8,
+)
+axes[1].axvline(
+    100.0, color="red", linestyle="--", linewidth=2, label="100 m threshold"
+)
+axes[1].set_xlabel("Maximum altitude (m)")
+axes[1].set_ylabel("Density")
+axes[1].legend(fontsize=9)
+
+plt.tight_layout()
+plt.show()
+```
+
 :::
 
 
 
 ## Vignette 2: Gravitational Slingshot
-
-<!-- TODO:
-
-There seems to be a problem with the inference. THe posterior samples don't look right.
- -->
 
 A space probe was launched from Station Alpha (located at the origin) to explore a region of space. A massive planet at position $(p_x, p_y) = (5, 3)$ bends all nearby trajectories through its gravitational pull. After $T$ seconds, a sensor detected the probe at coordinates $(x_T, y_T)$.
 
@@ -600,25 +638,6 @@ def simulate_gravity(x0, y0, vx0, vy0,
         vx = vx + 0.5*ax*dt; vy = vy + 0.5*ay*dt
     return torch.stack(xs_list), torch.stack(ys_list)
 
-def plot_trajectories(xs_list, ys_list, weights=None, ax=None,
-                      cmap="viridis", alpha_scale=0.5, linewidth=1.0,
-                      max_trajectories=200):
-    if ax is None: fig, ax = plt.subplots(figsize=(8, 5))
-    if isinstance(xs_list, torch.Tensor) and xs_list.dim() == 2:
-        N = xs_list.shape[1]
-        xs_list = [xs_list[:, i] for i in range(N)]
-        ys_list = [ys_list[:, i] for i in range(N)]
-    N = len(xs_list)
-    idx = torch.randperm(N)[:max_trajectories] if N > max_trajectories else torch.arange(N)
-    w = weights[idx].float() / weights[idx].float().max() if weights is not None else torch.ones(len(idx))
-    cm = plt.get_cmap(cmap)
-    for j, i in enumerate(idx):
-        color = cm(j / len(idx))
-        alpha = max(0.02, float(w[j]) * alpha_scale)
-        ax.plot(xs_list[i], ys_list[i],
-                color=color, alpha=alpha, linewidth=linewidth)
-    return ax
-
 planet_x, planet_y = 5.0, 3.0
 planet_mass = 30.0
 ```
@@ -626,28 +645,44 @@ planet_mass = 30.0
 ```{python}
 # | echo: false
 # | label: fig-gravity-setup
-# | fig-cap: "Trajectories of a probe launched from Station Alpha (green) under the gravitational influence of a massive planet (black). Different initial velocities lead to very different paths — some direct, some strongly deflected."
+# | fig-cap: "Trajectories of a probe launched from Station Alpha (green) under the gravitational influence of a massive planet (black). Different initial velocities lead to very different paths"
 
 velocities = [
-    (3.0, 2.0), (4.5, 1.0), (2.0, 4.0), (5.0, 0.5), (-1.0, 5.0),
-    (1.5, 3.5), (3.5, -0.5),
+    (3.0, 2.0),
+    (4.5, 1.0),
+    (2.0, 4.0),
+    (5.0, 0.5),
+    (-1.0, 5.0),
+    (1.5, 3.5),
+    (3.5, -0.5),
 ]
 
-fig, ax = plt.subplots(figsize=(8, 6))
+fig, ax = plt.subplots(figsize=(6, 4))
 cm = plt.get_cmap("tab10")
 
 for j, (vx, vy) in enumerate(velocities):
     xs, ys = simulate_gravity(
-        x0=0.0, y0=0.0, vx0=vx, vy0=vy,
-        planet_x=planet_x, planet_y=planet_y,
-        planet_mass=planet_mass, dt=0.02, n_steps=300,
+        x0=0.0,
+        y0=0.0,
+        vx0=vx,
+        vy0=vy,
+        planet_x=planet_x,
+        planet_y=planet_y,
+        planet_mass=planet_mass,
+        dt=0.02,
+        n_steps=300,
     )
     ax.plot(xs, ys, color=cm(j), linewidth=1.5, alpha=0.7)
     ax.plot(float(xs[-1]), float(ys[-1]), "o", color=cm(j), markersize=4)
 
 ax.plot(planet_x, planet_y, "ko", markersize=15, zorder=5)
-ax.annotate("Planet", (planet_x, planet_y), textcoords="offset points",
-            xytext=(10, 10), fontsize=10)
+ax.annotate(
+    "Planet",
+    (planet_x, planet_y),
+    textcoords="offset points",
+    xytext=(10, 10),
+    fontsize=10,
+)
 ax.plot(0, 0, "s", color="green", markersize=10, zorder=5, label="Station Alpha")
 ax.set_xlabel("x")
 ax.set_ylabel("y")
@@ -657,10 +692,9 @@ plt.tight_layout()
 plt.show()
 ```
 
-Unlike the ballistic case, different initial velocities can reach the same endpoint via very different paths — a direct trajectory, a trajectory that curves around the planet, or even one that loops around it. The mapping from initial velocity to final position is highly non-injective, making this a rich inference problem.
 
-::: {.callout-note collapse="true" title="Provided helper functions: gravity simulation & trajectory plotting"}
-The following functions are provided for you. Run this cell before starting the tasks.
+::: {.callout-note collapse="true" title="Provided helper function: gravity simulation"}
+The following function is provided for you. Run this cell before starting the tasks.
 
 ```{python}
 # | code-fold: false
@@ -730,138 +764,44 @@ def simulate_gravity(x0, y0, vx0, vy0,
     xs = torch.stack(xs_list)  # shape (n_steps, ...) 
     ys = torch.stack(ys_list)
     return xs, ys
-
-
-def plot_trajectories(xs_list, ys_list, weights=None, ax=None, 
-                      cmap="viridis", alpha_scale=0.5, linewidth=1.0,
-                      max_trajectories=200):
-    """Plot multiple trajectories with optional weight-based opacity.
-    
-    Args:
-        xs_list: list of 1-D tensors (one per trajectory), or (n_steps, N) tensor
-        ys_list: same shape as xs_list
-        weights: optional 1-D tensor of importance weights
-        ax: matplotlib axes (created if None)
-        cmap: colormap name for coloring trajectories
-        alpha_scale: maximum opacity
-        max_trajectories: subsample if more trajectories than this
-    """
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(8, 5))
-
-    # Handle (n_steps, N) tensor format
-    if isinstance(xs_list, torch.Tensor) and xs_list.dim() == 2:
-        N = xs_list.shape[1]
-        xs_list = [xs_list[:, i] for i in range(N)]
-        ys_list = [ys_list[:, i] for i in range(N)]
-
-    N = len(xs_list)
-    if N > max_trajectories:
-        idx = torch.randperm(N)[:max_trajectories]
-    else:
-        idx = torch.arange(N)
-
-    if weights is not None:
-        w = weights[idx].float()
-        w = w / w.max()
-    else:
-        w = torch.ones(len(idx))
-
-    cm = plt.get_cmap(cmap)
-    for j, i in enumerate(idx):
-        color = cm(j / len(idx))
-        alpha = max(0.02, float(w[j]) * alpha_scale)
-        ax.plot(xs_list[i], ys_list[i],
-                color=color, alpha=alpha, linewidth=linewidth)
-    return ax
 ```
 :::
 
-### Forward simulation
+### Task 2a: Forward simulation
 
-#### Task 2a: Explore the simulation *(Easy)*
+As before, we start by drawing from the **prior** — sampling velocities and running the simulation — to understand what outcomes are possible before any data is observed.
 
-Use the provided `simulate_gravity` function to simulate a single trajectory. The probe launches from the origin with some initial velocity $(v_x, v_y)$, influenced by a planet with gravitational parameter $GM = 30$ at position $(5, 3)$.
-
-1. Run the simulation with initial velocity $(v_x, v_y) = (3.0, 2.0)$ and plot the trajectory. Mark the planet's position with a large dot.
-2. Try a few different initial velocities by hand and observe how the trajectories change. Can you find two different velocities that end up near the same point?
-
-::: {.callout-note collapse="true" title="Hint: calling simulate_gravity"}
-```python
-xs, ys = simulate_gravity(
-    x0=0.0, y0=0.0,       # launch from origin
-    vx0=3.0, vy0=2.0,     # initial velocity
-    planet_x=5.0, planet_y=3.0,
-    planet_mass=30.0,      # GM parameter
-    dt=0.02, n_steps=300
-)
-# xs, ys are 1-D tensors of shape (300,)
-```
-:::
-
-::: {.callout-tip collapse="true" title="Solution"}
-
-```{python}
-# | code-fold: false
-# Simulation parameters
-planet_x, planet_y = 5.0, 3.0
-planet_mass = 30.0
-
-# Try several initial velocities
-velocities = [
-    (3.0, 2.0),
-    (4.5, 1.0),
-    (2.0, 4.0),
-    (5.0, 0.5),
-    (-1.0, 5.0),
-]
-
-fig, ax = plt.subplots(figsize=(8, 6))
-cm = plt.get_cmap("tab10")
-
-for j, (vx, vy) in enumerate(velocities):
-    xs, ys = simulate_gravity(
-        x0=0.0, y0=0.0, vx0=vx, vy0=vy,
-        planet_x=planet_x, planet_y=planet_y,
-        planet_mass=planet_mass,
-        dt=0.02, n_steps=300,
-    )
-    ax.plot(xs, ys, color=cm(j), linewidth=1.5,
-            label=f"$v$ = ({vx}, {vy})")
-    # Mark endpoint
-    ax.plot(float(xs[-1]), float(ys[-1]), "o", color=cm(j), markersize=5)
-
-# Mark planet and launch site
-ax.plot(planet_x, planet_y, "ko", markersize=15, zorder=5)
-ax.annotate("Planet", (planet_x, planet_y), textcoords="offset points",
-            xytext=(10, 10), fontsize=10)
-ax.plot(0, 0, "s", color="green", markersize=10, zorder=5, label="Station Alpha")
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.set_title("Trajectories under gravitational influence")
-ax.legend(fontsize=8, loc="upper left")
-ax.set_aspect("equal")
-plt.tight_layout()
-plt.show()
-```
-
-The gravitational pull of the planet bends each trajectory differently. Trajectories that pass close to the planet are deflected strongly, while those farther away follow nearly straight paths. It is easy to see that multiple initial velocities could reach similar endpoints.
-:::
-
-#### Task 2b: Forward model *(Medium)*
-
-Write a `@model` function `probe_launch()` that:
+**Part 1.** Write a `@model` function `probe_launch()` that:
 
 1. Samples initial velocity components $v_x \sim \text{Normal}(0, 3)$ and $v_y \sim \text{Normal}(0, 3)$.
-2. Simulates the trajectory using `simulate_gravity` with the parameters from Task 2a.
-3. Records the final position $(x_T, y_T)$ by accessing the last element of the returned trajectory tensors.
+2. Simulates the trajectory using `simulate_gravity` with launch from origin, planet at $(5, 3)$ with `planet_mass = 30`.
 
-Run the model with `num_particles=5000`. Create two plots:
+Run the model with `num_particles=5000` and use `summary()` to inspect the result.
 
-- A **scatter plot** of the prior distribution of endpoints (final $(x_T, y_T)$ for all particles).
-- An **overlay** of 50 random trajectories from the prior, using `plot_trajectories`.
+**Part 2.** Select 10 random particles from the result and plot their trajectories on a single figure. Mark the planet's position with a large dot and Station Alpha at the origin.
 
-::: {.callout-note collapse="true" title="Hint: extracting endpoints from batched simulation"}
+**Part 3.** Using the sampled velocities, re-run `simulate_gravity` to obtain all endpoints. Plot a **scatter** of the prior distribution of endpoints (final $(x_T, y_T)$ for all particles). Where is the density highest? How does the planet's gravity shape the distribution?
+
+::: {.callout-note collapse="true" title="Hint: Step-by-step approach"}
+
+**Part 1 — writing and running the model:**
+
+1. Define constants `planet_x, planet_y = 5.0, 3.0` and `planet_mass = 30.0`.
+2. Write a function decorated with `@model`. Inside, use `sample("vx", dist.Normal(0.0, 3.0))` and similarly for `vy`, then call `simulate_gravity`.
+3. Call the model with `num_particles=5000`:
+   ```python
+   result = probe_launch(num_particles=5000)
+   ```
+   The result is dictionary-like: `result["vx"]` and `result["vy"]` are tensors of shape `(5000,)`.
+
+**Part 2 — plotting trajectories:**
+
+1. Extract the velocities: `vx_samples = result["vx"]`, `vy_samples = result["vy"]`.
+2. Pick 10 random indices: `idx = torch.randperm(len(vx_samples))[:10]`.
+3. Re-run `simulate_gravity` for the selected particles and plot each trajectory.
+
+**Part 3 — scatter of endpoints:**
+
 When you pass tensors of shape `(N,)` as initial velocities to `simulate_gravity`, the returned `xs` and `ys` have shape `(n_steps, N)`. The final position of each particle is `xs[-1]` and `ys[-1]`, both of shape `(N,)`.
 :::
 
@@ -869,93 +809,197 @@ When you pass tensors of shape `(N,)` as initial velocities to `simulate_gravity
 
 ```{python}
 # | code-fold: false
+planet_x, planet_y = 5.0, 3.0
+planet_mass = 30.0
+
 @model
 def probe_launch():
     vx = sample("vx", dist.Normal(0.0, 3.0))
     vy = sample("vy", dist.Normal(0.0, 3.0))
-
     xs, ys = simulate_gravity(
         x0=0.0, y0=0.0, vx0=vx, vy0=vy,
         planet_x=planet_x, planet_y=planet_y,
         planet_mass=planet_mass,
         dt=0.02, n_steps=300,
     )
-    return xs, ys
 
 result_probe = probe_launch(num_particles=5000)
+print(summary(result_probe))
 ```
 
 ```{python}
 # | code-fold: false
+# Part 2: Re-simulate 10 random trajectories
 vx_samples = result_probe["vx"]
 vy_samples = result_probe["vy"]
+idx = torch.randperm(len(vx_samples))[:10]
 
-# Re-run simulation for visualization (we need the trajectories, not just vx/vy)
 all_xs, all_ys = simulate_gravity(
-    x0=0.0, y0=0.0, vx0=vx_samples, vy0=vy_samples,
+    x0=0.0, y0=0.0,
+    vx0=vx_samples[idx], vy0=vy_samples[idx],
     planet_x=planet_x, planet_y=planet_y,
     planet_mass=planet_mass,
     dt=0.02, n_steps=300,
 )
+```
 
-final_x = all_xs[-1]
-final_y = all_ys[-1]
+We plot the selected trajectories:
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 5))
-
-# Left: prior scatter of endpoints
-ax = axes[0]
-ax.scatter(final_x, final_y, s=3, alpha=0.3, color="steelblue")
-ax.plot(planet_x, planet_y, "ko", markersize=12, zorder=5)
-ax.plot(0, 0, "s", color="green", markersize=8, zorder=5)
-ax.set_xlabel("Final x")
-ax.set_ylabel("Final y")
-ax.set_title("Prior distribution of endpoints")
-ax.set_aspect("equal")
-
-# Right: 50 random trajectories
-ax = axes[1]
-plot_trajectories(all_xs, all_ys, ax=ax, max_trajectories=50, alpha_scale=0.6)
-ax.plot(planet_x, planet_y, "ko", markersize=12, zorder=5)
-ax.plot(0, 0, "s", color="green", markersize=8, zorder=5)
+```{python}
+# | code-fold: true
+fig, ax = plt.subplots(figsize=(6, 4))
+for j in range(10):
+    ax.plot(all_xs[:, j], all_ys[:, j], linewidth=1.5)
+    ax.plot(float(all_xs[-1, j]), float(all_ys[-1, j]), "o", markersize=4)
+ax.plot(planet_x, planet_y, "ko", markersize=15, zorder=5)
+ax.plot(0, 0, "s", color="green", markersize=10, zorder=5, label="Station Alpha")
 ax.set_xlabel("x")
 ax.set_ylabel("y")
-ax.set_title("50 sample trajectories from the prior")
 ax.set_aspect("equal")
-
+ax.legend(fontsize=9)
 plt.tight_layout()
 plt.show()
 ```
 
-:::
-
-### Conditioning on observation
-
-#### Task 2c: Infer the initial velocity *(Medium)*
-
-Suppose the probe was detected at $(x_T, y_T) = (8.0, 1.0)$ with measurement uncertainty $\sigma = 0.5$ in each coordinate.
-
-Modify your model to observe the final position:
-```python
-observe(x_obs, dist.Normal(final_x, sigma))
-observe(y_obs, dist.Normal(final_y, sigma))
+```{python}
+# | code-fold: false
+# Part 3: Re-simulate all particles and extract endpoints
+all_xs, all_ys = simulate_gravity(
+    x0=0.0, y0=0.0,
+    vx0=vx_samples, vy0=vy_samples,
+    planet_x=planet_x, planet_y=planet_y,
+    planet_mass=planet_mass,
+    dt=0.02, n_steps=300,
+)
+final_x = all_xs[-1]
+final_y = all_ys[-1]
 ```
 
-Run inference with `num_particles=10000`. Create:
+We scatter-plot the prior distribution of endpoints:
 
-1. A **scatter plot** of the posterior over initial velocities $(v_x, v_y)$.
-2. An overlay of posterior trajectories, colored by weight. Mark the observed endpoint.
-3. Use `summary()` to report the posterior mean and standard deviation for $v_x$ and $v_y$.
+```{python}
+# | code-fold: true
+fig, ax = plt.subplots(figsize=(6, 6))
+ax.scatter(final_x, final_y, s=3, alpha=0.3, color="steelblue")
+ax.plot(planet_x, planet_y, "ko", markersize=12, zorder=5)
+ax.plot(0, 0, "s", color="green", markersize=8, zorder=5, label="Station Alpha")
+ax.set_xlabel("Final x")
+ax.set_ylabel("Final y")
+ax.set_title("Prior distribution of endpoints")
+ax.set_aspect("equal")
+ax.legend(fontsize=9)
+plt.tight_layout()
+plt.show()
+```
+
+The planet acts as a gravitational lens: many trajectories are funneled around it, producing high density near the planet and a distinctive pattern of endpoint clustering. Probes with low initial speed tend to end up close to the planet, while faster probes fly past it in various directions.
+:::
+
+
+### Task 2b: Inferring the initial velocity
+
+Adding an `observe` statement turns the prior samples into **weighted posterior samples**. In this two-dimensional setting, the observation scores each particle's simulated endpoint against the data.
+
+Suppose the probe was detected at $(x_T, y_T) = (8.0, 1.0)$ with measurement uncertainty $\sigma = 1.0$ in each coordinate.
+
+**Part 1.** Modify your model to condition on the observed endpoint. Since the observation is two-dimensional, combine both coordinates into a **single** `observe` call using a multivariate normal:
+```python
+endpoint = torch.stack([xs[-1], ys[-1]], dim=-1)
+obs_vec = torch.tensor([x_obs, y_obs])
+observe(obs_vec, dist.MultivariateNormal(endpoint, sigma**2 * torch.eye(2)))
+```
+
+::: {.callout-warning collapse="true" title="Why not two separate observe calls?"}
+The SMC engine can trigger a **resampling step** after each `observe`. If you write two calls — first for $x$, then for $y$ — the engine resamples particles after scoring $x$ alone. This discards particles that happen to have a poor $x$ match, even if they would have had an excellent $y$ match. The result is a severe loss of particle diversity and a degraded posterior.
+
+By combining both coordinates into a single `observe` with a multivariate normal, the engine scores the full 2D likelihood at once and resamples only afterward, preserving particles that are globally good.
+:::
+
+Run inference with `num_particles=10000` and use `summary()` to inspect the result.
+
+**Part 2.** The posterior particles carry importance weights. To work with standard plotting tools, **resample** with `.sample()` to get equally-weighted particles. Create two plots:
+
+- A **joint plot** of the posterior over initial velocities $(v_x, v_y)$ using `sns.jointplot`.
+- An overlay of 500 resampled posterior trajectories, marking the observed endpoint, the planet, and Station Alpha.
+
+**Part 3.** The posterior over velocities gives us more than just velocity estimates — we can **re-simulate** each posterior trajectory and compute **derived quantities** that depend on the entire path. Plugging posterior samples into the simulation produces new samples representing the posterior distribution over these quantities.
+
+Using the resampled posterior velocities, compute and report:
+
+1. The expected **closest approach** to the planet: $\mathbb{E}[d_{\min} \mid \text{obs}]$, where $d_{\min} = \min_t \|\mathbf{r}(t) - \mathbf{r}_{\text{planet}}\|$.
+2. The expected **maximum speed** during transit: $\mathbb{E}[v_{\max} \mid \text{obs}]$.
+3. The **probability** that the probe passed within 1 unit of the planet (a "danger zone"): $P(d_{\min} < 1 \mid \text{obs})$.
+
+Plot histograms of $d_{\min}$ and $v_{\max}$ across the posterior samples.
+
+**Discussion:** Unlike the lunar launcher, where the posterior over $\theta$ was bimodal with well-separated peaks, the gravity problem has a two-dimensional velocity space. Do you see multiple clusters in the posterior? What do they correspond to physically?
+
+::: {.callout-note collapse="true" title="Hint: Step-by-step approach"}
+
+**Part 1 — conditioning with a single 2D observe:**
+
+Combine the $x$ and $y$ observations into one `observe` call:
+
+```python
+endpoint = torch.stack([xs[-1], ys[-1]], dim=-1)
+obs_vec = torch.tensor([x_obs, y_obs])
+observe(obs_vec, dist.MultivariateNormal(endpoint, sigma**2 * torch.eye(2)))
+```
+
+This creates a 2D isotropic Gaussian likelihood, scoring both coordinates jointly.
+
+**Part 2 — joint plot and trajectories:**
+
+The posterior particles carry importance weights. Use `.sample()` to resample into equally-weighted particles:
+
+```python
+resampled = result_cond.sample()
+vx_resampled = resampled["vx"]
+vy_resampled = resampled["vy"]
+```
+
+Then pass to seaborn:
+```python
+import seaborn as sns
+sns.jointplot(x=vx_resampled.numpy(), y=vy_resampled.numpy(), kind="scatter")
+```
+
+For trajectories, plug the resampled posterior velocities into `simulate_gravity`: pick 500 of them, re-run the simulation, and plot each trajectory with a low alpha.
+
+**Part 3 — derived quantities from re-simulation:**
+
+Re-simulate all resampled posterior trajectories (you already have `post_xs` and `post_ys` from Part 2). Plugging the posterior velocity samples into the simulation gives new samples representing the posterior distribution over trajectory-level quantities. For each trajectory, compute:
+
+- Closest approach: distance from the planet at each time step, then take the minimum.
+- Maximum speed: compute velocity at each step from finite differences, then take the max.
+
+```python
+# Closest approach to planet
+dx = post_xs - planet_x
+dy = post_ys - planet_y
+dist_to_planet = torch.sqrt(dx**2 + dy**2)  # shape (n_steps, N)
+d_min = dist_to_planet.min(dim=0).values     # shape (N,)
+```
+
+For speed, use finite differences on position:
+```python
+vx_traj = (post_xs[1:] - post_xs[:-1]) / dt
+vy_traj = (post_ys[1:] - post_ys[:-1]) / dt
+speed = torch.sqrt(vx_traj**2 + vy_traj**2)
+v_max = speed.max(dim=0).values
+```
+:::
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
 ```{python}
 # | code-fold: false
+# Part 1: Conditioned model
 x_obs, y_obs = 8.0, 1.0
-obs_sigma = 0.5
+obs_sigma = 1.0
 
 @model
-def probe_launch_conditioned(x_obs, y_obs, sigma):
+def probe_conditioned(x_obs, y_obs, sigma):
     vx = sample("vx", dist.Normal(0.0, 3.0))
     vy = sample("vy", dist.Normal(0.0, 3.0))
 
@@ -966,138 +1010,140 @@ def probe_launch_conditioned(x_obs, y_obs, sigma):
         dt=0.02, n_steps=300,
     )
 
-    observe(x_obs, dist.Normal(xs[-1], sigma))
-    observe(y_obs, dist.Normal(ys[-1], sigma))
+    endpoint = torch.stack([xs[-1], ys[-1]], dim=-1)
+    obs_vec = torch.tensor([x_obs, y_obs])
+    observe(obs_vec, dist.MultivariateNormal(endpoint, sigma**2 * torch.eye(2)))
 
-result_cond_probe = probe_launch_conditioned(x_obs, y_obs, obs_sigma, num_particles=10000)
-stats = summary(result_cond_probe)
-print(f"vx: mean = {stats['vx']['mean']:.3f} ± {stats['vx']['std']:.3f}")
-print(f"vy: mean = {stats['vy']['mean']:.3f} ± {stats['vy']['std']:.3f}")
-print(f"Unique particles: {stats['vx']['n_unique']}")
+result_cond = probe_conditioned(x_obs, y_obs, obs_sigma, num_particles=10000)
+print(summary(result_cond))
 ```
 
 ```{python}
 # | code-fold: false
-vx_post = result_cond_probe["vx"]
-vy_post = result_cond_probe["vy"]
-log_w = result_cond_probe["log_weights"]
-weights = torch.exp(log_w - log_w.max())
+# Part 2: Resample particles proportional to weights
+import seaborn as sns
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+resampled = result_cond.sample()
+vx_resampled = resampled["vx"]
+vy_resampled = resampled["vy"]
+```
 
-# Left: posterior scatter over initial velocities
-ax = axes[0]
-sc = ax.scatter(vx_post, vy_post,
-                c=weights, cmap="Blues", s=8, alpha=0.6)
-ax.set_xlabel("$v_x$ (initial)")
-ax.set_ylabel("$v_y$ (initial)")
-ax.set_title("Posterior over initial velocity")
-plt.colorbar(sc, ax=ax, label="Weight")
+We visualize the joint posterior over initial velocities:
 
-# Right: posterior trajectories
-ax = axes[1]
+```{python}
+# | code-fold: true
+sns.jointplot(
+    x=vx_resampled.numpy(),
+    y=vy_resampled.numpy(),
+    kind="scatter",
+    joint_kws={"s": 5, "alpha": 0.3},
+    marginal_kws={"bins": 60},
+    color="steelblue",
+    height=6,
+)
+plt.xlabel("$v_x$ (initial)")
+plt.ylabel("$v_y$ (initial)")
+plt.tight_layout()
+plt.show()
+```
+
+We overlay 500 resampled posterior trajectories:
+
+```{python}
+# | code-fold: true
+idx = torch.randperm(len(vx_resampled))[:500]
+
 post_xs, post_ys = simulate_gravity(
-    x0=0.0, y0=0.0, vx0=vx_post, vy0=vy_post,
+    x0=0.0, y0=0.0,
+    vx0=vx_resampled[idx], vy0=vy_resampled[idx],
     planet_x=planet_x, planet_y=planet_y,
     planet_mass=planet_mass,
     dt=0.02, n_steps=300,
 )
 
-plot_trajectories(post_xs, post_ys, weights=weights, ax=ax,
-                  max_trajectories=300, alpha_scale=0.4, cmap="Blues")
+fig, ax = plt.subplots(figsize=(6, 4))
+for j in range(len(idx)):
+    ax.plot(post_xs[:, j], post_ys[:, j], color="steelblue", alpha=0.05, linewidth=0.8)
 ax.plot(x_obs, y_obs, "*", color="red", markersize=15, zorder=5, label="Observed endpoint")
 ax.plot(planet_x, planet_y, "ko", markersize=12, zorder=5)
 ax.plot(0, 0, "s", color="green", markersize=8, zorder=5, label="Station Alpha")
 ax.set_xlabel("x")
 ax.set_ylabel("y")
-ax.set_title("Posterior trajectories (opacity ∝ weight)")
+ax.set_title("Posterior trajectories (500 resampled)")
 ax.legend(fontsize=9)
 ax.set_aspect("equal")
-
 plt.tight_layout()
 plt.show()
 ```
-
-The posterior over initial velocities may reveal multiple clusters — corresponding to trajectories that reach the observed endpoint via different paths (e.g., a direct route vs. one that swings around the planet).
-:::
-
-#### Task 2d: Visualize the posterior trajectories *(Medium)*
-
-Plot up to 200 posterior trajectories on a single figure, with line opacity proportional to the importance weight. Mark the planet, the observed endpoint, and Station Alpha. Use a colormap (e.g. `"Blues"`) so that high-weight trajectories stand out visually.
-
-::: {.callout-note collapse="true" title="Hint: weight-based opacity"}
-Normalize the weights to $[0, 1]$ by dividing by their maximum, then use each weight to set the `alpha` parameter when plotting.
-:::
-
-::: {.callout-tip collapse="true" title="Solution"}
 
 ```{python}
 # | code-fold: false
-n_plot = 200
-idx_plot = torch.randperm(len(vx_post))[:n_plot]
-w_plot = weights[idx_plot]
-w_plot = w_plot / w_plot.max()
+# Part 3: Trajectory-level posterior quantities
 
-plot_xs, plot_ys = simulate_gravity(
-    x0=0.0,
-    y0=0.0,
-    vx0=vx_post[idx_plot],
-    vy0=vy_post[idx_plot],
-    planet_x=planet_x,
-    planet_y=planet_y,
+# Use all resampled trajectories (re-simulate with full resample for better statistics)
+all_post_xs, all_post_ys = simulate_gravity(
+    x0=0.0, y0=0.0,
+    vx0=vx_resampled, vy0=vy_resampled,
+    planet_x=planet_x, planet_y=planet_y,
     planet_mass=planet_mass,
-    dt=0.02,
-    n_steps=300,
+    dt=0.02, n_steps=300,
 )
 
-fig, ax = plt.subplots(figsize=(6, 6))
-cm = plt.get_cmap("Blues")
+# Closest approach to planet
+dx = all_post_xs - planet_x
+dy = all_post_ys - planet_y
+dist_to_planet = torch.sqrt(dx**2 + dy**2)
+d_min = dist_to_planet.min(dim=0).values
 
-for j in range(n_plot):
-    # Use a power transform so low-weight lines are much fainter
-    w_val = float(w_plot[j])
-    alpha = w_val
-    color = cm(0.25 + 0.75 * w_val)
-    lw = 0.4 + 1.6 * w_val  # thicker lines for high-weight trajectories
-    ax.plot(
-        plot_xs[:, j],
-        plot_ys[:, j],
-        color=color,
-        alpha=alpha,
-        linewidth=lw,
-    )
+# Maximum speed (finite differences)
+dt_sim = 0.02
+vx_traj = (all_post_xs[1:] - all_post_xs[:-1]) / dt_sim
+vy_traj = (all_post_ys[1:] - all_post_ys[:-1]) / dt_sim
+speed = torch.sqrt(vx_traj**2 + vy_traj**2)
+v_max = speed.max(dim=0).values
 
-ax.plot(planet_x, planet_y, "ko", markersize=12, zorder=5, label="Planet")
-ax.plot(
-    x_obs, y_obs, "*", color="red", markersize=15, zorder=5, label="Observed endpoint"
+print(f"E[d_min | obs]  = {d_min.mean().item():.2f}")
+print(f"E[v_max | obs]  = {v_max.mean().item():.2f}")
+print(f"P(d_min < 1)    = {(d_min < 1).float().mean().item():.2f}")
+```
+
+We plot histograms of closest approach and maximum speed across the posterior:
+
+```{python}
+# | code-fold: true
+fig, axes = plt.subplots(1, 2, figsize=(7, 3))
+
+axes[0].hist(
+    d_min.numpy(),
+    bins=60,
+    density=True,
+    color="steelblue",
+    edgecolor="white",
+    linewidth=0.5,
+    alpha=0.8,
 )
-ax.plot(0, 0, "s", color="green", markersize=8, zorder=5, label="Station Alpha")
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.set_title("Posterior probe trajectories (opacity ∝ weight)")
+axes[0].axvline(
+    1.0, color="red", linestyle="--", linewidth=2, label="Danger zone (r=1)"
+)
+axes[0].set_xlabel("Closest approach to planet")
+axes[0].set_ylabel("Density")
+axes[0].legend(fontsize=9)
 
-# Pad axes to fill a landscape viewport while keeping equal scaling
-ax.set_xlim(-20, 20)
-ax.set_ylim(-40, 40)
-xlo, xhi = ax.get_xlim()
-ylo, yhi = ax.get_ylim()
-dx, dy = xhi - xlo, yhi - ylo
-target_ratio = 6 / 6  # match figsize width/height
-if dx / dy < target_ratio:
-    # data is taller than wide — widen x
-    new_dx = dy * target_ratio
-    cx = (xlo + xhi) / 2
-    ax.set_xlim(cx - new_dx / 2, cx + new_dx / 2)
-else:
-    # data is wider than tall — increase y
-    new_dy = dx / target_ratio
-    cy = (ylo + yhi) / 2
-    ax.set_ylim(cy - new_dy / 2, cy + new_dy / 2)
+axes[1].hist(
+    v_max.numpy(),
+    bins=60,
+    density=True,
+    color="steelblue",
+    edgecolor="white",
+    linewidth=0.5,
+    alpha=0.8,
+)
+axes[1].set_xlabel("Maximum speed during transit")
+axes[1].set_ylabel("Density")
 
-ax.legend(fontsize=9)
 plt.tight_layout()
 plt.show()
 ```
 
-The high-weight trajectories (darker, more opaque) all converge on the observed endpoint, while low-weight trajectories (faint) miss the target. If multiple trajectory families reach the endpoint — e.g., one passing above the planet and another below — they will both appear as distinct bundles.
+These derived quantities are obtained by plugging posterior velocity samples into the simulation and computing functions of the resulting trajectories. Each sample gives one value, so the collection represents the full posterior distribution over that quantity — not just a point estimate. The closest-approach distribution tells us how likely the probe was to have had a dangerous flyby, while the maximum-speed distribution reflects how much gravitational acceleration it experienced.
 :::

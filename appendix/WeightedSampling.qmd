@@ -302,6 +302,28 @@ plt.tight_layout()
 plt.show()
 ```
 
+### Resampling with `.sample()` {#sec-sample-method}
+
+Often, it is necessary to work with unweighted samples. In such cases, you can sample directly from the weighted set by calling the `.sample()` method on an `SMCResult`:
+
+```{python}
+#| code-fold: false
+result = conditioned_measurement(num_particles=5000)
+resampled = result.sample(1000)  # draw 1000 equally-weighted samples
+print(type(resampled))           # plain dict
+print(resampled["mu"].shape)     # torch.Size([1000])
+```
+
+The method draws indices proportional to the importance weights (with replacement), returning a plain dictionary of tensors. If `num_samples` is omitted, it defaults to the number of particles in the original result:
+
+```{python}
+#| code-fold: false
+resampled_all = result.sample()  # same as result.sample(5000)
+print(resampled_all["mu"].shape)
+```
+
+This is especially useful for passing posterior samples to external tools that expect unweighted data, such as plotting libraries.
+
 ### Log evidence for model comparison
 
 The log evidence $\log \hat p(y)$ of the data is computed automatically as a byproduct of sampling. It estimates the marginal likelihood of the observations under the model. For the conditioned measurement model, this is the observation likelihood $p(x = 3.2)$:
