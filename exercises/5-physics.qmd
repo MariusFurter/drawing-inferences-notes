@@ -1,6 +1,6 @@
-# Exercise 5: Cosmic Inference {.unnumbered}
+# Exercise 5: Inverse Physics {.unnumbered}
 
-In this exercise, we use the [`WeightedSampling.torch`](../appendix/WeightedSampling.qmd) library to perform Bayesian inference in simple physics models. The key idea: when a forward simulation $f(\theta)$ is **non-injective** — meaning several different parameter values $\theta$ produce the same observation — Bayesian inference recovers the **full set of consistent solutions**, weighted by prior plausibility. This is much more informative than the single "best guess" that a classical solver would return.
+In this exercise, we use the [`WeightedSampling.torch`](../appendix/WeightedSampling.qmd) library to perform Bayesian inference in simple physics models. The key idea: when a forward simulation $f(\theta)$ is **non-injective** — meaning several different parameter values $\theta$ produce the same observation — Bayesian inference recovers the **full set of consistent solutions**, weighted by prior plausibility. 
 
 We work through two scenarios of increasing complexity, each introducing new features of the library.
 
@@ -13,8 +13,9 @@ This exercise uses the following libraries:
   ```
 - [**PyTorch**](https://pytorch.org/) — for tensor operations. A short tutorial can be found in the [Appendix](../appendix/pytorch.qmd).
 - [**matplotlib**](https://matplotlib.org/) — for plotting.
+- [**seaborn**](https://seaborn.pydata.org/) — for statistical visualization (used in Task 1c).
 
-If any packages are missing, run `pip install torch matplotlib` in your terminal.
+If any packages are missing, run `pip install torch matplotlib seaborn` in your terminal.
 :::
 
 ## Setup
@@ -36,10 +37,9 @@ Because the inference engine runs all $N$ particles simultaneously via PyTorch b
 :::
 
 
-
 ## Vignette 1: Lunar Cargo Delivery
 
-A research station on the Moon uses a supply launcher to deliver cargo to remote landing zones across the lunar surface. The launcher gives the cargo an initial kick at a fixed speed $v_0 = 20\;\text{m/s}$, but at a variable launch angle $\theta$. After launch the cargo follows a ballistic trajectory in the Moon's gravity ($g_{\text{moon}} = 1.62\;\text{m/s}^2$).
+A research station on the Moon uses a supply launcher to deliver cargo to remote landing zones across the lunar surface. The launcher gives the cargo an initial kick at a fixed speed $v_0 = 20\;\text{m/s}$, but at a variable launch angle $\theta$ (in radians). After launch the cargo follows a ballistic trajectory in the Moon's gravity ($g_{\text{moon}} = 1.62\;\text{m/s}^2$).
 
 A sensor at the landing zone recorded that cargo arrived $R_{\text{obs}} = 200\;\text{m}$ from the launcher. **What was the launch angle $\theta$?**
 
@@ -73,7 +73,7 @@ R_obs = 200.0
 theta_low = 0.5 * torch.asin(torch.tensor(R_obs * g_moon / v0**2))
 theta_high = torch.pi / 2 - theta_low
 
-fig, ax = plt.subplots(figsize=(8, 4))
+fig, ax = plt.subplots(figsize=(7, 3))
 
 # A fan of faint trajectories to show the full possibility space
 for angle in torch.linspace(0.08, torch.pi / 2 - 0.08, 15):
@@ -81,13 +81,27 @@ for angle in torch.linspace(0.08, torch.pi / 2 - 0.08, 15):
     ax.plot(xs, ys, color="lightsteelblue", linewidth=0.8, alpha=0.5)
 
 # The two matching trajectories
-for angle, label, color in [(theta_low, "Low arc", "steelblue"),
-                             (theta_high, "High arc", "darkorange")]:
+for angle, label, color in [
+    (theta_low, "Low arc", "steelblue"),
+    (theta_high, "High arc", "darkorange"),
+]:
     xs, ys = compute_trajectory(v0, angle, g=g_moon)
-    ax.plot(xs, ys, color=color, linewidth=2.5,
-            label=f"{label} (θ = {float(angle)*180/torch.pi:.0f}°)")
+    ax.plot(
+        xs,
+        ys,
+        color=color,
+        linewidth=2.5,
+        label=f"{label} (θ = {float(angle)*180/torch.pi:.0f}°)",
+    )
 
-ax.axvline(R_obs, color="red", linestyle="--", linewidth=1.5, alpha=0.7, label=f"Landing zone ({R_obs:.0f} m)")
+ax.axvline(
+    R_obs,
+    color="red",
+    linestyle="--",
+    linewidth=1.5,
+    alpha=0.7,
+    label=f"Landing zone ({R_obs:.0f} m)",
+)
 ax.plot(0, 0, "s", color="green", markersize=9, zorder=5, label="Lunar base")
 ax.set_xlabel("Horizontal distance (m)")
 ax.set_ylabel("Height (m)")
@@ -97,12 +111,12 @@ plt.tight_layout()
 plt.show()
 ```
 
-The range of a ballistic trajectory is given by:
+The range of a [ballistic trajectory](https://en.wikipedia.org/wiki/Projectile_motion) is given by:
 $$
 R(\theta) = \frac{v_0^2 \sin(2\theta)}{g}
 $$
 
-This function is **non-injective**: two different angles — a low "direct" arc and a high "lob" arc — produce the same range, since $\sin(2\theta) = \sin(\pi - 2\theta)$. A classical solver would return one answer; Bayesian inference will reveal both.
+This function is **non-injective**: two different angles produce the same range.
 
 ::: {.callout-note collapse="true" title="Provided helper functions: ballistic trajectory"}
 The following functions are provided for you. Run this cell before starting the tasks.
@@ -145,23 +159,44 @@ def compute_trajectory(v0, theta, g=1.62, n_points=100):
 ```
 :::
 
-### Forward simulation
+### Task 1a: Forward simulation
 
-#### Task 1a: Write a forward model *(Easy)*
+This task introduces the core workflow: define a model with `@model` and `sample`, run it to produce particles, and inspect the result.
 
-Write a `@model` function `lunar_launch()` that:
+**Part 1.** Write a `@model` function `lunar_launch()` that:
 
 1. Samples a launch angle $\theta \sim \text{Uniform}(0, \pi/2)$.
-2. Computes the range $R$ using `compute_range(v0, theta)` with $v_0 = 20$ and the default lunar gravity.
+2. Computes the range $R$ using `compute_range(v0, theta)` with $v_0 = 20$ and the lunar gravity $g_{\text{moon}} = 1.62\;\text{m/s}^2$.
 
-Run the model with `num_particles=5000`. Then select 10 random particles from the result and plot their trajectories (use `compute_trajectory` with the sampled angles) on a single figure.
+Run the model with `num_particles=5000` and use `summary()` to inspect the result.
 
-::: {.callout-note collapse="true" title="Hint: accessing results"}
-The result object works like a dictionary. After running:
-```python
-result = lunar_launch(num_particles=5000)
-```
-you can access the sampled angles via `result['theta']`, which is a tensor of shape `(5000,)`. To pick 10 random indices, use `torch.randperm(5000)[:10]`.
+**Part 2.** Select 10 random particles from the result and plot their trajectories (use `compute_trajectory`) on a single figure.
+
+**Part 3.** Plot a histogram of the range $R$ for all particles. Can you explain the shape of the histogram from the shape of $R(\theta) = v_0^2 \sin(2\theta)/g$?
+
+::: {.callout-note collapse="true" title="Hint: Step-by-step approach"}
+
+**Part 1 — writing and running the model:**
+
+1. Define constants `v0 = 20.0` and `g_moon = 1.62`.
+2. Write a function decorated with `@model`. Inside the function, use `sample("theta", dist.Uniform(0, torch.pi / 2))` to draw a launch angle, then call `compute_range(v0, theta, g=g_moon)` to compute the range.
+3. Call the model with `num_particles=5000`:
+   ```python
+   result = lunar_launch(num_particles=5000)
+   ```
+   The `result` object is dictionary-like: `result["theta"]` is a tensor of shape `(5000,)` containing the sampled angles. Use `summary(result)` to print weighted statistics.
+
+**Part 2 — plotting trajectories:**
+
+1. Extract the angles: `thetas = result["theta"]`.
+2. Pick 10 random indices: `idx = torch.randperm(len(thetas))[:10]`.
+3. Loop over the selected indices, calling `compute_trajectory(v0, thetas[i], g=g_moon)` for each, and plot with `ax.plot(xs, ys)`.
+
+**Part 3 — histogram of ranges:**
+
+1. Compute ranges for all particles at once: `ranges = compute_range(v0, thetas, g=g_moon)`. This works because `compute_range` is vectorized via PyTorch.
+2. Plot with `ax.hist(ranges, bins=60, density=True, ...)`.
+3. To understand the shape, think about the graph of $R(\theta)$: where is it flat, and where is it steep? How does that affect how uniform samples in $\theta$ get mapped to values of $R$?
 :::
 
 ::: {.callout-tip collapse="true" title="Solution"}
@@ -170,6 +205,7 @@ you can access the sampled angles via `result['theta']`, which is a tensor of sh
 # | code-fold: false
 v0 = 20.0  # m/s
 g_moon = 1.62  # m/s²
+R_obs = 200.0  # m
 
 @model
 def lunar_launch():
@@ -183,10 +219,10 @@ print(summary(result))
 
 ```{python}
 # | code-fold: false
-# Plot 10 random trajectories
+# Part 2: Plot 10 random trajectories
 fig, ax = plt.subplots(figsize=(8, 4))
 
-thetas = result["theta"].detach()
+thetas = result["theta"]
 idx = torch.randperm(len(thetas))[:10]
 
 for i in idx:
@@ -200,26 +236,16 @@ plt.tight_layout()
 plt.show()
 ```
 
-:::
-
-#### Task 1b: Visualize the prior over ranges *(Easy)*
-
-Using the result from Task 1a, compute the range $R$ for each particle and plot a histogram. Overlay the observed range $R_{\text{obs}} = 200\;\text{m}$ as a vertical red line.
-
-What is the shape of the distribution? Can you explain it from the formula $R(\theta) = v_0^2 \sin(2\theta)/g$?
-
-::: {.callout-tip collapse="true" title="Solution"}
-
 ```{python}
 # | code-fold: false
-ranges = compute_range(v0, result["theta"].detach(), g=g_moon)
-R_obs = 200.0
+# Part 3: Histogram of ranges
+ranges = compute_range(v0, result["theta"], g=g_moon)
 
 fig, ax = plt.subplots(figsize=(7, 3.5))
 ax.hist(ranges, bins=60, density=True, color="steelblue",
         edgecolor="white", linewidth=0.5, alpha=0.8)
 ax.axvline(R_obs, color="red", linestyle="--", linewidth=2,
-           label=f"$R_{{obs}}$ = {R_obs} m")
+           label=f"$R_{{\\mathrm{{obs}}}}$ = {R_obs} m")
 ax.set_xlabel("Range (m)")
 ax.set_ylabel("Density")
 ax.legend()
@@ -227,36 +253,105 @@ plt.tight_layout()
 plt.show()
 ```
 
-The distribution peaks near the maximum range $R_{\max} = v_0^2/g \approx 247\;\text{m}$, because $\sin(2\theta)$ spends more time near its maximum (where its derivative is small). This is a change-of-variables effect: the density of $R = f(\theta)$ is proportional to $|f'(\theta)|^{-1}$.
+The density piles up near $R_{\max} = v_0^2/g \approx 247\;\text{m}$. To see why, look at the graph of $R(\theta)$:
+
+```{python}
+# | code-fold: true
+# Explanation: the range function R(θ)
+theta_grid = torch.linspace(0, torch.pi / 2, 200)
+R_grid = compute_range(v0, theta_grid, g=g_moon)
+
+fig, ax = plt.subplots(figsize=(7, 3.5))
+ax.plot(theta_grid, R_grid, color="steelblue", linewidth=2)
+ax.axhline(
+    R_obs,
+    color="red",
+    linestyle="--",
+    linewidth=1.5,
+    alpha=0.7,
+    label=f"$R_{{\\mathrm{{obs}}}}$ = {R_obs} m",
+)
+ax.set_xlabel("Launch angle θ (rad)")
+ax.set_ylabel("Range R (m)")
+ax.legend(fontsize=9)
+plt.tight_layout()
+plt.show()
+```
+
+Near the peak ($\theta = \pi/4$), the curve is flat. This means many nearby angles map to nearly the same range. Uniform samples in $\theta$ get compressed into a narrow band of $R$ values there, producing high density. Conversely, where the curve is steep (near $\theta = 0$ or $\theta = \pi/2$), samples spread out and density is low.
 :::
 
-### Conditioning on observation
+### Task 1b: Inferring the launch angle
 
-#### Task 1c: Condition on the observed range *(Medium)*
+This task introduces conditioning with `observe`.
 
-Modify your model to include a noisy observation of the range. Add:
+**Part 1.** Modify your model to condition on the observed range. Add an `observe` statement with a Gaussian likelihood:
+$$
+R_{\text{obs}} \sim \mathsf{Normal}(R(\theta),\; \sigma)
+$$
+where $\sigma = 5.0\;\text{m}$ represents measurement uncertainty and $R_{\text{obs}} = 200\;\text{m}$. Run inference with `num_particles=10000` and use `summary()` to inspect the result.
+
+**Part 2.** Plot a weighted histogram of the posterior over $\theta$. The range equation $R(\theta) = R_{\text{obs}}$ has two exact analytical solutions:
+$$
+\theta_{\text{low}} = \tfrac{1}{2}\arcsin\!\left(\frac{R_{\text{obs}}\, g}{v_0^2}\right), \qquad \theta_{\text{high}} = \frac{\pi}{2} - \theta_{\text{low}}.
+$$
+Compute these two angles and overlay them on your histogram as vertical dashed lines. What do you notice?
+
+**Part 3.** Use `expectation()` to compute the posterior mean $\mathbb{E}[\theta \mid R_{\text{obs}}]$. Is this a useful summary of the posterior?
+
+**Discussion:** How does the Bayesian posterior relate to the two exact solutions? What happens as the measurement noise $\sigma \to 0$? 
+
+::: {.callout-note collapse="true" title="Hint: Step-by-step approach"}
+
+**Part 1 — conditioning with `observe`:**
+
+1. Copy your `lunar_launch` model and add two parameters: `R_obs` and `sigma`.
+2. After computing `R`, add this line:
+   ```python
+   observe(R_obs, dist.Normal(R, sigma))
+   ```
+   This tells the engine: "the observed range $R_{\text{obs}}$ was drawn from a Normal centered at the predicted range $R$". Particles whose predicted range is close to 200 m will receive high weight.
+3. Run with `num_particles=10000`:
+   ```python
+   result_cond = lunar_launch_conditioned(R_obs, sigma, num_particles=10000)
+   ```
+   Note that `R_obs` and `sigma` are model arguments; `num_particles` is intercepted by the engine.
+
+**Part 2 — weighted histogram with exact solutions:**
+
+When there are `observe` statements, particles carry importance weights. To plot a correct histogram, pass these weights to `ax.hist`:
+
 ```python
-observe(R_obs, dist.Normal(R, sigma))
+thetas = result_cond["theta"]
+log_w = result_cond["log_weights"]
+weights = torch.exp(log_w - log_w.max()) # convert log-weights to normalized weights
+ax.hist(thetas, weights=weights, bins=80, density=True, ...)
 ```
-where `sigma = 5.0` represents measurement uncertainty ($\pm 5\;\text{m}$). Set `R_obs = 200.0`.
 
-Run inference with `num_particles=10000`. Plot a histogram of the posterior over $\theta$. What do you notice? Use `summary()` to inspect the result.
-
-::: {.callout-note collapse="true" title="Hint"}
-You only need to add one line to your model — the `observe` call. Everything else stays the same. Remember to pass `R_obs` and `sigma` as arguments to the model.
-
-When plotting a histogram of the posterior, pass importance weights to `ax.hist` via the `weights` argument:
+Compute the exact angles and overlay them:
 ```python
-log_w = result["log_weights"].detach()
-weights = torch.exp(log_w - log_w.max())
-ax.hist(values, weights=weights, bins=80, density=True, ...)
+theta_low = 0.5 * torch.asin(torch.tensor(R_obs * g_moon / v0**2))
+theta_high = torch.pi / 2 - theta_low
+ax.axvline(float(theta_low), ...)
+ax.axvline(float(theta_high), ...)
 ```
+
+**Part 3 — posterior mean with `expectation`:**
+
+The `expectation()` function takes a result object and a function whose argument names match the sampled variable names:
+
+```python
+E_theta = expectation(result_cond, lambda theta: theta)
+```
+
+This returns the weighted posterior mean of $\theta$.
 :::
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
 ```{python}
 # | code-fold: false
+# Part 1: Conditioned model
 R_obs = 200.0
 sigma = 5.0
 
@@ -272,13 +367,18 @@ print(summary(result_cond))
 
 ```{python}
 # | code-fold: false
-thetas_post = result_cond["theta"].detach()
-log_w = result_cond["log_weights"].detach()
+# Part 2: Posterior histogram with exact solutions
+thetas = result_cond["theta"]
+log_w = result_cond["log_weights"]
 weights = torch.exp(log_w - log_w.max())
+
+# Exact analytical solutions
+theta_low = 0.5 * torch.asin(torch.tensor(R_obs * g_moon / v0**2))
+theta_high = torch.pi / 2 - theta_low
 
 fig, ax = plt.subplots(figsize=(7, 3.5))
 ax.hist(
-    thetas_post,
+    thetas,
     weights=weights,
     bins=80,
     density=True,
@@ -286,67 +386,178 @@ ax.hist(
     edgecolor="white",
     linewidth=0.5,
     alpha=0.8,
+    label="Posterior",
 )
+ax.axvline(float(theta_low), color="darkorange", linestyle="--", linewidth=2,
+           label=f"Exact low: θ = {float(theta_low):.2f} rad ({float(theta_low)*180/torch.pi:.0f}°)")
+ax.axvline(float(theta_high), color="red", linestyle="--", linewidth=2,
+           label=f"Exact high: θ = {float(theta_high):.2f} rad ({float(theta_high)*180/torch.pi:.0f}°)")
 ax.set_xlabel("Launch angle θ (rad)")
 ax.set_ylabel("Density")
+ax.legend(fontsize=9)
 plt.tight_layout()
 plt.show()
 ```
 
-The posterior is **bimodal**: there are two peaks, one at a low angle (around $\theta \approx 0.54\;\text{rad} \approx 31°$) and one at a high angle (around $\theta \approx 1.03\;\text{rad} \approx 59°$). These are the two launch angles that produce a range of approximately 200 m. Since $\sin(2\theta) = \sin(\pi - 2\theta)$, the complementary angle $\pi/2 - \theta$ always gives the same range.
+The posterior is **bimodal**, with two peaks centered on the exact analytical solutions. The Bayesian posterior automatically discovers both solutions and quantifies how plausible each one is.
+
+```{python}
+# | code-fold: false
+# Part 3: Posterior mean of θ
+E_theta = expectation(result_cond, lambda theta: theta)
+print(f"E[θ] = {E_theta.item():.3f} rad ({E_theta.item()*180/torch.pi:.1f}°)")
+```
+
+The posterior mean $\mathbb{E}[\theta] \approx \pi/4 \approx 45°$ does not correspond to any physical solution; it is the average of the low-arc ($\sim 27°$) and high-arc ($\sim 63°$) peaks. **For multimodal posteriors, the mean can be misleading.** The histogram is a much better summary.
+
+**Discussion:** The posterior concentrates around $\theta_{\text{low}}$ and $\theta_{\text{high}}$, with a spread controlled by the measurement noise $\sigma$. As $\sigma \to 0$, the posterior peaks sharpen into a pair of delta functions at the exact solutions. With a uniform prior, both modes have roughly equal mass ($P \approx 0.5$ each).
 :::
 
-#### Task 1d: Interpret the posterior *(Medium)*
 
-1. Plot the two candidate trajectories corresponding to the two posterior modes. Overlay the landing zone at $R_{\text{obs}} = 200\;\text{m}$.
-2. Use `expectation()` to estimate $P(\theta > \pi/4)$ — the probability that the high-arc trajectory was used.
-3. **Discussion:** What happens to the posterior as the measurement noise $\sigma \to 0$? What if the observed range were exactly $R_{\max} = v_0^2/g$ — would the posterior still be bimodal?
+### Task 1c: Joint inference of $v_0$ and $\theta$ {#sec-task-1c}
+
+This task introduces models with multiple unknown parameters and joint posterior analysis.
+
+So far we assumed the launch speed $v_0 = 20\;\text{m/s}$ was known exactly. In practice, the launcher has some variability. Suppose we only know that $v_0$ is somewhere between 15 and 25 m/s.
+
+**Part 1.** Write a new model `lunar_launch_joint(R_obs, sigma)` that:
+
+1. Samples a launch speed $v_0 \sim \text{Uniform}(15, 25)$.
+2. Samples a launch angle $\theta \sim \text{Uniform}(0, \pi/2)$.
+3. Computes the range $R$ using `compute_range(v0, theta)`.
+4. Conditions on the observed range using `observe(R_obs, dist.Normal(R, sigma))`.
+
+Run the model with $R_{\text{obs}} = 200$, $\sigma = 5.0$, and `num_particles=10000`. Use `summary()` to inspect both parameters.
+
+**Part 2.** Visualize the joint posterior of $(v_0, \theta)$. A good way to summarize a multi-parameter posterior is a **joint plot**: a figure that shows the joint distribution of two parameters as a scatter plot (or 2D density), with the marginal distribution of each parameter along the axes.
+
+<!-- Add feature to sample from SMC results object. -->
+
+Use seaborn's `sns.jointplot()` to create this visualization. Since `jointplot` does not accept importance weights directly, you will first need to **resample** the particles: draw indices proportional to the weights using `torch.multinomial`, then pass the resampled $(v_0, \theta)$ values to seaborn.
+
+What structure do you see in the joint? Are the marginals unimodal or multimodal?
+
+**Part 3.** The posterior over $(v_0, \theta)$ lets us answer operational questions that depend on both parameters jointly. Use `expectation()` to estimate:
+
+1. The expected **flight time** $\mathbb{E}[T \mid R_{\text{obs}}]$, where $T = 2 v_0 \sin(\theta) / g$.
+2. The expected **maximum altitude** $\mathbb{E}[h_{\max} \mid R_{\text{obs}}]$, where $h_{\max} = v_0^2 \sin^2(\theta) / (2g)$.
+3. The **probability** that the cargo flies above 100 m: $P(h_{\max} > 100\;\text{m} \mid R_{\text{obs}})$.
+
+::: {.callout-note collapse="true" title="Hint: Step-by-step approach"}
+
+**Part 1 — multi-parameter model:**
+
+The model is a straightforward extension of the conditioned model from Task 1b. The only change is adding a second `sample` call:
+
+```python
+v0 = sample("v0", dist.Uniform(15.0, 25.0))
+```
+
+Place this *before* `compute_range`, which now uses the sampled `v0` instead of a fixed constant.
+
+**Part 2 — joint plot with seaborn:**
+
+First extract weights and resample:
+
+```python
+v0s = result_joint["v0"]
+thetas = result_joint["theta"]
+log_w = result_joint["log_weights"]
+weights = torch.exp(log_w - log_w.max())
+
+# Resample 5000 indices proportional to weights
+idx = torch.multinomial(weights, num_samples=5000, replacement=True)
+v0_resampled = v0s[idx]
+theta_resampled = thetas[idx]
+```
+
+Resampling converts weighted particles into equally-weighted ones — high-weight particles get duplicated, low-weight ones are dropped. Now pass to seaborn:
+
+```python
+import seaborn as sns
+sns.jointplot(x=v0_resampled.numpy(), y=theta_resampled.numpy(), kind="scatter")
+```
+
+Try different `kind` options: `"scatter"`, `"kde"`, `"hex"`.
+
+**Part 3 — joint expectations:**
+
+The `expectation()` function matches argument names to variable names in the result. To compute a function of multiple variables, use a lambda with matching argument names:
+
+```python
+E_T = expectation(result_joint, lambda v0, theta: 2 * v0 * torch.sin(theta) / g_moon)
+```
+
+For a probability, pass an indicator function:
+```python
+expectation(result_joint, lambda v0, theta: (h_max_expr > 100).float())
+```
+:::
 
 ::: {.callout-tip collapse="true" title="Solution"}
 
 ```{python}
 # | code-fold: false
-# 1. Plot two candidate trajectories
-thetas_post = result_cond["theta"].detach()
-low_angle = thetas_post[thetas_post < torch.pi / 4].median()
-high_angle = thetas_post[thetas_post > torch.pi / 4].median()
+# Part 1: Joint model
+R_obs = 200.0
+sigma = 5.0
 
-fig, ax = plt.subplots(figsize=(8, 4))
+@model
+def lunar_launch_joint(R_obs, sigma):
+    v0 = sample("v0", dist.Uniform(15.0, 25.0))
+    theta = sample("theta", dist.Uniform(0, torch.pi / 2))
+    R = compute_range(v0, theta, g=g_moon)
+    observe(R_obs, dist.Normal(R, sigma))
 
-for angle, label, color in [(low_angle, "Low arc", "steelblue"),
-                             (high_angle, "High arc", "darkorange")]:
-    xs, ys = compute_trajectory(v0, angle, g=g_moon)
-    ax.plot(xs, ys, color=color, linewidth=2,
-            label=f"{label}: θ = {float(angle):.2f} rad")
-
-ax.axvline(R_obs, color="red", linestyle="--", linewidth=1.5, alpha=0.7, label="Landing zone")
-ax.set_xlabel("Horizontal distance (m)")
-ax.set_ylabel("Height (m)")
-ax.set_title("Two trajectories consistent with the observed range")
-ax.legend(fontsize=9)
-ax.set_ylim(bottom=0)
-plt.tight_layout()
-plt.show()
+result_joint = lunar_launch_joint(R_obs, sigma, num_particles=10000)
+print(summary(result_joint))
 ```
 
 ```{python}
 # | code-fold: false
-# 2. Probability of the high-arc trajectory
-p_high = expectation(result_cond, lambda theta: (theta > torch.pi / 4).float())
-print(f"P(θ > π/4) = {p_high.item():.3f}")
+# Part 2: Joint plot with seaborn
+import seaborn as sns
+
+v0s = result_joint["v0"]
+thetas = result_joint["theta"]
+log_w = result_joint["log_weights"]
+weights = torch.exp(log_w - log_w.max())
+
+# Resample particles proportional to weights
+idx = torch.multinomial(weights, num_samples=5000, replacement=True)
+v0_resampled = v0s[idx]
+theta_resampled = thetas[idx]
+
+sns.jointplot(x=v0_resampled.numpy(), y=theta_resampled.numpy(),
+              kind="scatter", joint_kws={"s": 5, "alpha": 0.3},
+              marginal_kws={"bins": 60},
+              color="steelblue", height=6)
+plt.xlabel("$v_0$ (m/s)")
+plt.ylabel("θ (rad)")
+plt.tight_layout()
+plt.show()
 ```
 
-3. **Discussion:** As $\sigma \to 0$, the posterior concentrates on exactly the two angles satisfying $R(\theta) = R_{\text{obs}}$, becoming a pair of delta functions. With the uniform prior, both modes receive equal mass ($P \approx 0.5$ each).
+The joint posterior reveals a horseshoe shape. The marginal for $v_0$ is concentrated around $18 m/s$ since in that region, the two modes in $\theta$ merge into a single broad peak. The marginal for $\theta$ looks uniform.
 
-If $R_{\text{obs}} = R_{\max} = v_0^2/g$, there is only one angle that achieves the maximum range: $\theta = \pi/4$ (45°). The posterior would be **unimodal**. This is the unique angle where $\sin(2\theta) = 1$.
+
+```{python}
+# | code-fold: false
+# Part 3: Operational quantities from the joint posterior
+E_T = expectation(result_joint,
+    lambda v0, theta: 2 * v0 * torch.sin(theta) / g_moon)
+E_hmax = expectation(result_joint,
+    lambda v0, theta: v0**2 * torch.sin(theta)**2 / (2 * g_moon))
+P_high = expectation(result_joint,
+    lambda v0, theta: (v0**2 * torch.sin(theta)**2 / (2 * g_moon) > 100).float())
+
+print(f"E[flight time]   = {E_T.item():.1f} s")
+print(f"E[max altitude]  = {E_hmax.item():.1f} m")
+print(f"P(h_max > 100 m) = {P_high.item():.2f}")
+```
+
 :::
 
-<!-- 
-TODO:
-
-1. Merge the above into two simpler tasks.
-2. Evaluate whether we can also infer v_0 well. If so, add a section doing so, plot joint distribution, and compute joint stats.
- -->
 
 
 ## Vignette 2: Gravitational Slingshot
@@ -404,7 +615,7 @@ def plot_trajectories(xs_list, ys_list, weights=None, ax=None,
     for j, i in enumerate(idx):
         color = cm(j / len(idx))
         alpha = max(0.02, float(w[j]) * alpha_scale)
-        ax.plot(xs_list[i].detach().numpy(), ys_list[i].detach().numpy(),
+        ax.plot(xs_list[i], ys_list[i],
                 color=color, alpha=alpha, linewidth=linewidth)
     return ax
 
@@ -431,7 +642,7 @@ for j, (vx, vy) in enumerate(velocities):
         planet_x=planet_x, planet_y=planet_y,
         planet_mass=planet_mass, dt=0.02, n_steps=300,
     )
-    ax.plot(xs.numpy(), ys.numpy(), color=cm(j), linewidth=1.5, alpha=0.7)
+    ax.plot(xs, ys, color=cm(j), linewidth=1.5, alpha=0.7)
     ax.plot(float(xs[-1]), float(ys[-1]), "o", color=cm(j), markersize=4)
 
 ax.plot(planet_x, planet_y, "ko", markersize=15, zorder=5)
@@ -560,7 +771,7 @@ def plot_trajectories(xs_list, ys_list, weights=None, ax=None,
     for j, i in enumerate(idx):
         color = cm(j / len(idx))
         alpha = max(0.02, float(w[j]) * alpha_scale)
-        ax.plot(xs_list[i].detach().numpy(), ys_list[i].detach().numpy(),
+        ax.plot(xs_list[i], ys_list[i],
                 color=color, alpha=alpha, linewidth=linewidth)
     return ax
 ```
@@ -615,7 +826,7 @@ for j, (vx, vy) in enumerate(velocities):
         planet_mass=planet_mass,
         dt=0.02, n_steps=300,
     )
-    ax.plot(xs.numpy(), ys.numpy(), color=cm(j), linewidth=1.5,
+    ax.plot(xs, ys, color=cm(j), linewidth=1.5,
             label=f"$v$ = ({vx}, {vy})")
     # Mark endpoint
     ax.plot(float(xs[-1]), float(ys[-1]), "o", color=cm(j), markersize=5)
@@ -676,17 +887,16 @@ result_probe = probe_launch(num_particles=5000)
 
 ```{python}
 # | code-fold: false
-vx_samples = result_probe["vx"].detach()
-vy_samples = result_probe["vy"].detach()
+vx_samples = result_probe["vx"]
+vy_samples = result_probe["vy"]
 
 # Re-run simulation for visualization (we need the trajectories, not just vx/vy)
-with torch.no_grad():
-    all_xs, all_ys = simulate_gravity(
-        x0=0.0, y0=0.0, vx0=vx_samples, vy0=vy_samples,
-        planet_x=planet_x, planet_y=planet_y,
-        planet_mass=planet_mass,
-        dt=0.02, n_steps=300,
-    )
+all_xs, all_ys = simulate_gravity(
+    x0=0.0, y0=0.0, vx0=vx_samples, vy0=vy_samples,
+    planet_x=planet_x, planet_y=planet_y,
+    planet_mass=planet_mass,
+    dt=0.02, n_steps=300,
+)
 
 final_x = all_xs[-1]
 final_y = all_ys[-1]
@@ -695,7 +905,7 @@ fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
 # Left: prior scatter of endpoints
 ax = axes[0]
-ax.scatter(final_x.numpy(), final_y.numpy(), s=3, alpha=0.3, color="steelblue")
+ax.scatter(final_x, final_y, s=3, alpha=0.3, color="steelblue")
 ax.plot(planet_x, planet_y, "ko", markersize=12, zorder=5)
 ax.plot(0, 0, "s", color="green", markersize=8, zorder=5)
 ax.set_xlabel("Final x")
@@ -768,17 +978,17 @@ print(f"Unique particles: {stats['vx']['n_unique']}")
 
 ```{python}
 # | code-fold: false
-vx_post = result_cond_probe["vx"].detach()
-vy_post = result_cond_probe["vy"].detach()
-log_w = result_cond_probe["log_weights"].detach()
+vx_post = result_cond_probe["vx"]
+vy_post = result_cond_probe["vy"]
+log_w = result_cond_probe["log_weights"]
 weights = torch.exp(log_w - log_w.max())
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
 # Left: posterior scatter over initial velocities
 ax = axes[0]
-sc = ax.scatter(vx_post.numpy(), vy_post.numpy(),
-                c=weights.numpy(), cmap="Blues", s=8, alpha=0.6)
+sc = ax.scatter(vx_post, vy_post,
+                c=weights, cmap="Blues", s=8, alpha=0.6)
 ax.set_xlabel("$v_x$ (initial)")
 ax.set_ylabel("$v_y$ (initial)")
 ax.set_title("Posterior over initial velocity")
@@ -786,13 +996,12 @@ plt.colorbar(sc, ax=ax, label="Weight")
 
 # Right: posterior trajectories
 ax = axes[1]
-with torch.no_grad():
-    post_xs, post_ys = simulate_gravity(
-        x0=0.0, y0=0.0, vx0=vx_post, vy0=vy_post,
-        planet_x=planet_x, planet_y=planet_y,
-        planet_mass=planet_mass,
-        dt=0.02, n_steps=300,
-    )
+post_xs, post_ys = simulate_gravity(
+    x0=0.0, y0=0.0, vx0=vx_post, vy0=vy_post,
+    planet_x=planet_x, planet_y=planet_y,
+    planet_mass=planet_mass,
+    dt=0.02, n_steps=300,
+)
 
 plot_trajectories(post_xs, post_ys, weights=weights, ax=ax,
                   max_trajectories=300, alpha_scale=0.4, cmap="Blues")
@@ -829,18 +1038,17 @@ idx_plot = torch.randperm(len(vx_post))[:n_plot]
 w_plot = weights[idx_plot]
 w_plot = w_plot / w_plot.max()
 
-with torch.no_grad():
-    plot_xs, plot_ys = simulate_gravity(
-        x0=0.0,
-        y0=0.0,
-        vx0=vx_post[idx_plot],
-        vy0=vy_post[idx_plot],
-        planet_x=planet_x,
-        planet_y=planet_y,
-        planet_mass=planet_mass,
-        dt=0.02,
-        n_steps=300,
-    )
+plot_xs, plot_ys = simulate_gravity(
+    x0=0.0,
+    y0=0.0,
+    vx0=vx_post[idx_plot],
+    vy0=vy_post[idx_plot],
+    planet_x=planet_x,
+    planet_y=planet_y,
+    planet_mass=planet_mass,
+    dt=0.02,
+    n_steps=300,
+)
 
 fig, ax = plt.subplots(figsize=(6, 6))
 cm = plt.get_cmap("Blues")
@@ -852,8 +1060,8 @@ for j in range(n_plot):
     color = cm(0.25 + 0.75 * w_val)
     lw = 0.4 + 1.6 * w_val  # thicker lines for high-weight trajectories
     ax.plot(
-        plot_xs[:, j].numpy(),
-        plot_ys[:, j].numpy(),
+        plot_xs[:, j],
+        plot_ys[:, j],
         color=color,
         alpha=alpha,
         linewidth=lw,

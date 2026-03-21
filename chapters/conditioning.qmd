@@ -106,6 +106,8 @@ Conditional independence is the structural property that makes large models trac
 
 ::: {#def-conditional-independence}
 
+<!-- Not the correct definition with input x. b can also depend on x. -->
+
 Let $U, V, W$ be disjoint sets of output variables of a kernel $g$ with input $X$. We say that $U$ and $V$ are **conditionally independent given $W$**, denoted $(U \perp V \mid W)$, if $g$ can be written in the following form:
 $$
 g(u, v, w \mid x) = a(u \mid w) \, b(v \mid w) \, c(w \mid x),

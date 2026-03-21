@@ -30,7 +30,7 @@ book:
         - exercises/2-credit-card.qmd
         - exercises/3-stroke-prediction.qmd
         - exercises/4-hidden-markov-models.qmd
-        #- exercises/5-physics.qmd
+        - exercises/5-physics.qmd
     - part: "Appendix"
       chapters:
         - appendix/pytorch.qmd
