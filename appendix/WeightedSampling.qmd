@@ -15,7 +15,14 @@ You will need to import the main primitives to use the library:
 # | output: false
 import torch
 import torch.distributions as dist
-from weighted_sampling import model, sample, observe, summary, expectation
+from weighted_sampling import (
+    model,
+    sample,
+    observe,
+    deterministic,
+    summary,
+    expectation,
+)
 
 torch.manual_seed(42)  # for reproducibility
 ```
@@ -74,6 +81,27 @@ print(f"E[mu] = {summary(result)['mu']['mean']:.3f}")
 
 The `observe` call evaluates the Gaussian density $\ell(3.2 \mid \mu)$ for each particle's sampled `mu` and uses the result as a weight. Particles whose `mu` is close to $3.2$ receive high weight; those far away receive low weight. This is precisely the density-based conditioning from the [conditioning chapter](../chapters/conditioning.qmd).
 
+### Named sites and intermediate variables
+
+Only **named sites** — created by `sample` or `deterministic` — are recorded in the result object. Any other computation inside the model is an **intermediate variable** that is not stored. For example, if we write `y = mu + 1` inside the model, `y` is computed but not recorded.
+
+The **`deterministic(name, value)`** primitive records a computed (non-random) value under `name` and returns it unchanged. It does not add any weight — it simply stores the value so it can be accessed in the result:
+
+```{python}
+#| code-fold: false
+@model
+def measurement_with_derived():
+    mu = sample("mu", dist.Normal(0.0, 5.0))
+    observe(3.2, dist.Normal(mu, 0.5))
+    deterministic("mu_squared", mu**2)
+
+result = measurement_with_derived(num_particles=5000)
+print(result["mu_squared"].shape)  # recorded in the result
+print(summary(result))
+```
+
+This is useful when a model computes derived quantities (e.g. predictions, transformations) that you want to inspect afterward. However, it is often more efficient to compute derived quantities *after* inference from the sampled variables directly, rather than storing them inside the model.
+
 ::: {.callout-note}
 ### Torch compatibility {#sec-torch-compat}
 
@@ -88,7 +116,7 @@ This requirement only applies to code that operates on the sampled tensors. Ordi
 
 ### The `@model` decorator {#sec-model-decorator}
 
-The **`@model`** decorator is syntactic sugar for the underlying inference engine (`run_smc` — see @sec-behind-scenes). Writing
+The **`@model`** decorator connects the function to the inference engine (see @sec-behind-scenes). Writing
 
 ```python
 @model
@@ -98,7 +126,7 @@ def my_model():
 result = my_model(num_particles=1000)
 ```
 
-is equivalent to
+is equivalent to calling the engine directly:
 
 ```python
 from weighted_sampling import run_smc
@@ -138,9 +166,13 @@ The key parameters controlling inference are:
 | `num_particles` | 1000 | Number of particles $N$. More particles = better estimates but more computation. |
 | `ess_threshold` | 0.5 | Fraction of $N$ below which resampling triggers (see @sec-resampling). Set to $0$ to disable. |
 
-### The `SMCResult` object {#sec-smc-result}
+### The result object {#sec-smc-result}
 
-Calling a decorated model runs **Sequential Monte Carlo** (SMC) inference and returns an `SMCResult`. This is a dictionary-like object where each `sample` call produces a tensor of shape $(N, \ldots)$:
+Calling a decorated model runs the inference engine and returns a result object (of type `SMCResult`). This is a dictionary-like object where each `sample` call produces a tensor of shape $(N, \ldots)$:
+
+::: {.callout-note collapse="true" title="What does SMC stand for?"}
+SMC stands for **Sequential Monte Carlo**, a general family of particle-based inference algorithms. It includes **importance sampling** (a single weighting step) and **sequential importance sampling** (multiple weighting steps with resampling) as special cases. The library uses "SMC" as a catch-all name for the engine, even for simple models where basic importance sampling would suffice.
+:::
 
 ```{python}
 #| code-fold: false
@@ -272,18 +304,19 @@ result = bayesian_linreg(data, num_particles=5000, ess_threshold=0.01)
 a_samples = result["a"].detach()
 b_samples = result["b"].detach()
 log_w = result["log_weights"].detach()
-weights = torch.exp(log_w - log_w.max())  # normalize so weights in [0, 1]
+weights = torch.softmax(log_w, dim=0)  # exponentiate & normalize to sum to 1
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 3.5))
 
 # Left: posterior regression lines (opacity ∝ weight)
 ax = axes[0]
+alpha = weights / weights.max()  # rescale to [0, 1] for plotting opacity
 for idx in torch.randperm(len(a_samples))[:200]:
     ax.plot(
         xs,
         (a_samples[idx] * xs + b_samples[idx]).numpy(),
         color="steelblue",
-        alpha=weights[idx].item() * 0.5,
+        alpha=alpha[idx].item() * 0.5,
     )
 ax.plot(xs, true_a * xs + true_b, color="red", linewidth=2, label="True line")
 ax.scatter(xs, ys, color="black", s=25, zorder=5, label="Data")
@@ -292,7 +325,7 @@ ax.legend()
 
 # Right: joint posterior (color ∝ weight)
 ax = axes[1]
-ax.scatter(a_samples, b_samples, s=8, alpha=torch.clamp(weights, min=0.05))
+ax.scatter(a_samples, b_samples, s=8, alpha=torch.clamp(alpha, min=0.05))
 ax.axvline(true_a, color="red", linestyle="--", linewidth=1, label=f"true a = {true_a}")
 ax.axhline(true_b, color="red", linestyle="--", linewidth=1, label=f"true b = {true_b}")
 ax.set(xlabel="a (slope)", ylabel="b (intercept)", title="Joint posterior")
@@ -304,7 +337,7 @@ plt.show()
 
 ### Resampling with `.sample()` {#sec-sample-method}
 
-Often, it is necessary to work with unweighted samples. In such cases, you can sample directly from the weighted set by calling the `.sample()` method on an `SMCResult`:
+Often, it is necessary to work with unweighted samples. In such cases, you can sample directly from the weighted set by calling the `.sample()` method on the result:
 
 ```{python}
 #| code-fold: false
@@ -367,7 +400,7 @@ When there are many observations, most particles end up with negligible weight. 
 result_no_resample = bayesian_linreg(data, num_particles=5000, ess_threshold=0)
 
 log_w = result_no_resample.log_weights
-w = torch.exp(log_w - log_w.max())
+w = torch.softmax(log_w, dim=0)
 ```
 
 ```{python}
@@ -393,7 +426,7 @@ $$
 \text{ESS} = \frac{1}{\sum_{i=1}^N \bar w_i^2},
 $$
 
-where $\bar w_i$ are the normalized weights. When ESS drops below `ess_threshold` $\times\, N$, the engine **resamples**: it draws $N$ new particles from the current set with replacement, in proportion to their weights, and resets all weights to be equal. This is known as **sequential importance resampling** (SIR).
+where $\bar w_i$ are the normalized weights. When ESS drops below `ess_threshold` $\times\, N$, the engine **resamples**: it draws $N$ new particles from the current set with replacement, in proportion to their weights, and resets all weights to be equal.
 
 With the default `ess_threshold=0.5`, the linear regression model resamples after each observation that causes ESS to drop too low:
 
@@ -480,8 +513,9 @@ for ax, (res, title) in zip(
 ):
     a_s = res["a"]
     b_s = res["b"]
-    weights = torch.exp(res["log_weights"] - res["log_weights"].max())
-    ax.scatter(a_s, b_s, color="steelblue", s=8, alpha=torch.clamp(weights, min=0.05))
+    weights = torch.softmax(res["log_weights"], dim=0)
+    alpha = weights / weights.max()
+    ax.scatter(a_s, b_s, color="steelblue", s=8, alpha=torch.clamp(alpha, min=0.05))
     ax.axvline(true_a, color="red", linestyle="--", linewidth=1)
     ax.axhline(true_b, color="red", linestyle="--", linewidth=1)
     ax.set_xlabel("a (slope)")

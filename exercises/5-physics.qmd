@@ -17,7 +17,7 @@ This exercise uses the following libraries:
   ```
 - [**PyTorch**](https://pytorch.org/) — for tensor operations. A short tutorial can be found in the [Appendix](../appendix/pytorch.qmd).
 - [**matplotlib**](https://matplotlib.org/) — for plotting.
-- [**seaborn**](https://seaborn.pydata.org/) — for statistical visualization (used in Task 1c).
+- [**seaborn**](https://seaborn.pydata.org/) — for statistical visualization.
 
 If any packages are missing, run `pip install torch matplotlib seaborn` in your terminal.
 :::
@@ -30,8 +30,16 @@ If any packages are missing, run `pip install torch matplotlib seaborn` in your 
 import torch
 import torch.distributions as dist
 import matplotlib.pyplot as plt
+import seaborn as sns
 
-from weighted_sampling import model, sample, observe, summary, expectation
+from weighted_sampling import (
+    model,
+    sample,
+    observe,
+    deterministic,
+    summary,
+    expectation,
+)
 
 torch.manual_seed(42)
 ```
@@ -172,9 +180,9 @@ A model with only `sample` statements (no `observe`) draws from the **prior** �
 1. Samples a launch angle $\theta \sim \text{Uniform}(0, \pi/2)$.
 2. Computes the range $R$ using `compute_range(v0, theta)` with $v_0 = 20$ and the lunar gravity $g_{\text{moon}} = 1.62\;\text{m/s}^2$.
 
-Run the model with `num_particles=5000` and use `summary()` to inspect the result.
+Run the model with `num_particles=5000` and inspect the result. What data does the results object record? Use `summary()` to print statistics.
 
-**Part 2.** Select 10 random particles from the result and plot their trajectories (use `compute_trajectory`) on a single figure.
+**Part 2.** Select 20 random particles from the result and plot their trajectories (use `compute_trajectory`) on a single figure.
 
 **Part 3.** Plot a histogram of the range $R$ for all particles. Can you explain the shape of the histogram from the shape of $R(\theta) = v_0^2 \sin(2\theta)/g$?
 
@@ -188,12 +196,12 @@ Run the model with `num_particles=5000` and use `summary()` to inspect the resul
    ```python
    result = lunar_launch(num_particles=5000)
    ```
-   The `result` object is dictionary-like: `result["theta"]` is a tensor of shape `(5000,)` containing the sampled angles. Use `summary(result)` to print weighted statistics.
+   The `result` object is dictionary-like. Use `summary(result)` to print statistics.
 
 **Part 2 — plotting trajectories:**
 
 1. Extract the angles: `thetas = result["theta"]`.
-2. Pick 10 random indices: `idx = torch.randperm(len(thetas))[:10]`.
+2. Pick 20 random indices: `idx = torch.randperm(len(thetas))[:20]`.
 3. Loop over the selected indices, calling `compute_trajectory(v0, thetas[i], g=g_moon)` for each, and plot with `ax.plot(xs, ys)`.
 
 **Part 3 — histogram of ranges:**
@@ -217,17 +225,24 @@ def lunar_launch():
     R = compute_range(v0, theta, g=g_moon)
 
 result = lunar_launch(num_particles=5000)
+print(result)
 print(summary(result))
 ```
 
-We plot 10 randomly selected trajectories from the prior:
+The results object records 5000 samples of `theta`, along with 5000 `log_weights` (which are all zero since there are no `observe` statements), and a `log_evidence` of 0.0 (once there are `observe` statements, this will be the log marginal likelihood of the data under the model).
+
+Note that the range `R` is not recorded in the results object since it is not a sampled variable. Hence computing `R` does not actually have any effect in this program. It will be important in the next task, once we observe `R`. 
+
+If you want to record the result of the deterministic calculation, you can use `R = deterministic("R", compute_range(v0, theta, g=g_moon))` instead of a plain assignment. However, usually it is more efficient to compute derived quantities like `R` on the fly from the sampled variables when needed, rather than storing them in the results object.
+
+Next, we plot 20 randomly selected trajectories from the prior. These reflect our beliefs about how typical trajectories look given a uniform prior over $\theta$.
 
 ```{python}
 # | code-fold: true
 thetas = result["theta"]
-idx = torch.randperm(len(thetas))[:10]
+idx = torch.randperm(len(thetas))[:20]
 
-fig, ax = plt.subplots(figsize=(8, 4))
+fig, ax = plt.subplots(figsize=(6, 3))
 for i in idx:
     xs, ys = compute_trajectory(v0, thetas[i], g=g_moon)
     ax.plot(xs, ys, linewidth=1.5)
@@ -244,7 +259,7 @@ We plot a histogram of the prior distribution of ranges, with $R_{\text{obs}}$ m
 # | code-fold: true
 ranges = compute_range(v0, result["theta"], g=g_moon)
 
-fig, ax = plt.subplots(figsize=(7, 3.5))
+fig, ax = plt.subplots(figsize=(6, 3))
 ax.hist(ranges, bins=60, density=True, color="steelblue",
         edgecolor="white", linewidth=0.5, alpha=0.8)
 ax.axvline(R_obs, color="red", linestyle="--", linewidth=2,
@@ -264,7 +279,7 @@ The density piles up near $R_{\max} = v_0^2/g \approx 247\;\text{m}$. To see why
 theta_grid = torch.linspace(0, torch.pi / 2, 200)
 R_grid = compute_range(v0, theta_grid, g=g_moon)
 
-fig, ax = plt.subplots(figsize=(7, 3.5))
+fig, ax = plt.subplots(figsize=(6, 3))
 ax.plot(theta_grid, R_grid, color="steelblue", linewidth=2)
 ax.axhline(
     R_obs,
@@ -292,7 +307,7 @@ Adding an `observe` statement turns prior samples into **weighted posterior samp
 $$
 R_{\text{obs}} \sim \mathsf{Normal}(R(\theta),\; \sigma)
 $$
-where $\sigma = 5.0\;\text{m}$ represents measurement uncertainty and $R_{\text{obs}} = 200\;\text{m}$. Run inference with `num_particles=10000` and use `summary()` to inspect the result.
+where $\sigma = 5.0\;\text{m}$ represents measurement uncertainty and $R_{\text{obs}} = 200\;\text{m}$. Run inference with `num_particles=10000` and inspect the result. What has changed compared to task 1a?
 
 **Part 2.** The posterior samples carry importance weights. Plot a weighted histogram of the posterior over $\theta$ by passing `weights=...` to `ax.hist`. The range equation $R(\theta) = R_{\text{obs}}$ has two exact analytical solutions:
 $$
@@ -365,8 +380,11 @@ def lunar_launch_conditioned(R_obs, sigma):
     observe(R_obs, dist.Normal(R, sigma))
 
 result_cond = lunar_launch_conditioned(R_obs, sigma, num_particles=10000)
+print(result_cond)
 print(summary(result_cond))
 ```
+
+We again have 10000 samples of `theta`, but now they come with non-uniform `log_weights` that reflect how well each particle's predicted range matches the observed range. The `log_evidence` is now negative, indicating the marginal likelihood of the data under the model.
 
 ```{python}
 # | code-fold: false
@@ -397,7 +415,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-The posterior is **bimodal**, with two peaks centered on the exact analytical solutions. The Bayesian posterior automatically discovers both solutions and quantifies how plausible each one is.
+The posterior is **bimodal**, with two peaks centered on the exact analytical solutions. The Bayesian posterior automatically discovers both solutions and quantifies how plausible each one is. Because we used a uniform prior on `theta`, both modes have roughly equal mass. If we had used a prior that favored large angles, the high-arc solution would have received more weight.
 
 ```{python}
 # | code-fold: false
@@ -408,7 +426,7 @@ print(f"E[θ] = {E_theta.item():.3f} rad ({E_theta.item()*180/torch.pi:.1f}°)")
 
 The posterior mean $\mathbb{E}[\theta] \approx \pi/4 \approx 45°$ does not correspond to any physical solution; it is the average of the low-arc ($\sim 27°$) and high-arc ($\sim 63°$) peaks. **For multimodal posteriors, the mean can be misleading** — histograms or samples are much more informative.
 
-**Discussion:** The posterior concentrates around $\theta_{\text{low}}$ and $\theta_{\text{high}}$, with a spread controlled by the measurement noise $\sigma$. As $\sigma \to 0$, the posterior peaks sharpen into a pair of delta functions at the exact solutions. With a uniform prior, both modes have roughly equal mass ($P \approx 0.5$ each).
+**Discussion:** The posterior concentrates around $\theta_{\text{low}}$ and $\theta_{\text{high}}$, with a spread controlled by the measurement noise $\sigma$. As $\sigma \to 0$, the posterior peaks sharpen into a pair of delta functions at the exact solutions.
 :::
 
 
@@ -423,7 +441,7 @@ So far we assumed the launch speed $v_0 = 20\;\text{m/s}$ was known exactly. In 
 3. Computes the range $R$ using `compute_range(v0, theta)`.
 4. Conditions on the observed range using `observe(R_obs, dist.Normal(R, sigma))`.
 
-Run the model with $R_{\text{obs}} = 200$, $\sigma = 5.0$, and `num_particles=10000`. Use `summary()` to inspect both parameters.
+Run the model with $R_{\text{obs}} = 200$, $\sigma = 5.0$, and `num_particles=10000`. Inspect the results.
 
 **Part 2.** Visualize the joint posterior of $(v_0, \theta)$ using seaborn's `sns.jointplot()`. Since `jointplot` does not accept importance weights, you first need to **resample**: call `.sample()` on the result to convert the weighted particles into an equally-weighted collection. This draws indices proportional to the importance weights — high-weight particles get duplicated, low-weight ones are dropped.
 
@@ -462,7 +480,6 @@ theta_resampled = resampled["theta"]
 Now pass the unweighted samples to seaborn:
 
 ```python
-import seaborn as sns
 sns.jointplot(x=v0_resampled.numpy(), y=theta_resampled.numpy(), kind="scatter")
 ```
 
@@ -507,11 +524,11 @@ result_joint = lunar_launch_joint(R_obs, sigma, num_particles=10000)
 print(summary(result_joint))
 ```
 
+The result now contains samples of both `v0` and `theta`, along with their corresponding `log_weights`. Note that the samples are **paired**: the first sample of `v0` corresponds to the first sample of `theta`, and so on. The collection of pairs $(v_0, \theta)$ represents the joint posterior distribution.
+
 ```{python}
 # | code-fold: false
 # Part 2: Resample particles proportional to weights
-import seaborn as sns
-
 resampled = result_joint.sample()
 v0_resampled = resampled["v0"]
 theta_resampled = resampled["theta"]
@@ -536,8 +553,9 @@ plt.tight_layout()
 plt.show()
 ```
 
-The joint posterior reveals a horseshoe shape. The marginal for $v_0$ is concentrated around $18 m/s$ since in that region, the two modes in $\theta$ merge into a single broad peak. The marginal for $\theta$ looks uniform.
+The joint posterior reveals a horseshoe shape. The marginal for $v_0$ is concentrated around $18 \, \text{m/s}$ since in that region, the two modes in $\theta$ merge into a single broad peak. The marginal for $\theta$ looks uniform.
 
+Next, we compute the expected flight time, expected maximum altitude, and probability of flying above 100 m:
 
 ```{python}
 # | code-fold: false
@@ -554,14 +572,14 @@ print(f"E[max altitude]  = {E_hmax.item():.1f} m")
 print(f"P(h_max > 100 m) = {P_high.item():.2f}")
 ```
 
+Finally, we plot histograms of the posterior distributions of flight time and maximum altitude. For this we first compute $T$ and $h_{\max}$ for each resampled particle, then plot histograms:
+
 ```{python}
 # | code-fold: false
 # Part 3 (continued): Compute derived trajectory quantities
 T_samples = 2 * v0_resampled * torch.sin(theta_resampled) / g_moon
 hmax_samples = v0_resampled**2 * torch.sin(theta_resampled) ** 2 / (2 * g_moon)
 ```
-
-We plot histograms of the posterior distributions of flight time and maximum altitude:
 
 ```{python}
 # | code-fold: true
@@ -598,6 +616,8 @@ axes[1].legend(fontsize=9)
 plt.tight_layout()
 plt.show()
 ```
+
+Visually, the probability of flying above 100 m is the total area to the right of the red dashed line in the second histogram.
 
 :::
 
@@ -648,7 +668,7 @@ planet_mass = 30.0
 # | fig-cap: "Trajectories of a probe launched from Station Alpha (green) under the gravitational influence of a massive planet (black). Different initial velocities lead to very different paths"
 
 velocities = [
-    (3.0, 2.0),
+    (3.0, 2.5),
     (4.5, 1.0),
     (2.0, 4.0),
     (5.0, 0.5),
@@ -774,35 +794,36 @@ As before, we start by drawing from the **prior** — sampling velocities and ru
 **Part 1.** Write a `@model` function `probe_launch()` that:
 
 1. Samples initial velocity components $v_x \sim \text{Normal}(0, 3)$ and $v_y \sim \text{Normal}(0, 3)$.
-2. Simulates the trajectory using `simulate_gravity` with launch from origin, planet at $(5, 3)$ with `planet_mass = 30`.
+2. Simulates the trajectory using `simulate_gravity` with launch from origin, planet at $(5, 3)$ with `planet_mass = 30`, time step `dt = 0.02`, and `n_steps = 300`.
+3. Records the final position $(x_T, y_T)$ using two deterministic variables: `deterministic("final_x", xs[-1])` and `deterministic("final_y", ys[-1])`.
 
-Run the model with `num_particles=5000` and use `summary()` to inspect the result.
+Run the model with `num_particles=5000` and inspect the result.
 
-**Part 2.** Select 10 random particles from the result and plot their trajectories on a single figure. Mark the planet's position with a large dot and Station Alpha at the origin.
+**Part 2.** Extract the endpoints from the result and plot a **scatter** of the prior distribution of endpoints (final $(x_T, y_T)$ for all particles). Where is the density highest? How does the planet's gravity shape the distribution?
 
-**Part 3.** Using the sampled velocities, re-run `simulate_gravity` to obtain all endpoints. Plot a **scatter** of the prior distribution of endpoints (final $(x_T, y_T)$ for all particles). Where is the density highest? How does the planet's gravity shape the distribution?
+**Part 3.** Select 20 random particles from the result and plot their trajectories on a single figure. Mark the planet's position with a large dot and Station Alpha at the origin.
 
 ::: {.callout-note collapse="true" title="Hint: Step-by-step approach"}
 
 **Part 1 — writing and running the model:**
 
 1. Define constants `planet_x, planet_y = 5.0, 3.0` and `planet_mass = 30.0`.
-2. Write a function decorated with `@model`. Inside, use `sample("vx", dist.Normal(0.0, 3.0))` and similarly for `vy`, then call `simulate_gravity`.
+2. Write a function decorated with `@model`. Inside, use `sample("vx", dist.Normal(0.0, 3.0))` and similarly for `vy`, then call `simulate_gravity`. Finally, use `deterministic("final_x", xs[-1])` and `deterministic("final_y", ys[-1])` to record the final position.
 3. Call the model with `num_particles=5000`:
    ```python
    result = probe_launch(num_particles=5000)
    ```
    The result is dictionary-like: `result["vx"]` and `result["vy"]` are tensors of shape `(5000,)`.
 
-**Part 2 — plotting trajectories:**
+**Part 2 — scatter of endpoints:**
+
+The deterministic sites `"final_x"` and `"final_y"` are stored in the result. Extract them with `result["final_x"]` and `result["final_y"]` — each is a tensor of shape `(5000,)`.
+
+**Part 3 — plotting trajectories:**
 
 1. Extract the velocities: `vx_samples = result["vx"]`, `vy_samples = result["vy"]`.
-2. Pick 10 random indices: `idx = torch.randperm(len(vx_samples))[:10]`.
+2. Pick 20 random indices: `idx = torch.randperm(len(vx_samples))[:20]`.
 3. Re-run `simulate_gravity` for the selected particles and plot each trajectory.
-
-**Part 3 — scatter of endpoints:**
-
-When you pass tensors of shape `(N,)` as initial velocities to `simulate_gravity`, the returned `xs` and `ys` have shape `(n_steps, N)`. The final position of each particle is `xs[-1]` and `ys[-1]`, both of shape `(N,)`.
 :::
 
 ::: {.callout-tip collapse="true" title="Solution"}
@@ -817,11 +838,18 @@ def probe_launch():
     vx = sample("vx", dist.Normal(0.0, 3.0))
     vy = sample("vy", dist.Normal(0.0, 3.0))
     xs, ys = simulate_gravity(
-        x0=0.0, y0=0.0, vx0=vx, vy0=vy,
-        planet_x=planet_x, planet_y=planet_y,
+        x0=0.0,
+        y0=0.0,
+        vx0=vx,
+        vy0=vy,
+        planet_x=planet_x,
+        planet_y=planet_y,
         planet_mass=planet_mass,
-        dt=0.02, n_steps=300,
+        dt=0.02,
+        n_steps=300,
     )
+    deterministic("final_x", xs[-1])
+    deterministic("final_y", ys[-1])
 
 result_probe = probe_launch(num_particles=5000)
 print(summary(result_probe))
@@ -829,50 +857,9 @@ print(summary(result_probe))
 
 ```{python}
 # | code-fold: false
-# Part 2: Re-simulate 10 random trajectories
-vx_samples = result_probe["vx"]
-vy_samples = result_probe["vy"]
-idx = torch.randperm(len(vx_samples))[:10]
-
-all_xs, all_ys = simulate_gravity(
-    x0=0.0, y0=0.0,
-    vx0=vx_samples[idx], vy0=vy_samples[idx],
-    planet_x=planet_x, planet_y=planet_y,
-    planet_mass=planet_mass,
-    dt=0.02, n_steps=300,
-)
-```
-
-We plot the selected trajectories:
-
-```{python}
-# | code-fold: true
-fig, ax = plt.subplots(figsize=(6, 4))
-for j in range(10):
-    ax.plot(all_xs[:, j], all_ys[:, j], linewidth=1.5)
-    ax.plot(float(all_xs[-1, j]), float(all_ys[-1, j]), "o", markersize=4)
-ax.plot(planet_x, planet_y, "ko", markersize=15, zorder=5)
-ax.plot(0, 0, "s", color="green", markersize=10, zorder=5, label="Station Alpha")
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.set_aspect("equal")
-ax.legend(fontsize=9)
-plt.tight_layout()
-plt.show()
-```
-
-```{python}
-# | code-fold: false
-# Part 3: Re-simulate all particles and extract endpoints
-all_xs, all_ys = simulate_gravity(
-    x0=0.0, y0=0.0,
-    vx0=vx_samples, vy0=vy_samples,
-    planet_x=planet_x, planet_y=planet_y,
-    planet_mass=planet_mass,
-    dt=0.02, n_steps=300,
-)
-final_x = all_xs[-1]
-final_y = all_ys[-1]
+# Part 2: Extract endpoints from the result
+final_x = result_probe["final_x"]
+final_y = result_probe["final_y"]
 ```
 
 We scatter-plot the prior distribution of endpoints:
@@ -893,6 +880,40 @@ plt.show()
 ```
 
 The planet acts as a gravitational lens: many trajectories are funneled around it, producing high density near the planet and a distinctive pattern of endpoint clustering. Probes with low initial speed tend to end up close to the planet, while faster probes fly past it in various directions.
+
+```{python}
+# | code-fold: false
+# Part 3: Re-simulate 20 random trajectories
+vx_samples = result_probe["vx"]
+vy_samples = result_probe["vy"]
+idx = torch.randperm(len(vx_samples))[:20]
+
+all_xs, all_ys = simulate_gravity(
+    x0=0.0, y0=0.0,
+    vx0=vx_samples[idx], vy0=vy_samples[idx],
+    planet_x=planet_x, planet_y=planet_y,
+    planet_mass=planet_mass,
+    dt=0.02, n_steps=300,
+)
+```
+
+We plot the selected trajectories:
+
+```{python}
+# | code-fold: true
+fig, ax = plt.subplots(figsize=(6, 4))
+for j in range(20):
+    ax.plot(all_xs[:, j], all_ys[:, j], linewidth=1.5)
+    ax.plot(float(all_xs[-1, j]), float(all_ys[-1, j]), "o", markersize=4)
+ax.plot(planet_x, planet_y, "ko", markersize=15, zorder=5)
+ax.plot(0, 0, "s", color="green", markersize=10, zorder=5, label="Station Alpha")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_aspect("equal")
+ax.legend(fontsize=9)
+plt.tight_layout()
+plt.show()
+```
 :::
 
 
@@ -902,15 +923,17 @@ Adding an `observe` statement turns the prior samples into **weighted posterior 
 
 Suppose the probe was detected at $(x_T, y_T) = (8.0, 1.0)$ with measurement uncertainty $\sigma = 1.0$ in each coordinate.
 
-**Part 1.** Modify your model to condition on the observed endpoint. Since the observation is two-dimensional, combine both coordinates into a **single** `observe` call using a multivariate normal:
+**Part 1.** Write a new model `probe_conditioned(x_obs, y_obs, sigma)` that takes the observed coordinates and measurement noise as arguments. As before, record the final coordinates with `deterministic`. Since the observation is two-dimensional, combine both coordinates into a **single** `observe` call using a multivariate normal:
 ```python
-endpoint = torch.stack([xs[-1], ys[-1]], dim=-1)
+final_x = deterministic("final_x", xs[-1])
+final_y = deterministic("final_y", ys[-1])
+endpoint = torch.stack([final_x, final_y], dim=-1)
 obs_vec = torch.tensor([x_obs, y_obs])
 observe(obs_vec, dist.MultivariateNormal(endpoint, sigma**2 * torch.eye(2)))
 ```
 
 ::: {.callout-warning collapse="true" title="Why not two separate observe calls?"}
-The SMC engine can trigger a **resampling step** after each `observe`. If you write two calls — first for $x$, then for $y$ — the engine resamples particles after scoring $x$ alone. This discards particles that happen to have a poor $x$ match, even if they would have had an excellent $y$ match. The result is a severe loss of particle diversity and a degraded posterior.
+The inference engine can trigger a **resampling step** after each `observe`. If you write two calls — first for $x$, then for $y$ — the engine resamples particles after scoring $x$ alone. This discards particles that happen to have a poor $x$ match, even if they would have had an excellent $y$ match. The result is a severe loss of particle diversity and a degraded posterior.
 
 By combining both coordinates into a single `observe` with a multivariate normal, the engine scores the full 2D likelihood at once and resamples only afterward, preserving particles that are globally good.
 :::
@@ -938,10 +961,12 @@ Plot histograms of $d_{\min}$ and $v_{\max}$ across the posterior samples.
 
 **Part 1 — conditioning with a single 2D observe:**
 
-Combine the $x$ and $y$ observations into one `observe` call:
+Combine the $x$ and $y$ observations into one `observe` call. First record the final coordinates as deterministic sites, then stack them:
 
 ```python
-endpoint = torch.stack([xs[-1], ys[-1]], dim=-1)
+final_x = deterministic("final_x", xs[-1])
+final_y = deterministic("final_y", ys[-1])
+endpoint = torch.stack([final_x, final_y], dim=-1)
 obs_vec = torch.tensor([x_obs, y_obs])
 observe(obs_vec, dist.MultivariateNormal(endpoint, sigma**2 * torch.eye(2)))
 ```
@@ -960,7 +985,6 @@ vy_resampled = resampled["vy"]
 
 Then pass to seaborn:
 ```python
-import seaborn as sns
 sns.jointplot(x=vx_resampled.numpy(), y=vy_resampled.numpy(), kind="scatter")
 ```
 
@@ -1010,7 +1034,9 @@ def probe_conditioned(x_obs, y_obs, sigma):
         dt=0.02, n_steps=300,
     )
 
-    endpoint = torch.stack([xs[-1], ys[-1]], dim=-1)
+    final_x = deterministic("final_x", xs[-1])
+    final_y = deterministic("final_y", ys[-1])
+    endpoint = torch.stack([final_x, final_y], dim=-1)
     obs_vec = torch.tensor([x_obs, y_obs])
     observe(obs_vec, dist.MultivariateNormal(endpoint, sigma**2 * torch.eye(2)))
 
@@ -1021,8 +1047,6 @@ print(summary(result_cond))
 ```{python}
 # | code-fold: false
 # Part 2: Resample particles proportional to weights
-import seaborn as sns
-
 resampled = result_cond.sample()
 vx_resampled = resampled["vx"]
 vy_resampled = resampled["vy"]
@@ -1047,7 +1071,9 @@ plt.tight_layout()
 plt.show()
 ```
 
-We overlay 500 resampled posterior trajectories:
+We can see that there are three clusters in the posterior, corresponding to three qualitatively different paths that could have produced the observed endpoint.
+
+We can visualize the corresponding trajectories by re-simulating the probe's path for each resampled velocity and plotting them:
 
 ```{python}
 # | code-fold: true
@@ -1076,17 +1102,23 @@ plt.tight_layout()
 plt.show()
 ```
 
+
+
 ```{python}
 # | code-fold: false
 # Part 3: Trajectory-level posterior quantities
 
 # Use all resampled trajectories (re-simulate with full resample for better statistics)
 all_post_xs, all_post_ys = simulate_gravity(
-    x0=0.0, y0=0.0,
-    vx0=vx_resampled, vy0=vy_resampled,
-    planet_x=planet_x, planet_y=planet_y,
+    x0=0.0,
+    y0=0.0,
+    vx0=vx_resampled,
+    vy0=vy_resampled,
+    planet_x=planet_x,
+    planet_y=planet_y,
     planet_mass=planet_mass,
-    dt=0.02, n_steps=300,
+    dt=0.02,
+    n_steps=300,
 )
 
 # Closest approach to planet
@@ -1096,9 +1128,9 @@ dist_to_planet = torch.sqrt(dx**2 + dy**2)
 d_min = dist_to_planet.min(dim=0).values
 
 # Maximum speed (finite differences)
-dt_sim = 0.02
-vx_traj = (all_post_xs[1:] - all_post_xs[:-1]) / dt_sim
-vy_traj = (all_post_ys[1:] - all_post_ys[:-1]) / dt_sim
+dt = 0.02
+vx_traj = (all_post_xs[1:] - all_post_xs[:-1]) / dt
+vy_traj = (all_post_ys[1:] - all_post_ys[:-1]) / dt
 speed = torch.sqrt(vx_traj**2 + vy_traj**2)
 v_max = speed.max(dim=0).values
 
@@ -1145,5 +1177,5 @@ plt.tight_layout()
 plt.show()
 ```
 
-These derived quantities are obtained by plugging posterior velocity samples into the simulation and computing functions of the resulting trajectories. Each sample gives one value, so the collection represents the full posterior distribution over that quantity — not just a point estimate. The closest-approach distribution tells us how likely the probe was to have had a dangerous flyby, while the maximum-speed distribution reflects how much gravitational acceleration it experienced.
+These derived quantities are obtained by plugging posterior velocity samples into the simulation and computing functions of the resulting trajectories. Each sample gives one value, so the collection represents the full posterior distribution over that quantity. We can see that the distributions are quite complex, so it would be difficult to summarize them with a point or interval estimate alone.
 :::

@@ -27,18 +27,14 @@ March 13:
 
 March 20:
 
-- Intervening
-- Derive classical causal stuff
-- Exercise: Something causal
+- Importance sampling
+- Exercise: Inverse physics
 
 March 27:
 
 - General kernels
-- Importance sampling from prior?
+- Parametric forms
 - Exercise:
-
-- MCMC
-- Exercise: Multilevel regression
 
 April 3:
 ---- Good Friday ----
@@ -47,12 +43,17 @@ April 10:
 
 April 17:
 
-- More with MCMC
-- Exploiting conjugacies?
+- Intervening
+- Derive classical causal stuff
+- Exercise: Something causal
 
 April 24:
 
 - MCMC
+- Exercise: Multilevel regression
+
+- More with MCMC
+- Exploiting conjugacies?
 
 May 1:
 ---- Tag der Arbeit ----
