@@ -357,7 +357,7 @@ window.Quarto = {
 <p>The library can be installed via pip:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install git+https://github.com/MariusFurter/WeightedSampling.torch.git</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>You will need to import the main primitives to use the library:</p>
-<div id="c20fb7c1" class="cell" data-execution_count="1">
+<div id="ad201fb9" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.distributions <span class="im">as</span> dist</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> (</span>
@@ -430,7 +430,7 @@ Warning
 <section id="a-first-example-noisy-measurement" class="level3">
 <h3 class="anchored" data-anchor-id="a-first-example-noisy-measurement">A first example: noisy measurement</h3>
 <p>Consider estimating an unknown quantity <span class="math inline">\(\mu\)</span> from a noisy measurement <span class="math inline">\(x\)</span>. We place a prior on <span class="math inline">\(\mu\)</span> and model the measurement as <span class="math inline">\(\mu\)</span> plus Gaussian noise:</p>
-<div id="89199a12" class="cell" data-execution_count="2">
+<div id="414effd6" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> measurement():</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">5.0</span>))</span>
@@ -438,7 +438,7 @@ Warning
 </div>
 <p>Here <code>mu</code> is drawn from <span class="math inline">\(\mathsf{Normal}(0, 25)\)</span>, then <code>x</code> is drawn from <span class="math inline">\(\mathsf{Normal}(\mu, 0.25)\)</span>. The two variables are dependent because <code>x</code> depends on the sampled value of <code>mu</code>.</p>
 <p>The <code>@model</code> decorator makes the function callable with inference parameters (see <a href="#sec-inference-params" class="quarto-xref"><span>Inference parameters</span></a>). We run it by specifying the number of particles:</p>
-<div id="8e9137fc" class="cell" data-execution_count="3">
+<div id="c8151dc7" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -449,7 +449,7 @@ Warning
 </div>
 </div>
 <p>The returned <code>result</code> is a dictionary-like object containing the sampled tensors and metadata — we describe its structure below. The <code>summary</code> function gives us a histogram, the weighted mean, standard deviation, and number of unique particles for each variable.</p>
-<div id="c2de2e8b" class="cell" data-execution_count="4">
+<div id="8dde357d" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>SMC Summary (N=5000, log_evidence=0.0000, ESS=5000.0)
@@ -468,7 +468,7 @@ Warning
 <section id="conditioning-with-observe" class="level3">
 <h3 class="anchored" data-anchor-id="conditioning-with-observe">Conditioning with <code>observe</code></h3>
 <p>Now suppose we observe that the measurement takes value <span class="math inline">\(x = 3.2\)</span>. We replace the second <code>sample</code> with an <code>observe</code>:</p>
-<div id="4fc5364f" class="cell" data-execution_count="5">
+<div id="0ece5b51" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> conditioned_measurement():</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">5.0</span>))</span>
@@ -486,7 +486,7 @@ Warning
 <h3 class="anchored" data-anchor-id="named-sites-and-intermediate-variables">Named sites and intermediate variables</h3>
 <p>Only <strong>named sites</strong> — created by <code>sample</code> or <code>deterministic</code> — are recorded in the result object. Any other computation inside the model is an <strong>intermediate variable</strong> that is not stored. For example, if we write <code>y = mu + 1</code> inside the model, <code>y</code> is computed but not recorded.</p>
 <p>The <strong><code>deterministic(name, value)</code></strong> primitive records a computed (non-random) value under <code>name</code> and returns it unchanged. Like <code>sample</code>, the return value can be captured for use later in the model:</p>
-<div id="531b33cf" class="cell" data-execution_count="6">
+<div id="44001f9b" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> measurement_with_derived():</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">5.0</span>))</span>
@@ -531,7 +531,7 @@ SMC Summary (N=5000, log_evidence=-2.6223, ESS=647.7)
 <section id="model-arguments" class="level3">
 <h3 class="anchored" data-anchor-id="model-arguments">Model arguments</h3>
 <p>Model functions can accept arbitrary arguments — data, hyperparameters, configuration — which are passed through to the underlying function. Inference parameters (<code>num_particles</code>, <code>ess_threshold</code>, etc.) are intercepted by the decorator and never reach the model body:</p>
-<div id="3bc39599" class="cell" data-execution_count="7">
+<div id="e00ae578" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flexible_measurement(observed_value, prior_std<span class="op">=</span><span class="fl">5.0</span>):</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">0.0</span>, prior_std))</span>
@@ -592,7 +592,7 @@ Warning
 <section id="sec-smc-result" class="level3">
 <h3 class="anchored" data-anchor-id="sec-smc-result">The result object</h3>
 <p>Calling a decorated model runs the inference engine and returns a result object (of type <code>SMCResult</code>). This is a dictionary-like object where each <code>sample</code> call produces a tensor of shape <span class="math inline">\((N, \ldots)\)</span>:</p>
-<div id="ab3be671" class="cell" data-execution_count="8">
+<div id="d2fb194b" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -609,10 +609,10 @@ Warning
 <li><strong><code>result.log_evidence</code></strong> — estimate of <span class="math inline">\(\log p(\text{observations})\)</span>, useful for model comparison.</li>
 </ul>
 <p>You can access each variable with <code>result["var_name"]</code> or <code>result.var_name</code>.</p>
-<div id="6859921d" class="cell" data-execution_count="9">
+<div id="771eb207" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>result[<span class="st">"x"</span>]</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>result.x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="412">
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>tensor([ 5.2938, -0.4008, -4.4538,  ...,  3.8232,  2.2977,  2.2212])</code></pre>
 </div>
 </div>
@@ -620,7 +620,7 @@ Warning
 <section id="sec-summary" class="level3">
 <h3 class="anchored" data-anchor-id="sec-summary"><code>summary</code>: quick posterior overview</h3>
 <p>The <code>summary</code> function computes weighted mean, standard deviation, and the number of unique particles for each variable. It is also available as a method on the result object: <code>result.summary()</code>. Printing the summary gives an overview including a histogram for each variable:</p>
-<div id="80dfcae6" class="cell" data-execution_count="10">
+<div id="7c1a394e" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> conditioned_measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>stats <span class="op">=</span> summary(result)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(stats)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -638,7 +638,7 @@ Warning
 </div>
 </div>
 <p>You can also extract specific statistics for a variable:</p>
-<div id="52c6acbd" class="cell" data-execution_count="11">
+<div id="5cb01299" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[mu | x=3.2] = </span><span class="sc">{</span>stats[<span class="st">'mu'</span>][<span class="st">'mean'</span>]<span class="sc">:.3f}</span><span class="ss"> ± </span><span class="sc">{</span>stats[<span class="st">'mu'</span>][<span class="st">'std'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Unique particles: </span><span class="sc">{</span>stats[<span class="st">'mu'</span>][<span class="st">'n_unique'</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -650,7 +650,7 @@ Unique particles: 5000</code></pre>
 <section id="sec-linreg-basic" class="level3">
 <h3 class="anchored" data-anchor-id="sec-linreg-basic">Example: Bayesian linear regression</h3>
 <p>As a more realistic example, consider inferring the slope <span class="math inline">\(a\)</span> and intercept <span class="math inline">\(b\)</span> of a line from noisy data. We place informative priors and assume known noise:</p>
-<div id="ea5a0ab3" class="cell" data-execution_count="12">
+<div id="4044b5b5" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bayesian_linreg(data):</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> sample(<span class="st">"a"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">2.0</span>))  <span class="co"># prior on slope</span></span>
@@ -659,7 +659,7 @@ Unique particles: 5000</code></pre>
 <span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>        observe(y, dist.Normal(a <span class="op">*</span> x <span class="op">+</span> b, <span class="fl">0.2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We generate synthetic data from a known ground truth and run inference:</p>
-<div id="f6823790" class="cell" data-execution_count="13">
+<div id="b298b76e" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>true_a, true_b <span class="op">=</span> <span class="fl">2.0</span>, <span class="op">-</span><span class="fl">1.0</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> torch.linspace(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">5</span>)</span>
@@ -686,7 +686,7 @@ Unique particles: 5000</code></pre>
 <section id="sec-nesting-models" class="level3">
 <h3 class="anchored" data-anchor-id="sec-nesting-models">Composing models</h3>
 <p>Models can call other functions that use <code>sample</code> and <code>observe</code>. This is the primary way to build modular models. However, only the <strong>outermost</strong> function should carry the <code>@model</code> decorator. For example, we can rewrite <code>bayesian_linreg</code> by extracting the prior sampling into a helper:</p>
-<div id="b04e2f39" class="cell" data-execution_count="14">
+<div id="b3594871" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_parameters():</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Sample the regression parameters from their priors."""</span></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> sample(<span class="st">"a"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">2.0</span>))</span>
@@ -708,7 +708,7 @@ Unique particles: 5000</code></pre>
 <section id="computing-expectations" class="level3">
 <h3 class="anchored" data-anchor-id="computing-expectations">Computing expectations</h3>
 <p>The <code>expectation</code> function computes <span class="math inline">\(\mathbb{E}[t(X)]\)</span> for an arbitrary <strong>test function</strong> <span class="math inline">\(t\)</span>. The function’s argument names are matched against the variable names in the result. Like <code>summary</code>, it is also available as a method: <code>result.expectation(f)</code>. The standalone function is a wrapper around this method.</p>
-<div id="cb296130" class="cell" data-execution_count="15">
+<div id="ffac8c65" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>E_mu <span class="op">=</span> expectation(result, <span class="kw">lambda</span> mu: mu)</span>
@@ -722,7 +722,7 @@ Var[mu] = 25.716</code></pre>
 </div>
 </div>
 <p><strong>Joint quantities</strong> Since each particle carries values for all variables, we can estimate expectations of functions of several variables, such as covariances:</p>
-<div id="2aef2682" class="cell" data-execution_count="16">
+<div id="fb2e3dd0" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>E_mu <span class="op">=</span> expectation(result, <span class="kw">lambda</span> mu: mu)</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>E_x <span class="op">=</span> expectation(result, <span class="kw">lambda</span> x: x)</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> expectation(result, <span class="kw">lambda</span> mu, x: (mu <span class="op">-</span> E_mu) <span class="op">*</span> (x <span class="op">-</span> E_x))</span>
@@ -732,7 +732,7 @@ Var[mu] = 25.716</code></pre>
 </div>
 </div>
 <p><strong>Computing probabilities</strong> To estimate probabilities, use an indicator function.</p>
-<div id="913573d3" class="cell" data-execution_count="17">
+<div id="45d8b422" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>p_pos <span class="op">=</span> expectation(result, <span class="kw">lambda</span> mu: mu <span class="op">&gt;</span> <span class="dv">0</span>)</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(mu &gt; 0)  = </span><span class="sc">{</span>p_pos<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -740,7 +740,7 @@ Var[mu] = 25.716</code></pre>
 </div>
 </div>
 <p>The anonymous function notation is optional. You can also define a named function and pass it to <code>expectation</code>, as long as the argument names match the variable names in the result:</p>
-<div id="024689a9" class="cell" data-execution_count="18">
+<div id="0311410e" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> indicator(mu):</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mu <span class="op">&gt;</span> <span class="dv">0</span></span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -754,12 +754,12 @@ Var[mu] = 25.716</code></pre>
 <section id="sec-sample-method" class="level3">
 <h3 class="anchored" data-anchor-id="sec-sample-method">Resampling with <code>.sample()</code></h3>
 <p>Often, it is necessary to work with unweighted samples. In such cases, you can sample directly from the weighted set by calling the <code>.sample()</code> method on the result:</p>
-<div id="3a6f12e3" class="cell" data-execution_count="19">
+<div id="620c317b" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> conditioned_measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>resampled <span class="op">=</span> result.sample(<span class="dv">1000</span>)  <span class="co"># draw 1000 equally-weighted samples</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The method draws indices proportional to the importance weights (with replacement), returning a plain dictionary of tensors. If <code>num_samples</code> is omitted, it defaults to the number of particles in the original result:</p>
-<div id="79233a47" class="cell" data-execution_count="20">
+<div id="46f53254" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>resampled_all <span class="op">=</span> result.sample()  <span class="co"># same as result.sample(5000)</span></span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(resampled_all[<span class="st">"mu"</span>].shape)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -771,7 +771,7 @@ Var[mu] = 25.716</code></pre>
 <section id="sec-visualize-posterior" class="level3">
 <h3 class="anchored" data-anchor-id="sec-visualize-posterior">Visualizing the posterior</h3>
 <p>We can visualize the posterior distribution by resampling the particles and plotting the results with low opacity:</p>
-<div id="045a9e51" class="cell" data-execution_count="21">
+<div id="e7b6960a" class="cell" data-execution_count="21">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -781,7 +781,7 @@ Var[mu] = 25.716</code></pre>
 <span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>log_w <span class="op">=</span> result.log_weights</span>
 <span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> result.norm_weights</span>
 <span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">3.5</span>))</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
 <span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: posterior regression lines (resampled)</span></span>
 <span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
@@ -813,7 +813,7 @@ Var[mu] = 25.716</code></pre>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="WeightedSampling_files/figure-html/cell-22-output-1.png" width="758" height="326" class="figure-img"></p>
+<p><img src="WeightedSampling_files/figure-html/cell-22-output-1.png" width="566" height="278" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -822,7 +822,7 @@ Var[mu] = 25.716</code></pre>
 <section id="log-evidence-for-model-comparison" class="level3">
 <h3 class="anchored" data-anchor-id="log-evidence-for-model-comparison">Log evidence for model comparison</h3>
 <p>The log evidence <span class="math inline">\(\log \hat p(y)\)</span> of the data is computed automatically as a byproduct of sampling. It estimates the marginal likelihood of the observations under the model. For the conditioned measurement model, this is the observation likelihood <span class="math inline">\(p(x = 3.2)\)</span>:</p>
-<div id="da76dbac" class="cell" data-execution_count="22">
+<div id="1526aca5" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> conditioned_measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Log evidence: </span><span class="sc">{</span>result<span class="sc">.</span>log_evidence<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -830,7 +830,7 @@ Var[mu] = 25.716</code></pre>
 </div>
 </div>
 <p>We can verify this against the exact marginal <span class="math inline">\(p(x) = \int p(x \mid \mu)\, p(\mu)\, d\mu\)</span>, which for two Gaussians is <span class="math inline">\(\mathsf{Normal}(0, \sigma_\mu^2 + \sigma_x^2)\)</span>:</p>
-<div id="654aea1e" class="cell" data-execution_count="23">
+<div id="606dc6a9" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>exact <span class="op">=</span> dist.Normal(<span class="fl">0.0</span>, (<span class="fl">5.0</span><span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">**</span><span class="dv">2</span>)<span class="op">**</span><span class="fl">0.5</span>).log_prob(torch.tensor(<span class="fl">3.2</span>))</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Exact:        </span><span class="sc">{</span>exact<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -854,13 +854,13 @@ Var[mu] = 25.716</code></pre>
 <section id="sec-weight-collapse" class="level3">
 <h3 class="anchored" data-anchor-id="sec-weight-collapse">Weight collapse</h3>
 <p>When there are many observations, most particles end up with negligible weight. We can see this clearly in the linear regression example by disabling resampling (<code>ess_threshold=0</code>):</p>
-<div id="9f518f3e" class="cell" data-execution_count="24">
+<div id="29999fa7" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>result_no_resample <span class="op">=</span> bayesian_linreg(data, num_particles<span class="op">=</span><span class="dv">5000</span>, ess_threshold<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>log_w <span class="op">=</span> result_no_resample.log_weights</span>
 <span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> result_no_resample.norm_weights</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="038ce384" class="cell" data-execution_count="25">
+<div id="31ba18b2" class="cell" data-execution_count="25">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
@@ -891,7 +891,7 @@ Var[mu] = 25.716</code></pre>
 \]</span></p>
 <p>where <span class="math inline">\(\bar w_i\)</span> are the normalized weights. When ESS drops below <code>ess_threshold</code> <span class="math inline">\(\times\, N\)</span>, the engine <strong>resamples</strong>: it draws <span class="math inline">\(N\)</span> new particles from the current set with replacement, in proportion to their weights, and resets all weights to be equal.</p>
 <p>With the default <code>ess_threshold=0.5</code>, the linear regression model resamples after each observation that causes ESS to drop too low:</p>
-<div id="9e4a727f" class="cell" data-execution_count="26">
+<div id="aa5c07de" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>result_resample <span class="op">=</span> bayesian_linreg(data, num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_resample))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -917,7 +917,7 @@ Var[mu] = 25.716</code></pre>
 <section id="randomwalkproposal" class="level3">
 <h3 class="anchored" data-anchor-id="randomwalkproposal"><code>RandomWalkProposal</code></h3>
 <p>The simplest proposal is a symmetric random walk. We revisit the linear regression example, now adding a <code>move</code> after each observation:</p>
-<div id="cbb21bbb" class="cell" data-execution_count="27">
+<div id="3297b8f8" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> move, RandomWalkProposal</span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
@@ -949,7 +949,7 @@ Var[mu] = 25.716</code></pre>
 <section id="adaptiveproposal" class="level3">
 <h3 class="anchored" data-anchor-id="adaptiveproposal"><code>AdaptiveProposal</code></h3>
 <p>The <code>AdaptiveProposal</code> automatically tunes the proposal covariance from the current particle population, using an adaptive Metropolis strategy:</p>
-<div id="2887f29c" class="cell" data-execution_count="28">
+<div id="8eb8d8b0" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> AdaptiveProposal</span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
@@ -976,12 +976,12 @@ Var[mu] = 25.716</code></pre>
 </div>
 </div>
 <p>The <code>AdaptiveProposal</code> estimates the weighted covariance of the targeted variables from the current particles, scales it using a factor of <span class="math inline">\(2.38 / \sqrt{d}\)</span> (optimal for Gaussian targets), and adds a small ridge for numerical stability. This generally works well without manual tuning.</p>
-<div id="d7aee6fe" class="cell" data-execution_count="29">
+<div id="5e6073f9" class="cell" data-execution_count="29">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>result_no_moves <span class="op">=</span> bayesian_linreg(data, num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="fl">3.5</span>))</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
 <span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (res, title) <span class="kw">in</span> <span class="bu">zip</span>(</span>
 <span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    axes,</span>
@@ -1012,7 +1012,7 @@ Var[mu] = 25.716</code></pre>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="WeightedSampling_files/figure-html/cell-30-output-1.png" width="1142" height="327" class="figure-img"></p>
+<p><img src="WeightedSampling_files/figure-html/cell-30-output-1.png" width="758" height="279" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1029,7 +1029,7 @@ Var[mu] = 25.716</code></pre>
 \text{Cloudy} \to \text{Rain}, \quad \text{Cloudy} \to \text{Sprinkler}, \quad (\text{Rain}, \text{Sprinkler}) \to \text{WetGrass}.
 \]</span></p>
 <p>We encode each CPT as a <code>DiscreteConditional</code>, specifying the domain size of each parent:</p>
-<div id="b5a9acb6" class="cell" data-execution_count="30">
+<div id="81574e64" class="cell" data-execution_count="30">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> DiscreteConditional</span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>cloudy_cpt <span class="op">=</span> DiscreteConditional(<span class="kw">lambda</span>: [<span class="fl">0.5</span>, <span class="fl">0.5</span>], domain_sizes<span class="op">=</span>[])</span>
@@ -1050,7 +1050,7 @@ Var[mu] = 25.716</code></pre>
 </div>
 <p>The <code>domain_sizes</code> argument lists the number of values each <em>parent</em> can take (in the order they appear in the function signature). A root node has <code>domain_sizes=[]</code>. The CPT function maps parent values to a list of probabilities: entry <span class="math inline">\(i\)</span> is <span class="math inline">\(P(\text{child} = i \mid \text{parents})\)</span>.</p>
 <p>Calling a <code>DiscreteConditional</code> with parent tensors returns a <code>torch.distributions.Categorical</code>, which can be passed to <code>sample</code> or <code>observe</code>:</p>
-<div id="d03ae81e" class="cell" data-execution_count="31">
+<div id="754eaa5d" class="cell" data-execution_count="31">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> wet_grass_model():</span>
 <span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> sample(<span class="st">"cloudy"</span>, cloudy_cpt())</span>
@@ -1094,7 +1094,7 @@ Note
 </div>
 </div>
 <p>As an example, suppose we want to use a prior proportional to <span class="math inline">\(e^{-x^4}\)</span>, a super-Gaussian density that is not available in <code>torch.distributions</code>:</p>
-<div id="27947955" class="cell" data-execution_count="32">
+<div id="7de81001" class="cell" data-execution_count="32">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> ImportanceSampler</span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a></span>
