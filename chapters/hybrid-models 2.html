@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -211,12 +246,6 @@ window.Quarto = {
  <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Exercise 5: Inverse Physics</span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -236,8 +265,8 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">WeightedSampling.torch</span></a>
+  <a href="../appendix/WeigtedSampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">WeightedSampling.torch</span></span></a>
   </div>
 </li>
       </ul>
@@ -267,6 +296,27 @@ window.Quarto = {
   <li><a href="#sec-density-functions" id="toc-sec-density-functions" class="nav-link" data-scroll-target="#sec-density-functions"><span class="header-section-number">4.1.5</span> Density functions</a></li>
   <li><a href="#sec-string-diagrams-carry-over" id="toc-sec-string-diagrams-carry-over" class="nav-link" data-scroll-target="#sec-string-diagrams-carry-over"><span class="header-section-number">4.1.6</span> String diagrams carry over</a></li>
   </ul></li>
+  <li><a href="#sec-parametric-kernels" id="toc-sec-parametric-kernels" class="nav-link" data-scroll-target="#sec-parametric-kernels"><span class="header-section-number">4.2</span> Parametric kernels</a>
+  <ul class="collapse">
+  <li><a href="#sec-constructing-kernels" id="toc-sec-constructing-kernels" class="nav-link" data-scroll-target="#sec-constructing-kernels"><span class="header-section-number">4.2.1</span> Constructing kernels</a></li>
+  <li><a href="#sec-linear-regression" id="toc-sec-linear-regression" class="nav-link" data-scroll-target="#sec-linear-regression"><span class="header-section-number">4.2.2</span> Linear regression kernel</a></li>
+  <li><a href="#sec-logistic-regression" id="toc-sec-logistic-regression" class="nav-link" data-scroll-target="#sec-logistic-regression"><span class="header-section-number">4.2.3</span> Logistic regression kernel</a></li>
+  <li><a href="#sec-categorical-regression" id="toc-sec-categorical-regression" class="nav-link" data-scroll-target="#sec-categorical-regression"><span class="header-section-number">4.2.4</span> Categorical regression kernel</a></li>
+  <li><a href="#sec-lognormal-regression" id="toc-sec-lognormal-regression" class="nav-link" data-scroll-target="#sec-lognormal-regression"><span class="header-section-number">4.2.5</span> Log-normal regression kernel</a></li>
+  <li><a href="#sec-poisson-regression" id="toc-sec-poisson-regression" class="nav-link" data-scroll-target="#sec-poisson-regression"><span class="header-section-number">4.2.6</span> Poisson regression kernel</a></li>
+  </ul></li>
+  <li><a href="#sec-swiss-health-model" id="toc-sec-swiss-health-model" class="nav-link" data-scroll-target="#sec-swiss-health-model"><span class="header-section-number">4.3</span> The Swiss health model</a>
+  <ul class="collapse">
+  <li><a href="#root-distributions" id="toc-root-distributions" class="nav-link" data-scroll-target="#root-distributions"><span class="header-section-number">4.3.1</span> Root distributions</a></li>
+  <li><a href="#sec-bmi-kernel" id="toc-sec-bmi-kernel" class="nav-link" data-scroll-target="#sec-bmi-kernel"><span class="header-section-number">4.3.2</span> The BMI kernel (linear regression)</a></li>
+  <li><a href="#sec-diabetes-kernel" id="toc-sec-diabetes-kernel" class="nav-link" data-scroll-target="#sec-diabetes-kernel"><span class="header-section-number">4.3.3</span> The diabetes kernel (logistic regression)</a></li>
+  <li><a href="#sec-cost-kernel" id="toc-sec-cost-kernel" class="nav-link" data-scroll-target="#sec-cost-kernel"><span class="header-section-number">4.3.4</span> The cost kernel (log-normal regression)</a></li>
+  <li><a href="#composing-the-full-model" id="toc-composing-the-full-model" class="nav-link" data-scroll-target="#composing-the-full-model"><span class="header-section-number">4.3.5</span> Composing the full model</a></li>
+  <li><a href="#forward-sampling" id="toc-forward-sampling" class="nav-link" data-scroll-target="#forward-sampling"><span class="header-section-number">4.3.6</span> Forward sampling</a></li>
+  <li><a href="#sec-conditioning-continuous" id="toc-sec-conditioning-continuous" class="nav-link" data-scroll-target="#sec-conditioning-continuous"><span class="header-section-number">4.3.7</span> Conditioning on continuous observations</a></li>
+  <li><a href="#sec-conditioning-discrete" id="toc-sec-conditioning-discrete" class="nav-link" data-scroll-target="#sec-conditioning-discrete"><span class="header-section-number">4.3.8</span> Conditioning on discrete observations</a></li>
+  </ul></li>
+  <li><a href="#bibliographic-notes" id="toc-bibliographic-notes" class="nav-link" data-scroll-target="#bibliographic-notes">Bibliographic notes</a></li>
   </ul>
 </nav>
     </div>
@@ -304,6 +354,7 @@ window.Quarto = {
 \def\ivmark#1{[\![#1]\!]}
 \]</span></p>
 </div>
+<p><em>Work in progress…</em></p>
 <p>So far, all our models have lived in the world of finite sets: every wire carried a variable with finitely many values, and every kernel was specified by a finite table of numbers. But many quantities we care about take continuous values. In this chapter, we extend the string-diagrammatic framework to handle continuous and mixed-type variables.</p>
 <p>We introduce the theory gradually. First, we sketch how kernels generalize beyond finite sets, and why density functions are the practical tool for specifying them. Next, we introduce a small probabilistic programming library, <code>WeightedSampling.torch</code>, that automates the weighted sampling procedure from the <a href="../chapters/conditioning.html">previous chapter</a>. We then develop a family of parametric regression kernels — the standard building blocks for models with continuous and mixed-type variables. Finally, we compose these kernels into a concrete Swiss health model and demonstrate forward sampling and conditioning.</p>
 <!-- ============================================================ -->
@@ -463,330 +514,475 @@ k_f(B \mid x) := \ivmark{f(x) \in B},
 <p><strong>Algebraic laws.</strong> All the algebraic laws verified in the discrete setting continue to hold for general kernels. The proofs are the same calculations, with sums replaced by integrals. In particular, any two diagrams that could be deformed into each other in the discrete setting still represent the same kernel.</p>
 <p><strong>Conditional independence.</strong> The graphical test for conditional independence from the <a href="../chapters/conditioning.html">conditioning chapter</a> remains valid for general kernels.</p>
 <p><strong>Graphical conditioning.</strong> Pre-conditioning on an <em>input</em> works exactly as before: given a kernel <span class="math inline">\(g : X \otimes Y \kernel U\)</span>, fixing <span class="math inline">\(X = \bar{x}\)</span> yields <span class="math inline">\(g_{\mid X = \bar{x}}(B \mid y) := g(B \mid \bar{x}, y)\)</span>. This is still a well-defined kernel.</p>
-<p>Pre-conditioning on an <em>output</em> generalizes the discrete formula from the <a href="../chapters/conditioning.html">conditioning chapter</a>. For a discrete kernel <span class="math inline">\(g : X \kernel U \otimes V\)</span>, pre-conditioning on <span class="math inline">\(U = \bar{u}\)</span> meant plugging <span class="math inline">\(\bar{u}\)</span> into the first argument: <span class="math inline">\(g_{\mid U = \bar{u}}(v \mid x) = g(\bar{u}, v \mid x)\)</span>. Since the values of a discrete kernel are exactly its density with respect to counting measure, this is the same as plugging <span class="math inline">\(\bar{u}\)</span> into the density. The same idea works in general.</p>
+<p>Pre-conditioning on an <em>output</em> generalizes the discrete formula from the <a href="../chapters/conditioning.html">conditioning chapter</a>. There, for a discrete kernel <span class="math inline">\(g : X \kernel U \otimes V\)</span>, pre-conditioning on <span class="math inline">\(U = \bar{u}\)</span> meant plugging <span class="math inline">\(\bar{u}\)</span> into the first argument: <span class="math inline">\(g_{\mid U = \bar{u}}(v \mid x) = g(\bar{u}, v \mid x)\)</span>. Since the values of a discrete kernel are exactly its density with respect to counting measure, this is the same as plugging <span class="math inline">\(\bar{u}\)</span> into the density. The same idea works in general.</p>
 <p>Suppose <span class="math inline">\(g : X \kernel U \otimes V\)</span> has density <span class="math inline">\(l_g(u, v \mid x)\)</span> with respect to a product base measure <span class="math inline">\(\nu_U \otimes \nu_V\)</span> (see the box above for what this means). Pre-conditioning on <span class="math inline">\(U = \bar{u}\)</span> plugs <span class="math inline">\(\bar{u}\)</span> into the density, giving the kernel with density <span class="math inline">\(l_g(\bar{u}, v \mid x)\)</span>: <span class="math display">\[
 g_{\mid U = \bar{u}}(B \mid x) = \int_B l_g(\bar{u}, v \mid x) \, \nu_V(dv).
 \]</span></p>
 <p>If <span class="math inline">\(g : X \kernel U\)</span> has density <span class="math inline">\(l_g\)</span> and we fix its only output <span class="math inline">\(U = \bar{u}\)</span>, there are no remaining variables to integrate over. The resulting kernel <span class="math inline">\(g_{\mid U = \bar u} : X \kernel I\)</span> assigns each <span class="math inline">\(x \in X\)</span> the <strong>likelihood weight</strong> <span class="math inline">\(l_g(\bar{u} \mid x)\)</span>. This is the case that arises most often in practice.</p>
-<!-- Work in progress..
-
-## Parametric kernels {#sec-parametric-kernels}
-
-In the discrete setting, a kernel $f : X \kernel Y$ was fully specified by a finite table of values $f(y \mid x)$. When the input or output space is infinite, we need a formula instead: a **parametric family** that fixes the functional form of the density and lets a finite collection of **parameters** pin down which density each input selects.
-
-Consider the Gaussian family from @exm-gaussian-kernel. If we let the mean depend on an input $x$ through the function $\mu = \alpha_0 + \alpha_1 x$, then three parameters $\alpha_0$, $\alpha_1$, and $\sigma^2$ determine a kernel $k : \mathbb{R} \kernel \mathbb{R}$:
-$$
-l_k(y \mid x) = l_{\mathsf{Normal}}(y \mid \alpha_0 + \alpha_1 x,\; \sigma^2).
-$$
-For every value of $x$, this formula produces a valid Gaussian density for $y$. Hence, we have reduced the problem of specifying a kernel to specifying a finite number of parameters. This comes at the cost of expressiveness: kernels in this family can only produce Gaussian samples with means that depend linearly on $x$.
-
-### Constructing kernels {#sec-constructing-kernels}
-
-Our strategy for building kernels between arbitrary spaces is compositional. Every kernel we construct has the form
-$$
-X \xrightarrow{\; g \;} \Theta \xrightarrow{\; k_{\text{base}} \;} Y \xrightarrow{\; f \;} Z,
-$$
-or, in string-diagram notation, $k = k_g \then k_{\text{base}} \then k_f$. Three ingredients are chosen independently:
-
-1. A **base family** $k_{\text{base}} : \Theta \kernel Y$ — a standard parametric family of distributions that does all the stochastic work.
-2. An **input transformation** $g : X \to \Theta$ — a deterministic function that computes valid parameters from whatever inputs are given.
-3. An **output transformation** $f : Y \to Z$ — a deterministic function that redirects the base family's output to the desired target space.
-
-Either deterministic map can be the identity when no transformation is needed. We now discuss each ingredient in turn.
-
-**Base families.** Each base family is the simplest adequate model for one common output type:
-
-| Family | Parameters | Output space |
-|---|---|---|
-| Gaussian | mean $\mu \in \mathbb{R}$, variance $\sigma^2 > 0$ | $\mathbb{R}$ |
-| Bernoulli | probability $p \in (0,1)$ | $\{0,1\}$ |
-| Poisson | rate $\lambda > 0$ | $\mathbb{N}_0$ |
-
-: Common base families, one for each basic output type. {#tbl-base-families}
-
-The Gaussian family is the default for real-valued outputs; the Bernoulli family is the unique distribution on $\{0,1\}$; and the Poisson family is the standard model for counts. Other families — Gamma ($\mathbb{R}_{>0}$), negative binomial ($\mathbb{N}_0$), Beta ($(0,1)$) — can be slotted into the same pattern when needed.
-
-**Input transformations.** The input transformation $g : X_1 \otimes \cdots \otimes X_n \to \Theta$ maps the inputs into the parameter space $\Theta$ of the base family. We build it in two steps:
-$$
-X_1 \otimes \cdots \otimes X_n \xrightarrow{\;g_{\text{lin}}\;} \mathbb{R} \xrightarrow{\;\varphi\;} \Theta.
-$$
-
-The first step is a **linear predictor** $g_{\text{lin}}$ that reduces all inputs to a single real number:
-$$
-\eta \;=\; g_{\text{lin}}(x_1, \ldots, x_n) \;=\; \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n.
-$$
-This accepts any mix of discrete and continuous inputs: a binary input $x_j \in \{0,1\}$ switches its coefficient on or off, while a continuous input contributes proportionally.
-
-The second step is a **response map** $\varphi : \mathbb{R} \to \Theta$ that sends $\eta$ into the parameter space of the chosen base family. When $\Theta = \mathbb{R}$ (as for the Gaussian mean), this is just the identity; when $\Theta$ is a strict subset of $\mathbb{R}$, we need a map that lands in the right space:
-
-| Parameter space $\Theta$ | Response map $\varphi$ | Formula |
-|---|---|---|
-| $\mathbb{R}$ | identity | $\varphi(\eta) = \eta$ |
-| $(0,1)$ | sigmoid | $\varphi(\eta) = \frac{1}{1 + e^{-\eta}}$ |
-| $\mathbb{R}_{>0}$ | exponential | $\varphi(\eta) = e^{\eta}$ |
-
-: Response maps sending a linear predictor $\eta \in \mathbb{R}$ into the parameter space of each base family. {#tbl-input-transforms}
-
-The full input transformation is
-$$
-g = \varphi \circ g_{\text{lin}}.
-$$
-Nothing in the construction requires the first step to be linear: we can replace it with nonlinear features, spline bases, or a neural network without changing anything else. In string-diagrammatic terms, only the deterministic kernel $k_g$ changes; the base family and output transformation are unaffected.
-
-::: {.callout-note collapse="true"}
-## Connection to generalized linear models
-
-When the input transformation has the form $g = \varphi \circ g_{\text{linear}}$ and the base family belongs to the exponential family, statisticians call the resulting kernel a **generalized linear model (GLM)**. In that literature, $\varphi^{-1}$ is called the *link function* and $\varphi$ the *response function* or *inverse link*. Linear regression, logistic regression, and Poisson regression are the three canonical GLMs, corresponding to the three base families above with identity, sigmoid, and exponential maps respectively.
-:::
-
-**Output transformations.** To reach output spaces beyond $\mathbb{R}$, $\{0,1\}$, and $\mathbb{N}_0$, we postcompose with a deterministic function $f : Y \to Z$:
-
-| Base output | Transform $f$ | Target | Use |
-|---|---|---|---|
-| $\mathbb{R}$ | $\exp$ | $\mathbb{R}_{>0}$ | positive quantities (costs, durations) |
-| $\mathbb{R}$ | $\text{sigmoid}$ | $(0,1)$ | proportions |
-| $\mathbb{N}_0$ | $n \mapsto \mathbb{1}[n > 0]$ | $\{0,1\}$ | event occurrence (any visits vs. none) |
-
-: Common output transformations. {#tbl-output-transforms}
-
-For example, postcomposing a Gaussian kernel with $\exp$ gives a **log-normal** distribution on $\mathbb{R}_{>0}$ (@sec-lognormal-regression). Postcomposing with the sigmoid gives a **logit-normal** distribution on $(0,1)$. The thresholding map $n \mapsto \mathbb{1}[n > 0]$ collapses a Poisson output to a binary indicator, the basis of **hurdle models**.
-
-We now illustrate the construction on each of the three base families.
-
-### Linear regression kernel {#sec-linear-regression}
-
-A **linear regression kernel** $k : X_1 \otimes \cdots \otimes X_n \kernel \mathbb{R}$ models a real-valued output as a Gaussian whose mean depends linearly on the inputs:
-$$
-l_k(y \mid x_1, \ldots, x_n) = l_{\mathsf{Normal}}(y \mid \eta,\; \sigma^2), \qquad \eta = \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n.
-$$
-The output is a bell curve centred at the predicted value $\eta$. The variance $\sigma^2$ controls the spread of this curve and does not depend on the inputs, so it represents the irreducible noise that remains even when all inputs are known. Each coefficient $\alpha_j$ tells us how much a one-unit increase in $x_j$ shifts the centre of the output distribution, with all other inputs held fixed. In particular, $\mathbb{E}[Y \mid x] = \eta$, so the inputs affect the output *additively*: changing $x_j$ by $\Delta$ shifts the expected output by $\alpha_j \Delta$.
-
-### Logistic regression kernel {#sec-logistic-regression}
-
-A **logistic regression kernel** $k : X_1 \otimes \cdots \otimes X_n \kernel \{0,1\}$ models a binary output. The sigmoid response map (@tbl-input-transforms) converts a linear predictor into a valid Bernoulli probability:
-$$
-k(y = 1 \mid x_1, \ldots, x_n) = \sigma(\eta), \qquad \eta = \beta_0 + \beta_1 x_1 + \cdots + \beta_n x_n.
-$$
-The output distribution is fully described by $p = \sigma(\eta)$: the output is $1$ with probability $p$ and $0$ with probability $1-p$. Because $\sigma$ is a nonlinear squashing function, the inputs do not affect $p$ additively. Instead, they act additively on the **log-odds** scale: $\log\!\bigl(p/(1{-}p)\bigr) = \eta$, so increasing $x_j$ by one unit shifts the log-odds by $\beta_j$, or equivalently multiplies the odds by $e^{\beta_j}$. When $\eta$ is near $0$ (where $\sigma$ is approximately linear), a small change in an input produces a roughly proportional change in probability; when $|\eta|$ is large, the probability is already close to $0$ or $1$ and the same change has little effect.
-
-### Categorical regression kernel {#sec-categorical-regression}
-
-A **categorical regression kernel** $k : X_1 \otimes \cdots \otimes X_n \kernel \{1, \ldots, K\}$ extends logistic regression from two classes to $K > 2$ unordered values. Each class $j$ gets its own linear predictor $\eta_j = \beta_{j,0} + \beta_{j,1} x_1 + \cdots + \beta_{j,n} x_n$, and **softmax** converts the vector $(\eta_1, \ldots, \eta_K)$ into a probability distribution:
-$$
-k(y = j \mid x_1, \ldots, x_n) = \frac{e^{\eta_j}}{\sum_{k=1}^K e^{\eta_k}}.
-$$
-The output distribution assigns a probability to each of the $K$ classes; these probabilities are positive and sum to $1$. The class with the largest $\eta_j$ is the most probable, but the other classes retain positive probability. Each coefficient $\beta_{j,i}$ controls how input $x_i$ shifts the log-odds of class $j$ relative to the others: increasing $x_i$ by one unit multiplies the odds of class $j$ (relative to any fixed reference class) by $e^{\beta_{j,i}}$. For $K = 2$, writing $\eta = \eta_1 - \eta_2$ recovers the logistic regression kernel.
-
-### Log-normal regression kernel {#sec-lognormal-regression}
-
-A **log-normal regression kernel** models a strictly positive, right-skewed output by combining a Gaussian base family with the output transformation $f = \exp$ (@tbl-output-transforms):
-$$
-l_k(z \mid x_1, \ldots, x_n) = l_{\mathsf{LogNormal}}(z \mid \eta,\; \tau^2), \qquad \eta = \gamma_0 + \gamma_1 x_1 + \cdots + \gamma_n x_n.
-$$
-Equivalently, $Z = e^{Y}$ where $Y \sim \mathsf{Normal}(\eta, \tau^2)$. Since $\exp$ maps $\mathbb{R}$ onto $\mathbb{R}_{>0}$, the output is automatically positive. Its distribution is right-skewed: the median is $e^{\eta}$, and the parameter $\tau^2$ controls how spread out and heavy-tailed the distribution is. Because the linear predictor $\eta$ operates on the log scale, the inputs affect the output *multiplicatively*: increasing $x_j$ by one unit multiplies the median by $e^{\gamma_j}$.
-
-### Poisson regression kernel {#sec-poisson-regression}
-
-A **Poisson regression kernel** models a count-valued output ($y \in \mathbb{N}_0$). The exponential response map (@tbl-input-transforms) converts a linear predictor into a valid Poisson rate $\lambda > 0$:
-$$
-k(y \mid x_1, \ldots, x_n) = l_{\mathsf{Poisson}}(y \mid \lambda), \qquad \lambda = e^{\eta}, \qquad \eta = \delta_0 + \delta_1 x_1 + \cdots + \delta_n x_n.
-$$
-The output distribution places a probability bar at each non-negative integer, concentrated around $\lambda$: the expected count is $\mathbb{E}[Y \mid x] = \lambda = e^{\eta}$, and the variance equals $\lambda$ as well — so higher counts come with more spread. As with the log-normal kernel, the inputs act multiplicatively: increasing $x_j$ by one unit multiplies the expected count by $e^{\delta_j}$.
-
-
-## The Swiss health model {#sec-swiss-health-model}
-
-
-We now apply the framework to a concrete example: a model of Swiss health variables relating lifestyle factors to disease risk and healthcare costs. The model is assembled entirely from the parametric kernels introduced above, composed via the string-diagrammatic operations of @sec-string-diagrams-carry-over. We describe the variables and their relationships, instantiate the kernels with parameters calibrated to Swiss population statistics, and demonstrate forward sampling and conditioning using `WeightedSampling.torch`.
-
-The model relates six variables:
-
-| Variable | Symbol | Type | Role |
-|---|---|---|---|
-| Smoking status | $S$ | $\{0,1\}$ | root |
-| Age | $A$ | $\mathbb{R}_{\geq 0}$ | root |
-| Physical activity | $P$ | $\mathbb{R}_{\geq 0}$ | root |
-| BMI | $B$ | $\mathbb{R}$ | intermediate |
-| Diabetes | $D$ | $\{0,1\}$ | intermediate |
-| Healthcare costs | $C$ | $\mathbb{R}_{>0}$ | leaf |
-
-: Variables in the Swiss health model. {#tbl-swiss-health-vars}
-
-The causal story runs as follows. Smoking status, age, and physical activity are root variables with no parents in the model. Together, they influence BMI through a linear regression kernel. BMI in turn influences diabetes risk through a logistic regression kernel. Finally, diabetes status and BMI jointly determine healthcare costs through a log-normal regression kernel. The graph is a directed chain with one fan-out: BMI feeds into both the diabetes kernel and the cost kernel.
-
-The parameters appearing below are grounded in publicly available Swiss summary statistics. Where a parameter corresponds directly to a published statistic (a prevalence, a mean, or a rate), we read its value from the source; where possible, we derive regression coefficients from published relative risks. The remaining coefficients are calibrated so that the model's marginal distributions reproduce the published target values. In the [next chapter](parameter-estimation.qmd), we explain how parameter estimates are obtained systematically from data.
-
-::: {.callout-note collapse="true"}
-## Data sources
-
-- [BFS Gesundheit — Taschenstatistik 2025](https://www.bfs.admin.ch/bfs/en/home/statistics/health.assetdetail.33427753.html) (based on the [Swiss Health Survey](https://www.bfs.admin.ch/bfs/en/home/statistics/health/surveys/sgb.html), SGB 2022): smoking prevalence (p. 20), overweight and obesity rates (pp. 20–21), diabetes prevalence (pp. 8–9), physical activity (p. 20), doctor consultations (p. 31), and healthcare costs (p. 32).
-- [Obsan Bericht 10/2020: Diabetes Mellitus](https://www.obsan.admin.ch/de/publikationen/2020-diabetes-mellitus) (Fürst & Probst-Hensch, 2020): disease burden and care in Switzerland. Reference data include diabetes prevalence by age and data source (ch. 8), BMI $\geq$ 25 prevalence among diabetics (SAPALDIA: 79–83% vs. 50–56% among non-diabetics, p. 49), and direct healthcare costs for diabetic patients (CHF 8,239/year, Helsana 2011, p. 47).
-- [Kosten von nichtübertragbaren Krankheiten in der Schweiz](https://www.bag.admin.ch/bag/de/home/das-bag/publikationen/forschungsberichte/forschungsberichte-ncd.html) (Stucki et al., 2025, ZHAW/Uni Luzern/BFH for BAG): full NCD cost report (156 pp.). Relative risks for diabetes type 2 from overweight: RR = 2.25 (M) / 2.30 (F); from obesity: RR = 5.50 (M) / 7.00 (F) (Tables 20–21, from Lobstein & Leach, 2010). Physical inactivity relative risk for diabetes: RR = 1.17 (Kyu et al., 2016). For obesity: OR = 1.49 (Bell et al., 2014, Table 28). Total healthcare costs attributable to overweight/obesity: CHF 3.7 billion (2022), of which diabetes type 2 accounts for CHF 1.07 billion, with an additional CHF 2.9 billion in productivity losses (Tables 22–25). 150,315 DALYs (Table 26), of which diabetes type 2 accounts for 58,293 (39%).
-- [CoLaus study](https://doi.org/10.1111/j.1464-5491.2011.03422.x) (Kaiser et al., 2012, *Diabetic Medicine* 29: 190–197): population-based study of 6,188 subjects (35–75 years) in Lausanne. Multivariable-adjusted odds ratios for type 2 diabetes (Table 4): BMI overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78); physical activity OR = 0.64 (0.51–0.80); age 65–75 vs. 35–44 OR = 8.20 (5.22–12.9). T2D prevalence 6.3%; mean BMI of diabetics 30.2 vs. 25.5 for non-diabetics.
-- [Sport Schweiz 2020](https://www.sportobs.ch/sport-schweiz/) (BASPO / Lamprecht & Stamm): physical activity categories and sport behavior (pp. 12–16).
-- [WHO Global Health Observatory](https://www.who.int/data/gho): mean BMI by country (age-standardized).
-- [IDF Diabetes Atlas](https://diabetesatlas.org/): diabetes prevalence by country.
-- [OECD Health at a Glance](https://www.oecd.org/health/health-at-a-glance/) (2023): doctor consultations per capita.
-- [BFS Population Statistics](https://www.bfs.admin.ch/bfs/en/home/statistics/population.html) (STATPOP): median age and age distribution.
-:::
-
-### Root distributions
-
-The three root variables have no parents, so they are specified by marginal distributions (kernels $I \kernel X$ with trivial input):
-
-- **Smoking** $S \sim \mathsf{Bernoulli}(0.27)$. The SGB 2022 reports that 27.1% of men and 20.8% of women smoke daily or occasionally; we use $0.27$ as a round approximation.
-- **Age** $A \sim \mathsf{Normal}(42, 17^2)$. The Swiss median age is 42.7 years (BFS STATPOP). The standard deviation of 17 is chosen to approximate the adult age distribution.
-- **Physical activity** $P \sim \mathsf{Normal}(5, 2^2)$, measured in hours of sport per week. Sport Schweiz 2020 reports that 51% of adults are "trained" ($\geq 3$ hours/week), 27% "sufficiently active," 16% "partly active," and 6% "inactive."
-
-### The BMI kernel (linear regression) {#sec-bmi-kernel}
-
-BMI is a continuous variable influenced by a mix of discrete and continuous parents — exactly the setting for which the linear regression kernel (@sec-linear-regression) is designed:
-$$
-B \mid S, A, P \;\sim\; \mathsf{Normal}(\alpha_0 + \alpha_S\, S + \alpha_A\, A + \alpha_P\, P,\; \sigma^2).
-$$
-
-::: {.callout-note collapse="true"}
-## Parameter sourcing — BMI kernel
-
-- *Intercept* $\alpha_0 = 25.0$: set so that $\mathbb{E}[B] \approx 25.3$ at the population means, matching the WHO age-standardized estimate of Switzerland's mean BMI.
-- *Smoking slope* $\alpha_S = -0.5$: epidemiological studies consistently find that current smokers have slightly lower BMI than non-smokers, owing to nicotine's appetite-suppressive effect. A meta-analysis (Dare et al., 2015, *BMJ Open* 5: e008330) reports that current smokers have BMI roughly 0.3–0.7 kg/m² lower than never-smokers after adjusting for confounders.
-- *Age slope* $\alpha_A = 0.05$: the SGB 2022 shows overweight-plus-obesity prevalence rising from roughly 30% in the 25–34 age group to 55% at ages 55–64. A slope of 0.05 BMI units per year produces a 1.5-unit increase over 30 years, consistent with this gradient.
-- *Activity slope* $\alpha_P = -0.3$: the NCD cost report (Stucki et al., 2025, Table 28) reports a physical inactivity → obesity odds ratio of 1.49 (Bell et al., 2014), confirming the direction. The magnitude is approximate.
-- *Residual standard deviation* $\sigma = 3.8$: calibrated so that the model produces approximately 43% overweight (BMI $\geq$ 25) and 12% obese (BMI $>$ 30), matching SGB 2022 rates.
-:::
-
-### The diabetes kernel (logistic regression) {#sec-diabetes-kernel}
-
-Diabetes status is binary and depends on BMI — the setting for the logistic regression kernel (@sec-logistic-regression):
-$$
-D \mid B \;\sim\; \mathsf{Bernoulli}\bigl(\sigma(\beta_0 + \beta_1\, B)\bigr).
-$$
-
-::: {.callout-note collapse="true"}
-## Parameter sourcing — diabetes kernel
-
-- *Intercept* $\beta_0 = -6.7$: calibrated so that the marginal diabetes prevalence at average BMI matches the Swiss rate. The IDF Diabetes Atlas reports 5.3% (ages 20–79). The SGB 2022 reports 6.9% of men and 4.0% of women, giving a combined rate of approximately 5.4%. The Obsan diabetes report (pp. 47–49) compiles prevalence estimates from multiple Swiss data sources (SGB, Helsana, CoLaus, SAPALDIA), all converging on 5–7%.
-- *Slope* $\beta_1 = 0.15$: the Stucki et al. (2025) NCD cost report compiles relative risks for diabetes type 2: overweight (BMI 25–30) vs. normal weight gives RR = 2.25 (men) / 2.30 (women); obesity (BMI $\geq$ 30) vs. normal weight gives RR = 5.50 (men) / 7.00 (women). The CoLaus study (Kaiser et al., 2012) reports multivariable-adjusted odds ratios: overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78). Approximating a log-linear relationship from the Stucki RRs gives $\beta_1 \approx \log(2.25)/5.5 \approx 0.15$.
-:::
-
-### The cost kernel (log-normal regression) {#sec-cost-kernel}
-
-Annual healthcare costs are strictly positive and right-skewed — the setting for the log-normal regression kernel (@sec-lognormal-regression). Costs depend on both diabetes status and BMI:
-$$
-\log C \mid D, B \;\sim\; \mathsf{Normal}(\gamma_0 + \gamma_D\, D + \gamma_B\, B,\; \tau^2).
-$$
-
-::: {.callout-note collapse="true"}
-## Parameter sourcing — cost kernel
-
-- *Intercept* $\gamma_0 = 7.5$: calibrated so that the median cost for a non-diabetic adult at average BMI is roughly CHF 3,900. For reference, total Swiss healthcare expenditure in 2022 was CHF 869 per person per month (CHF 10,428 per year; BFS Taschenstatistik 2025, p. 32).
-- *Diabetes slope* $\gamma_D = 0.65$: the Obsan diabetes report (p. 47) cites Helsana data showing direct healthcare costs of CHF 8,239/year per diabetic patient (2011), roughly twice the non-diabetic baseline. Taking the log ratio gives $\gamma_D \approx \ln(8239/3900) \approx 0.75$; we use the slightly conservative value $0.65$ to account for the fact that not all of the cost differential is attributable to diabetes status alone.
-- *BMI slope* $\gamma_B = 0.03$: encodes the qualitatively correct direction (higher BMI increases costs). The NCD cost report attributes 70% of diabetes type 2 productivity losses to overweight/obesity, confirming the strong cost linkage. The per-unit magnitude is approximate.
-- *Dispersion* $\tau = 0.6$: reflects the typically right-skewed cost distribution.
-:::
-
-### Composing the full model
-
-Compose root measures + regression kernels via sequential/parallel composition + copy/swap.
-     Draw the complete string diagram: {S, A, P} → B → D → C, with B also feeding into C.
-     Show how the compositional structure encodes the causal story.
-
-``` {.tikz}
-%%| label: fig-swiss-health-model
-%%| fig-cap: String diagram for the Swiss health model.
-%%| height: 8em
-% TODO: draw the composed string diagram
-```
-
-### Forward sampling
-
-We implement the full model in `WeightedSampling.torch` by composing the root distributions and regression kernels:
-
-::: {#58218a96 .cell execution_count=4}
-``` {.python .cell-code code-fold="false"}
-import torch
-import torch.distributions as dist
-from weighted_sampling import model, sample, observe, summary, expectation
-```
-:::
-
-
-::: {#f8a32d51 .cell execution_count=5}
-``` {.python .cell-code code-fold="false"}
-@model
-def swiss_health():
-    # --- Root distributions ---
-    S = sample("S", dist.Bernoulli(0.27))          # smoking
-    A = sample("A", dist.Normal(42.0, 17.0))       # age
-    P = sample("P", dist.Normal(5.0, 2.0))         # activity (hours/week)
-
-    # --- BMI kernel (linear regression) ---
-    eta_B = 25.0 + (-0.5) * S + 0.05 * A - 0.3 * P
-    B = sample("B", dist.Normal(eta_B, 3.8))
-
-    # --- Diabetes kernel (logistic regression) ---
-    eta_D = -6.7 + 0.15 * B
-    D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
-
-    # --- Cost kernel (log-normal regression) ---
-    eta_C = 7.5 + 0.65 * D + 0.03 * B
-    C = sample("C", dist.LogNormal(eta_C, 0.6))
-
-
-result = swiss_health(num_particles=10_000)
-print(summary(result))
-```
-
-::: {.cell-output .cell-output-stdout}
-```
-{'S': {'mean': tensor(0.2693), 'std': tensor(0.4436), 'n_unique': 2}, 'A': {'mean': tensor(42.0880), 'std': tensor(17.0479), 'n_unique': 9999}, 'P': {'mean': tensor(5.0009), 'std': tensor(2.0197), 'n_unique': 9998}, 'B': {'mean': tensor(25.4932), 'std': tensor(3.9734), 'n_unique': 9996}, 'D': {'mean': tensor(0.0612), 'std': tensor(0.2397), 'n_unique': 2}, 'C': {'mean': tensor(5022.1299), 'std': tensor(3689.0903), 'n_unique': 9977}}
-```
-:::
-:::
-
-
-We can verify the model against known Swiss statistics:
-
-::: {#ee326760 .cell execution_count=6}
-``` {.python .cell-code code-fold="false"}
-B_vals = result["B"]
-D_vals = result["D"]
-C_vals = result["C"]
-
-print(f"P(BMI >= 25):       {(B_vals >= 25).float().mean():.3f}")
-print(f"P(BMI >= 30):       {(B_vals >= 30).float().mean():.3f}")
-print(f"P(Diabetes):        {D_vals.mean():.3f}")
-print(f"Median cost (CHF):  {C_vals.median().item():,.0f}")
-```
-
-::: {.cell-output .cell-output-stdout}
-```
-P(BMI >= 25):       0.550
-P(BMI >= 30):       0.129
-P(Diabetes):        0.061
-Median cost (CHF):  4,055
-```
-:::
-:::
-
-
-### Conditioning on continuous observations {#sec-conditioning-continuous}
-
-Extend the graphical conditioning procedure from Chapter 3: pre-condition on density values. Worked example: condition on observed BMI B = b.
-
-### Conditioning on discrete observations {#sec-conditioning-discrete}
-
-Same as the discrete case. Example: condition on D = 1 (has diabetes). What does this tell us about likely health costs? 
-
-## Bibliographic notes {.unnumbered}
-
-References: measure-theoretic probability, generalized linear models, Swiss Health Survey (SGB), WeightedSampling.torch. 
-
--->
-
-
-
 </section>
+</section>
+<section id="sec-parametric-kernels" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="sec-parametric-kernels"><span class="header-section-number">4.2</span> Parametric kernels</h2>
+<p>In the discrete setting, a kernel <span class="math inline">\(f : X \kernel Y\)</span> was fully specified by a finite table of values <span class="math inline">\(f(y \mid x)\)</span>. When the input or output space is infinite, we need a formula instead: a <strong>parametric family</strong> that fixes the functional form of the density and lets a finite collection of <strong>parameters</strong> pin down which density each input selects.</p>
+<p>Consider the Gaussian family from <a href="#exm-gaussian-kernel">Example&nbsp;4.5</a>. If we let the mean depend on an input <span class="math inline">\(x\)</span> through the function <span class="math inline">\(\mu = \alpha_0 + \alpha_1 x\)</span>, then three parameters <span class="math inline">\(\alpha_0\)</span>, <span class="math inline">\(\alpha_1\)</span>, and <span class="math inline">\(\sigma^2\)</span> determine a kernel <span class="math inline">\(k : \mathbb{R} \kernel \mathbb{R}\)</span>: <span class="math display">\[
+l_k(y \mid x) = l_{\mathsf{Normal}}(y \mid \alpha_0 + \alpha_1 x,\; \sigma^2).
+\]</span> For every value of <span class="math inline">\(x\)</span>, this formula produces a valid Gaussian density for <span class="math inline">\(y\)</span>. Hence, we have reduced the problem of specifying a kernel to specifying a finite number of parameters. This comes at the cost of expressiveness: kernels in this family can only produce Gaussian samples with means that depend linearly on <span class="math inline">\(x\)</span>.</p>
+<section id="sec-constructing-kernels" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="sec-constructing-kernels"><span class="header-section-number">4.2.1</span> Constructing kernels</h3>
+<p>Our strategy for building kernels between arbitrary spaces is compositional. Every kernel we construct has the form <span class="math display">\[
+X \xrightarrow{\; g \;} \Theta \xrightarrow{\; k_{\text{base}} \;} Y \xrightarrow{\; f \;} Z,
+\]</span> or, in string-diagram notation, <span class="math inline">\(k = k_g \then k_{\text{base}} \then k_f\)</span>. Three ingredients are chosen independently:</p>
+<ol type="1">
+<li>A <strong>base family</strong> <span class="math inline">\(k_{\text{base}} : \Theta \kernel Y\)</span> — a standard parametric family of distributions that does all the stochastic work.</li>
+<li>An <strong>input transformation</strong> <span class="math inline">\(g : X \to \Theta\)</span> — a deterministic function that computes valid parameters from whatever inputs are given.</li>
+<li>An <strong>output transformation</strong> <span class="math inline">\(f : Y \to Z\)</span> — a deterministic function that redirects the base family’s output to the desired target space.</li>
+</ol>
+<p>Either deterministic map can be the identity when no transformation is needed. We now discuss each ingredient in turn.</p>
+<p><strong>Base families.</strong> Each base family is the simplest adequate model for one common output type:</p>
+<div id="tbl-base-families" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-base-families-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.1: Common base families, one for each basic output type.
+</figcaption>
+<div aria-describedby="tbl-base-families-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Parameters</th>
+<th>Output space</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gaussian</td>
+<td>mean <span class="math inline">\(\mu \in \mathbb{R}\)</span>, variance <span class="math inline">\(\sigma^2 &gt; 0\)</span></td>
+<td><span class="math inline">\(\mathbb{R}\)</span></td>
+</tr>
+<tr class="even">
+<td>Bernoulli</td>
+<td>probability <span class="math inline">\(p \in (0,1)\)</span></td>
+<td><span class="math inline">\(\{0,1\}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Poisson</td>
+<td>rate <span class="math inline">\(\lambda &gt; 0\)</span></td>
+<td><span class="math inline">\(\mathbb{N}_0\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The Gaussian family is the default for real-valued outputs; the Bernoulli family is the unique distribution on <span class="math inline">\(\{0,1\}\)</span>; and the Poisson family is the standard model for counts. Other families — Gamma (<span class="math inline">\(\mathbb{R}_{&gt;0}\)</span>), negative binomial (<span class="math inline">\(\mathbb{N}_0\)</span>), Beta (<span class="math inline">\((0,1)\)</span>) — can be slotted into the same pattern when needed.</p>
+<p><strong>Input transformations.</strong> The input transformation <span class="math inline">\(g : X_1 \otimes \cdots \otimes X_n \to \Theta\)</span> maps the inputs into the parameter space <span class="math inline">\(\Theta\)</span> of the base family. We build it in two steps: <span class="math display">\[
+X_1 \otimes \cdots \otimes X_n \xrightarrow{\;g_{\text{lin}}\;} \mathbb{R} \xrightarrow{\;\varphi\;} \Theta.
+\]</span></p>
+<p>The first step is a <strong>linear predictor</strong> <span class="math inline">\(g_{\text{lin}}\)</span> that reduces all inputs to a single real number: <span class="math display">\[
+\eta \;=\; g_{\text{lin}}(x_1, \ldots, x_n) \;=\; \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n.
+\]</span> This accepts any mix of discrete and continuous inputs: a binary input <span class="math inline">\(x_j \in \{0,1\}\)</span> switches its coefficient on or off, while a continuous input contributes proportionally.</p>
+<p>The second step is a <strong>response map</strong> <span class="math inline">\(\varphi : \mathbb{R} \to \Theta\)</span> that sends <span class="math inline">\(\eta\)</span> into the parameter space of the chosen base family. When <span class="math inline">\(\Theta = \mathbb{R}\)</span> (as for the Gaussian mean), this is just the identity; when <span class="math inline">\(\Theta\)</span> is a strict subset of <span class="math inline">\(\mathbb{R}\)</span>, we need a map that lands in the right space:</p>
+<div id="tbl-input-transforms" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-input-transforms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.2: Response maps sending a linear predictor <span class="math inline">\(\eta \in \mathbb{R}\)</span> into the parameter space of each base family.
+</figcaption>
+<div aria-describedby="tbl-input-transforms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter space <span class="math inline">\(\Theta\)</span></th>
+<th>Response map <span class="math inline">\(\varphi\)</span></th>
+<th>Formula</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathbb{R}\)</span></td>
+<td>identity</td>
+<td><span class="math inline">\(\varphi(\eta) = \eta\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\((0,1)\)</span></td>
+<td>sigmoid</td>
+<td><span class="math inline">\(\varphi(\eta) = \frac{1}{1 + e^{-\eta}}\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathbb{R}_{&gt;0}\)</span></td>
+<td>exponential</td>
+<td><span class="math inline">\(\varphi(\eta) = e^{\eta}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The full input transformation is <span class="math display">\[
+g = \varphi \circ g_{\text{lin}}.
+\]</span> Nothing in the construction requires the first step to be linear: we can replace it with nonlinear features, spline bases, or a neural network without changing anything else. In string-diagrammatic terms, only the deterministic kernel <span class="math inline">\(k_g\)</span> changes; the base family and output transformation are unaffected.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Connection to generalized linear models
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>When the input transformation has the form <span class="math inline">\(g = \varphi \circ g_{\text{linear}}\)</span> and the base family belongs to the exponential family, statisticians call the resulting kernel a <strong>generalized linear model (GLM)</strong>. In that literature, <span class="math inline">\(\varphi^{-1}\)</span> is called the <em>link function</em> and <span class="math inline">\(\varphi\)</span> the <em>response function</em> or <em>inverse link</em>. Linear regression, logistic regression, and Poisson regression are the three canonical GLMs, corresponding to the three base families above with identity, sigmoid, and exponential maps respectively.</p>
+</div>
+</div>
+</div>
+<p><strong>Output transformations.</strong> To reach output spaces beyond <span class="math inline">\(\mathbb{R}\)</span>, <span class="math inline">\(\{0,1\}\)</span>, and <span class="math inline">\(\mathbb{N}_0\)</span>, we postcompose with a deterministic function <span class="math inline">\(f : Y \to Z\)</span>:</p>
+<div id="tbl-output-transforms" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-output-transforms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.3: Common output transformations.
+</figcaption>
+<div aria-describedby="tbl-output-transforms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Base output</th>
+<th>Transform <span class="math inline">\(f\)</span></th>
+<th>Target</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathbb{R}\)</span></td>
+<td><span class="math inline">\(\exp\)</span></td>
+<td><span class="math inline">\(\mathbb{R}_{&gt;0}\)</span></td>
+<td>positive quantities (costs, durations)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathbb{R}\)</span></td>
+<td><span class="math inline">\(\text{sigmoid}\)</span></td>
+<td><span class="math inline">\((0,1)\)</span></td>
+<td>proportions</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathbb{N}_0\)</span></td>
+<td><span class="math inline">\(n \mapsto \mathbb{1}[n &gt; 0]\)</span></td>
+<td><span class="math inline">\(\{0,1\}\)</span></td>
+<td>event occurrence (any visits vs.&nbsp;none)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>For example, postcomposing a Gaussian kernel with <span class="math inline">\(\exp\)</span> gives a <strong>log-normal</strong> distribution on <span class="math inline">\(\mathbb{R}_{&gt;0}\)</span> (<a href="#sec-lognormal-regression" class="quarto-xref"><span>Section 4.2.5</span></a>). Postcomposing with the sigmoid gives a <strong>logit-normal</strong> distribution on <span class="math inline">\((0,1)\)</span>. The thresholding map <span class="math inline">\(n \mapsto \mathbb{1}[n &gt; 0]\)</span> collapses a Poisson output to a binary indicator, the basis of <strong>hurdle models</strong>.</p>
+<p>We now illustrate the construction on each of the three base families.</p>
+</section>
+<section id="sec-linear-regression" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="sec-linear-regression"><span class="header-section-number">4.2.2</span> Linear regression kernel</h3>
+<p>A <strong>linear regression kernel</strong> <span class="math inline">\(k : X_1 \otimes \cdots \otimes X_n \kernel \mathbb{R}\)</span> models a real-valued output as a Gaussian whose mean depends linearly on the inputs: <span class="math display">\[
+l_k(y \mid x_1, \ldots, x_n) = l_{\mathsf{Normal}}(y \mid \eta,\; \sigma^2), \qquad \eta = \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n.
+\]</span> The output is a bell curve centred at the predicted value <span class="math inline">\(\eta\)</span>. The variance <span class="math inline">\(\sigma^2\)</span> controls the spread of this curve and does not depend on the inputs, so it represents the irreducible noise that remains even when all inputs are known. Each coefficient <span class="math inline">\(\alpha_j\)</span> tells us how much a one-unit increase in <span class="math inline">\(x_j\)</span> shifts the centre of the output distribution, with all other inputs held fixed. In particular, <span class="math inline">\(\mathbb{E}[Y \mid x] = \eta\)</span>, so the inputs affect the output <em>additively</em>: changing <span class="math inline">\(x_j\)</span> by <span class="math inline">\(\Delta\)</span> shifts the expected output by <span class="math inline">\(\alpha_j \Delta\)</span>.</p>
+</section>
+<section id="sec-logistic-regression" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="sec-logistic-regression"><span class="header-section-number">4.2.3</span> Logistic regression kernel</h3>
+<p>A <strong>logistic regression kernel</strong> <span class="math inline">\(k : X_1 \otimes \cdots \otimes X_n \kernel \{0,1\}\)</span> models a binary output. The sigmoid response map (<a href="#tbl-input-transforms" class="quarto-xref">Table&nbsp;<span>4.2</span></a>) converts a linear predictor into a valid Bernoulli probability: <span class="math display">\[
+k(y = 1 \mid x_1, \ldots, x_n) = \sigma(\eta), \qquad \eta = \beta_0 + \beta_1 x_1 + \cdots + \beta_n x_n.
+\]</span> The output distribution is fully described by <span class="math inline">\(p = \sigma(\eta)\)</span>: the output is <span class="math inline">\(1\)</span> with probability <span class="math inline">\(p\)</span> and <span class="math inline">\(0\)</span> with probability <span class="math inline">\(1-p\)</span>. Because <span class="math inline">\(\sigma\)</span> is a nonlinear squashing function, the inputs do not affect <span class="math inline">\(p\)</span> additively. Instead, they act additively on the <strong>log-odds</strong> scale: <span class="math inline">\(\log\!\bigl(p/(1{-}p)\bigr) = \eta\)</span>, so increasing <span class="math inline">\(x_j\)</span> by one unit shifts the log-odds by <span class="math inline">\(\beta_j\)</span>, or equivalently multiplies the odds by <span class="math inline">\(e^{\beta_j}\)</span>. When <span class="math inline">\(\eta\)</span> is near <span class="math inline">\(0\)</span> (where <span class="math inline">\(\sigma\)</span> is approximately linear), a small change in an input produces a roughly proportional change in probability; when <span class="math inline">\(|\eta|\)</span> is large, the probability is already close to <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span> and the same change has little effect.</p>
+</section>
+<section id="sec-categorical-regression" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="sec-categorical-regression"><span class="header-section-number">4.2.4</span> Categorical regression kernel</h3>
+<p>A <strong>categorical regression kernel</strong> <span class="math inline">\(k : X_1 \otimes \cdots \otimes X_n \kernel \{1, \ldots, K\}\)</span> extends logistic regression from two classes to <span class="math inline">\(K &gt; 2\)</span> unordered values. Each class <span class="math inline">\(j\)</span> gets its own linear predictor <span class="math inline">\(\eta_j = \beta_{j,0} + \beta_{j,1} x_1 + \cdots + \beta_{j,n} x_n\)</span>, and <strong>softmax</strong> converts the vector <span class="math inline">\((\eta_1, \ldots, \eta_K)\)</span> into a probability distribution: <span class="math display">\[
+k(y = j \mid x_1, \ldots, x_n) = \frac{e^{\eta_j}}{\sum_{k=1}^K e^{\eta_k}}.
+\]</span> The output distribution assigns a probability to each of the <span class="math inline">\(K\)</span> classes; these probabilities are positive and sum to <span class="math inline">\(1\)</span>. The class with the largest <span class="math inline">\(\eta_j\)</span> is the most probable, but the other classes retain positive probability. Each coefficient <span class="math inline">\(\beta_{j,i}\)</span> controls how input <span class="math inline">\(x_i\)</span> shifts the log-odds of class <span class="math inline">\(j\)</span> relative to the others: increasing <span class="math inline">\(x_i\)</span> by one unit multiplies the odds of class <span class="math inline">\(j\)</span> (relative to any fixed reference class) by <span class="math inline">\(e^{\beta_{j,i}}\)</span>. For <span class="math inline">\(K = 2\)</span>, writing <span class="math inline">\(\eta = \eta_1 - \eta_2\)</span> recovers the logistic regression kernel.</p>
+</section>
+<section id="sec-lognormal-regression" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="sec-lognormal-regression"><span class="header-section-number">4.2.5</span> Log-normal regression kernel</h3>
+<p>A <strong>log-normal regression kernel</strong> models a strictly positive, right-skewed output by combining a Gaussian base family with the output transformation <span class="math inline">\(f = \exp\)</span> (<a href="#tbl-output-transforms" class="quarto-xref">Table&nbsp;<span>4.3</span></a>): <span class="math display">\[
+l_k(z \mid x_1, \ldots, x_n) = l_{\mathsf{LogNormal}}(z \mid \eta,\; \tau^2), \qquad \eta = \gamma_0 + \gamma_1 x_1 + \cdots + \gamma_n x_n.
+\]</span> Equivalently, <span class="math inline">\(Z = e^{Y}\)</span> where <span class="math inline">\(Y \sim \mathsf{Normal}(\eta, \tau^2)\)</span>. Since <span class="math inline">\(\exp\)</span> maps <span class="math inline">\(\mathbb{R}\)</span> onto <span class="math inline">\(\mathbb{R}_{&gt;0}\)</span>, the output is automatically positive. Its distribution is right-skewed: the median is <span class="math inline">\(e^{\eta}\)</span>, and the parameter <span class="math inline">\(\tau^2\)</span> controls how spread out and heavy-tailed the distribution is. Because the linear predictor <span class="math inline">\(\eta\)</span> operates on the log scale, the inputs affect the output <em>multiplicatively</em>: increasing <span class="math inline">\(x_j\)</span> by one unit multiplies the median by <span class="math inline">\(e^{\gamma_j}\)</span>.</p>
+</section>
+<section id="sec-poisson-regression" class="level3" data-number="4.2.6">
+<h3 data-number="4.2.6" class="anchored" data-anchor-id="sec-poisson-regression"><span class="header-section-number">4.2.6</span> Poisson regression kernel</h3>
+<p>A <strong>Poisson regression kernel</strong> models a count-valued output (<span class="math inline">\(y \in \mathbb{N}_0\)</span>). The exponential response map (<a href="#tbl-input-transforms" class="quarto-xref">Table&nbsp;<span>4.2</span></a>) converts a linear predictor into a valid Poisson rate <span class="math inline">\(\lambda &gt; 0\)</span>: <span class="math display">\[
+k(y \mid x_1, \ldots, x_n) = l_{\mathsf{Poisson}}(y \mid \lambda), \qquad \lambda = e^{\eta}, \qquad \eta = \delta_0 + \delta_1 x_1 + \cdots + \delta_n x_n.
+\]</span> The output distribution places a probability bar at each non-negative integer, concentrated around <span class="math inline">\(\lambda\)</span>: the expected count is <span class="math inline">\(\mathbb{E}[Y \mid x] = \lambda = e^{\eta}\)</span>, and the variance equals <span class="math inline">\(\lambda\)</span> as well — so higher counts come with more spread. As with the log-normal kernel, the inputs act multiplicatively: increasing <span class="math inline">\(x_j\)</span> by one unit multiplies the expected count by <span class="math inline">\(e^{\delta_j}\)</span>.</p>
+<!-- ============================================================ -->
+</section>
+</section>
+<section id="sec-swiss-health-model" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="sec-swiss-health-model"><span class="header-section-number">4.3</span> The Swiss health model</h2>
+<!-- ============================================================ -->
+<p>We now apply the framework to a concrete example: a model of Swiss health variables relating lifestyle factors to disease risk and healthcare costs. The model is assembled entirely from the parametric kernels introduced above, composed via the string-diagrammatic operations of <a href="#sec-string-diagrams-carry-over" class="quarto-xref"><span>Section 4.1.6</span></a>. We describe the variables and their relationships, instantiate the kernels with parameters calibrated to Swiss population statistics, and demonstrate forward sampling and conditioning using <code>WeightedSampling.torch</code>.</p>
+<p>The model relates six variables:</p>
+<div id="tbl-swiss-health-vars" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-swiss-health-vars-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.4: Variables in the Swiss health model.
+</figcaption>
+<div aria-describedby="tbl-swiss-health-vars-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Symbol</th>
+<th>Type</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Smoking status</td>
+<td><span class="math inline">\(S\)</span></td>
+<td><span class="math inline">\(\{0,1\}\)</span></td>
+<td>root</td>
+</tr>
+<tr class="even">
+<td>Age</td>
+<td><span class="math inline">\(A\)</span></td>
+<td><span class="math inline">\(\mathbb{R}_{\geq 0}\)</span></td>
+<td>root</td>
+</tr>
+<tr class="odd">
+<td>Physical activity</td>
+<td><span class="math inline">\(P\)</span></td>
+<td><span class="math inline">\(\mathbb{R}_{\geq 0}\)</span></td>
+<td>root</td>
+</tr>
+<tr class="even">
+<td>BMI</td>
+<td><span class="math inline">\(B\)</span></td>
+<td><span class="math inline">\(\mathbb{R}\)</span></td>
+<td>intermediate</td>
+</tr>
+<tr class="odd">
+<td>Diabetes</td>
+<td><span class="math inline">\(D\)</span></td>
+<td><span class="math inline">\(\{0,1\}\)</span></td>
+<td>intermediate</td>
+</tr>
+<tr class="even">
+<td>Healthcare costs</td>
+<td><span class="math inline">\(C\)</span></td>
+<td><span class="math inline">\(\mathbb{R}_{&gt;0}\)</span></td>
+<td>leaf</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The causal story runs as follows. Smoking status, age, and physical activity are root variables with no parents in the model. Together, they influence BMI through a linear regression kernel. BMI in turn influences diabetes risk through a logistic regression kernel. Finally, diabetes status and BMI jointly determine healthcare costs through a log-normal regression kernel. The graph is a directed chain with one fan-out: BMI feeds into both the diabetes kernel and the cost kernel.</p>
+<p>The parameters appearing below are grounded in publicly available Swiss summary statistics. Where a parameter corresponds directly to a published statistic (a prevalence, a mean, or a rate), we read its value from the source; where possible, we derive regression coefficients from published relative risks. The remaining coefficients are calibrated so that the model’s marginal distributions reproduce the published target values. In the <a href="parameter-estimation.qmd">next chapter</a>, we explain how parameter estimates are obtained systematically from data.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Data sources
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="https://www.bfs.admin.ch/bfs/en/home/statistics/health.assetdetail.33427753.html">BFS Gesundheit — Taschenstatistik 2025</a> (based on the <a href="https://www.bfs.admin.ch/bfs/en/home/statistics/health/surveys/sgb.html">Swiss Health Survey</a>, SGB 2022): smoking prevalence (p.&nbsp;20), overweight and obesity rates (pp.&nbsp;20–21), diabetes prevalence (pp.&nbsp;8–9), physical activity (p.&nbsp;20), doctor consultations (p.&nbsp;31), and healthcare costs (p.&nbsp;32).</li>
+<li><a href="https://www.obsan.admin.ch/de/publikationen/2020-diabetes-mellitus">Obsan Bericht 10/2020: Diabetes Mellitus</a> (Fürst &amp; Probst-Hensch, 2020): disease burden and care in Switzerland. Reference data include diabetes prevalence by age and data source (ch.&nbsp;8), BMI <span class="math inline">\(\geq\)</span> 25 prevalence among diabetics (SAPALDIA: 79–83% vs.&nbsp;50–56% among non-diabetics, p.&nbsp;49), and direct healthcare costs for diabetic patients (CHF 8,239/year, Helsana 2011, p.&nbsp;47).</li>
+<li><a href="https://www.bag.admin.ch/bag/de/home/das-bag/publikationen/forschungsberichte/forschungsberichte-ncd.html">Kosten von nichtübertragbaren Krankheiten in der Schweiz</a> (Stucki et al., 2025, ZHAW/Uni Luzern/BFH for BAG): full NCD cost report (156 pp.). Relative risks for diabetes type 2 from overweight: RR = 2.25 (M) / 2.30 (F); from obesity: RR = 5.50 (M) / 7.00 (F) (Tables 20–21, from Lobstein &amp; Leach, 2010). Physical inactivity relative risk for diabetes: RR = 1.17 (Kyu et al., 2016). For obesity: OR = 1.49 (Bell et al., 2014, Table 28). Total healthcare costs attributable to overweight/obesity: CHF 3.7 billion (2022), of which diabetes type 2 accounts for CHF 1.07 billion, with an additional CHF 2.9 billion in productivity losses (Tables 22–25). 150,315 DALYs (Table 26), of which diabetes type 2 accounts for 58,293 (39%).</li>
+<li><a href="https://doi.org/10.1111/j.1464-5491.2011.03422.x">CoLaus study</a> (Kaiser et al., 2012, <em>Diabetic Medicine</em> 29: 190–197): population-based study of 6,188 subjects (35–75 years) in Lausanne. Multivariable-adjusted odds ratios for type 2 diabetes (Table 4): BMI overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78); physical activity OR = 0.64 (0.51–0.80); age 65–75 vs.&nbsp;35–44 OR = 8.20 (5.22–12.9). T2D prevalence 6.3%; mean BMI of diabetics 30.2 vs.&nbsp;25.5 for non-diabetics.</li>
+<li><a href="https://www.sportobs.ch/sport-schweiz/">Sport Schweiz 2020</a> (BASPO / Lamprecht &amp; Stamm): physical activity categories and sport behavior (pp.&nbsp;12–16).</li>
+<li><a href="https://www.who.int/data/gho">WHO Global Health Observatory</a>: mean BMI by country (age-standardized).</li>
+<li><a href="https://diabetesatlas.org/">IDF Diabetes Atlas</a>: diabetes prevalence by country.</li>
+<li><a href="https://www.oecd.org/health/health-at-a-glance/">OECD Health at a Glance</a> (2023): doctor consultations per capita.</li>
+<li><a href="https://www.bfs.admin.ch/bfs/en/home/statistics/population.html">BFS Population Statistics</a> (STATPOP): median age and age distribution.</li>
+</ul>
+</div>
+</div>
+</div>
+<section id="root-distributions" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="root-distributions"><span class="header-section-number">4.3.1</span> Root distributions</h3>
+<p>The three root variables have no parents, so they are specified by marginal distributions (kernels <span class="math inline">\(I \kernel X\)</span> with trivial input):</p>
+<ul>
+<li><strong>Smoking</strong> <span class="math inline">\(S \sim \mathsf{Bernoulli}(0.27)\)</span>. The SGB 2022 reports that 27.1% of men and 20.8% of women smoke daily or occasionally; we use <span class="math inline">\(0.27\)</span> as a round approximation.</li>
+<li><strong>Age</strong> <span class="math inline">\(A \sim \mathsf{Normal}(42, 17^2)\)</span>. The Swiss median age is 42.7 years (BFS STATPOP). The standard deviation of 17 is chosen to approximate the adult age distribution.</li>
+<li><strong>Physical activity</strong> <span class="math inline">\(P \sim \mathsf{Normal}(5, 2^2)\)</span>, measured in hours of sport per week. Sport Schweiz 2020 reports that 51% of adults are “trained” (<span class="math inline">\(\geq 3\)</span> hours/week), 27% “sufficiently active,” 16% “partly active,” and 6% “inactive.”</li>
+</ul>
+</section>
+<section id="sec-bmi-kernel" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="sec-bmi-kernel"><span class="header-section-number">4.3.2</span> The BMI kernel (linear regression)</h3>
+<p>BMI is a continuous variable influenced by a mix of discrete and continuous parents — exactly the setting for which the linear regression kernel (<a href="#sec-linear-regression" class="quarto-xref"><span>Section 4.2.2</span></a>) is designed: <span class="math display">\[
+B \mid S, A, P \;\sim\; \mathsf{Normal}(\alpha_0 + \alpha_S\, S + \alpha_A\, A + \alpha_P\, P,\; \sigma^2).
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Parameter sourcing — BMI kernel
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><em>Intercept</em> <span class="math inline">\(\alpha_0 = 25.0\)</span>: set so that <span class="math inline">\(\mathbb{E}[B] \approx 25.3\)</span> at the population means, matching the WHO age-standardized estimate of Switzerland’s mean BMI.</li>
+<li><em>Smoking slope</em> <span class="math inline">\(\alpha_S = -0.5\)</span>: epidemiological studies consistently find that current smokers have slightly lower BMI than non-smokers, owing to nicotine’s appetite-suppressive effect. A meta-analysis (Dare et al., 2015, <em>BMJ Open</em> 5: e008330) reports that current smokers have BMI roughly 0.3–0.7 kg/m² lower than never-smokers after adjusting for confounders.</li>
+<li><em>Age slope</em> <span class="math inline">\(\alpha_A = 0.05\)</span>: the SGB 2022 shows overweight-plus-obesity prevalence rising from roughly 30% in the 25–34 age group to 55% at ages 55–64. A slope of 0.05 BMI units per year produces a 1.5-unit increase over 30 years, consistent with this gradient.</li>
+<li><em>Activity slope</em> <span class="math inline">\(\alpha_P = -0.3\)</span>: the NCD cost report (Stucki et al., 2025, Table 28) reports a physical inactivity → obesity odds ratio of 1.49 (Bell et al., 2014), confirming the direction. The magnitude is approximate.</li>
+<li><em>Residual standard deviation</em> <span class="math inline">\(\sigma = 3.8\)</span>: calibrated so that the model produces approximately 43% overweight (BMI <span class="math inline">\(\geq\)</span> 25) and 12% obese (BMI <span class="math inline">\(&gt;\)</span> 30), matching SGB 2022 rates.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-diabetes-kernel" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="sec-diabetes-kernel"><span class="header-section-number">4.3.3</span> The diabetes kernel (logistic regression)</h3>
+<p>Diabetes status is binary and depends on BMI — the setting for the logistic regression kernel (<a href="#sec-logistic-regression" class="quarto-xref"><span>Section 4.2.3</span></a>): <span class="math display">\[
+D \mid B \;\sim\; \mathsf{Bernoulli}\bigl(\sigma(\beta_0 + \beta_1\, B)\bigr).
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Parameter sourcing — diabetes kernel
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><em>Intercept</em> <span class="math inline">\(\beta_0 = -6.7\)</span>: calibrated so that the marginal diabetes prevalence at average BMI matches the Swiss rate. The IDF Diabetes Atlas reports 5.3% (ages 20–79). The SGB 2022 reports 6.9% of men and 4.0% of women, giving a combined rate of approximately 5.4%. The Obsan diabetes report (pp.&nbsp;47–49) compiles prevalence estimates from multiple Swiss data sources (SGB, Helsana, CoLaus, SAPALDIA), all converging on 5–7%.</li>
+<li><em>Slope</em> <span class="math inline">\(\beta_1 = 0.15\)</span>: the Stucki et al.&nbsp;(2025) NCD cost report compiles relative risks for diabetes type 2: overweight (BMI 25–30) vs.&nbsp;normal weight gives RR = 2.25 (men) / 2.30 (women); obesity (BMI <span class="math inline">\(\geq\)</span> 30) vs.&nbsp;normal weight gives RR = 5.50 (men) / 7.00 (women). The CoLaus study (Kaiser et al., 2012) reports multivariable-adjusted odds ratios: overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78). Approximating a log-linear relationship from the Stucki RRs gives <span class="math inline">\(\beta_1 \approx \log(2.25)/5.5 \approx 0.15\)</span>.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-cost-kernel" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="sec-cost-kernel"><span class="header-section-number">4.3.4</span> The cost kernel (log-normal regression)</h3>
+<p>Annual healthcare costs are strictly positive and right-skewed — the setting for the log-normal regression kernel (<a href="#sec-lognormal-regression" class="quarto-xref"><span>Section 4.2.5</span></a>). Costs depend on both diabetes status and BMI: <span class="math display">\[
+\log C \mid D, B \;\sim\; \mathsf{Normal}(\gamma_0 + \gamma_D\, D + \gamma_B\, B,\; \tau^2).
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Parameter sourcing — cost kernel
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><em>Intercept</em> <span class="math inline">\(\gamma_0 = 7.5\)</span>: calibrated so that the median cost for a non-diabetic adult at average BMI is roughly CHF 3,900. For reference, total Swiss healthcare expenditure in 2022 was CHF 869 per person per month (CHF 10,428 per year; BFS Taschenstatistik 2025, p.&nbsp;32).</li>
+<li><em>Diabetes slope</em> <span class="math inline">\(\gamma_D = 0.65\)</span>: the Obsan diabetes report (p.&nbsp;47) cites Helsana data showing direct healthcare costs of CHF 8,239/year per diabetic patient (2011), roughly twice the non-diabetic baseline. Taking the log ratio gives <span class="math inline">\(\gamma_D \approx \ln(8239/3900) \approx 0.75\)</span>; we use the slightly conservative value <span class="math inline">\(0.65\)</span> to account for the fact that not all of the cost differential is attributable to diabetes status alone.</li>
+<li><em>BMI slope</em> <span class="math inline">\(\gamma_B = 0.03\)</span>: encodes the qualitatively correct direction (higher BMI increases costs). The NCD cost report attributes 70% of diabetes type 2 productivity losses to overweight/obesity, confirming the strong cost linkage. The per-unit magnitude is approximate.</li>
+<li><em>Dispersion</em> <span class="math inline">\(\tau = 0.6\)</span>: reflects the typically right-skewed cost distribution.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="composing-the-full-model" class="level3" data-number="4.3.5">
+<h3 data-number="4.3.5" class="anchored" data-anchor-id="composing-the-full-model"><span class="header-section-number">4.3.5</span> Composing the full model</h3>
+<!-- Compose root measures + regression kernels via sequential/parallel composition + copy/swap.
+     Draw the complete string diagram: {S, A, P} → B → D → C, with B also feeding into C.
+     Show how the compositional structure encodes the causal story. -->
+<div id="fig-swiss-health-model" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="hybrid-models_files/mediabag/c180873eab03380b3eca175e1097db4d53d6449e.svg" style="height:8em" class="figure-img"></p>
+<figcaption>String diagram for the Swiss health model.</figcaption>
+</figure>
+</div>
+</section>
+<section id="forward-sampling" class="level3" data-number="4.3.6">
+<h3 data-number="4.3.6" class="anchored" data-anchor-id="forward-sampling"><span class="header-section-number">4.3.6</span> Forward sampling</h3>
+<p>We implement the full model in <code>WeightedSampling.torch</code> by composing the root distributions and regression kernels:</p>
+<div id="1334c806" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.distributions <span class="im">as</span> dist</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> model, sample, observe, summary, expectation</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="9b52a031" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> swiss_health():</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Root distributions ---</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> sample(<span class="st">"S"</span>, dist.Bernoulli(<span class="fl">0.27</span>))          <span class="co"># smoking</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> sample(<span class="st">"A"</span>, dist.Normal(<span class="fl">42.0</span>, <span class="fl">17.0</span>))       <span class="co"># age</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> sample(<span class="st">"P"</span>, dist.Normal(<span class="fl">5.0</span>, <span class="fl">2.0</span>))         <span class="co"># activity (hours/week)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- BMI kernel (linear regression) ---</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    eta_B <span class="op">=</span> <span class="fl">25.0</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">0.5</span>) <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.05</span> <span class="op">*</span> A <span class="op">-</span> <span class="fl">0.3</span> <span class="op">*</span> P</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    B <span class="op">=</span> sample(<span class="st">"B"</span>, dist.Normal(eta_B, <span class="fl">3.8</span>))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Diabetes kernel (logistic regression) ---</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    eta_D <span class="op">=</span> <span class="op">-</span><span class="fl">6.7</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> sample(<span class="st">"D"</span>, dist.Bernoulli(torch.sigmoid(eta_D)))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Cost kernel (log-normal regression) ---</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    eta_C <span class="op">=</span> <span class="fl">7.5</span> <span class="op">+</span> <span class="fl">0.65</span> <span class="op">*</span> D <span class="op">+</span> <span class="fl">0.03</span> <span class="op">*</span> B</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> sample(<span class="st">"C"</span>, dist.LogNormal(eta_C, <span class="fl">0.6</span>))</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> swiss_health(num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'S': {'mean': tensor(0.2704), 'std': tensor(0.4442), 'n_unique': 2}, 'A': {'mean': tensor(41.9234), 'std': tensor(17.0442), 'n_unique': 9998}, 'P': {'mean': tensor(5.0154), 'std': tensor(1.9998), 'n_unique': 9990}, 'B': {'mean': tensor(25.4706), 'std': tensor(3.9752), 'n_unique': 9995}, 'D': {'mean': tensor(0.0599), 'std': tensor(0.2373), 'n_unique': 2}, 'C': {'mean': tensor(4999.3154), 'std': tensor(3627.4531), 'n_unique': 9978}}</code></pre>
+</div>
+</div>
+<p>We can verify the model against known Swiss statistics:</p>
+<div id="f66dd316" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>B_vals <span class="op">=</span> result[<span class="st">"B"</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>D_vals <span class="op">=</span> result[<span class="st">"D"</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>C_vals <span class="op">=</span> result[<span class="st">"C"</span>]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(BMI &gt;= 25):       </span><span class="sc">{</span>(B_vals <span class="op">&gt;=</span> <span class="dv">25</span>)<span class="sc">.</span><span class="bu">float</span>()<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(BMI &gt;= 30):       </span><span class="sc">{</span>(B_vals <span class="op">&gt;=</span> <span class="dv">30</span>)<span class="sc">.</span><span class="bu">float</span>()<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(Diabetes):        </span><span class="sc">{</span>D_vals<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Median cost (CHF):  </span><span class="sc">{</span>C_vals<span class="sc">.</span>median()<span class="sc">.</span>item()<span class="sc">:,.0f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(BMI &gt;= 25):       0.544
+P(BMI &gt;= 30):       0.126
+P(Diabetes):        0.060
+Median cost (CHF):  4,068</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-conditioning-continuous" class="level3" data-number="4.3.7">
+<h3 data-number="4.3.7" class="anchored" data-anchor-id="sec-conditioning-continuous"><span class="header-section-number">4.3.7</span> Conditioning on continuous observations</h3>
+<!-- Extend the graphical conditioning procedure from Chapter 3: pre-condition on density values. Worked example: condition on observed BMI B = b. -->
+</section>
+<section id="sec-conditioning-discrete" class="level3" data-number="4.3.8">
+<h3 data-number="4.3.8" class="anchored" data-anchor-id="sec-conditioning-discrete"><span class="header-section-number">4.3.8</span> Conditioning on discrete observations</h3>
+<!-- Same as the discrete case. Example: condition on D = 1 (has diabetes). What does this tell us about likely health costs? -->
+<!-- ============================================================ -->
+</section>
+</section>
+<section id="bibliographic-notes" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="bibliographic-notes">Bibliographic notes</h2>
+<!-- ============================================================ -->
+<!-- References: measure-theoretic probability, generalized linear models, Swiss Health Survey (SGB), WeightedSampling.torch. -->
+
+
+
 </section>
 
 </main> <!-- /main -->
