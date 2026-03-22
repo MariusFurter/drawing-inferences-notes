@@ -363,7 +363,7 @@ window.Quarto = {
 </div>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
-<div id="cda40f33" class="cell" data-execution_count="1">
+<div id="12ab41cd" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.distributions <span class="im">as</span> dist</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -429,7 +429,7 @@ R(\theta) = \frac{v_0^2 \sin(2\theta)}{g}
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The following functions are provided for you. Run this cell before starting the tasks.</p>
-<div id="24490c94" class="cell" data-execution_count="4">
+<div id="0af5d9b8" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_range(v0, theta, g<span class="op">=</span><span class="fl">1.62</span>):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute the range of a ballistic projectile (flat ground).</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
@@ -523,7 +523,7 @@ R(\theta) = \frac{v_0^2 \sin(2\theta)}{g}
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="beb154b4" class="cell" data-execution_count="5">
+<div id="29acaa19" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>v0 <span class="op">=</span> <span class="fl">20.0</span>  <span class="co"># m/s</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g_moon <span class="op">=</span> <span class="fl">1.62</span>  <span class="co"># m/s²</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>R_obs <span class="op">=</span> <span class="fl">200.0</span>  <span class="co"># m</span></span>
@@ -541,22 +541,20 @@ R(\theta) = \frac{v_0^2 \sin(2\theta)}{g}
     theta: shape=(5000,)</code></pre>
 </div>
 </div>
-<div id="75581d16" class="cell" data-execution_count="6">
+<div id="9a21fb48" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>SMC Summary (N=5000, log_evidence=0.0000, ESS=5000.0)
 
-           ▄▅▄▇▅▆▆▄▅█▃▆▄▅
-           ██████████████
-           ██████████████
-               theta     
-─────────────────────────
-     mean      0.7805    
-      std      0.4513    
- n_unique       5000     </code></pre>
+          │ ▇▇▇█▇▇▇▇▇█▆▇▇▇ │
+          │     theta      │
+──────────┼────────────────┤
+     mean │     0.7805     │
+      std │     0.4513     │
+ n_unique │      5000      │</code></pre>
 </div>
 </div>
-<div id="1a902283" class="cell" data-execution_count="7">
+<div id="538edf2a" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result.log_weights) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>tensor([0., 0., 0.,  ..., 0., 0., 0.])</code></pre>
@@ -566,7 +564,7 @@ R(\theta) = \frac{v_0^2 \sin(2\theta)}{g}
 <p>Note that the range <code>R</code> is not recorded in the results object since it is not a sampled variable. Hence computing <code>R</code> does not actually have any effect in this program. It will be important in the next task, once we observe <code>R</code>.</p>
 <p>If you want to record the result of the deterministic calculation, you can use <code>R = deterministic("R", compute_range(v0, theta, g=g_moon))</code> instead of a plain assignment. However, usually it is more efficient to compute derived quantities like <code>R</code> on the fly from the sampled variables when needed, rather than storing them in the results object.</p>
 <p>Next, we plot 20 randomly selected trajectories from the prior. These reflect our beliefs about how typical trajectories look given a uniform prior over <span class="math inline">\(\theta\)</span>.</p>
-<div id="c86c31f4" class="cell" data-execution_count="8">
+<div id="215b4e84" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> result[<span class="st">"theta"</span>]</span>
@@ -591,7 +589,7 @@ R(\theta) = \frac{v_0^2 \sin(2\theta)}{g}
 </div>
 </div>
 <p>We plot a histogram of the prior distribution of ranges, with <span class="math inline">\(R_{\text{obs}}\)</span> marked:</p>
-<div id="f1e00053" class="cell" data-execution_count="9">
+<div id="7bb3aa4a" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> compute_range(v0, result[<span class="st">"theta"</span>], g<span class="op">=</span>g_moon)</span>
@@ -616,7 +614,7 @@ R(\theta) = \frac{v_0^2 \sin(2\theta)}{g}
 </div>
 </div>
 <p>The density piles up near <span class="math inline">\(R_{\max} = v_0^2/g \approx 247\;\text{m}\)</span>. To see why, look at the graph of <span class="math inline">\(R(\theta)\)</span>:</p>
-<div id="52724439" class="cell" data-execution_count="10">
+<div id="9e1f05da" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Explanation: the range function R(θ)</span></span>
@@ -715,7 +713,7 @@ R_{\text{obs}} \sim \mathsf{Normal}(R(\theta),\; \sigma)
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="4d0928d9" class="cell" data-execution_count="11">
+<div id="202a3fed" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 1: Conditioned model</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>R_obs <span class="op">=</span> <span class="fl">200.0</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">5.0</span></span>
@@ -735,18 +733,16 @@ R_{\text{obs}} \sim \mathsf{Normal}(R(\theta),\; \sigma)
     theta: shape=(10000,)
 SMC Summary (N=10000, log_evidence=-5.4029, ESS=798.0)
 
-               ▆    █▆   
-               █    ██   
-               █    ██   
-               theta     
-─────────────────────────
-     mean      0.7867    
-      std      0.3130    
- n_unique       9998     </code></pre>
+          │     ▇    █▇    │
+          │     theta      │
+──────────┼────────────────┤
+     mean │     0.7867     │
+      std │     0.3130     │
+ n_unique │      9998      │</code></pre>
 </div>
 </div>
 <p>We again have 10000 samples of <code>theta</code>, but now they come with non-uniform <code>log_weights</code> that reflect how well each particle’s predicted range matches the observed range. The <code>log_evidence</code> is now negative, indicating the marginal likelihood of the data under the model.</p>
-<div id="be573b5a" class="cell" data-execution_count="12">
+<div id="5143b242" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 2: Compute normalized weights and exact solutions</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> result_cond[<span class="st">"theta"</span>]</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>log_w <span class="op">=</span> result_cond.log_weights</span>
@@ -756,7 +752,7 @@ SMC Summary (N=10000, log_evidence=-5.4029, ESS=798.0)
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>theta_high <span class="op">=</span> torch.pi <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> theta_low</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We plot the weighted posterior histogram of <span class="math inline">\(\theta\)</span>, with the exact analytical solutions overlaid:</p>
-<div id="fcfbf87f" class="cell" data-execution_count="13">
+<div id="bd0986db" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.5</span>))</span>
@@ -781,7 +777,7 @@ SMC Summary (N=10000, log_evidence=-5.4029, ESS=798.0)
 </div>
 </div>
 <p>The posterior is <strong>bimodal</strong>, with two peaks centered on the exact analytical solutions. The Bayesian posterior automatically discovers both solutions and quantifies how plausible each one is. Because we used a uniform prior on <code>theta</code>, both modes have roughly equal mass. If we had used a prior that favored large angles, the high-arc solution would have received more weight.</p>
-<div id="2532a2ac" class="cell" data-execution_count="14">
+<div id="d83ac20e" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3: Posterior mean of θ</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>E_theta <span class="op">=</span> expectation(result_cond, <span class="kw">lambda</span> theta: theta)</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[θ] = </span><span class="sc">{</span>E_theta<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss"> rad (</span><span class="sc">{</span>E_theta<span class="sc">.</span>item()<span class="op">*</span><span class="dv">180</span><span class="op">/</span>torch<span class="sc">.</span>pi<span class="sc">:.1f}</span><span class="ss">°)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -862,7 +858,7 @@ SMC Summary (N=10000, log_evidence=-5.4029, ESS=798.0)
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="4b44fea8" class="cell" data-execution_count="15">
+<div id="fb9e9978" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 1: Joint model</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>R_obs <span class="op">=</span> <span class="fl">200.0</span></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">5.0</span></span>
@@ -879,25 +875,23 @@ SMC Summary (N=10000, log_evidence=-5.4029, ESS=798.0)
 <div class="cell-output cell-output-stdout">
 <pre><code>SMC Summary (N=10000, log_evidence=-5.7743, ESS=552.4)
 
-                █             █▅▄▇▄▂▃▃   
-               ██▆▅▃          ████████▄  
-               █████▇█▇▆▆     █████████  
-                 v0            theta     
-─────────────────────────────────────────
-     mean     20.0800          0.7837    
-      std      2.0329          0.3041    
- n_unique       9989           10000     </code></pre>
+          │     ▅█▅▄▄▂▃▂▂▂ │    █▇▇█▇▆▆▆▄   │
+          │       v0       │     theta      │
+──────────┼────────────────┼────────────────┤
+     mean │    20.0800     │     0.7837     │
+      std │     2.0329     │     0.3041     │
+ n_unique │      9989      │     10000      │</code></pre>
 </div>
 </div>
 <p>The result now contains samples of both <code>v0</code> and <code>theta</code>, along with their corresponding <code>log_weights</code>. Note that the samples are <strong>paired</strong>: the first sample of <code>v0</code> corresponds to the first sample of <code>theta</code>, and so on. The collection of pairs <span class="math inline">\((v_0, \theta)\)</span> represents the joint posterior distribution.</p>
-<div id="b247cff4" class="cell" data-execution_count="16">
+<div id="c8a8c66d" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 2: Resample particles proportional to weights</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>resampled <span class="op">=</span> result_joint.sample()</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>v0_resampled <span class="op">=</span> resampled[<span class="st">"v0"</span>]</span>
 <span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>theta_resampled <span class="op">=</span> resampled[<span class="st">"theta"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We create a joint plot showing the posterior distribution of <span class="math inline">\((v_0, \theta)\)</span>:</p>
-<div id="b4c3c586" class="cell" data-execution_count="17">
+<div id="0b30b134" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sns.jointplot(</span>
@@ -924,7 +918,7 @@ SMC Summary (N=10000, log_evidence=-5.4029, ESS=798.0)
 </div>
 <p>The joint posterior reveals a horseshoe shape. The marginal for <span class="math inline">\(v_0\)</span> is concentrated around <span class="math inline">\(18 \, \text{m/s}\)</span> since in that region, the two modes in <span class="math inline">\(\theta\)</span> merge into a single broad peak. The marginal for <span class="math inline">\(\theta\)</span> looks uniform.</p>
 <p>Next, we compute the expected flight time, expected maximum altitude, and probability of flying above 100 m:</p>
-<div id="4150d5d2" class="cell" data-execution_count="18">
+<div id="ef0712c1" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3: Operational quantities from the joint posterior</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>E_T <span class="op">=</span> expectation(result_joint,</span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> v0, theta: <span class="dv">2</span> <span class="op">*</span> v0 <span class="op">*</span> torch.sin(theta) <span class="op">/</span> g_moon)</span>
@@ -943,12 +937,12 @@ P(h_max &gt; 100 m) = 0.19</code></pre>
 </div>
 </div>
 <p>Finally, we plot histograms of the posterior distributions of flight time and maximum altitude. For this we first compute <span class="math inline">\(T\)</span> and <span class="math inline">\(h_{\max}\)</span> for each resampled particle, then plot histograms:</p>
-<div id="0c04bf30" class="cell" data-execution_count="19">
+<div id="616a2eb8" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3 (continued): Compute derived trajectory quantities</span></span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>T_samples <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> v0_resampled <span class="op">*</span> torch.sin(theta_resampled) <span class="op">/</span> g_moon</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>hmax_samples <span class="op">=</span> v0_resampled<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> torch.sin(theta_resampled) <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> g_moon)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="e376ba1c" class="cell" data-execution_count="20">
+<div id="f7eb38d7" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">3</span>))</span>
@@ -1029,7 +1023,7 @@ Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The following function is provided for you. Run this cell before starting the tasks.</p>
-<div id="d8df0203" class="cell" data-execution_count="23">
+<div id="adaeb8e8" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> simulate_gravity(x0, y0, vx0, vy0,</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>                     planet_x, planet_y, planet_mass,</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>                     dt<span class="op">=</span><span class="fl">0.02</span>, n_steps<span class="op">=</span><span class="dv">300</span>, softening<span class="op">=</span><span class="fl">0.5</span>):</span>
@@ -1153,7 +1147,7 @@ Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under
 </div>
 <div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="c5cae0fa" class="cell" data-execution_count="24">
+<div id="461136b1" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>planet_x, planet_y <span class="op">=</span> <span class="fl">5.0</span>, <span class="fl">3.0</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>planet_mass <span class="op">=</span> <span class="fl">30.0</span></span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1180,23 +1174,21 @@ Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under
 <div class="cell-output cell-output-stdout">
 <pre><code>SMC Summary (N=5000, log_evidence=0.0000, ESS=5000.0)
 
-                ▃█▇▃            ▂▅█▂              █               █      
-               ▂████▂           ████▁           ▁▂█▇             ▅██     
-            ▁▁▆██████▆▂▁      ▃▅█████▄▁      ▁▃▄████▆▄▁       ▁▃████▅▂   
-                 vx              vy           final_x         final_y    
-─────────────────────────────────────────────────────────────────────────
-     mean      0.0499         -0.0364          3.7868          1.9873    
-      std      2.9803          3.0503         16.0433         15.8321    
- n_unique       5000            4999            5000            5000     </code></pre>
+          │    ▂▃▆██▆▃▂▁   │    ▁▂▆▇█▆▃▁    │    ▁▁▃▃█▅▂▁    │     ▁▃▄█▅▂▁    │
+          │       vx       │       vy       │    final_x     │    final_y     │
+──────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+     mean │     0.0499     │    -0.0364     │     3.7868     │     1.9873     │
+      std │     2.9803     │     3.0503     │    16.0433     │    15.8321     │
+ n_unique │      5000      │      4999      │      5000      │      5000      │</code></pre>
 </div>
 </div>
-<div id="546ebe9a" class="cell" data-execution_count="25">
+<div id="a8b2d91c" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 2: Extract endpoints from the result</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>final_x <span class="op">=</span> result_probe[<span class="st">"final_x"</span>]</span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>final_y <span class="op">=</span> result_probe[<span class="st">"final_y"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We scatter-plot the prior distribution of endpoints:</p>
-<div id="c1aad396" class="cell" data-execution_count="26">
+<div id="a4df1f50" class="cell" data-execution_count="26">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">6</span>))</span>
@@ -1220,7 +1212,7 @@ Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under
 </div>
 </div>
 <p>The planet acts as a gravitational lens: many trajectories are funneled around it, producing high density near the planet and a distinctive pattern of endpoint clustering. Probes with low initial speed tend to end up close to the planet, while faster probes fly past it in various directions.</p>
-<div id="832f2b17" class="cell" data-execution_count="27">
+<div id="d1b36553" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3: Re-simulate 20 random trajectories</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>vx_samples <span class="op">=</span> result_probe[<span class="st">"vx"</span>]</span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>vy_samples <span class="op">=</span> result_probe[<span class="st">"vy"</span>]</span>
@@ -1235,7 +1227,7 @@ Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under
 <span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We plot the selected trajectories:</p>
-<div id="4a7a2c3e" class="cell" data-execution_count="28">
+<div id="bf6aee9d" class="cell" data-execution_count="28">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
@@ -1364,7 +1356,7 @@ Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under
 </div>
 <div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="e491eb64" class="cell" data-execution_count="29">
+<div id="f8e6f28f" class="cell" data-execution_count="29">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 1: Conditioned model</span></span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>x_obs, y_obs <span class="op">=</span> <span class="fl">8.0</span>, <span class="fl">1.0</span></span>
 <span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>obs_sigma <span class="op">=</span> <span class="fl">1.0</span></span>
@@ -1392,24 +1384,22 @@ Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under
 <div class="cell-output cell-output-stdout">
 <pre><code>SMC Summary (N=10000, log_evidence=-6.7961, ESS=149.3)
 
-                 █              ▂█                █              █       
-                 █              ██                █              █       
-                 █▅             ██▇               █▁             █       
-                 vx              vy           final_x         final_y    
-─────────────────────────────────────────────────────────────────────────
-     mean     -0.5231          0.0131          8.0541          0.7995    
-      std      0.6801          1.3552          1.1052          0.9871    
- n_unique       9999            9998            9998           10000     </code></pre>
+          │       █▂       │      ▆█▂       │        █       │       █        │
+          │       vx       │       vy       │    final_x     │    final_y     │
+──────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+     mean │    -0.5231     │     0.0131     │     8.0541     │     0.7995     │
+      std │     0.6801     │     1.3552     │     1.1052     │     0.9871     │
+ n_unique │      9999      │      9998      │      9998      │     10000      │</code></pre>
 </div>
 </div>
-<div id="3e3f76af" class="cell" data-execution_count="30">
+<div id="275ae7a4" class="cell" data-execution_count="30">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 2: Resample particles proportional to weights</span></span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>resampled <span class="op">=</span> result_cond.sample()</span>
 <span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>vx_resampled <span class="op">=</span> resampled[<span class="st">"vx"</span>]</span>
 <span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>vy_resampled <span class="op">=</span> resampled[<span class="st">"vy"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We visualize the joint posterior over initial velocities:</p>
-<div id="cc38a697" class="cell" data-execution_count="31">
+<div id="899663ca" class="cell" data-execution_count="31">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>sns.jointplot(</span>
@@ -1436,7 +1426,7 @@ Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under
 </div>
 <p>We can see that there are three clusters in the posterior, corresponding to three qualitatively different paths that could have produced the observed endpoint.</p>
 <p>We can visualize the corresponding trajectories by re-simulating the probe’s path for each resampled velocity and plotting them:</p>
-<div id="3c5f3907" class="cell" data-execution_count="32">
+<div id="77fdaa09" class="cell" data-execution_count="32">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> torch.randperm(<span class="bu">len</span>(vx_resampled))[:<span class="dv">500</span>]</span>
@@ -1471,7 +1461,7 @@ Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under
 </div>
 </div>
 </div>
-<div id="d94efa7c" class="cell" data-execution_count="33">
+<div id="135c08e3" class="cell" data-execution_count="33">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3: Trajectory-level posterior quantities</span></span>
 <span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Use all resampled trajectories (re-simulate with full resample for better statistics)</span></span>
@@ -1510,7 +1500,7 @@ P(d_min &lt; 1)    = 0.38</code></pre>
 </div>
 </div>
 <p>We plot histograms of closest approach and maximum speed across the posterior:</p>
-<div id="00575205" class="cell" data-execution_count="34">
+<div id="c4d28d6e" class="cell" data-execution_count="34">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">3</span>))</span>
