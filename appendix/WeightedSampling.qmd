@@ -28,10 +28,14 @@ torch.manual_seed(42)  # for reproducibility
 ```
 
 ::: {.callout-warning}
-This package is in early development. If you encounter any bugs, please file an issue on the [GitHub issue tracker](https://github.com/MariusFurter/WeightedSampling.torch/issues).
+This package is in early development. Make sure you are using the most recent version. If you encounter any bugs, please file an issue on the [GitHub issue tracker](https://github.com/MariusFurter/WeightedSampling.torch/issues).
 :::
 
-A typical workflow involves writing a model from `sample` and `observe` primitives, running it to produce a collection of weighted **particles** (independent random samples, each carrying a weight), and using these to estimate quantities of interest. We introduce the library through progressively richer examples, then cover more advanced features in later sections.
+A typical workflow involves writing a model from `sample` and `observe` primitives, running it to produce a collection of weighted **particles** (random samples, each carrying a weight), and using these to estimate quantities of interest. We introduce the library through progressively richer examples, then cover more advanced features in later sections.
+
+::: {.callout-note collapse="true" title="What does SMC stand for?"}
+SMC stands for **Sequential Monte Carlo**, a general family of particle-based inference algorithms. It includes **importance sampling** (a single weighting step) and **sequential importance sampling** (multiple weighting steps with resampling) as special cases. The library uses "SMC" as a catch-all name for the engine, even for simple models where basic importance sampling would suffice.
+:::
 
 ## Writing models {#sec-write-model}
 
@@ -39,6 +43,18 @@ A probabilistic model is an ordinary Python function that builds a joint distrib
 
 - **`sample(name, distribution)`** — draws a value from `distribution`, records it under `name`, and returns the sampled tensor.
 - **`observe(value, distribution)`** — conditions on the observed `value` by evaluating the log-density of `distribution` at `value` and adding it to the running log-weight.
+
+::: {.callout-note}
+### Torch compatibility {#sec-torch-compat}
+
+Because the engine runs all $N$ particles simultaneously via PyTorch broadcasting, any computation on sampled values must use **torch-compatible operations**. Specifically:
+
+- Use `torch` functions instead of Python / NumPy equivalents (e.g. `torch.exp(x)` not `math.exp(x)`).
+- Use `torch.where(cond, a, b)` instead of Python `if/else` on tensor values.
+- Comparison operators (`>`, `==`, etc.) on tensors return boolean tensors — call `.float()` before arithmetic.
+
+This requirement only applies to code that operates on the sampled tensors. Ordinary Python logic — loops, list operations, data loading — works as usual.
+:::
 
 ### A first example: noisy measurement
 
@@ -57,12 +73,17 @@ Here `mu` is drawn from $\mathsf{Normal}(0, 25)$, then `x` is drawn from $\maths
 The `@model` decorator makes the function callable with inference parameters (see @sec-inference-params). We run it by specifying the number of particles:
 
 ```{python}
-#| code-fold: false
+# | code-fold: false
 result = measurement(num_particles=5000)
-print(summary(result))
+print(result)
 ```
 
-The returned `result` is a dictionary-like object containing the sampled tensors and metadata — we describe its structure below. The `summary` function gives us the weighted mean, standard deviation, and number of unique particles for each variable.
+The returned `result` is a dictionary-like object containing the sampled tensors and metadata — we describe its structure below. The `summary` function gives us a histogram, the weighted mean, standard deviation, and number of unique particles for each variable.
+
+```{python}
+# | code-fold: false
+print(summary(result))
+```
 
 ### Conditioning with `observe`
 
@@ -85,34 +106,22 @@ The `observe` call evaluates the Gaussian density $\ell(3.2 \mid \mu)$ for each 
 
 Only **named sites** — created by `sample` or `deterministic` — are recorded in the result object. Any other computation inside the model is an **intermediate variable** that is not stored. For example, if we write `y = mu + 1` inside the model, `y` is computed but not recorded.
 
-The **`deterministic(name, value)`** primitive records a computed (non-random) value under `name` and returns it unchanged. It does not add any weight — it simply stores the value so it can be accessed in the result:
+The **`deterministic(name, value)`** primitive records a computed (non-random) value under `name` and returns it unchanged. Like `sample`, the return value can be captured for use later in the model:
 
 ```{python}
 #| code-fold: false
 @model
 def measurement_with_derived():
     mu = sample("mu", dist.Normal(0.0, 5.0))
-    observe(3.2, dist.Normal(mu, 0.5))
-    deterministic("mu_squared", mu**2)
+    prediction = deterministic("prediction", mu + 1.0)  # recorded & returned
+    observe(3.2, dist.Normal(prediction, 0.5))
 
 result = measurement_with_derived(num_particles=5000)
-print(result["mu_squared"].shape)  # recorded in the result
+print(result["prediction"].shape)  # recorded in the result
 print(summary(result))
 ```
 
-This is useful when a model computes derived quantities (e.g. predictions, transformations) that you want to inspect afterward. However, it is often more efficient to compute derived quantities *after* inference from the sampled variables directly, rather than storing them inside the model.
-
-::: {.callout-note}
-### Torch compatibility {#sec-torch-compat}
-
-Because the engine runs all $N$ particles simultaneously via PyTorch broadcasting, any computation on sampled values must use **torch-compatible operations**. Specifically:
-
-- Use `torch` functions instead of Python / NumPy equivalents (e.g. `torch.exp(x)` not `math.exp(x)`).
-- Use `torch.where(cond, a, b)` instead of Python `if/else` on tensor values.
-- Comparison operators (`>`, `==`, etc.) on tensors return boolean tensors — call `.float()` before arithmetic.
-
-This requirement only applies to code that operates on the sampled tensors. Ordinary Python logic — loops, list operations, data loading — works as usual.
-:::
+This is useful when a model computes a derived quantity that is both needed later in the model (e.g. as the mean of an `observe`) and worth inspecting in the result. However, when a derived quantity is only needed *after* inference, it is often simpler to compute it from the sampled variables directly rather than storing it inside the model.
 
 ### The `@model` decorator {#sec-model-decorator}
 
@@ -166,64 +175,49 @@ The key parameters controlling inference are:
 | `num_particles` | 1000 | Number of particles $N$. More particles = better estimates but more computation. |
 | `ess_threshold` | 0.5 | Fraction of $N$ below which resampling triggers (see @sec-resampling). Set to $0$ to disable. |
 
+For models that take a long time to run, you can also enable a progress bar by passing `progress_bar=True`.
+
 ### The result object {#sec-smc-result}
 
 Calling a decorated model runs the inference engine and returns a result object (of type `SMCResult`). This is a dictionary-like object where each `sample` call produces a tensor of shape $(N, \ldots)$:
 
-::: {.callout-note collapse="true" title="What does SMC stand for?"}
-SMC stands for **Sequential Monte Carlo**, a general family of particle-based inference algorithms. It includes **importance sampling** (a single weighting step) and **sequential importance sampling** (multiple weighting steps with resampling) as special cases. The library uses "SMC" as a catch-all name for the engine, even for simple models where basic importance sampling would suffice.
-:::
-
 ```{python}
-#| code-fold: false
+# | code-fold: false
 result = measurement(num_particles=5000)
-print(f"result keys:  {[k for k in result if k not in ('log_weights', 'log_evidence')]}")
-print(f"mu shape:     {result['mu'].shape}")
-print(f"x shape:      {result['x'].shape}")
+print(result)
 ```
 
-Two metadata entries are always present:
+Three metadata entries are always present:
 
 - **`result.log_weights`** — log-weights accumulated from `observe` calls, shape $(N,)$.
+- **`result.norm_weights`** — normalized weights (i.e. `softmax` of `log_weights`), shape $(N,)$. These sum to $1$ and are convenient for computing weighted averages or plotting.
 - **`result.log_evidence`** — estimate of $\log p(\text{observations})$, useful for model comparison.
 
-When there are no `observe` statements, all log-weights are zero (equal weight).
+You can access each variable with `result["var_name"]` or `result.var_name`. 
+```{python}
+# | code-fold: false
+result["x"]
+result.x
+```
 
 ### `summary`: quick posterior overview {#sec-summary}
 
-The `summary` function computes weighted mean, standard deviation, and the number of unique particles for each variable:
+The `summary` function computes weighted mean, standard deviation, and the number of unique particles for each variable. It is also available as a method on the result object: `result.summary()`. Printing the summary gives an overview including a histogram for each variable:
 
 ```{python}
 #| code-fold: false
 result = conditioned_measurement(num_particles=5000)
 stats = summary(result)
+print(stats)
+```
+
+You can also extract specific statistics for a variable:
+
+```{python}
+# | code-fold: false
 print(f"E[mu | x=3.2] = {stats['mu']['mean']:.3f} ± {stats['mu']['std']:.3f}")
 print(f"Unique particles: {stats['mu']['n_unique']}")
 ```
-
-Because the observation ($\sigma = 0.5$) is much more informative than the vague prior ($\sigma = 5$), the posterior concentrates near the observed value.
-
-### Composing models {#sec-nesting-models}
-
-Models can call other functions that use `sample` and `observe`. This is the primary way to build modular models. However, only the **outermost** function should carry the `@model` decorator.
-
-```{python}
-#| code-fold: false
-def linear_predictor(x):
-    """Sub-model: sample slope and intercept, return prediction."""
-    a = sample("a", dist.Normal(0.0, 2.0))
-    b = sample("b", dist.Normal(0.0, 5.0))
-    return a * x + b
-
-
-@model
-def regression_model(data):
-    for x, y in data:
-        y_hat = linear_predictor(x)
-        observe(y, dist.Normal(y_hat, 0.3))
-```
-
-The undecorated `linear_predictor` shares the calling model's context, so its `sample` calls are recorded alongside those of the outer model. This pattern makes it easy to compose larger models from smaller building blocks.
 
 ### Example: Bayesian linear regression {#sec-linreg-basic}
 
@@ -236,7 +230,7 @@ def bayesian_linreg(data):
     a = sample("a", dist.Normal(0.0, 2.0))  # prior on slope
     b = sample("b", dist.Normal(0.0, 2.0))  # prior on intercept
     for x, y in data:
-        observe(y, dist.Normal(a * x + b, 0.3))
+        observe(y, dist.Normal(a * x + b, 0.2))
 ```
 
 We generate synthetic data from a known ground truth and run inference:
@@ -246,22 +240,43 @@ We generate synthetic data from a known ground truth and run inference:
 true_a, true_b = 2.0, -1.0
 
 xs = torch.linspace(0, 5, 5)
-ys = true_a * xs + true_b + 0.3 * torch.randn(5)
+ys = true_a * xs + true_b + 0.2 * torch.randn(5)
 data = list(zip(xs, ys))
 
-result = bayesian_linreg(data, num_particles=5000)
-stats = summary(result)
-print(f"a = {stats['a']['mean']:.3f} ± {stats['a']['std']:.3f}")
-print(f"b = {stats['b']['mean']:.3f} ± {stats['b']['std']:.3f}")
+result = bayesian_linreg(data, num_particles=10_000)
+print(summary(result))
 ```
 
 The posterior means are close to the true values. We will revisit this example in @sec-behind-scenes to examine how the inference engine handles the five observations internally.
+
+
+### Composing models {#sec-nesting-models}
+
+Models can call other functions that use `sample` and `observe`. This is the primary way to build modular models. However, only the **outermost** function should carry the `@model` decorator. For example, we can rewrite `bayesian_linreg` by extracting the prior sampling into a helper:
+
+```{python}
+#| code-fold: false
+def sample_parameters():
+    """Sample the regression parameters from their priors."""
+    a = sample("a", dist.Normal(0.0, 2.0))
+    b = sample("b", dist.Normal(0.0, 2.0))
+    return a, b
+
+
+@model
+def bayesian_linreg_v2(data):
+    a, b = sample_parameters()
+    for x, y in data:
+        observe(y, dist.Normal(a * x + b, 0.2))
+```
+
+The undecorated `sample_parameters` shares the calling model's context, so its `sample` calls are recorded alongside those of the outer model.
 
 ## Evaluating results {#sec-evaluate-results}
 
 ### Computing expectations
 
-The `expectation` function computes $\mathbb{E}[t(X)]$ for an arbitrary **test function** $t$. The function's argument names are matched against the variable names in the result:
+The `expectation` function computes $\mathbb{E}[t(X)]$ for an arbitrary **test function** $t$. The function's argument names are matched against the variable names in the result. Like `summary`, it is also available as a method: `result.expectation(f)`. The standalone function is a wrapper around this method.
 
 ```{python}
 #| code-fold: false
@@ -292,47 +307,14 @@ p_pos = expectation(result, lambda mu: mu > 0)
 print(f"P(mu > 0)  = {p_pos.item():.3f}")
 ```
 
-### Visualizing the posterior {#sec-visualize-posterior}
-
-The weighted particles can be visualized by plotting them with opacity proportional to their weight:
-
+The anonymous function notation is optional. You can also define a named function and pass it to `expectation`, as long as the argument names match the variable names in the result:
 ```{python}
-import matplotlib.pyplot as plt
+# | code-fold: false
+def indicator(mu):
+    return mu > 0
 
-result = bayesian_linreg(data, num_particles=5000, ess_threshold=0.01)
-
-a_samples = result["a"].detach()
-b_samples = result["b"].detach()
-log_w = result["log_weights"].detach()
-weights = torch.softmax(log_w, dim=0)  # exponentiate & normalize to sum to 1
-
-fig, axes = plt.subplots(1, 2, figsize=(8, 3.5))
-
-# Left: posterior regression lines (opacity ∝ weight)
-ax = axes[0]
-alpha = weights / weights.max()  # rescale to [0, 1] for plotting opacity
-for idx in torch.randperm(len(a_samples))[:200]:
-    ax.plot(
-        xs,
-        (a_samples[idx] * xs + b_samples[idx]).numpy(),
-        color="steelblue",
-        alpha=alpha[idx].item() * 0.5,
-    )
-ax.plot(xs, true_a * xs + true_b, color="red", linewidth=2, label="True line")
-ax.scatter(xs, ys, color="black", s=25, zorder=5, label="Data")
-ax.set(xlabel="x", ylabel="y", title="Posterior regression lines")
-ax.legend()
-
-# Right: joint posterior (color ∝ weight)
-ax = axes[1]
-ax.scatter(a_samples, b_samples, s=8, alpha=torch.clamp(alpha, min=0.05))
-ax.axvline(true_a, color="red", linestyle="--", linewidth=1, label=f"true a = {true_a}")
-ax.axhline(true_b, color="red", linestyle="--", linewidth=1, label=f"true b = {true_b}")
-ax.set(xlabel="a (slope)", ylabel="b (intercept)", title="Joint posterior")
-ax.legend(fontsize=9)
-
-plt.tight_layout()
-plt.show()
+p_pos = expectation(result, indicator)
+print(f"P(mu > 0)  = {p_pos.item():.3f}")
 ```
 
 ### Resampling with `.sample()` {#sec-sample-method}
@@ -343,8 +325,6 @@ Often, it is necessary to work with unweighted samples. In such cases, you can s
 #| code-fold: false
 result = conditioned_measurement(num_particles=5000)
 resampled = result.sample(1000)  # draw 1000 equally-weighted samples
-print(type(resampled))           # plain dict
-print(resampled["mu"].shape)     # torch.Size([1000])
 ```
 
 The method draws indices proportional to the importance weights (with replacement), returning a plain dictionary of tensors. If `num_samples` is omitted, it defaults to the number of particles in the original result:
@@ -356,6 +336,49 @@ print(resampled_all["mu"].shape)
 ```
 
 This is especially useful for passing posterior samples to external tools that expect unweighted data, such as plotting libraries.
+
+### Visualizing the posterior {#sec-visualize-posterior}
+
+We can visualize the posterior distribution by resampling the particles and plotting the results with low opacity:
+
+```{python}
+import matplotlib.pyplot as plt
+
+result = bayesian_linreg(data, num_particles=10_000, ess_threshold=0)
+
+log_w = result.log_weights
+weights = result.norm_weights
+
+fig, axes = plt.subplots(1, 2, figsize=(6, 3))
+
+# Left: posterior regression lines (resampled)
+ax = axes[0]
+alpha = weights
+resampled = result.sample()
+for i in range(200):
+    ax.plot(
+        xs,
+        (resampled["a"][i] * xs + resampled["b"][i]).numpy(),
+        color="steelblue",
+        alpha=0.1,
+    )
+ax.plot(xs, true_a * xs + true_b, color="red", linewidth=2, label="True line")
+ax.scatter(xs, ys, color="black", s=25, zorder=5, label="Data")
+ax.set(xlabel="x", ylabel="y", title="Posterior regression lines")
+ax.legend()
+
+# Right: joint posterior (color ∝ weight)
+ax = axes[1]
+ax.scatter(resampled["a"], resampled["b"], s=8, alpha=0.1)
+ax.axvline(true_a, color="red", linestyle="--", linewidth=1, label=f"true a = {true_a}")
+ax.axhline(true_b, color="red", linestyle="--", linewidth=1, label=f"true b = {true_b}")
+ax.set(xlabel="a (slope)", ylabel="b (intercept)", title="Joint posterior")
+ax.legend(fontsize=9)
+
+plt.tight_layout()
+plt.show()
+```
+
 
 ### Log evidence for model comparison
 
@@ -400,7 +423,7 @@ When there are many observations, most particles end up with negligible weight. 
 result_no_resample = bayesian_linreg(data, num_particles=5000, ess_threshold=0)
 
 log_w = result_no_resample.log_weights
-w = torch.softmax(log_w, dim=0)
+w = result_no_resample.norm_weights
 ```
 
 ```{python}
@@ -433,9 +456,7 @@ With the default `ess_threshold=0.5`, the linear regression model resamples afte
 ```{python}
 #| code-fold: false
 result_resample = bayesian_linreg(data, num_particles=5000)
-stats = summary(result_resample)
-print(f"a = {stats['a']['mean']:.3f} ± {stats['a']['std']:.3f}  (unique particles: {stats['a']['n_unique']})")
-print(f"b = {stats['b']['mean']:.3f} ± {stats['b']['std']:.3f}  (unique particles: {stats['b']['n_unique']})")
+print(summary(result_resample))
 ```
 
 Resampling prevents weight collapse, but it comes at a cost: many particles become copies of the same ancestor, reducing **diversity**. The low number of unique particles above shows that most of the 5000 particles collapsed onto a handful of ancestors during resampling. The next section introduces Metropolis-Hastings moves as a remedy.
@@ -464,9 +485,7 @@ def bayesian_linreg_mh(data):
         move(["a", "b"], RandomWalkProposal(scale=0.1), threshold=0.5)
 
 result_mh = bayesian_linreg_mh(data, num_particles=5000)
-stats_mh = summary(result_mh)
-print(f"a = {stats_mh['a']['mean']:.3f} ± {stats_mh['a']['std']:.3f}  (unique: {stats_mh['a']['n_unique']})")
-print(f"b = {stats_mh['b']['mean']:.3f} ± {stats_mh['b']['std']:.3f}  (unique: {stats_mh['b']['n_unique']})")
+print(summary(result_mh))
 ```
 
 The number of unique particles is now much higher. The `threshold` parameter controls when the move fires: it only runs when the diversity ratio (unique particles / $N$) drops below the threshold.
@@ -490,9 +509,7 @@ def bayesian_linreg_adaptive(data):
         move(["a", "b"], AdaptiveProposal(), threshold=0.5)
 
 result_adapt = bayesian_linreg_adaptive(data, num_particles=5000)
-stats_adapt = summary(result_adapt)
-print(f"a = {stats_adapt['a']['mean']:.3f} ± {stats_adapt['a']['std']:.3f}  (unique: {stats_adapt['a']['n_unique']})")
-print(f"b = {stats_adapt['b']['mean']:.3f} ± {stats_adapt['b']['std']:.3f}  (unique: {stats_adapt['b']['n_unique']})")
+print(summary(result_adapt))
 ```
 
 The `AdaptiveProposal` estimates the weighted covariance of the targeted variables from the current particles, scales it using a factor of $2.38 / \sqrt{d}$ (optimal for Gaussian targets), and adds a small ridge for numerical stability. This generally works well without manual tuning.
@@ -501,7 +518,7 @@ The `AdaptiveProposal` estimates the weighted covariance of the targeted variabl
 # | code-fold: true
 result_no_moves = bayesian_linreg(data, num_particles=5000)
 
-fig, axes = plt.subplots(1, 3, figsize=(12, 3.5))
+fig, axes = plt.subplots(1, 3, figsize=(8, 3))
 
 for ax, (res, title) in zip(
     axes,
@@ -511,11 +528,14 @@ for ax, (res, title) in zip(
         (result_adapt, "AdaptiveProposal"),
     ],
 ):
-    a_s = res["a"]
-    b_s = res["b"]
-    weights = torch.softmax(res["log_weights"], dim=0)
-    alpha = weights / weights.max()
-    ax.scatter(a_s, b_s, color="steelblue", s=8, alpha=torch.clamp(alpha, min=0.05))
+    if res is not result_no_moves:
+        res_resampled = res.sample()
+        a_s = res_resampled["a"]
+        b_s = res_resampled["b"]
+    else:  # plot all points for the no-move case, since diversity is very low
+        a_s = res["a"]
+        b_s = res["b"]
+    ax.scatter(a_s, b_s, color="steelblue", s=8, alpha=0.1)
     ax.axvline(true_a, color="red", linestyle="--", linewidth=1)
     ax.axhline(true_b, color="red", linestyle="--", linewidth=1)
     ax.set_xlabel("a (slope)")
@@ -527,11 +547,10 @@ plt.tight_layout()
 plt.show()
 ```
 
-<!-- Plot for RW proposal looks strange. -->
 
 ## Discrete Bayesian networks {#sec-discrete-bayes-nets}
 
-For models with discrete variables, `DiscreteConditional` provides a convenient way to define conditional probability tables (CPTs). Each CPT is specified by a function that maps parent values to a probability vector.
+For models with discrete variables, `DiscreteConditional` provides a convenient way to define discrete kernels. You do so by giving it a function that maps each input value to a probability vector.
 
 ### Example: wet grass network
 
@@ -578,10 +597,7 @@ def wet_grass_model():
     observe(torch.tensor(1), wet_grass_cpt(s, r))
 
 result = wet_grass_model(num_particles=10_000)
-stats = summary(result)
-print(f"P(Cloudy    | WetGrass=1) ≈ {stats['cloudy']['mean']:.3f}")
-print(f"P(Rain      | WetGrass=1) ≈ {stats['rain']['mean']:.3f}")
-print(f"P(Sprinkler | WetGrass=1) ≈ {stats['sprinkler']['mean']:.3f}")
+print(summary(result))
 ```
 
 The CPT function is called lazily — only for parent configurations that actually appear among the particles — and results are cached. This means you can define CPTs over large parent domains without computing the entire table upfront.
@@ -600,25 +616,31 @@ The target density can be unnormalized — posterior expectations will still be 
 As an example, suppose we want to use a prior proportional to $e^{-x^4}$, a super-Gaussian density that is not available in `torch.distributions`:
 
 ```{python}
-#| code-fold: false
+# | code-fold: false
 from weighted_sampling import ImportanceSampler
+
 
 class SuperGaussian:
     """Unnormalized density proportional to exp(-x^4)."""
+
     def log_prob(self, x):
-        return -x**4
+        return -(x**4)
+
 
 @model
 def super_gaussian_measurement():
-    mu = sample("mu", ImportanceSampler(
-        target=SuperGaussian(),
-        proposal=dist.Normal(0.0, 1.0),
-    ))
+    mu = sample(
+        "mu",
+        ImportanceSampler(
+            target=SuperGaussian(),
+            proposal=dist.Normal(0.0, 1.0),
+        ),
+    )
     observe(1.5, dist.Normal(mu, 0.5))
 
+
 result = super_gaussian_measurement(num_particles=10_000)
-stats = summary(result)
-print(f"E[mu | x=1.5] = {stats['mu']['mean']:.3f} ± {stats['mu']['std']:.3f}")
+print(summary(result))
 ```
 
 The `ImportanceSampler` draws from the Gaussian proposal and reweights to target the custom `SuperGaussian` density. Combined with the `observe` likelihood, inference targets the correct posterior $p(\mu \mid x = 1.5) \propto e^{-\mu^4} \cdot \ell(1.5 \mid \mu)$.

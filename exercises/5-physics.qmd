@@ -226,7 +226,16 @@ def lunar_launch():
 
 result = lunar_launch(num_particles=5000)
 print(result)
+```
+
+```{python}
+# | code-fold: false
 print(summary(result))
+```
+
+```{python}
+# | code-fold: false
+print(result.log_weights) 
 ```
 
 The results object records 5000 samples of `theta`, along with 5000 `log_weights` (which are all zero since there are no `observe` statements), and a `log_evidence` of 0.0 (once there are `observe` statements, this will be the log marginal likelihood of the data under the model).
@@ -341,7 +350,7 @@ When there are `observe` statements, particles carry importance weights. To plot
 
 ```python
 thetas = result_cond["theta"]
-log_w = result_cond["log_weights"]
+log_w = result_cond.log_weights
 weights = torch.softmax(log_w, dim=0)  # exponentiate and normalize
 ax.hist(thetas, weights=weights, bins=80, density=True, ...)
 ```
@@ -390,7 +399,7 @@ We again have 10000 samples of `theta`, but now they come with non-uniform `log_
 # | code-fold: false
 # Part 2: Compute normalized weights and exact solutions
 thetas = result_cond["theta"]
-log_w = result_cond["log_weights"]
+log_w = result_cond.log_weights
 weights = torch.softmax(log_w, dim=0)
 
 theta_low = 0.5 * torch.asin(torch.tensor(R_obs * g_moon / v0**2))
