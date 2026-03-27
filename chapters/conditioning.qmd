@@ -106,11 +106,9 @@ Conditional independence is the structural property that makes large models trac
 
 ::: {#def-conditional-independence}
 
-<!-- Not the correct definition with input x. b can also depend on x. -->
-
-Let $U, V, W$ be disjoint sets of output variables of a kernel $g$ with input $X$. We say that $U$ and $V$ are **conditionally independent given $W$**, denoted $(U \perp V \mid W)$, if $g$ can be written in the following form:
+Let $g :  \kernel U \otimes V \otimes W$ be a kernel with no inputs. We say that $U$ and $V$ are **conditionally independent given $W$**, denoted $(U \perp V \mid W)$, if $g$ can be written in the following form:
 $$
-g(u, v, w \mid x) = a(u \mid w) \, b(v \mid w) \, c(w \mid x),
+g(u, v, w) = a(u \mid w) \, b(v \mid w) \, c(w),
 $$
 where $a$, $b$, and $c$ are kernels. In diagrams:
 
@@ -123,7 +121,14 @@ where $a$, $b$, and $c$ are kernels. In diagrams:
 By bundling, this definition applies equally when $U$, $V$, and $W$ each consist of multiple variables.
 :::
 
-The factorization says that $g$ generates $W$ first (given input $X$), then generates $U$ and $V$ independently by feeding $W$ into separate kernels $a$ and $b$. In particular, conditioning on $W$ makes $U$ and $V$ independent. To see this, apply the pre-conditioning procedure to $g$ to fix $W = \bar w$ and note that the resulting diagram factors into two separate parts generating $U$ and $V$. Therefore, once $W$ is known, learning $V$ tells us nothing new about $U$, and vice versa.
+The factorization says that $g$ generates $W$ first, then generates $U$ and $V$ independently by feeding $W$ into separate kernels $a$ and $b$. In particular, conditioning on $W$ makes $U$ and $V$ independent. To see this, apply the pre-conditioning procedure to $g$ to fix $W = \bar w$ and note that the resulting diagram factors into two separate parts generating $U$ and $V$. Therefore, once $W$ is known, learning $V$ tells us nothing new about $U$, and vice versa.
+
+The above definition can be extended to kernels $g : X \kernel U \otimes V \otimes W$ with inputs: $(U \perp V \mid W)$ if $g$ can be written in the form
+$$
+g(u, v, w \mid x) = a(u \mid w) \, b(v \mid w,x) \, c(w \mid x).
+$$
+
+Note that $b$ may depend on $x$ while $a$ does not, making the definition asymmetric in $U$ and $V$. This is stronger than requiring conditional independence for each fixed input $x$.
 
 ### Graphical test for conditional independence
 

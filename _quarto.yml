@@ -31,8 +31,10 @@ book:
         - exercises/3-stroke-prediction.qmd
         - exercises/4-hidden-markov-models.qmd
         - exercises/5-physics.qmd
+        #- exercises/6-swiss-health.qmd
     - part: "Appendix"
       chapters:
+        - appendix/parametric-kernels.qmd
         - appendix/pytorch.qmd
         - appendix/WeightedSampling.qmd
     - references.qmd

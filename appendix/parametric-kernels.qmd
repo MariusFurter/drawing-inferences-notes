@@ -1,3 +1,233 @@
-<!-- List most useful torch.distributions with domains, parameters, and explanation of when to use them. -->
+# Parametric kernels reference {#sec-parametric-families-appendix}
 
-<!-- List common transformations of inputs and outputs, along with their use cases. -->
+This appendix collects the building blocks of parametric kernels: distributional families (@sec-distributional-families-appendix), predictors (@sec-predictors-appendix), response maps (@sec-response-maps-appendix), output transformations (@sec-output-transforms-appendix), and input transformations (@sec-input-transforms-appendix). Each parametric kernel is assembled by composing one choice from each category, as described in @sec-parametric-kernels.
+
+## Distributional families {#sec-distributional-families-appendix}
+
+The entries below list the most useful distributional families available in PyTorch via `torch.distributions`, grouped by output type. Each entry gives the PyTorch class, parameter space, support, and typical use cases. For the full API, see the [PyTorch distributions documentation](https://docs.pytorch.org/docs/main/distributions.html).
+
+### Binary outputs
+
+**Bernoulli** (`Bernoulli`): $p \in (0,1) \to \{0,1\}$
+:   Single binary outcome. The default for yes/no events (disease present, click occurred, coin lands heads).
+
+### Categorical outputs
+
+**Categorical** (`Categorical`): $\mathbf{p} \in \Delta^{K-1} \to \{0,\ldots,K{-}1\}$
+:   Returns an integer class label. Standard choice for unordered multi-class outcomes (diagnosis type, colour, species).
+
+**One-hot categorical** (`OneHotCategorical`): $\mathbf{p} \in \Delta^{K-1} \to \{0,1\}^K$ (one-hot)
+:   Same probabilities as Categorical but returns a one-hot vector. Useful when downstream computation needs a vector representation.
+
+**Multinomial** (`Multinomial`): $n \in \mathbb{N},\; \mathbf{p} \in \Delta^{K-1} \to \{0,\ldots,n\}^K$ with sum $= n$
+:   Counts across $K$ categories in $n$ independent trials. Models category frequencies (word counts, allele counts).
+
+### Count data
+
+**Poisson** (`Poisson`): $\lambda > 0 \to \mathbb{N}_0$
+:   Counts with equal mean and variance. Default for rare-event counts (arrivals, mutations, photon hits).
+
+**Binomial** (`Binomial`): $n \in \mathbb{N},\; p \in (0,1) \to \{0,\ldots,n\}$
+:   Number of successes in $n$ fixed trials. Used when the maximum count is known (defects out of $n$ items, correct answers out of $n$ questions).
+
+**Negative binomial** (`NegativeBinomial`): $r > 0,\; p \in [0,1) \to \mathbb{N}_0$
+:   Count of successes before $r$ failures. Handles overdispersed counts (variance $>$ mean), common in genomics and ecology.
+
+**Geometric** (`Geometric`): $p \in (0,1] \to \mathbb{N}_0$
+:   Number of failures before the first success. Models waiting times in discrete trials (number of attempts until success).
+
+### Real-valued outputs
+
+**Normal** (`Normal`): $\mu \in \mathbb{R},\; \sigma > 0 \to \mathbb{R}$
+:   The default for continuous real-valued quantities. Justified by the central limit theorem whenever the variable arises as a sum of many small effects.
+
+**Student-$t$** (`StudentT`): $\nu > 0,\; \mu \in \mathbb{R},\; \sigma > 0 \to \mathbb{R}$
+:   Heavy-tailed alternative to the Normal. Useful when outliers are expected (financial returns, robust regression). Approaches Normal as $\nu \to \infty$.
+
+**Cauchy** (`Cauchy`): $\text{loc} \in \mathbb{R},\; \text{scale} > 0 \to \mathbb{R}$
+:   Very heavy tails (no finite mean or variance). Special case of Student-$t$ with $\nu = 1$. Used as a weakly informative prior.
+
+**Laplace** (`Laplace`): $\mu \in \mathbb{R},\; b > 0 \to \mathbb{R}$
+:   Peaked, with exponentially decaying tails. Connected to $L^1$ (median) regression and sparse signal recovery.
+
+**Gumbel** (`Gumbel`): $\text{loc} \in \mathbb{R},\; \text{scale} > 0 \to \mathbb{R}$
+:   Models the maximum of many samples. Appears in extreme-value theory (flood levels, maximum wind speeds) and as the noise distribution in logit models.
+
+### Positive real-valued outputs
+
+**Exponential** (`Exponential`): $\text{rate} > 0 \to [0, \infty)$
+:   Memoryless waiting time. The continuous analogue of the Geometric distribution. Used for inter-arrival times and survival analysis.
+
+**Gamma** (`Gamma`): $\text{concentration} > 0,\; \text{rate} > 0 \to [0, \infty)$
+:   Flexible positive distribution. Generalises the Exponential (concentration $= 1$). Common for waiting times, rainfall amounts, and as a prior for rate or precision parameters.
+
+**Log-normal** (`LogNormal`): $\mu \in \mathbb{R},\; \sigma > 0 \to (0, \infty)$
+:   Arises when $\log Y \sim \text{Normal}(\mu, \sigma^2)$. Natural for quantities formed by multiplicative effects (incomes, concentrations, particle sizes).
+
+**Inverse gamma** (`InverseGamma`): $\text{concentration} > 0,\; \text{rate} > 0 \to (0, \infty)$
+:   If $X \sim \text{Gamma}$ then $1/X \sim \text{InverseGamma}$. Classical conjugate prior for the variance of a Normal distribution.
+
+**Half-normal** (`HalfNormal`): $\text{scale} > 0 \to [0, \infty)$
+:   Folded Normal. Popular weakly informative prior for scale (standard deviation) parameters.
+
+**Half-Cauchy** (`HalfCauchy`): $\text{scale} > 0 \to [0, \infty)$
+:   Folded Cauchy. Recommended default prior for scale parameters when little prior information is available.
+
+**Chi-squared** (`Chi2`): $\text{df} > 0 \to [0, \infty)$
+:   Sum of squared standard Normals. Appears in goodness-of-fit tests and as the sampling distribution of sample variances. Special case of Gamma.
+
+**Weibull** (`Weibull`): $\text{scale} > 0,\; \text{concentration} > 0 \to (0, \infty)$
+:   Flexible lifetime distribution. Generalises the Exponential (concentration $= 1$). Standard in reliability engineering and survival analysis.
+
+**Pareto** (`Pareto`): $\text{scale} > 0,\; \alpha > 0 \to [\text{scale}, \infty)$
+:   Power-law tail. Models phenomena where large values are rare but extreme (city sizes, wealth, file sizes).
+
+### Unit-interval outputs
+
+**Beta** (`Beta`): $\alpha > 0,\; \beta > 0 \to (0, 1)$
+:   The standard distribution on the unit interval. Used for proportions, probabilities, and as a conjugate prior for Bernoulli/Binomial.
+
+**Continuous Bernoulli** (`ContinuousBernoulli`): $p \in (0,1) \to [0, 1]$
+:   A single-parameter continuous distribution on $[0,1]$. Designed to fix a common error in variational autoencoders when modelling pixel intensities.
+
+**Kumaraswamy** (`Kumaraswamy`): $a > 0,\; b > 0 \to (0, 1)$
+:   Similar to Beta but with a closed-form CDF, making sampling and density evaluation faster. Useful as a drop-in replacement for Beta in variational inference.
+
+### Simplex-valued outputs
+
+**Dirichlet** (`Dirichlet`): $\boldsymbol{\alpha} \in \mathbb{R}_{>0}^K \to \Delta^{K-1}$
+:   Distribution over probability vectors. The multivariate generalisation of Beta. Used for topic proportions, mixture weights, and as a conjugate prior for Categorical/Multinomial.
+
+### Multivariate real-valued outputs
+
+**Multivariate Normal** (`MultivariateNormal`): $\boldsymbol{\mu} \in \mathbb{R}^d,\; \boldsymbol{\Sigma} \succ 0 \to \mathbb{R}^d$
+:   The default for correlated continuous vectors. Parameterised by mean and covariance (or precision, or Cholesky factor). Ubiquitous in spatial statistics, finance, and latent-variable models.
+
+**Low-rank MVN** (`LowRankMultivariateNormal`): $\boldsymbol{\mu},\; \text{cov\_factor},\; \text{cov\_diag} \to \mathbb{R}^d$
+:   Multivariate Normal with low-rank-plus-diagonal covariance. Efficient when $d$ is large but correlations are driven by a few latent factors.
+
+**Wishart** (`Wishart`): $\text{df},\; \boldsymbol{\Sigma} \succ 0 \to \mathbb{S}^d_{++}$
+:   Distribution over positive-definite matrices. Conjugate prior for the precision matrix of a Multivariate Normal.
+
+**LKJ Cholesky** (`LKJCholesky`): $\text{dim},\; \eta > 0 \to$ Cholesky factors of correlation matrices
+:   Prior over correlation matrices. At $\eta = 1$ the distribution is uniform over correlations. Widely used in Bayesian hierarchical models.
+
+### Circular outputs
+
+**Von Mises** (`VonMises`): $\text{loc} \in \mathbb{R},\; \text{concentration} > 0 \to (-\pi, \pi]$
+:   The circular analogue of the Normal distribution. Used for angular data (wind direction, time of day, molecular torsion angles).
+
+## Predictors {#sec-predictors-appendix}
+
+A predictor is a deterministic function $h : X_1 \otimes \cdots \otimes X_n \to H$ that maps the inputs into a predictor space $H$. A response map (@sec-response-maps-appendix) then converts $H$ into valid parameters for the base family. The entries below list the main classes, in order of increasing flexibility.
+
+**Linear**: $h(\mathbf{x}) = \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n$
+:   *Interpretability:* high. *Flexibility:* low. Each coefficient $\alpha_j$ measures the effect of a one-unit increase in $x_j$, all else equal. The default for scientific modelling because the parameters have a direct interpretation. Combined with a response map and exponential-family base, this gives a GLM.
+
+**Polynomial**: $h(\mathbf{x}) = \sum_{|\mathbf{k}| \leq d} \alpha_{\mathbf{k}} \, \mathbf{x}^{\mathbf{k}}$
+:   *Interpretability:* moderate. *Flexibility:* moderate. Extends the linear predictor with powers and cross-terms up to degree $d$. Captures curvature and interactions. Coefficients are still interpretable but grow combinatorially with $d$ and $n$.
+
+**Spline basis**: $h(\mathbf{x}) = \sum_{j} \alpha_j \, B_j(\mathbf{x})$
+:   *Interpretability:* moderate. *Flexibility:* moderate–high. Uses piecewise polynomial basis functions $B_j$ (B-splines, natural splines, thin-plate splines) anchored at chosen knots. Locally flexible and numerically stable. Penalised splines (P-splines) add a smoothness penalty on the coefficients to prevent overfitting. Standard in generalised additive models (GAMs).
+
+**Radial basis functions**: $h(\mathbf{x}) = \sum_{j} \alpha_j \, \phi(\lVert \mathbf{x} - \mathbf{c}_j \rVert)$
+:   *Interpretability:* low–moderate. *Flexibility:* moderate–high. Each basis function $\phi$ depends only on the distance to a centre $\mathbf{c}_j$ (often Gaussian: $\phi(r) = e^{-r^2/2\ell^2}$). Provides a smooth, local interpolation. Related to Gaussian process regression when the number of centres equals the number of data points.
+
+**Fourier features**: $h(\mathbf{x}) = \alpha_0 + \sum_{k} \bigl[\alpha_k \cos(2\pi \boldsymbol{\omega}_k^\top \mathbf{x}) + \beta_k \sin(2\pi \boldsymbol{\omega}_k^\top \mathbf{x})\bigr]$
+:   *Interpretability:* low. *Flexibility:* moderate. Approximates shift-invariant kernels via random or fixed frequency vectors $\boldsymbol{\omega}_k$. Efficient for large datasets where direct kernel methods are too costly. Natural for periodic signals.
+
+**Neural network**: $h(\mathbf{x}) = f_L \circ \cdots \circ f_1(\mathbf{x})$, each $f_l(\mathbf{z}) = \sigma(W_l \mathbf{z} + \mathbf{b}_l)$
+:   *Interpretability:* low. *Flexibility:* high. A composition of affine maps and element-wise non-linearities. Universal approximation guarantees for sufficiently wide or deep networks. Implemented in PyTorch via `torch.nn.Sequential`, `torch.nn.Linear`, etc. Maximally flexible but coefficients are not directly interpretable.
+
+All predictors slot into the same compositional pattern: $k = k_h \then k_\varphi \then k_{\text{base}} \then k_t$. Replacing one predictor with another changes only the deterministic kernel $k_h$; the base family, response map, and output transformation are unaffected.
+
+## Response maps {#sec-response-maps-appendix}
+
+A response map $\varphi : H \to \Theta$ converts the output of a predictor (in a predictor space $H$, typically $\mathbb{R}$) into a valid parameter for the base family. In the GLM literature, the inverse $\varphi^{-1}$ is called the *link function*.
+
+**Identity**: $\varphi(\eta) = \eta$, $\;\mathbb{R} \to \mathbb{R}$
+:   Gaussian mean parameter. No transformation needed.
+
+**Sigmoid** (`torch.sigmoid`): $\varphi(\eta) = \frac{1}{1 + e^{-\eta}}$, $\;\mathbb{R} \to (0,1)$
+:   Bernoulli success probability; Beta mean. The canonical response map for binary outcomes.
+
+**Softmax** (`torch.softmax`): $\varphi(\boldsymbol{\eta})_k = \frac{e^{\eta_k}}{\sum_j e^{\eta_j}}$, $\;\mathbb{R}^K \to \Delta^{K-1}$
+:   Categorical / Multinomial probabilities. Multivariate generalisation of the sigmoid.
+
+**Exponential** (`torch.exp`): $\varphi(\eta) = e^{\eta}$, $\;\mathbb{R} \to \mathbb{R}_{>0}$
+:   Poisson rate, Gamma rate, Exponential rate. Ensures positivity.
+
+**Softplus** (`torch.nn.functional.softplus`): $\varphi(\eta) = \log(1 + e^{\eta})$, $\;\mathbb{R} \to \mathbb{R}_{>0}$
+:   Smooth approximation to $\max(0, \eta)$. Alternative to $\exp$ that avoids overflow for large $\eta$. Used for scale and variance parameters.
+
+**Squared**: $\varphi(\eta) = \eta^2$, $\;\mathbb{R} \to \mathbb{R}_{\geq 0}$
+:   Ensures non-negativity. Simple but has zero gradient at $\eta = 0$, which can stall optimisation.
+
+**Tanh** (`torch.tanh`): $\varphi(\eta) = \tanh(\eta)$, $\;\mathbb{R} \to (-1,1)$
+:   Correlation coefficients or any quantity bounded between $-1$ and $1$.
+
+**Scaled sigmoid**: $\varphi(\eta) = a + (b-a)\,\sigma(\eta)$, $\;\mathbb{R} \to (a,b)$
+:   Maps to an arbitrary open interval $(a,b)$. Generalises the standard sigmoid.
+
+**Probit** (`torch.distributions.Normal(0,1).cdf`): $\varphi(\eta) = \Phi(\eta)$, $\;\mathbb{R} \to (0,1)$
+:   Alternative to sigmoid for binary outcomes. $\Phi$ is the standard Normal CDF. Yields slightly different tail behaviour.
+
+## Output transformations {#sec-output-transforms-appendix}
+
+An output transformation $f : Y \to Z$ is applied after sampling from the base family to redirect the output to a different target space. In PyTorch, many of these are implemented via `TransformedDistribution`.
+
+**Exponential** (`ExpTransform`): $f(y) = e^y$, $\;\mathbb{R} \to \mathbb{R}_{>0}$
+:   Postcompose with a Normal to obtain a **log-normal** distribution for positive quantities (costs, durations, concentrations).
+
+**Sigmoid** (`SigmoidTransform`): $f(y) = \frac{1}{1+e^{-y}}$, $\;\mathbb{R} \to (0,1)$
+:   Postcompose with a Normal to obtain a **logit-normal** distribution for proportions.
+
+**Affine** (`AffineTransform`): $f(y) = a + by$, $\;\mathbb{R} \to \mathbb{R}$
+:   Location-scale shift. Used to reparameterise standard distributions ($Y = \mu + \sigma Z$ where $Z$ is standard).
+
+**Power** (`PowerTransform`): $f(y) = y^c$, $\;\mathbb{R}_{>0} \to \mathbb{R}_{>0}$
+:   Box–Cox-style transformations. Includes square root ($c = \tfrac{1}{2}$) and reciprocal ($c = -1$).
+
+**Absolute value** (`AbsTransform`): $f(y) = \lvert y \rvert$, $\;\mathbb{R} \to \mathbb{R}_{\geq 0}$
+:   Folds a symmetric distribution onto the positive half-line (e.g.\ Normal $\to$ Half-Normal).
+
+**Softmax** (`SoftmaxTransform`): $f(\mathbf{y})_k = \frac{e^{y_k}}{\sum_j e^{y_j}}$, $\;\mathbb{R}^K \to \Delta^{K-1}$
+:   Maps unconstrained scores to the simplex.
+
+**Stick-breaking** (`StickBreakingTransform`): $f(\mathbf{y})$ via iterated sigmoids, $\;\mathbb{R}^{K-1} \to \Delta^{K-1}$
+:   Bijective map to the simplex. Suitable for HMC and other gradient-based samplers that require invertibility.
+
+**Tanh** (`TanhTransform`): $f(y) = \tanh(y)$, $\;\mathbb{R} \to (-1,1)$
+:   Squashes outputs to a bounded interval. Common in reinforcement learning (bounded action spaces).
+
+**Lower Cholesky** (`LowerCholeskyTransform`): $f(\mathbf{y})$ fills lower triangle, $\;\mathbb{R}^{d(d+1)/2} \to \mathbb{L}^d_+$
+:   Maps an unconstrained vector to a lower-triangular matrix with positive diagonal, parameterising a positive-definite covariance.
+
+**Cumulative distribution** (`CumulativeDistributionTransform`): $f(y) = F(y)$, $\;\mathbb{R} \to (0,1)$
+:   Probability integral transform for a chosen CDF $F$. Used to construct copulas from multivariate distributions.
+
+**Thresholding**: $f(n) = \mathbb{1}[n > 0]$, $\;\mathbb{N}_0 \to \{0,1\}$
+:   Collapses a count to a binary indicator (any occurrence vs. none). Basis of **hurdle models**.
+
+## Input transformations {#sec-input-transforms-appendix}
+
+Input transformations reshape predictor variables before they enter the predictor. They expand the class of relationships that a linear model can capture.
+
+**Polynomial features**: $x \mapsto (x, x^2, \ldots, x^d)$
+:   Captures non-linear trends with a single continuous input. Degree $d$ controls flexibility.
+
+**Log**: $x \mapsto \log x$
+:   Linearises multiplicative relationships. Standard for right-skewed positive inputs (income, population).
+
+**Standardisation**: $x \mapsto \frac{x - \bar{x}}{s_x}$
+:   Centres and scales each input to zero mean and unit variance. Improves numerical stability and makes coefficients comparable.
+
+**One-hot encoding**: $x \in \{1,\ldots,K\} \mapsto \mathbf{e}_x \in \{0,1\}^K$
+:   Converts a categorical variable into indicator columns, one per level. Required for categorical inputs in a linear predictor.
+
+**Interaction terms**: $(x_i, x_j) \mapsto x_i \cdot x_j$
+:   Allows the effect of one variable to depend on the level of another.
+
+**Basis expansion**: $x \mapsto (\phi_1(x), \ldots, \phi_m(x))$
+:   General feature map using chosen basis functions (splines, radial basis functions, Fourier features). Captures complex non-linear patterns.
+

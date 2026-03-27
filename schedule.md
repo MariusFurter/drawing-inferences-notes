@@ -34,7 +34,7 @@ March 27:
 
 - General kernels
 - Parametric forms
-- Exercise:
+- Exercise: Swiss health model
 
 April 3:
 ---- Good Friday ----
@@ -45,33 +45,32 @@ April 17:
 
 - Intervening
 - Derive classical causal stuff
-- Exercise: Something causal
+- Exercise: Intervening in Swiss health
+
+--- Bayesian Data Analysis ---
 
 April 24:
 
+- Parameter learning (From complete and incomplete data)
 - MCMC
 - Exercise: Multilevel regression
-
-- More with MCMC
-- Exploiting conjugacies?
 
 May 1:
 ---- Tag der Arbeit ----
 
 May 8:
 
-- Weighted kernels
-- SMC
-- Exercise: State-space model
+- More with MCMC
+- Exploiting conjugacies?
 
 May 15:
 
-- Advanced SMC
+- State-space models
+- SMC
+- Exercise: State-space model
 
 May 22:
 
 - Variational inference
 
 May 29:
-
-- Buffer

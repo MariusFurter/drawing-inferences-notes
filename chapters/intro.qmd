@@ -46,6 +46,8 @@ We assign every subset $E \subseteq \Omega$ a number $p(E)$ that captures how li
 
 1. **Normalization.** $p(\emptyset) = 0$ and $p(\Omega) = 1.$ We could choose a different scale, but this is the most convenient one. 
 
+<!-- Might be good to first introduce measure, then probability measure. -->
+
 2. **Additivity.** Whenever $E_1$ and $E_2$ have no elements in common, we have $p(E_1 \cup E_2) = p(E_1) + p(E_2).$ Such events are called *mutually exclusive* because they can't both happen at the same time. Additivity says that the probability of either $E_1$ or $E_2$ happening is the sum of their individual probabilities.
 
 It $E \subseteq F$, we can write $F = E \cup (F \setminus E)$, so that by additivity $p(E) \leq p(F)$. Additivity also implies that the probability of $E$ *not* happening is $p(E^\text{c}) = 1 - p(E)$. 

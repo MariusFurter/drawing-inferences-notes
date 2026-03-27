@@ -1,0 +1,180 @@
+# Exercise 6: Swiss Health Model {.unnumbered}
+
+We apply the framework from the [chapter on hybrid models](../chapters/hybrid-models.qmd) to a concrete example: a model of Swiss health variables relating lifestyle factors to disease risk and healthcare costs. The model is assembled entirely from the parametric kernels introduced in that chapter, composed via the string-diagrammatic operations of @sec-string-diagrams-carry-over. We describe the variables and their relationships, instantiate the kernels with parameters calibrated to Swiss population statistics, and demonstrate forward sampling and conditioning using `WeightedSampling.torch`.
+
+::: {.callout-note collapse="true" title="Prerequisites: Python libraries"}
+This exercise uses the following libraries:
+
+- [**WeightedSampling.torch**](../appendix/WeightedSampling.qmd) — for probabilistic programming and inference. Install via:
+  ```bash
+  pip install git+https://github.com/MariusFurter/WeightedSampling.torch.git
+  ```
+- [**PyTorch**](https://pytorch.org/) — for tensor operations. A short tutorial can be found in the [Appendix](../appendix/pytorch.qmd).
+- [**matplotlib**](https://matplotlib.org/) — for plotting.
+
+If any packages are missing, run `pip install torch matplotlib` in your terminal.
+:::
+
+## The model
+
+The model relates six variables:
+
+| Variable | Symbol | Type | Role |
+|---|---|---|---|
+| Smoking status | $S$ | $\{0,1\}$ | root |
+| Age | $A$ | $\mathbb{R}_{\geq 0}$ | root |
+| Physical activity | $P$ | $\mathbb{R}_{\geq 0}$ | root |
+| BMI | $B$ | $\mathbb{R}$ | intermediate |
+| Diabetes | $D$ | $\{0,1\}$ | intermediate |
+| Healthcare costs | $C$ | $\mathbb{R}_{>0}$ | leaf |
+
+: Variables in the Swiss health model. {#tbl-swiss-health-vars}
+
+The causal story runs as follows. Smoking status, age, and physical activity are root variables with no parents in the model. Together, they influence BMI through a linear regression kernel. BMI in turn influences diabetes risk through a logistic regression kernel. Finally, diabetes status and BMI jointly determine healthcare costs through a log-normal regression kernel. The graph is a directed chain with one fan-out: BMI feeds into both the diabetes kernel and the cost kernel.
+
+The parameters appearing below are grounded in publicly available Swiss summary statistics. Where a parameter corresponds directly to a published statistic (a prevalence, a mean, or a rate), we read its value from the source; where possible, we derive regression coefficients from published relative risks. The remaining coefficients are calibrated so that the model's marginal distributions reproduce the published target values. In the [next chapter](../chapters/parameter-estimation.qmd), we explain how parameter estimates are obtained systematically from data.
+
+::: {.callout-note collapse="true"}
+## Data sources
+
+- [BFS Gesundheit — Taschenstatistik 2025](https://www.bfs.admin.ch/bfs/en/home/statistics/health.assetdetail.33427753.html) (based on the [Swiss Health Survey](https://www.bfs.admin.ch/bfs/en/home/statistics/health/surveys/sgb.html), SGB 2022): smoking prevalence (p. 20), overweight and obesity rates (pp. 20–21), diabetes prevalence (pp. 8–9), physical activity (p. 20), doctor consultations (p. 31), and healthcare costs (p. 32).
+- [Obsan Bericht 10/2020: Diabetes Mellitus](https://www.obsan.admin.ch/de/publikationen/2020-diabetes-mellitus) (Fürst & Probst-Hensch, 2020): disease burden and care in Switzerland. Reference data include diabetes prevalence by age and data source (ch. 8), BMI $\geq$ 25 prevalence among diabetics (SAPALDIA: 79–83% vs. 50–56% among non-diabetics, p. 49), and direct healthcare costs for diabetic patients (CHF 8,239/year, Helsana 2011, p. 47).
+- [Kosten von nichtübertragbaren Krankheiten in der Schweiz](https://www.bag.admin.ch/bag/de/home/das-bag/publikationen/forschungsberichte/forschungsberichte-ncd.html) (Stucki et al., 2025, ZHAW/Uni Luzern/BFH for BAG): full NCD cost report (156 pp.). Relative risks for diabetes type 2 from overweight: RR = 2.25 (M) / 2.30 (F); from obesity: RR = 5.50 (M) / 7.00 (F) (Tables 20–21, from Lobstein & Leach, 2010). Physical inactivity relative risk for diabetes: RR = 1.17 (Kyu et al., 2016). For obesity: OR = 1.49 (Bell et al., 2014, Table 28). Total healthcare costs attributable to overweight/obesity: CHF 3.7 billion (2022), of which diabetes type 2 accounts for CHF 1.07 billion, with an additional CHF 2.9 billion in productivity losses (Tables 22–25). 150,315 DALYs (Table 26), of which diabetes type 2 accounts for 58,293 (39%).
+- [CoLaus study](https://doi.org/10.1111/j.1464-5491.2011.03422.x) (Kaiser et al., 2012, *Diabetic Medicine* 29: 190–197): population-based study of 6,188 subjects (35–75 years) in Lausanne. Multivariable-adjusted odds ratios for type 2 diabetes (Table 4): BMI overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78); physical activity OR = 0.64 (0.51–0.80); age 65–75 vs. 35–44 OR = 8.20 (5.22–12.9). T2D prevalence 6.3%; mean BMI of diabetics 30.2 vs. 25.5 for non-diabetics.
+- [Sport Schweiz 2020](https://www.sportobs.ch/sport-schweiz/) (BASPO / Lamprecht & Stamm): physical activity categories and sport behavior (pp. 12–16).
+- [WHO Global Health Observatory](https://www.who.int/data/gho): mean BMI by country (age-standardized).
+- [IDF Diabetes Atlas](https://diabetesatlas.org/): diabetes prevalence by country.
+- [OECD Health at a Glance](https://www.oecd.org/health/health-at-a-glance/) (2023): doctor consultations per capita.
+- [BFS Population Statistics](https://www.bfs.admin.ch/bfs/en/home/statistics/population.html) (STATPOP): median age and age distribution.
+:::
+
+### Root distributions
+
+The three root variables have no parents, so they are specified by marginal distributions (kernels $I \kernel X$ with trivial input):
+
+- **Smoking** $S \sim \mathsf{Bernoulli}(0.27)$. The SGB 2022 reports that 27.1% of men and 20.8% of women smoke daily or occasionally; we use $0.27$ as a round approximation.
+- **Age** $A \sim \mathsf{Normal}(42, 17^2)$. The Swiss median age is 42.7 years (BFS STATPOP). The standard deviation of 17 is chosen to approximate the adult age distribution.
+- **Physical activity** $P \sim \mathsf{Normal}(5, 2^2)$, measured in hours of sport per week. Sport Schweiz 2020 reports that 51% of adults are "trained" ($\geq 3$ hours/week), 27% "sufficiently active," 16% "partly active," and 6% "inactive."
+
+### The BMI kernel (linear regression) {#sec-bmi-kernel}
+
+BMI is a continuous variable influenced by a mix of discrete and continuous parents — exactly the setting for which the linear regression kernel (@sec-linear-regression) is designed:
+$$
+B \mid S, A, P \;\sim\; \mathsf{Normal}(\alpha_0 + \alpha_S\, S + \alpha_A\, A + \alpha_P\, P,\; \sigma^2).
+$$
+
+::: {.callout-note collapse="true"}
+## Parameter sourcing — BMI kernel
+
+- *Intercept* $\alpha_0 = 25.0$: set so that $\mathbb{E}[B] \approx 25.3$ at the population means, matching the WHO age-standardized estimate of Switzerland's mean BMI.
+- *Smoking slope* $\alpha_S = -0.5$: epidemiological studies consistently find that current smokers have slightly lower BMI than non-smokers, owing to nicotine's appetite-suppressive effect. A meta-analysis (Dare et al., 2015, *BMJ Open* 5: e008330) reports that current smokers have BMI roughly 0.3–0.7 kg/m² lower than never-smokers after adjusting for confounders.
+- *Age slope* $\alpha_A = 0.05$: the SGB 2022 shows overweight-plus-obesity prevalence rising from roughly 30% in the 25–34 age group to 55% at ages 55–64. A slope of 0.05 BMI units per year produces a 1.5-unit increase over 30 years, consistent with this gradient.
+- *Activity slope* $\alpha_P = -0.3$: the NCD cost report (Stucki et al., 2025, Table 28) reports a physical inactivity → obesity odds ratio of 1.49 (Bell et al., 2014), confirming the direction. The magnitude is approximate.
+- *Residual standard deviation* $\sigma = 3.8$: calibrated so that the model produces approximately 43% overweight (BMI $\geq$ 25) and 12% obese (BMI $>$ 30), matching SGB 2022 rates.
+:::
+
+### The diabetes kernel (logistic regression) {#sec-diabetes-kernel}
+
+Diabetes status is binary and depends on BMI — the setting for the logistic regression kernel (@sec-logistic-regression):
+$$
+D \mid B \;\sim\; \mathsf{Bernoulli}\bigl(\sigma(\beta_0 + \beta_1\, B)\bigr).
+$$
+
+::: {.callout-note collapse="true"}
+## Parameter sourcing — diabetes kernel
+
+- *Intercept* $\beta_0 = -6.7$: calibrated so that the marginal diabetes prevalence at average BMI matches the Swiss rate. The IDF Diabetes Atlas reports 5.3% (ages 20–79). The SGB 2022 reports 6.9% of men and 4.0% of women, giving a combined rate of approximately 5.4%. The Obsan diabetes report (pp. 47–49) compiles prevalence estimates from multiple Swiss data sources (SGB, Helsana, CoLaus, SAPALDIA), all converging on 5–7%.
+- *Slope* $\beta_1 = 0.15$: the Stucki et al. (2025) NCD cost report compiles relative risks for diabetes type 2: overweight (BMI 25–30) vs. normal weight gives RR = 2.25 (men) / 2.30 (women); obesity (BMI $\geq$ 30) vs. normal weight gives RR = 5.50 (men) / 7.00 (women). The CoLaus study (Kaiser et al., 2012) reports multivariable-adjusted odds ratios: overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78). Approximating a log-linear relationship from the Stucki RRs gives $\beta_1 \approx \log(2.25)/5.5 \approx 0.15$.
+:::
+
+### The cost kernel (log-normal regression) {#sec-cost-kernel}
+
+Annual healthcare costs are strictly positive and right-skewed — the setting for the log-normal regression kernel (@sec-lognormal-regression). Costs depend on both diabetes status and BMI:
+$$
+\log C \mid D, B \;\sim\; \mathsf{Normal}(\gamma_0 + \gamma_D\, D + \gamma_B\, B,\; \tau^2).
+$$
+
+::: {.callout-note collapse="true"}
+## Parameter sourcing — cost kernel
+
+- *Intercept* $\gamma_0 = 7.5$: calibrated so that the median cost for a non-diabetic adult at average BMI is roughly CHF 3,900. For reference, total Swiss healthcare expenditure in 2022 was CHF 869 per person per month (CHF 10,428 per year; BFS Taschenstatistik 2025, p. 32).
+- *Diabetes slope* $\gamma_D = 0.65$: the Obsan diabetes report (p. 47) cites Helsana data showing direct healthcare costs of CHF 8,239/year per diabetic patient (2011), roughly twice the non-diabetic baseline. Taking the log ratio gives $\gamma_D \approx \ln(8239/3900) \approx 0.75$; we use the slightly conservative value $0.65$ to account for the fact that not all of the cost differential is attributable to diabetes status alone.
+- *BMI slope* $\gamma_B = 0.03$: encodes the qualitatively correct direction (higher BMI increases costs). The NCD cost report attributes 70% of diabetes type 2 productivity losses to overweight/obesity, confirming the strong cost linkage. The per-unit magnitude is approximate.
+- *Dispersion* $\tau = 0.6$: reflects the typically right-skewed cost distribution.
+:::
+
+### Composing the full model
+
+Compose root measures + regression kernels via sequential/parallel composition + copy/swap.
+     Draw the complete string diagram: {S, A, P} → B → D → C, with B also feeding into C.
+     Show how the compositional structure encodes the causal story.
+
+``` {.tikz}
+%%| label: fig-swiss-health-model
+%%| fig-cap: String diagram for the Swiss health model.
+%%| height: 8em
+% TODO: draw the composed string diagram
+```
+
+### Forward sampling
+
+We implement the full model in `WeightedSampling.torch` by composing the root distributions and regression kernels:
+
+```{python}
+# | code-fold: false
+import torch
+import torch.distributions as dist
+from weighted_sampling import model, sample, observe, summary, expectation
+```
+
+```{python}
+#| echo: true
+#| code-fold: false
+
+@model
+def swiss_health():
+    # --- Root distributions ---
+    S = sample("S", dist.Bernoulli(0.27))          # smoking
+    A = sample("A", dist.Normal(42.0, 17.0))       # age
+    P = sample("P", dist.Normal(5.0, 2.0))         # activity (hours/week)
+
+    # --- BMI kernel (linear regression) ---
+    eta_B = 25.0 + (-0.5) * S + 0.05 * A - 0.3 * P
+    B = sample("B", dist.Normal(eta_B, 3.8))
+
+    # --- Diabetes kernel (logistic regression) ---
+    eta_D = -6.7 + 0.15 * B
+    D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
+
+    # --- Cost kernel (log-normal regression) ---
+    eta_C = 7.5 + 0.65 * D + 0.03 * B
+    C = sample("C", dist.LogNormal(eta_C, 0.6))
+
+
+result = swiss_health(num_particles=10_000)
+print(summary(result))
+```
+
+We can verify the model against known Swiss statistics:
+
+```{python}
+#| echo: true
+#| code-fold: false
+
+B_vals = result["B"]
+D_vals = result["D"]
+C_vals = result["C"]
+
+print(f"P(BMI >= 25):       {(B_vals >= 25).float().mean():.3f}")
+print(f"P(BMI >= 30):       {(B_vals >= 30).float().mean():.3f}")
+print(f"P(Diabetes):        {D_vals.mean():.3f}")
+print(f"Median cost (CHF):  {C_vals.median().item():,.0f}")
+```
+
+### Conditioning on continuous observations {#sec-conditioning-continuous}
+
+Extend the graphical conditioning procedure from Chapter 3: pre-condition on density values. Worked example: condition on observed BMI B = b.
+
+### Conditioning on discrete observations {#sec-conditioning-discrete}
+
+Same as the discrete case. Example: condition on D = 1 (has diabetes). What does this tell us about likely health costs? 
