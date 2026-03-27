@@ -285,6 +285,12 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parametric kernels reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">PyTorch Tutorial</span></a>
   </div>
@@ -434,20 +440,22 @@ p(y \mid E) = \frac{p(y, E)}{p(E)}.
 <h2 data-number="3.2" class="anchored" data-anchor-id="sec-conditional-independence"><span class="header-section-number">3.2</span> Conditional independence</h2>
 <p>Conditional independence is the structural property that makes large models tractable. It says that once we know a certain set of variables, some other variables become irrelevant to each other. We already encountered this idea informally in the <a href="../chapters/intro.html">Introduction</a>. We now give a precise definition in terms of kernels.</p>
 <div id="def-conditional-independence" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 3.4</strong></span> &nbsp;</p>
-<!-- Not the correct definition with input x. b can also depend on x. -->
-<p>Let <span class="math inline">\(U, V, W\)</span> be disjoint sets of output variables of a kernel <span class="math inline">\(g\)</span> with input <span class="math inline">\(X\)</span>. We say that <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> are <strong>conditionally independent given <span class="math inline">\(W\)</span></strong>, denoted <span class="math inline">\((U \perp V \mid W)\)</span>, if <span class="math inline">\(g\)</span> can be written in the following form: <span class="math display">\[
-g(u, v, w \mid x) = a(u \mid w) \, b(v \mid w) \, c(w \mid x),
+<p><span class="theorem-title"><strong>Definition 3.4</strong></span> Let <span class="math inline">\(g :  \kernel U \otimes V \otimes W\)</span> be a kernel with no inputs. We say that <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> are <strong>conditionally independent given <span class="math inline">\(W\)</span></strong>, denoted <span class="math inline">\((U \perp V \mid W)\)</span>, if <span class="math inline">\(g\)</span> can be written in the following form: <span class="math display">\[
+g(u, v, w) = a(u \mid w) \, b(v \mid w) \, c(w),
 \]</span> where <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span>, and <span class="math inline">\(c\)</span> are kernels. In diagrams:</p>
 <div id="Conditional independence" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="conditioning_files/mediabag/b8a989f6b154c776de97052c21577ac64018cd37.svg" style="height:6.5em" class="figure-img"></p>
+<p><img src="conditioning_files/mediabag/eb0c093f436b49881e70ec645b730a3ae636de3f.svg" style="height:6.5em" class="figure-img"></p>
 <figcaption>Conditional independence of <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> given <span class="math inline">\(W\)</span>.</figcaption>
 </figure>
 </div>
 <p>By bundling, this definition applies equally when <span class="math inline">\(U\)</span>, <span class="math inline">\(V\)</span>, and <span class="math inline">\(W\)</span> each consist of multiple variables.</p>
 </div>
-<p>The factorization says that <span class="math inline">\(g\)</span> generates <span class="math inline">\(W\)</span> first (given input <span class="math inline">\(X\)</span>), then generates <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> independently by feeding <span class="math inline">\(W\)</span> into separate kernels <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>. In particular, conditioning on <span class="math inline">\(W\)</span> makes <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> independent. To see this, apply the pre-conditioning procedure to <span class="math inline">\(g\)</span> to fix <span class="math inline">\(W = \bar w\)</span> and note that the resulting diagram factors into two separate parts generating <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span>. Therefore, once <span class="math inline">\(W\)</span> is known, learning <span class="math inline">\(V\)</span> tells us nothing new about <span class="math inline">\(U\)</span>, and vice versa.</p>
+<p>The factorization says that <span class="math inline">\(g\)</span> generates <span class="math inline">\(W\)</span> first, then generates <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> independently by feeding <span class="math inline">\(W\)</span> into separate kernels <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>. In particular, conditioning on <span class="math inline">\(W\)</span> makes <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> independent. To see this, apply the pre-conditioning procedure to <span class="math inline">\(g\)</span> to fix <span class="math inline">\(W = \bar w\)</span> and note that the resulting diagram factors into two separate parts generating <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span>. Therefore, once <span class="math inline">\(W\)</span> is known, learning <span class="math inline">\(V\)</span> tells us nothing new about <span class="math inline">\(U\)</span>, and vice versa.</p>
+<p>The above definition can be extended to kernels <span class="math inline">\(g : X \kernel U \otimes V \otimes W\)</span> with inputs: <span class="math inline">\((U \perp V \mid W)\)</span> if <span class="math inline">\(g\)</span> can be written in the form <span class="math display">\[
+g(u, v, w \mid x) = a(u \mid w) \, b(v \mid w,x) \, c(w \mid x).
+\]</span></p>
+<p>Note that <span class="math inline">\(b\)</span> may depend on <span class="math inline">\(x\)</span> while <span class="math inline">\(a\)</span> does not, making the definition asymmetric in <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span>. This is stronger than requiring conditional independence for each fixed input <span class="math inline">\(x\)</span>.</p>
 <section id="graphical-test-for-conditional-independence" class="level3" data-number="3.2.1">
 <h3 data-number="3.2.1" class="anchored" data-anchor-id="graphical-test-for-conditional-independence"><span class="header-section-number">3.2.1</span> Graphical test for conditional independence</h3>
 <p>String diagrams make it easy to read off conditional independence relationships directly from the model structure, without computing any probabilities. Consider a string diagram of probability kernels. Let <span class="math inline">\(U, W, X\)</span> be arbitrary disjoint sets of variables represented by wires in the diagram. To check whether <span class="math inline">\(U\)</span> and <span class="math inline">\(W\)</span> are conditionally independent given <span class="math inline">\(X\)</span>:</p>
@@ -574,7 +582,7 @@ g'(y \mid x) := \frac{g(y \mid x)}{\sum_{y' \in Y} g(y' \mid x)},
 </ol>
 <p>Hence, as long as we condition on a variable that is the only output of a box, we can simply substitute the sampling step with a corresponding weighting step. For this to work, one needs to know the exact probability specification of the kernel in question.</p>
 <p>Let us implement this in PyTorch. Recall from the <a href="../chapters/intro.html">Introduction</a> that the model uses binary variables (0 = unaffected, 1 = affected/carrier) with all inheritance and zygosity probabilities equal to <span class="math inline">\(1/2\)</span>. The key difference from the original model is that instead of writing a function <code>gen_s(M)</code> that samples <span class="math inline">\(B\)</span>, we write a function <code>w_s(M)</code> that returns the probability of <span class="math inline">\(B = 0\)</span>, given the genotype of the mother <span class="math inline">\(m \in M\)</span>.</p>
-<div id="f83692b2" class="cell" data-execution_count="1">
+<div id="f4248d51" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.distributions <span class="im">import</span> Bernoulli</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -592,7 +600,7 @@ g'(y \mid x) := \frac{g(y \mid x)}{\sum_{y' \in Y} g(y' \mid x)},
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> T1, T2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now we use these functions to define a weighted sampling function that implements the importance sampling procedure above.</p>
-<div id="f57f7216" class="cell" data-execution_count="2">
+<div id="b1606dd5" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> weighted_sample(N):</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    M <span class="op">=</span> gen_m(N)                <span class="co"># 1. Sample mother</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> w_s(M)                  <span class="co"># 2. Weight = s(0 | M)</span></span>
@@ -601,7 +609,7 @@ g'(y \mid x) := \frac{g(y \mid x)}{\sum_{y' \in Y} g(y' \mid x)},
 </div>
 <p>The weighted samples that this provides can be used to estimate expectations of test functions by taking weighted averages: <span class="math display">\[\sum_{y} t(y) \, g(y \mid \bar z, x) \approx \frac{\sum_{i=1}^N w(y_i, x) \, t(y_i)}{\sum_{i=1}^N w(y_i, x)}\]</span></p>
 <p>In particular, we can estimate the conditional probabilities by choosing appropriate indicator functions.</p>
-<div id="7e6bff9b" class="cell" data-execution_count="3">
+<div id="cd40bf4c" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>

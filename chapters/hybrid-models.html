@@ -230,6 +230,12 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parametric kernels reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">PyTorch Tutorial</span></a>
   </div>
@@ -260,13 +266,21 @@ window.Quarto = {
   <ul>
   <li><a href="#general-kernels" id="toc-general-kernels" class="nav-link active" data-scroll-target="#general-kernels"><span class="header-section-number">4.1</span> General kernels</a>
   <ul class="collapse">
-  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation"><span class="header-section-number">4.1.1</span> Motivation</a></li>
-  <li><a href="#sec-events" id="toc-sec-events" class="nav-link" data-scroll-target="#sec-events"><span class="header-section-number">4.1.2</span> Events</a></li>
-  <li><a href="#sec-measures" id="toc-sec-measures" class="nav-link" data-scroll-target="#sec-measures"><span class="header-section-number">4.1.3</span> Measures</a></li>
-  <li><a href="#sec-general-kernels" id="toc-sec-general-kernels" class="nav-link" data-scroll-target="#sec-general-kernels"><span class="header-section-number">4.1.4</span> Kernels</a></li>
-  <li><a href="#sec-density-functions" id="toc-sec-density-functions" class="nav-link" data-scroll-target="#sec-density-functions"><span class="header-section-number">4.1.5</span> Density functions</a></li>
-  <li><a href="#sec-string-diagrams-carry-over" id="toc-sec-string-diagrams-carry-over" class="nav-link" data-scroll-target="#sec-string-diagrams-carry-over"><span class="header-section-number">4.1.6</span> String diagrams carry over</a></li>
+  <li><a href="#sec-events" id="toc-sec-events" class="nav-link" data-scroll-target="#sec-events"><span class="header-section-number">4.1.1</span> Events</a></li>
+  <li><a href="#sec-measures" id="toc-sec-measures" class="nav-link" data-scroll-target="#sec-measures"><span class="header-section-number">4.1.2</span> Measures</a></li>
+  <li><a href="#sec-general-kernels" id="toc-sec-general-kernels" class="nav-link" data-scroll-target="#sec-general-kernels"><span class="header-section-number">4.1.3</span> Kernels</a></li>
+  <li><a href="#sec-density-functions" id="toc-sec-density-functions" class="nav-link" data-scroll-target="#sec-density-functions"><span class="header-section-number">4.1.4</span> Density functions</a></li>
+  <li><a href="#sec-string-diagrams-carry-over" id="toc-sec-string-diagrams-carry-over" class="nav-link" data-scroll-target="#sec-string-diagrams-carry-over"><span class="header-section-number">4.1.5</span> String diagrams carry over</a></li>
   </ul></li>
+  <li><a href="#sec-parametric-kernels" id="toc-sec-parametric-kernels" class="nav-link" data-scroll-target="#sec-parametric-kernels"><span class="header-section-number">4.2</span> Parametric kernels</a>
+  <ul class="collapse">
+  <li><a href="#sec-base-families" id="toc-sec-base-families" class="nav-link" data-scroll-target="#sec-base-families"><span class="header-section-number">4.2.1</span> Base families</a></li>
+  <li><a href="#sec-predictors" id="toc-sec-predictors" class="nav-link" data-scroll-target="#sec-predictors"><span class="header-section-number">4.2.2</span> Predictors</a></li>
+  <li><a href="#sec-adaptor-maps" id="toc-sec-adaptor-maps" class="nav-link" data-scroll-target="#sec-adaptor-maps"><span class="header-section-number">4.2.3</span> Adaptor maps</a></li>
+  <li><a href="#sec-composing-pieces" id="toc-sec-composing-pieces" class="nav-link" data-scroll-target="#sec-composing-pieces"><span class="header-section-number">4.2.4</span> Composing the pieces</a></li>
+  <li><a href="#sec-common-regression-kernels" id="toc-sec-common-regression-kernels" class="nav-link" data-scroll-target="#sec-common-regression-kernels"><span class="header-section-number">4.2.5</span> Common regression kernels</a></li>
+  </ul></li>
+  <li><a href="#bibliographic-notes" id="toc-bibliographic-notes" class="nav-link" data-scroll-target="#bibliographic-notes">Bibliographic notes</a></li>
   </ul>
 </nav>
     </div>
@@ -305,70 +319,66 @@ window.Quarto = {
 \]</span></p>
 </div>
 <p>So far, all our models have lived in the world of finite sets: every wire carried a variable with finitely many values, and every kernel was specified by a finite table of numbers. But many quantities we care about take continuous values. In this chapter, we extend the string-diagrammatic framework to handle continuous and mixed-type variables.</p>
-<p>We introduce the theory gradually. First, we sketch how kernels generalize beyond finite sets, and why density functions are the practical tool for specifying them. Next, we introduce a small probabilistic programming library, <code>WeightedSampling.torch</code>, that automates the weighted sampling procedure from the <a href="../chapters/conditioning.html">previous chapter</a>. We then develop a family of parametric regression kernels — the standard building blocks for models with continuous and mixed-type variables. Finally, we compose these kernels into a concrete Swiss health model and demonstrate forward sampling and conditioning.</p>
-<!-- ============================================================ -->
 <section id="general-kernels" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="general-kernels"><span class="header-section-number">4.1</span> General kernels</h2>
-<!-- ============================================================ -->
-<section id="motivation" class="level3" data-number="4.1.1">
-<h3 data-number="4.1.1" class="anchored" data-anchor-id="motivation"><span class="header-section-number">4.1.1</span> Motivation</h3>
-<!-- Why finite tables are not enough. Continuous measurements, counts, mixed-type variables. Preview the Swiss health model variables. -->
-</section>
-<section id="sec-events" class="level3" data-number="4.1.2">
-<h3 data-number="4.1.2" class="anchored" data-anchor-id="sec-events"><span class="header-section-number">4.1.2</span> Events</h3>
+<p>In the <a href="../chapters/discrete-graphical-models.html">chapter on discrete graphical models</a>, a kernel <span class="math inline">\(f : X \kernel Y\)</span> was specified by listing a number <span class="math inline">\(f(y \mid x)\)</span> for every pair <span class="math inline">\((x, y)\)</span>. This works when both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are finite, but many quantities of interest take values in continuous spaces like <span class="math inline">\(\mathbb{R}\)</span> or <span class="math inline">\(\mathbb{R}_{\geq 0}\)</span>, where we cannot simply enumerate all possible outputs. To handle such variables, we need to define kernels between infinite spaces. This requires three concepts: a notion of <em>event</em> that captures which subsets of the space we care about, a notion of <em>measure</em> that assigns numbers to events, and a generalization of <em>kernels</em> that assigns numbers to events dependent on input values.</p>
+<section id="sec-events" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="sec-events"><span class="header-section-number">4.1.1</span> Events</h3>
 <p>In the <a href="../chapters/intro.html">introduction</a> we defined an event as any subset <span class="math inline">\(E \subseteq \Omega\)</span> of a finite sample space <span class="math inline">\(\Omega\)</span>, and observed that logical operations on events correspond to set operations: “not <span class="math inline">\(E\)</span>” is the complement <span class="math inline">\(E^\text{c}\)</span>, “<span class="math inline">\(E_1\)</span> and <span class="math inline">\(E_2\)</span>” is the intersection <span class="math inline">\(E_1 \cap E_2\)</span>, and “<span class="math inline">\(E_1\)</span> or <span class="math inline">\(E_2\)</span>” is the union <span class="math inline">\(E_1 \cup E_2\)</span>.</p>
-<p>When the sample space is infinite — say <span class="math inline">\(\Omega = \mathbb{R}\)</span> — we need to be more careful. It turns out that there is no way to consistently assign probabilities to <em>every</em> subset of <span class="math inline">\(\mathbb{R}\)</span>. Instead, we fix a collection <span class="math inline">\(\mathcal{E}\)</span> of subsets that we agree to treat as events, and only assign probabilities to those.</p>
-<p>Which subsets should count? The collection <span class="math inline">\(\mathcal{E}\)</span> should be rich enough that every event we could want to express is included, and it should be closed under the logical operations we rely on:</p>
+<p>When the sample space is infinite, say <span class="math inline">\(\Omega = \mathbb{R}\)</span>, we need to be more careful. It turns out that there is no way to consistently assign probabilities to <em>every</em> subset of <span class="math inline">\(\mathbb{R}\)</span>. Instead, we fix a collection <span class="math inline">\(\Sigma\)</span> of subsets that we agree to treat as events, and only assign probabilities to those.</p>
+<p>Which subsets should count? The collection <span class="math inline">\(\Sigma\)</span> should be rich enough that every event we could want to express is included, and it should be closed under the logical operations we rely on:</p>
 <ol type="1">
 <li><strong>Tautology and contradiction.</strong> The entire space <span class="math inline">\(\Omega\)</span> (“something happens”) and the empty set <span class="math inline">\(\varnothing\)</span> (“nothing happens”) are events.</li>
 <li><strong>Complement.</strong> If <span class="math inline">\(E\)</span> is an event, then “not <span class="math inline">\(E\)</span>”, i.e.&nbsp;<span class="math inline">\(E^\text{c}\)</span>, is also an event.</li>
 <li><strong>Sequential unions.</strong> If <span class="math inline">\(E_1, E_2, E_3, \ldots\)</span> is a sequence of events, then <span class="math inline">\(\bigcup_{n=1}^{\infty} E_n\)</span> is also an event.</li>
 </ol>
-<p>The third rule says that if each <span class="math inline">\(E_n\)</span> is a meaningful event, then “at least one of them holds” should be a meaningful event too — it is the logical “there exists.” Together with complements, it also gives us “all of them hold”: by De Morgan’s law, <span class="math inline">\(\bigcap_n E_n = \bigl(\bigcup_n E_n^\text{c}\bigr)^\text{c}\)</span>, which is the logical “for all.” Finite unions and intersections are the special case where all but finitely many <span class="math inline">\(E_n\)</span> are <span class="math inline">\(\Omega\)</span> or <span class="math inline">\(\varnothing\)</span>.</p>
-<p>A collection <span class="math inline">\(\mathcal{E}\)</span> of subsets of <span class="math inline">\(\Omega\)</span> satisfying these three rules is called a <strong><span class="math inline">\(\sigma\)</span>-algebra</strong>, and its elements are called <strong>events</strong>.</p>
+<p>The third rule says that if we can enumerate meaningful events <span class="math inline">\(E_n\)</span>, then “at least one of <span class="math inline">\(E_n\)</span> holds” should also be a meaningful event too. Together with complements, this also gives us “all of them hold” by De Morgan’s law: <span class="math inline">\(\bigcap_n E_n = \bigl(\bigcup_n E_n^\text{c}\bigr)^\text{c}\)</span>. Finite unions and intersections are the special case where all but finitely many <span class="math inline">\(E_n\)</span> are <span class="math inline">\(\Omega\)</span> or <span class="math inline">\(\varnothing\)</span>.</p>
+<p>A collection <span class="math inline">\(\Sigma\)</span> of subsets of <span class="math inline">\(\Omega\)</span> satisfying these three rules is called a <strong><span class="math inline">\(\sigma\)</span>-algebra</strong>, and its elements are called <strong>events</strong>.</p>
 <div id="def-measurable-space" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 4.1</strong></span> A <strong>measurable space</strong> is a pair <span class="math inline">\((\Omega, \mathcal{E})\)</span> consisting of a set <span class="math inline">\(\Omega\)</span> and a <span class="math inline">\(\sigma\)</span>-algebra <span class="math inline">\(\mathcal{E}\)</span> on <span class="math inline">\(\Omega\)</span>. We call the elements of <span class="math inline">\(\mathcal{E}\)</span> the <strong>events</strong> of <span class="math inline">\((\Omega, \mathcal{E})\)</span>. When we refer to a measurable space by a single letter, such as <span class="math inline">\(X\)</span>, we write <span class="math inline">\(\mathcal{E}_X\)</span> for its <span class="math inline">\(\sigma\)</span>-algebra.</p>
+<p><span class="theorem-title"><strong>Definition 4.1</strong></span> A <strong>measurable space</strong> is a pair <span class="math inline">\((\Omega, \Sigma)\)</span> consisting of a set <span class="math inline">\(\Omega\)</span> and a <span class="math inline">\(\sigma\)</span>-algebra <span class="math inline">\(\Sigma\)</span> on <span class="math inline">\(\Omega\)</span>. We call the elements of <span class="math inline">\(\Sigma\)</span> the <strong>events</strong> of <span class="math inline">\((\Omega, \Sigma)\)</span>. When we refer to a measurable space by a single letter, such as <span class="math inline">\(X\)</span>, we write <span class="math inline">\(\Sigma_X\)</span> for its <span class="math inline">\(\sigma\)</span>-algebra.</p>
 </div>
 <div id="exm-borel" class="theorem example">
 <p><span class="theorem-title"><strong>Example 4.2 (Events on the real line)</strong></span> On <span class="math inline">\(\Omega = \mathbb{R}\)</span>, start with the closed intervals <span class="math inline">\([a, b]\)</span> for all <span class="math inline">\(a \leq b\)</span> and close under the three rules above. The resulting collection of events is called the <strong>Borel <span class="math inline">\(\sigma\)</span>-algebra</strong> <span class="math inline">\(\mathcal{B}(\mathbb{R})\)</span>. It contains every open set, closed set, and interval. This is the collection we will always use when a wire carries a real-valued variable.</p>
+<p>There are many other collections that also generate the Borel <span class="math inline">\(\sigma\)</span>-algebra, such as the open intervals <span class="math inline">\((a, b)\)</span>, half-open intervals <span class="math inline">\([a, b)\)</span>, and closed rays <span class="math inline">\((-\infty, a]\)</span>. The latter is the basis for <strong>cumulative distribution functions (CDFs)</strong> which characterize the distribution of a real-valued random variable <span class="math inline">\(X\)</span> by <span class="math inline">\(F_X(a) := p((-\infty, a]) = p(X \leq a)\)</span>.</p>
 </div>
 </section>
-<section id="sec-measures" class="level3" data-number="4.1.3">
-<h3 data-number="4.1.3" class="anchored" data-anchor-id="sec-measures"><span class="header-section-number">4.1.3</span> Measures</h3>
-<p>In the <a href="../chapters/intro.html">introduction</a> we defined a probability measure on a finite set <span class="math inline">\(\Omega\)</span> by two properties: normalization (<span class="math inline">\(p(\varnothing) = 0\)</span> and <span class="math inline">\(p(\Omega) = 1\)</span>) and additivity (<span class="math inline">\(p(E_1 \cup E_2) = p(E_1) + p(E_2)\)</span> whenever <span class="math inline">\(E_1\)</span> and <span class="math inline">\(E_2\)</span> are mutually exclusive).</p>
-<p>The same idea carries over to a general measurable space <span class="math inline">\((\Omega, \mathcal{E})\)</span>: a probability measure is a function <span class="math inline">\(p : \mathcal{E} \to [0,1]\)</span> that assigns a probability to every event, satisfying normalization and additivity. The one new requirement is that additivity must extend from pairs to sequences of mutually exclusive events: if <span class="math inline">\(E_1, E_2, E_3, \ldots\)</span> are pairwise disjoint, then <span class="math display">\[
-p\Bigl(\bigcup_{n=1}^{\infty} E_n\Bigr) = \sum_{n=1}^{\infty} p(E_n).
+<section id="sec-measures" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="sec-measures"><span class="header-section-number">4.1.2</span> Measures</h3>
+<p>In the <a href="../chapters/intro.html">introduction</a> we defined a probability measure on a finite set <span class="math inline">\(\Omega\)</span> by two properties: normalization (<span class="math inline">\(p(\varnothing) = 0\)</span> and <span class="math inline">\(p(\Omega) = 1\)</span>) and additivity (<span class="math inline">\(p(E_1 \cup E_2) = p(E_1) + p(E_2)\)</span> whenever <span class="math inline">\(E_1\)</span> and <span class="math inline">\(E_2\)</span> are mutually exclusive). If we drop the normalization requirement, we get a more general notion of <strong>measure</strong> that assigns a non-negative number to each event, but does not require the total to be 1. Measures are the right level of generality for kernels: they allow us to talk about unnormalized weights and likelihoods without forcing us to normalize them into probabilities.</p>
+<p>In the general setting, a measure is still a function <span class="math inline">\(\mu : \Sigma \to [0, \infty]\)</span> that assigns each event a non-negative number. However, we must extend the additivity requirement to hold for any sequence of pairwise disjoint events. If <span class="math inline">\(E_1, E_2, E_3, \ldots\)</span> are pairwise disjoint, then <span class="math display">\[
+\mu\Bigl(\bigcup_{n=1}^{\infty} E_n\Bigr) = \sum_{n=1}^{\infty} \mu(E_n).
 \]</span></p>
-<p>Why is it reasonable? It is equivalent to requiring that probability be <strong>continuous</strong> at 0: if <span class="math inline">\(E_1 \supseteq E_2 \supseteq E_3 \supseteq \cdots\)</span> is a decreasing sequence of events that shrinks to nothing (<span class="math inline">\(\bigcap_n E_n = \varnothing\)</span>), then <span class="math inline">\(p(E_n) \to 0\)</span>. In other words, if we iteratively shrink an event until nothing remains, its probability should decrease to zero.</p>
-<div id="def-probability-measure" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 4.3</strong></span> A <strong>probability measure</strong> on a measurable space <span class="math inline">\((\Omega, \mathcal{E})\)</span> is a function <span class="math inline">\(p : \mathcal{E} \to [0,1]\)</span> satisfying:</p>
+<p>Why is this natural? For finite measures, it is equivalent to <strong>continuity from above</strong>: if <span class="math inline">\(E_1 \supseteq E_2 \supseteq E_3 \supseteq \cdots\)</span> is a decreasing sequence of events that shrinks to nothing (<span class="math inline">\(\bigcap_n E_n = \varnothing\)</span>), then <span class="math inline">\(\mu(E_n) \to 0\)</span>. In other words, if we iteratively shrink an event until nothing remains, its measure should decrease to zero.</p>
+<div id="def-measure" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 4.3</strong></span> A <strong>measure</strong> on a measurable space <span class="math inline">\((\Omega, \Sigma)\)</span> is a function <span class="math inline">\(\mu : \Sigma \to [0, \infty]\)</span> satisfying:</p>
 <ol type="1">
-<li><strong>Normalization.</strong> <span class="math inline">\(p(\varnothing) = 0\)</span> and <span class="math inline">\(p(\Omega) = 1\)</span>.</li>
-<li><strong>Countable additivity.</strong> If <span class="math inline">\(E_1, E_2, E_3, \ldots \in \mathcal{E}\)</span> are pairwise disjoint, then <span class="math inline">\(p\bigl(\bigcup_{n=1}^\infty E_n\bigr) = \sum_{n=1}^\infty p(E_n)\)</span>.</li>
+<li><strong>Empty set.</strong> <span class="math inline">\(\mu(\varnothing) = 0\)</span>.</li>
+<li><strong>Countable additivity.</strong> If <span class="math inline">\(E_1, E_2, E_3, \ldots \in \Sigma\)</span> are pairwise disjoint, then <span class="math inline">\(\mu\bigl(\bigcup_{n=1}^\infty E_n\bigr) = \sum_{n=1}^\infty \mu(E_n)\)</span>.</li>
 </ol>
-<p>The triple <span class="math inline">\((\Omega, \mathcal{E}, p)\)</span> is called a <strong>probability space</strong>.</p>
+<p>A measure <span class="math inline">\(\mu\)</span> is called a <strong>probability measure</strong> if in addition <span class="math inline">\(\mu(\Omega) = 1\)</span>.</p>
 </div>
 </section>
-<section id="sec-general-kernels" class="level3" data-number="4.1.4">
-<h3 data-number="4.1.4" class="anchored" data-anchor-id="sec-general-kernels"><span class="header-section-number">4.1.4</span> Kernels</h3>
+<section id="sec-general-kernels" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="sec-general-kernels"><span class="header-section-number">4.1.3</span> Kernels</h3>
 <p>In the <a href="../chapters/discrete-graphical-models.html">chapter on discrete graphical models</a> we defined a discrete kernel <span class="math inline">\(f : X \kernel Y\)</span> between finite sets by specifying a non-negative number <span class="math inline">\(f(y \mid x)\)</span> for each input <span class="math inline">\(x \in X\)</span> and output <span class="math inline">\(y \in Y\)</span>. We can equivalently describe <span class="math inline">\(f\)</span> in terms of events: for any subset <span class="math inline">\(B \subseteq Y\)</span>, set <span class="math display">\[
 f(B \mid x) := \sum_{y \in B} f(y \mid x).
 \]</span> This gives us the total weight that <span class="math inline">\(f\)</span> assigns to the event <span class="math inline">\(B\)</span>, given input <span class="math inline">\(x\)</span>. The values on individual points are recovered by taking <span class="math inline">\(B = \{y\}\)</span>.</p>
-<p>The event-based formulation generalizes to infinite spaces where it in no longer possible to assign meaningful values to individual points. Thus, a general kernel <span class="math inline">\(k : X \kernel Y\)</span> assigns a non-negative number <span class="math inline">\(k(B \mid x)\)</span> to each input <span class="math inline">\(x\)</span> and each event <span class="math inline">\(B \in \mathcal{E}_Y\)</span>.</p>
+<p>The event-based formulation generalizes to infinite spaces where it is not longer possible to compute the measure of a set from individual points. Thus, a general kernel <span class="math inline">\(k : X \kernel Y\)</span> assigns a non-negative number <span class="math inline">\(k(B \mid x)\)</span> to each input <span class="math inline">\(x\)</span> and each event <span class="math inline">\(B \in \Sigma_Y\)</span>.</p>
 <div id="def-kernel" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 4.4</strong></span> A <strong>kernel</strong> <span class="math inline">\(k : X \kernel Y\)</span> between measurable spaces <span class="math inline">\((X, \mathcal{E}_X)\)</span> and <span class="math inline">\((Y, \mathcal{E}_Y)\)</span> assigns to each input <span class="math inline">\(x \in X\)</span> and each event <span class="math inline">\(B \in \mathcal{E}_Y\)</span> a non-negative number <span class="math inline">\(k(B \mid x)\)</span>, such that:</p>
+<p><span class="theorem-title"><strong>Definition 4.4</strong></span> A <strong>kernel</strong> <span class="math inline">\(k : X \kernel Y\)</span> between measurable spaces <span class="math inline">\((X, \Sigma_X)\)</span> and <span class="math inline">\((Y, \Sigma_Y)\)</span> assigns to each input <span class="math inline">\(x \in X\)</span> and each event <span class="math inline">\(B \in \Sigma_Y\)</span> a non-negative number <span class="math inline">\(k(B \mid x)\)</span>, such that:</p>
 <ol type="1">
-<li>For each fixed <span class="math inline">\(x \in X\)</span>, the function <span class="math inline">\(B \mapsto k(B \mid x)\)</span> is a measure on <span class="math inline">\((Y, \mathcal{E}_Y)\)</span>.</li>
-<li>For each fixed <span class="math inline">\(B \in \mathcal{E}_Y\)</span>, the function <span class="math inline">\(x \mapsto k(B \mid x)\)</span> is measurable.</li>
+<li>For each fixed <span class="math inline">\(x \in X\)</span>, the function <span class="math inline">\(B \mapsto k(B \mid x)\)</span> is a measure on <span class="math inline">\((Y, \Sigma_Y)\)</span>.</li>
+<li>For each fixed <span class="math inline">\(B \in \Sigma_Y\)</span>, the function <span class="math inline">\(x \mapsto k(B \mid x)\)</span> is measurable.</li>
 </ol>
 <p>If <span class="math inline">\(k(Y \mid x) = 1\)</span> for all <span class="math inline">\(x\)</span>, we call <span class="math inline">\(k\)</span> a <strong>probability kernel</strong>. We call <span class="math inline">\(k\)</span> <strong>finite</strong> if there is a uniform bound <span class="math inline">\(r\)</span> such that <span class="math inline">\(k(Y \mid x) \leq r\)</span> for all <span class="math inline">\(x \in X\)</span>. We will always assume that kernels are finite.</p>
 </div>
 <p>Condition 1 is the substantive requirement: each input produces a measure on the output space. Condition 2 is a technical regularity condition ensuring that the kernel interacts well with the <span class="math inline">\(\sigma\)</span>-algebras. All kernels we construct in practice will satisfy it automatically, so we will not check it explicitly.</p>
+<!-- Remark about handling non-finite kernels -->
 </section>
-<section id="sec-density-functions" class="level3" data-number="4.1.5">
-<h3 data-number="4.1.5" class="anchored" data-anchor-id="sec-density-functions"><span class="header-section-number">4.1.5</span> Density functions</h3>
+<section id="sec-density-functions" class="level3" data-number="4.1.4">
+<h3 data-number="4.1.4" class="anchored" data-anchor-id="sec-density-functions"><span class="header-section-number">4.1.4</span> Density functions</h3>
 <p>A convenient way to specify a kernel is through a <strong>density function</strong> that describes how weight is spread across the output space.</p>
-<p><strong>Continuous outputs.</strong> Consider a kernel <span class="math inline">\(k : X \kernel \mathbb{R}\)</span> whose output is a real-valued variable. For each input <span class="math inline">\(x\)</span>, suppose we have a non-negative function <span class="math inline">\(y \mapsto l_k(y \mid x)\)</span> whose graph is a curve over the real line. We think of <span class="math inline">\(l_k(y \mid x)\)</span> as the <em>weight per unit length</em> that <span class="math inline">\(k\)</span> places near the output value <span class="math inline">\(y\)</span>. The total weight assigned to an event <span class="math inline">\(B \in \mathcal{E}_Y\)</span> is then the area under this curve above <span class="math inline">\(B\)</span>:</p>
+<p><strong>Continuous outputs.</strong> Consider a kernel <span class="math inline">\(k : X \kernel \mathbb{R}\)</span> whose output is a real-valued variable. For each input <span class="math inline">\(x\)</span>, suppose we have a non-negative function <span class="math inline">\(y \mapsto \ell_k(y \mid x)\)</span> whose graph is a curve over the real line. We think of <span class="math inline">\(\ell_k(y \mid x)\)</span> as the <em>weight per unit length</em> that <span class="math inline">\(k\)</span> places near the output value <span class="math inline">\(y\)</span>. The total weight assigned to an event <span class="math inline">\(B \in \Sigma_Y\)</span> is then the area under this curve above <span class="math inline">\(B\)</span>:</p>
 <div id="cell-fig-density-area" class="cell" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div id="fig-density-area" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -384,11 +394,11 @@ Figure&nbsp;4.1: The weight assigned to <span class="math inline">\(B = [a, b]\)
 </div>
 </div>
 <p>Mathematically, this area is given by the <span class="math display">\[
-k(B \mid x) = \int_B l_k(y \mid x) \, dy.
-\]</span> We call <span class="math inline">\(l_k\)</span> the <em>density</em> of <span class="math inline">\(k\)</span>; the precise definition will follow shortly. For a probability kernel, the total area under the curve equals 1. Note that a single point <span class="math inline">\(\{y\}\)</span> has zero width and therefore zero area: <span class="math inline">\(k(\{y\} \mid x) = 0\)</span>. For continuous variables, individual outcomes always have probability zero.</p>
+k(B \mid x) = \int_B \ell_k(y \mid x) \, dy.
+\]</span> We call <span class="math inline">\(\ell_k\)</span> the <em>density</em> of <span class="math inline">\(k\)</span>; the precise definition will follow shortly. For a probability kernel, the total area under the curve equals 1. Note that a single point <span class="math inline">\(\{y\}\)</span> has zero width and therefore zero area: <span class="math inline">\(k(\{y\} \mid x) = 0\)</span>. For continuous variables, individual outcomes always have probability zero.</p>
 <div id="exm-gaussian-kernel" class="theorem example">
 <p><span class="theorem-title"><strong>Example 4.5</strong></span> The <strong>Gaussian</strong> (or normal) density with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span> is <span class="math display">\[
-l(y \mid \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\Bigl(-\frac{(y - \mu)^2}{2\sigma^2}\Bigr).
+\ell(y \mid \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\Bigl(-\frac{(y - \mu)^2}{2\sigma^2}\Bigr).
 \]</span> We write <span class="math inline">\(\mathsf{Normal}(\mu, \sigma^2)\)</span> for the probability measure with this density — its graph is the familiar bell curve, centered at <span class="math inline">\(\mu\)</span> with spread controlled by <span class="math inline">\(\sigma^2\)</span>. Since the total area is 1 for every choice of <span class="math inline">\((\mu, \sigma^2)\)</span>, varying the inputs defines a probability kernel <span class="math inline">\(k : \mathbb{R} \times \mathbb{R}_{&gt;0} \kernel \mathbb{R}\)</span>.</p>
 <div id="cell-fig-gaussian-density" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
@@ -405,7 +415,7 @@ Figure&nbsp;4.2: The Gaussian density for several inputs <span class="math inlin
 </div>
 </div>
 </div>
-<p><strong>Discrete outputs.</strong> In the <a href="../chapters/discrete-graphical-models.html">discrete setting</a>, each output value <span class="math inline">\(y\)</span> carries a weight <span class="math inline">\(l_k(y \mid x)\)</span>, which we can picture as a bar of that height. The total weight on an event <span class="math inline">\(B\)</span> is the sum of bar heights:</p>
+<p><strong>Discrete outputs.</strong> In the <a href="../chapters/discrete-graphical-models.html">discrete setting</a>, each output value <span class="math inline">\(y\)</span> carries a weight <span class="math inline">\(\ell_k(y \mid x)\)</span>, which we can picture as a bar of that height. The total weight on an event <span class="math inline">\(B\)</span> is the sum of bar heights:</p>
 <div id="cell-fig-density-discrete" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div id="fig-density-discrete" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -421,18 +431,20 @@ Figure&nbsp;4.3: For a discrete kernel, the weight on <span class="math inline">
 </div>
 </div>
 <p>In formulas, the total weight on <span class="math inline">\(B\)</span> is <span class="math display">\[
-k(B \mid x) = \sum_{y \in B} l_k(y \mid x).
+k(B \mid x) = \sum_{y \in B} \ell_k(y \mid x).
 \]</span> This is exactly the formula from the beginning of the previous section: the values <span class="math inline">\(f(y \mid x)\)</span> that defined a discrete kernel in the <a href="../chapters/discrete-graphical-models.html">chapter on discrete graphical models</a> are precisely its density. Since a discrete kernel is completely determined by its density and vice versa, we treated the two interchangeably in the discrete setting. In the continuous case this identification breaks down, because not all kernels have densities.</p>
 <p><strong>Base measures and densities.</strong> In both cases above, the kernel is determined by integrating a non-negative function against a fixed measure on the output space: Lebesgue measure (length / area) in the continuous case, counting measure (each point has mass 1) in the discrete case. We call this fixed measure the <strong>base measure</strong> and the function the <strong>density</strong>.</p>
 <div id="def-density" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 4.6</strong></span> Let <span class="math inline">\(\nu\)</span> be a measure on the output space <span class="math inline">\(Y\)</span>. A non-negative function <span class="math inline">\(l_k(y \mid x)\)</span> is a <strong>density</strong> of the kernel <span class="math inline">\(k : X \kernel Y\)</span> with respect to <span class="math inline">\(\nu\)</span> if <span class="math display">\[
-k(B \mid x) = \int_B l_k(y \mid x) \, \nu(dy)
-\]</span> for every <span class="math inline">\(x \in X\)</span> and every event <span class="math inline">\(B \in \mathcal{E}_Y\)</span>.</p>
+<p><span class="theorem-title"><strong>Definition 4.6</strong></span> Let <span class="math inline">\(\nu\)</span> be a measure on the output space <span class="math inline">\(Y\)</span>. A non-negative function <span class="math inline">\(\ell_k(y \mid x)\)</span> is a <strong>density</strong> of the kernel <span class="math inline">\(k : X \kernel Y\)</span> with respect to <span class="math inline">\(\nu\)</span> if <span class="math display">\[
+k(B \mid x) = \int_B \ell_k(y \mid x) \, \nu(dy)
+\]</span> for every <span class="math inline">\(x \in X\)</span> and every event <span class="math inline">\(B \in \Sigma_Y\)</span>.</p>
 </div>
+<p>The integral above is the <em>Lebesgue integral</em> from measure theory. Don’t worry if you are not familiar with it. Simply think of it as continuous version of the sum.</p>
+<!-- Give better references to measure theory and integration. Provide intuitive description of Lebesgue integral. -->
 </section>
-<section id="sec-string-diagrams-carry-over" class="level3" data-number="4.1.6">
-<h3 data-number="4.1.6" class="anchored" data-anchor-id="sec-string-diagrams-carry-over"><span class="header-section-number">4.1.6</span> String diagrams carry over</h3>
-<p>The string-diagrammatic language from the <a href="../chapters/discrete-graphical-models.html">chapter on discrete graphical models</a> extends to general kernels with almost no changes. We briefly indicate what stays the same and what requires care.</p>
+<section id="sec-string-diagrams-carry-over" class="level3" data-number="4.1.5">
+<h3 data-number="4.1.5" class="anchored" data-anchor-id="sec-string-diagrams-carry-over"><span class="header-section-number">4.1.5</span> String diagrams carry over</h3>
+<p>The string-diagrammatic language from the <a href="../chapters/discrete-graphical-models.html">chapter on discrete graphical models</a> extends to general kernels with almost no changes. The main difference is that the graphical conditioning procedure relies on densities to work. This means you can work with general kernels, even if you do not know measure theory.</p>
 <p><strong>Deterministic functions.</strong> A measurable function <span class="math inline">\(f : X \to Y\)</span> defines a kernel by <span class="math display">\[
 k_f(B \mid x) := \ivmark{f(x) \in B},
 \]</span> which assigns full weight to the unique output <span class="math inline">\(f(x)\)</span>. The structural kernels <span class="math inline">\(\id\)</span>, <span class="math inline">\(\swap\)</span>, <span class="math inline">\(\cp\)</span>, and <span class="math inline">\(\del\)</span> are all deterministic. Hence, their formulas are literally the same as before, with the Iverson bracket <span class="math inline">\(\ivmark{y = f(x)}\)</span> replaced by <span class="math inline">\(\ivmark{f(x) \in B}\)</span>.</p>
@@ -453,340 +465,273 @@ k_f(B \mid x) := \ivmark{f(x) \in B},
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>When two measurable spaces <span class="math inline">\((X, \mathcal{E}_X)\)</span> and <span class="math inline">\((Y, \mathcal{E}_Y)\)</span> are combined, their product space <span class="math inline">\(X \times Y\)</span> carries the <strong>product <span class="math inline">\(\sigma\)</span>-algebra</strong> <span class="math inline">\(\mathcal{E}_X \otimes \mathcal{E}_Y\)</span>, defined as the smallest <span class="math inline">\(\sigma\)</span>-algebra containing all rectangles <span class="math inline">\(B_1 \times B_2\)</span> with <span class="math inline">\(B_1 \in \mathcal{E}_X\)</span> and <span class="math inline">\(B_2 \in \mathcal{E}_Y\)</span>. This <span class="math inline">\(\sigma\)</span>-algebra contains many events beyond rectangles — for instance, discs in <span class="math inline">\(\mathbb{R}^2\)</span> — but a finite measure that is defined consistently on rectangles extends uniquely to the full product <span class="math inline">\(\sigma\)</span>-algebra. This is why the formula for parallel composition, stated only on rectangles, determines the kernel on all product events.</p>
+<p>When two measurable spaces <span class="math inline">\((X, \Sigma_X)\)</span> and <span class="math inline">\((Y, \Sigma_Y)\)</span> are combined, their product space <span class="math inline">\(X \times Y\)</span> carries the <strong>product <span class="math inline">\(\sigma\)</span>-algebra</strong> <span class="math inline">\(\Sigma_X \otimes \Sigma_Y\)</span>, defined as the smallest <span class="math inline">\(\sigma\)</span>-algebra containing all rectangles <span class="math inline">\(B_1 \times B_2\)</span> with <span class="math inline">\(B_1 \in \Sigma_X\)</span> and <span class="math inline">\(B_2 \in \Sigma_Y\)</span>. This <span class="math inline">\(\sigma\)</span>-algebra contains many events beyond rectangles — for instance, discs in <span class="math inline">\(\mathbb{R}^2\)</span> — but a finite measure that is defined consistently on rectangles extends uniquely to the full product <span class="math inline">\(\sigma\)</span>-algebra. This is why the formula for parallel composition, stated only on rectangles, determines the kernel on all product events.</p>
 <p>The same principle gives us <strong>product measures</strong>. Given measures <span class="math inline">\(\nu_U\)</span> on <span class="math inline">\(U\)</span> and <span class="math inline">\(\nu_V\)</span> on <span class="math inline">\(V\)</span>, the product measure <span class="math inline">\(\nu_U \otimes \nu_V\)</span> is the unique measure on the product space <span class="math inline">\(U \times V\)</span> satisfying <span class="math display">\[
 (\nu_U \otimes \nu_V)(B_1 \times B_2) = \nu_U(B_1) \cdot \nu_V(B_2).
-\]</span> For instance, Lebesgue measure on <span class="math inline">\(\mathbb{R}^2\)</span> (area) is the product of Lebesgue measure on <span class="math inline">\(\mathbb{R}\)</span> (length) with itself. Product measures appear naturally when a kernel has multiple outputs: if each output has a base measure, the joint base measure is their product. This is the setting used in the graphical conditioning formula for multiple outputs below.</p>
+\]</span> For instance, Lebesgue measure on <span class="math inline">\(\mathbb{R}^2\)</span> (area) is the product of Lebesgue measure on <span class="math inline">\(\mathbb{R}\)</span> (length) with itself. Product measures appear naturally when a kernel has multiple outputs: if each output has a base measure, the joint base measure is their product.</p>
 </div>
 </div>
 </div>
 <p><strong>Algebraic laws.</strong> All the algebraic laws verified in the discrete setting continue to hold for general kernels. The proofs are the same calculations, with sums replaced by integrals. In particular, any two diagrams that could be deformed into each other in the discrete setting still represent the same kernel.</p>
 <p><strong>Conditional independence.</strong> The graphical test for conditional independence from the <a href="../chapters/conditioning.html">conditioning chapter</a> remains valid for general kernels.</p>
 <p><strong>Graphical conditioning.</strong> Pre-conditioning on an <em>input</em> works exactly as before: given a kernel <span class="math inline">\(g : X \otimes Y \kernel U\)</span>, fixing <span class="math inline">\(X = \bar{x}\)</span> yields <span class="math inline">\(g_{\mid X = \bar{x}}(B \mid y) := g(B \mid \bar{x}, y)\)</span>. This is still a well-defined kernel.</p>
-<p>Pre-conditioning on an <em>output</em> generalizes the discrete formula from the <a href="../chapters/conditioning.html">conditioning chapter</a>. For a discrete kernel <span class="math inline">\(g : X \kernel U \otimes V\)</span>, pre-conditioning on <span class="math inline">\(U = \bar{u}\)</span> meant plugging <span class="math inline">\(\bar{u}\)</span> into the first argument: <span class="math inline">\(g_{\mid U = \bar{u}}(v \mid x) = g(\bar{u}, v \mid x)\)</span>. Since the values of a discrete kernel are exactly its density with respect to counting measure, this is the same as plugging <span class="math inline">\(\bar{u}\)</span> into the density. The same idea works in general.</p>
-<p>Suppose <span class="math inline">\(g : X \kernel U \otimes V\)</span> has density <span class="math inline">\(l_g(u, v \mid x)\)</span> with respect to a product base measure <span class="math inline">\(\nu_U \otimes \nu_V\)</span> (see the box above for what this means). Pre-conditioning on <span class="math inline">\(U = \bar{u}\)</span> plugs <span class="math inline">\(\bar{u}\)</span> into the density, giving the kernel with density <span class="math inline">\(l_g(\bar{u}, v \mid x)\)</span>: <span class="math display">\[
-g_{\mid U = \bar{u}}(B \mid x) = \int_B l_g(\bar{u}, v \mid x) \, \nu_V(dv).
-\]</span></p>
-<p>If <span class="math inline">\(g : X \kernel U\)</span> has density <span class="math inline">\(l_g\)</span> and we fix its only output <span class="math inline">\(U = \bar{u}\)</span>, there are no remaining variables to integrate over. The resulting kernel <span class="math inline">\(g_{\mid U = \bar u} : X \kernel I\)</span> assigns each <span class="math inline">\(x \in X\)</span> the <strong>likelihood weight</strong> <span class="math inline">\(l_g(\bar{u} \mid x)\)</span>. This is the case that arises most often in practice.</p>
-<!-- Work in progress..
-
-## Parametric kernels {#sec-parametric-kernels}
-
-In the discrete setting, a kernel $f : X \kernel Y$ was fully specified by a finite table of values $f(y \mid x)$. When the input or output space is infinite, we need a formula instead: a **parametric family** that fixes the functional form of the density and lets a finite collection of **parameters** pin down which density each input selects.
-
-Consider the Gaussian family from @exm-gaussian-kernel. If we let the mean depend on an input $x$ through the function $\mu = \alpha_0 + \alpha_1 x$, then three parameters $\alpha_0$, $\alpha_1$, and $\sigma^2$ determine a kernel $k : \mathbb{R} \kernel \mathbb{R}$:
-$$
-l_k(y \mid x) = l_{\mathsf{Normal}}(y \mid \alpha_0 + \alpha_1 x,\; \sigma^2).
-$$
-For every value of $x$, this formula produces a valid Gaussian density for $y$. Hence, we have reduced the problem of specifying a kernel to specifying a finite number of parameters. This comes at the cost of expressiveness: kernels in this family can only produce Gaussian samples with means that depend linearly on $x$.
-
-### Constructing kernels {#sec-constructing-kernels}
-
-Our strategy for building kernels between arbitrary spaces is compositional. Every kernel we construct has the form
-$$
-X \xrightarrow{\; g \;} \Theta \xrightarrow{\; k_{\text{base}} \;} Y \xrightarrow{\; f \;} Z,
-$$
-or, in string-diagram notation, $k = k_g \then k_{\text{base}} \then k_f$. Three ingredients are chosen independently:
-
-1. A **base family** $k_{\text{base}} : \Theta \kernel Y$ — a standard parametric family of distributions that does all the stochastic work.
-2. An **input transformation** $g : X \to \Theta$ — a deterministic function that computes valid parameters from whatever inputs are given.
-3. An **output transformation** $f : Y \to Z$ — a deterministic function that redirects the base family's output to the desired target space.
-
-Either deterministic map can be the identity when no transformation is needed. We now discuss each ingredient in turn.
-
-**Base families.** Each base family is the simplest adequate model for one common output type:
-
-| Family | Parameters | Output space |
-|---|---|---|
-| Gaussian | mean $\mu \in \mathbb{R}$, variance $\sigma^2 > 0$ | $\mathbb{R}$ |
-| Bernoulli | probability $p \in (0,1)$ | $\{0,1\}$ |
-| Poisson | rate $\lambda > 0$ | $\mathbb{N}_0$ |
-
-: Common base families, one for each basic output type. {#tbl-base-families}
-
-The Gaussian family is the default for real-valued outputs; the Bernoulli family is the unique distribution on $\{0,1\}$; and the Poisson family is the standard model for counts. Other families — Gamma ($\mathbb{R}_{>0}$), negative binomial ($\mathbb{N}_0$), Beta ($(0,1)$) — can be slotted into the same pattern when needed.
-
-**Input transformations.** The input transformation $g : X_1 \otimes \cdots \otimes X_n \to \Theta$ maps the inputs into the parameter space $\Theta$ of the base family. We build it in two steps:
-$$
-X_1 \otimes \cdots \otimes X_n \xrightarrow{\;g_{\text{lin}}\;} \mathbb{R} \xrightarrow{\;\varphi\;} \Theta.
-$$
-
-The first step is a **linear predictor** $g_{\text{lin}}$ that reduces all inputs to a single real number:
-$$
-\eta \;=\; g_{\text{lin}}(x_1, \ldots, x_n) \;=\; \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n.
-$$
-This accepts any mix of discrete and continuous inputs: a binary input $x_j \in \{0,1\}$ switches its coefficient on or off, while a continuous input contributes proportionally.
-
-The second step is a **response map** $\varphi : \mathbb{R} \to \Theta$ that sends $\eta$ into the parameter space of the chosen base family. When $\Theta = \mathbb{R}$ (as for the Gaussian mean), this is just the identity; when $\Theta$ is a strict subset of $\mathbb{R}$, we need a map that lands in the right space:
-
-| Parameter space $\Theta$ | Response map $\varphi$ | Formula |
-|---|---|---|
-| $\mathbb{R}$ | identity | $\varphi(\eta) = \eta$ |
-| $(0,1)$ | sigmoid | $\varphi(\eta) = \frac{1}{1 + e^{-\eta}}$ |
-| $\mathbb{R}_{>0}$ | exponential | $\varphi(\eta) = e^{\eta}$ |
-
-: Response maps sending a linear predictor $\eta \in \mathbb{R}$ into the parameter space of each base family. {#tbl-input-transforms}
-
-The full input transformation is
-$$
-g = \varphi \circ g_{\text{lin}}.
-$$
-Nothing in the construction requires the first step to be linear: we can replace it with nonlinear features, spline bases, or a neural network without changing anything else. In string-diagrammatic terms, only the deterministic kernel $k_g$ changes; the base family and output transformation are unaffected.
-
-::: {.callout-note collapse="true"}
-## Connection to generalized linear models
-
-When the input transformation has the form $g = \varphi \circ g_{\text{linear}}$ and the base family belongs to the exponential family, statisticians call the resulting kernel a **generalized linear model (GLM)**. In that literature, $\varphi^{-1}$ is called the *link function* and $\varphi$ the *response function* or *inverse link*. Linear regression, logistic regression, and Poisson regression are the three canonical GLMs, corresponding to the three base families above with identity, sigmoid, and exponential maps respectively.
-:::
-
-**Output transformations.** To reach output spaces beyond $\mathbb{R}$, $\{0,1\}$, and $\mathbb{N}_0$, we postcompose with a deterministic function $f : Y \to Z$:
-
-| Base output | Transform $f$ | Target | Use |
-|---|---|---|---|
-| $\mathbb{R}$ | $\exp$ | $\mathbb{R}_{>0}$ | positive quantities (costs, durations) |
-| $\mathbb{R}$ | $\text{sigmoid}$ | $(0,1)$ | proportions |
-| $\mathbb{N}_0$ | $n \mapsto \mathbb{1}[n > 0]$ | $\{0,1\}$ | event occurrence (any visits vs. none) |
-
-: Common output transformations. {#tbl-output-transforms}
-
-For example, postcomposing a Gaussian kernel with $\exp$ gives a **log-normal** distribution on $\mathbb{R}_{>0}$ (@sec-lognormal-regression). Postcomposing with the sigmoid gives a **logit-normal** distribution on $(0,1)$. The thresholding map $n \mapsto \mathbb{1}[n > 0]$ collapses a Poisson output to a binary indicator, the basis of **hurdle models**.
-
-We now illustrate the construction on each of the three base families.
-
-### Linear regression kernel {#sec-linear-regression}
-
-A **linear regression kernel** $k : X_1 \otimes \cdots \otimes X_n \kernel \mathbb{R}$ models a real-valued output as a Gaussian whose mean depends linearly on the inputs:
-$$
-l_k(y \mid x_1, \ldots, x_n) = l_{\mathsf{Normal}}(y \mid \eta,\; \sigma^2), \qquad \eta = \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n.
-$$
-The output is a bell curve centred at the predicted value $\eta$. The variance $\sigma^2$ controls the spread of this curve and does not depend on the inputs, so it represents the irreducible noise that remains even when all inputs are known. Each coefficient $\alpha_j$ tells us how much a one-unit increase in $x_j$ shifts the centre of the output distribution, with all other inputs held fixed. In particular, $\mathbb{E}[Y \mid x] = \eta$, so the inputs affect the output *additively*: changing $x_j$ by $\Delta$ shifts the expected output by $\alpha_j \Delta$.
-
-### Logistic regression kernel {#sec-logistic-regression}
-
-A **logistic regression kernel** $k : X_1 \otimes \cdots \otimes X_n \kernel \{0,1\}$ models a binary output. The sigmoid response map (@tbl-input-transforms) converts a linear predictor into a valid Bernoulli probability:
-$$
-k(y = 1 \mid x_1, \ldots, x_n) = \sigma(\eta), \qquad \eta = \beta_0 + \beta_1 x_1 + \cdots + \beta_n x_n.
-$$
-The output distribution is fully described by $p = \sigma(\eta)$: the output is $1$ with probability $p$ and $0$ with probability $1-p$. Because $\sigma$ is a nonlinear squashing function, the inputs do not affect $p$ additively. Instead, they act additively on the **log-odds** scale: $\log\!\bigl(p/(1{-}p)\bigr) = \eta$, so increasing $x_j$ by one unit shifts the log-odds by $\beta_j$, or equivalently multiplies the odds by $e^{\beta_j}$. When $\eta$ is near $0$ (where $\sigma$ is approximately linear), a small change in an input produces a roughly proportional change in probability; when $|\eta|$ is large, the probability is already close to $0$ or $1$ and the same change has little effect.
-
-### Categorical regression kernel {#sec-categorical-regression}
-
-A **categorical regression kernel** $k : X_1 \otimes \cdots \otimes X_n \kernel \{1, \ldots, K\}$ extends logistic regression from two classes to $K > 2$ unordered values. Each class $j$ gets its own linear predictor $\eta_j = \beta_{j,0} + \beta_{j,1} x_1 + \cdots + \beta_{j,n} x_n$, and **softmax** converts the vector $(\eta_1, \ldots, \eta_K)$ into a probability distribution:
-$$
-k(y = j \mid x_1, \ldots, x_n) = \frac{e^{\eta_j}}{\sum_{k=1}^K e^{\eta_k}}.
-$$
-The output distribution assigns a probability to each of the $K$ classes; these probabilities are positive and sum to $1$. The class with the largest $\eta_j$ is the most probable, but the other classes retain positive probability. Each coefficient $\beta_{j,i}$ controls how input $x_i$ shifts the log-odds of class $j$ relative to the others: increasing $x_i$ by one unit multiplies the odds of class $j$ (relative to any fixed reference class) by $e^{\beta_{j,i}}$. For $K = 2$, writing $\eta = \eta_1 - \eta_2$ recovers the logistic regression kernel.
-
-### Log-normal regression kernel {#sec-lognormal-regression}
-
-A **log-normal regression kernel** models a strictly positive, right-skewed output by combining a Gaussian base family with the output transformation $f = \exp$ (@tbl-output-transforms):
-$$
-l_k(z \mid x_1, \ldots, x_n) = l_{\mathsf{LogNormal}}(z \mid \eta,\; \tau^2), \qquad \eta = \gamma_0 + \gamma_1 x_1 + \cdots + \gamma_n x_n.
-$$
-Equivalently, $Z = e^{Y}$ where $Y \sim \mathsf{Normal}(\eta, \tau^2)$. Since $\exp$ maps $\mathbb{R}$ onto $\mathbb{R}_{>0}$, the output is automatically positive. Its distribution is right-skewed: the median is $e^{\eta}$, and the parameter $\tau^2$ controls how spread out and heavy-tailed the distribution is. Because the linear predictor $\eta$ operates on the log scale, the inputs affect the output *multiplicatively*: increasing $x_j$ by one unit multiplies the median by $e^{\gamma_j}$.
-
-### Poisson regression kernel {#sec-poisson-regression}
-
-A **Poisson regression kernel** models a count-valued output ($y \in \mathbb{N}_0$). The exponential response map (@tbl-input-transforms) converts a linear predictor into a valid Poisson rate $\lambda > 0$:
-$$
-k(y \mid x_1, \ldots, x_n) = l_{\mathsf{Poisson}}(y \mid \lambda), \qquad \lambda = e^{\eta}, \qquad \eta = \delta_0 + \delta_1 x_1 + \cdots + \delta_n x_n.
-$$
-The output distribution places a probability bar at each non-negative integer, concentrated around $\lambda$: the expected count is $\mathbb{E}[Y \mid x] = \lambda = e^{\eta}$, and the variance equals $\lambda$ as well — so higher counts come with more spread. As with the log-normal kernel, the inputs act multiplicatively: increasing $x_j$ by one unit multiplies the expected count by $e^{\delta_j}$.
-
-
-## The Swiss health model {#sec-swiss-health-model}
-
-
-We now apply the framework to a concrete example: a model of Swiss health variables relating lifestyle factors to disease risk and healthcare costs. The model is assembled entirely from the parametric kernels introduced above, composed via the string-diagrammatic operations of @sec-string-diagrams-carry-over. We describe the variables and their relationships, instantiate the kernels with parameters calibrated to Swiss population statistics, and demonstrate forward sampling and conditioning using `WeightedSampling.torch`.
-
-The model relates six variables:
-
-| Variable | Symbol | Type | Role |
-|---|---|---|---|
-| Smoking status | $S$ | $\{0,1\}$ | root |
-| Age | $A$ | $\mathbb{R}_{\geq 0}$ | root |
-| Physical activity | $P$ | $\mathbb{R}_{\geq 0}$ | root |
-| BMI | $B$ | $\mathbb{R}$ | intermediate |
-| Diabetes | $D$ | $\{0,1\}$ | intermediate |
-| Healthcare costs | $C$ | $\mathbb{R}_{>0}$ | leaf |
-
-: Variables in the Swiss health model. {#tbl-swiss-health-vars}
-
-The causal story runs as follows. Smoking status, age, and physical activity are root variables with no parents in the model. Together, they influence BMI through a linear regression kernel. BMI in turn influences diabetes risk through a logistic regression kernel. Finally, diabetes status and BMI jointly determine healthcare costs through a log-normal regression kernel. The graph is a directed chain with one fan-out: BMI feeds into both the diabetes kernel and the cost kernel.
-
-The parameters appearing below are grounded in publicly available Swiss summary statistics. Where a parameter corresponds directly to a published statistic (a prevalence, a mean, or a rate), we read its value from the source; where possible, we derive regression coefficients from published relative risks. The remaining coefficients are calibrated so that the model's marginal distributions reproduce the published target values. In the [next chapter](parameter-estimation.qmd), we explain how parameter estimates are obtained systematically from data.
-
-::: {.callout-note collapse="true"}
-## Data sources
-
-- [BFS Gesundheit — Taschenstatistik 2025](https://www.bfs.admin.ch/bfs/en/home/statistics/health.assetdetail.33427753.html) (based on the [Swiss Health Survey](https://www.bfs.admin.ch/bfs/en/home/statistics/health/surveys/sgb.html), SGB 2022): smoking prevalence (p. 20), overweight and obesity rates (pp. 20–21), diabetes prevalence (pp. 8–9), physical activity (p. 20), doctor consultations (p. 31), and healthcare costs (p. 32).
-- [Obsan Bericht 10/2020: Diabetes Mellitus](https://www.obsan.admin.ch/de/publikationen/2020-diabetes-mellitus) (Fürst & Probst-Hensch, 2020): disease burden and care in Switzerland. Reference data include diabetes prevalence by age and data source (ch. 8), BMI $\geq$ 25 prevalence among diabetics (SAPALDIA: 79–83% vs. 50–56% among non-diabetics, p. 49), and direct healthcare costs for diabetic patients (CHF 8,239/year, Helsana 2011, p. 47).
-- [Kosten von nichtübertragbaren Krankheiten in der Schweiz](https://www.bag.admin.ch/bag/de/home/das-bag/publikationen/forschungsberichte/forschungsberichte-ncd.html) (Stucki et al., 2025, ZHAW/Uni Luzern/BFH for BAG): full NCD cost report (156 pp.). Relative risks for diabetes type 2 from overweight: RR = 2.25 (M) / 2.30 (F); from obesity: RR = 5.50 (M) / 7.00 (F) (Tables 20–21, from Lobstein & Leach, 2010). Physical inactivity relative risk for diabetes: RR = 1.17 (Kyu et al., 2016). For obesity: OR = 1.49 (Bell et al., 2014, Table 28). Total healthcare costs attributable to overweight/obesity: CHF 3.7 billion (2022), of which diabetes type 2 accounts for CHF 1.07 billion, with an additional CHF 2.9 billion in productivity losses (Tables 22–25). 150,315 DALYs (Table 26), of which diabetes type 2 accounts for 58,293 (39%).
-- [CoLaus study](https://doi.org/10.1111/j.1464-5491.2011.03422.x) (Kaiser et al., 2012, *Diabetic Medicine* 29: 190–197): population-based study of 6,188 subjects (35–75 years) in Lausanne. Multivariable-adjusted odds ratios for type 2 diabetes (Table 4): BMI overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78); physical activity OR = 0.64 (0.51–0.80); age 65–75 vs. 35–44 OR = 8.20 (5.22–12.9). T2D prevalence 6.3%; mean BMI of diabetics 30.2 vs. 25.5 for non-diabetics.
-- [Sport Schweiz 2020](https://www.sportobs.ch/sport-schweiz/) (BASPO / Lamprecht & Stamm): physical activity categories and sport behavior (pp. 12–16).
-- [WHO Global Health Observatory](https://www.who.int/data/gho): mean BMI by country (age-standardized).
-- [IDF Diabetes Atlas](https://diabetesatlas.org/): diabetes prevalence by country.
-- [OECD Health at a Glance](https://www.oecd.org/health/health-at-a-glance/) (2023): doctor consultations per capita.
-- [BFS Population Statistics](https://www.bfs.admin.ch/bfs/en/home/statistics/population.html) (STATPOP): median age and age distribution.
-:::
-
-### Root distributions
-
-The three root variables have no parents, so they are specified by marginal distributions (kernels $I \kernel X$ with trivial input):
-
-- **Smoking** $S \sim \mathsf{Bernoulli}(0.27)$. The SGB 2022 reports that 27.1% of men and 20.8% of women smoke daily or occasionally; we use $0.27$ as a round approximation.
-- **Age** $A \sim \mathsf{Normal}(42, 17^2)$. The Swiss median age is 42.7 years (BFS STATPOP). The standard deviation of 17 is chosen to approximate the adult age distribution.
-- **Physical activity** $P \sim \mathsf{Normal}(5, 2^2)$, measured in hours of sport per week. Sport Schweiz 2020 reports that 51% of adults are "trained" ($\geq 3$ hours/week), 27% "sufficiently active," 16% "partly active," and 6% "inactive."
-
-### The BMI kernel (linear regression) {#sec-bmi-kernel}
-
-BMI is a continuous variable influenced by a mix of discrete and continuous parents — exactly the setting for which the linear regression kernel (@sec-linear-regression) is designed:
-$$
-B \mid S, A, P \;\sim\; \mathsf{Normal}(\alpha_0 + \alpha_S\, S + \alpha_A\, A + \alpha_P\, P,\; \sigma^2).
-$$
-
-::: {.callout-note collapse="true"}
-## Parameter sourcing — BMI kernel
-
-- *Intercept* $\alpha_0 = 25.0$: set so that $\mathbb{E}[B] \approx 25.3$ at the population means, matching the WHO age-standardized estimate of Switzerland's mean BMI.
-- *Smoking slope* $\alpha_S = -0.5$: epidemiological studies consistently find that current smokers have slightly lower BMI than non-smokers, owing to nicotine's appetite-suppressive effect. A meta-analysis (Dare et al., 2015, *BMJ Open* 5: e008330) reports that current smokers have BMI roughly 0.3–0.7 kg/m² lower than never-smokers after adjusting for confounders.
-- *Age slope* $\alpha_A = 0.05$: the SGB 2022 shows overweight-plus-obesity prevalence rising from roughly 30% in the 25–34 age group to 55% at ages 55–64. A slope of 0.05 BMI units per year produces a 1.5-unit increase over 30 years, consistent with this gradient.
-- *Activity slope* $\alpha_P = -0.3$: the NCD cost report (Stucki et al., 2025, Table 28) reports a physical inactivity → obesity odds ratio of 1.49 (Bell et al., 2014), confirming the direction. The magnitude is approximate.
-- *Residual standard deviation* $\sigma = 3.8$: calibrated so that the model produces approximately 43% overweight (BMI $\geq$ 25) and 12% obese (BMI $>$ 30), matching SGB 2022 rates.
-:::
-
-### The diabetes kernel (logistic regression) {#sec-diabetes-kernel}
-
-Diabetes status is binary and depends on BMI — the setting for the logistic regression kernel (@sec-logistic-regression):
-$$
-D \mid B \;\sim\; \mathsf{Bernoulli}\bigl(\sigma(\beta_0 + \beta_1\, B)\bigr).
-$$
-
-::: {.callout-note collapse="true"}
-## Parameter sourcing — diabetes kernel
-
-- *Intercept* $\beta_0 = -6.7$: calibrated so that the marginal diabetes prevalence at average BMI matches the Swiss rate. The IDF Diabetes Atlas reports 5.3% (ages 20–79). The SGB 2022 reports 6.9% of men and 4.0% of women, giving a combined rate of approximately 5.4%. The Obsan diabetes report (pp. 47–49) compiles prevalence estimates from multiple Swiss data sources (SGB, Helsana, CoLaus, SAPALDIA), all converging on 5–7%.
-- *Slope* $\beta_1 = 0.15$: the Stucki et al. (2025) NCD cost report compiles relative risks for diabetes type 2: overweight (BMI 25–30) vs. normal weight gives RR = 2.25 (men) / 2.30 (women); obesity (BMI $\geq$ 30) vs. normal weight gives RR = 5.50 (men) / 7.00 (women). The CoLaus study (Kaiser et al., 2012) reports multivariable-adjusted odds ratios: overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78). Approximating a log-linear relationship from the Stucki RRs gives $\beta_1 \approx \log(2.25)/5.5 \approx 0.15$.
-:::
-
-### The cost kernel (log-normal regression) {#sec-cost-kernel}
-
-Annual healthcare costs are strictly positive and right-skewed — the setting for the log-normal regression kernel (@sec-lognormal-regression). Costs depend on both diabetes status and BMI:
-$$
-\log C \mid D, B \;\sim\; \mathsf{Normal}(\gamma_0 + \gamma_D\, D + \gamma_B\, B,\; \tau^2).
-$$
-
-::: {.callout-note collapse="true"}
-## Parameter sourcing — cost kernel
-
-- *Intercept* $\gamma_0 = 7.5$: calibrated so that the median cost for a non-diabetic adult at average BMI is roughly CHF 3,900. For reference, total Swiss healthcare expenditure in 2022 was CHF 869 per person per month (CHF 10,428 per year; BFS Taschenstatistik 2025, p. 32).
-- *Diabetes slope* $\gamma_D = 0.65$: the Obsan diabetes report (p. 47) cites Helsana data showing direct healthcare costs of CHF 8,239/year per diabetic patient (2011), roughly twice the non-diabetic baseline. Taking the log ratio gives $\gamma_D \approx \ln(8239/3900) \approx 0.75$; we use the slightly conservative value $0.65$ to account for the fact that not all of the cost differential is attributable to diabetes status alone.
-- *BMI slope* $\gamma_B = 0.03$: encodes the qualitatively correct direction (higher BMI increases costs). The NCD cost report attributes 70% of diabetes type 2 productivity losses to overweight/obesity, confirming the strong cost linkage. The per-unit magnitude is approximate.
-- *Dispersion* $\tau = 0.6$: reflects the typically right-skewed cost distribution.
-:::
-
-### Composing the full model
-
-Compose root measures + regression kernels via sequential/parallel composition + copy/swap.
-     Draw the complete string diagram: {S, A, P} → B → D → C, with B also feeding into C.
-     Show how the compositional structure encodes the causal story.
-
-``` {.tikz}
-%%| label: fig-swiss-health-model
-%%| fig-cap: String diagram for the Swiss health model.
-%%| height: 8em
-% TODO: draw the composed string diagram
-```
-
-### Forward sampling
-
-We implement the full model in `WeightedSampling.torch` by composing the root distributions and regression kernels:
-
-::: {#58218a96 .cell execution_count=4}
-``` {.python .cell-code code-fold="false"}
-import torch
-import torch.distributions as dist
-from weighted_sampling import model, sample, observe, summary, expectation
-```
-:::
-
-
-::: {#f8a32d51 .cell execution_count=5}
-``` {.python .cell-code code-fold="false"}
-@model
-def swiss_health():
-    # --- Root distributions ---
-    S = sample("S", dist.Bernoulli(0.27))          # smoking
-    A = sample("A", dist.Normal(42.0, 17.0))       # age
-    P = sample("P", dist.Normal(5.0, 2.0))         # activity (hours/week)
-
-    # --- BMI kernel (linear regression) ---
-    eta_B = 25.0 + (-0.5) * S + 0.05 * A - 0.3 * P
-    B = sample("B", dist.Normal(eta_B, 3.8))
-
-    # --- Diabetes kernel (logistic regression) ---
-    eta_D = -6.7 + 0.15 * B
-    D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
-
-    # --- Cost kernel (log-normal regression) ---
-    eta_C = 7.5 + 0.65 * D + 0.03 * B
-    C = sample("C", dist.LogNormal(eta_C, 0.6))
-
-
-result = swiss_health(num_particles=10_000)
-print(summary(result))
-```
-
-::: {.cell-output .cell-output-stdout}
-```
-{'S': {'mean': tensor(0.2693), 'std': tensor(0.4436), 'n_unique': 2}, 'A': {'mean': tensor(42.0880), 'std': tensor(17.0479), 'n_unique': 9999}, 'P': {'mean': tensor(5.0009), 'std': tensor(2.0197), 'n_unique': 9998}, 'B': {'mean': tensor(25.4932), 'std': tensor(3.9734), 'n_unique': 9996}, 'D': {'mean': tensor(0.0612), 'std': tensor(0.2397), 'n_unique': 2}, 'C': {'mean': tensor(5022.1299), 'std': tensor(3689.0903), 'n_unique': 9977}}
-```
-:::
-:::
-
-
-We can verify the model against known Swiss statistics:
-
-::: {#ee326760 .cell execution_count=6}
-``` {.python .cell-code code-fold="false"}
-B_vals = result["B"]
-D_vals = result["D"]
-C_vals = result["C"]
-
-print(f"P(BMI >= 25):       {(B_vals >= 25).float().mean():.3f}")
-print(f"P(BMI >= 30):       {(B_vals >= 30).float().mean():.3f}")
-print(f"P(Diabetes):        {D_vals.mean():.3f}")
-print(f"Median cost (CHF):  {C_vals.median().item():,.0f}")
-```
-
-::: {.cell-output .cell-output-stdout}
-```
-P(BMI >= 25):       0.550
-P(BMI >= 30):       0.129
-P(Diabetes):        0.061
-Median cost (CHF):  4,055
-```
-:::
-:::
-
-
-### Conditioning on continuous observations {#sec-conditioning-continuous}
-
-Extend the graphical conditioning procedure from Chapter 3: pre-condition on density values. Worked example: condition on observed BMI B = b.
-
-### Conditioning on discrete observations {#sec-conditioning-discrete}
-
-Same as the discrete case. Example: condition on D = 1 (has diabetes). What does this tell us about likely health costs? 
-
-## Bibliographic notes {.unnumbered}
-
-References: measure-theoretic probability, generalized linear models, Swiss Health Survey (SGB), WeightedSampling.torch. 
-
--->
-
-
-
+<p>Pre-conditioning on an <em>output</em> requires the kernel to have a density; we simply plug the observed value in. Suppose <span class="math inline">\(g : X \kernel U \otimes V\)</span> has density <span class="math inline">\(\ell_g(u, v \mid x)\)</span> with respect to a product base measure <span class="math inline">\(\nu_U \otimes \nu_V\)</span>. Pre-conditioning on <span class="math inline">\(U = \bar{u}\)</span> substitutes <span class="math inline">\(\bar{u}\)</span> for <span class="math inline">\(u\)</span>, giving a kernel with density <span class="math inline">\(\ell_g(\bar{u}, v \mid x)\)</span>: <span class="math display">\[
+g_{\mid U = \bar{u}}(B \mid x) = \int_B \ell_g(\bar{u}, v \mid x) \, \nu_V(dv).
+\]</span> This is exactly what we did in the discrete case from the <a href="../chapters/conditioning.html">conditioning chapter</a>: for a discrete kernel <span class="math inline">\(g : X \kernel U \otimes V\)</span>, pre-conditioning on <span class="math inline">\(U = \bar{u}\)</span> gave <span class="math inline">\(g_{\mid U = \bar{u}}(v \mid x) = g(\bar{u}, v \mid x)\)</span>. Since the values of a discrete kernel are its density with respect to counting measure, this was already a special case of plugging <span class="math inline">\(\bar{u}\)</span> into the density.</p>
+<p>If <span class="math inline">\(g : X \kernel U\)</span> has density <span class="math inline">\(\ell_g\)</span> and we fix its only output <span class="math inline">\(U = \bar{u}\)</span>, there are no remaining variables to integrate over. The resulting kernel <span class="math inline">\(g_{\mid U = \bar u} : X \kernel I\)</span> assigns each <span class="math inline">\(x \in X\)</span> the <strong>likelihood weight</strong> <span class="math inline">\(\ell_g(\bar{u} \mid x)\)</span>. This is the case that arises most often in practice.</p>
 </section>
+</section>
+<section id="sec-parametric-kernels" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="sec-parametric-kernels"><span class="header-section-number">4.2</span> Parametric kernels</h2>
+<p>In the discrete setting, a kernel <span class="math inline">\(f : X \kernel Y\)</span> was fully specified by a finite table of values <span class="math inline">\(f(y \mid x)\)</span>. When the input or output space is infinite, we need a formula instead. Our approach is compositional: we build complex kernels by composing a small number of simple, reusable pieces. Three ingredients suffice:</p>
+<ol type="1">
+<li>A <strong>base family</strong> — a standard parametric distribution that does all the stochastic work.</li>
+<li>A <strong>predictor</strong> — a deterministic function that computes the base family’s parameters from the inputs.</li>
+<li><strong>Adaptor maps</strong> — deterministic functions that reshape the input or output domain.</li>
+</ol>
+<p>We introduce each ingredient in turn, then show how composing them yields the standard regression kernels.</p>
+<!-- In the following section, insert suitable references to the appendix (parametric-kernels.qmd) for further details. -->
+<section id="sec-base-families" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="sec-base-families"><span class="header-section-number">4.2.1</span> Base families</h3>
+<p>Each parametric distribution defines a <strong>base family</strong> — a kernel <span class="math inline">\(k_{\text{base}} : \Theta \kernel Y\)</span> that takes a parameter value as input and returns the corresponding distribution. We discuss the three most common ones here; <a href="../appendix/parametric-kernels.html" class="quarto-xref"><span>Chapter 5</span></a> lists further families available in PyTorch.</p>
+<p><strong>Gaussian</strong> (<span class="math inline">\(Y = \mathbb{R}\)</span>). The Gaussian (normal) family is parameterised by a mean <span class="math inline">\(\mu \in \mathbb{R}\)</span> and variance <span class="math inline">\(\sigma^2 &gt; 0\)</span>, with density <span class="math display">\[
+\ell(y \mid \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\Bigl(-\frac{(y - \mu)^2}{2\sigma^2}\Bigr).
+\]</span> Its graph is the bell curve from <a href="#exm-gaussian-kernel">Example&nbsp;4.5</a>: centred at <span class="math inline">\(\mu\)</span>, with spread controlled by <span class="math inline">\(\sigma^2\)</span>. The Gaussian family is the default for real-valued outputs because the central limit theorem guarantees that any quantity arising as a sum of many small, independent effects will be approximately normally distributed.</p>
+<p><strong>Bernoulli</strong> (<span class="math inline">\(Y = \{0,1\}\)</span>). The Bernoulli family has a single parameter <span class="math inline">\(p \in (0,1)\)</span> and mass function <span class="math display">\[
+\ell(y \mid p) = p^{\,y}\,(1-p)^{1-y}.
+\]</span> It assigns probability <span class="math inline">\(p\)</span> to <span class="math inline">\(y = 1\)</span> and <span class="math inline">\(1-p\)</span> to <span class="math inline">\(y = 0\)</span>. This is the unique single-parameter distribution on <span class="math inline">\(\{0,1\}\)</span>, so it is the only option for modelling a binary outcome.</p>
+<p><strong>Poisson</strong> (<span class="math inline">\(Y = \mathbb{N}_0\)</span>). The Poisson family is parameterised by a rate <span class="math inline">\(\lambda &gt; 0\)</span>, with mass function <span class="math display">\[
+\ell(y \mid \lambda) = \frac{e^{-\lambda}\,\lambda^{\,y}}{y!}.
+\]</span> It models counts of independent, memoryless events occurring at a fixed rate, for example arrivals, mutations, or photon hits. It arises as the limit of a Binomial distribution with many trials and a small per-trial probability. The mean and variance both equal <span class="math inline">\(\lambda\)</span>.</p>
+<div id="cell-fig-poisson-pmf" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div id="fig-poisson-pmf" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-poisson-pmf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="hybrid-models_files/figure-html/fig-poisson-pmf-output-1.png" width="469" height="229" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-poisson-pmf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.4: The Poisson mass function for several rates <span class="math inline">\(\lambda\)</span>. Larger <span class="math inline">\(\lambda\)</span> shifts the distribution to the right and spreads it out.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>A base family on its own already defines a kernel: feed in a parameter value, get out a distribution. To build a kernel whose input is not a bare parameter but an arbitrary collection of variables, we precompose with a deterministic function — the predictor.</p>
+</section>
+<section id="sec-predictors" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="sec-predictors"><span class="header-section-number">4.2.2</span> Predictors</h3>
+<p>A <strong>predictor</strong> is a deterministic function <span class="math inline">\(h : X_1 \otimes \cdots \otimes X_n \to H\)</span> that maps the inputs into a <strong>predictor space</strong> <span class="math inline">\(H\)</span>. A response map then converts <span class="math inline">\(H\)</span> into valid parameters for the base family (see below). The simplest and most common choice is a <strong>linear predictor</strong>: <span class="math display">\[
+\eta \:;=\; h_{\text{lin}}(x_1, \ldots, x_n) \;=\; \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n.
+\]</span> This accepts any mix of discrete and continuous inputs: a binary input <span class="math inline">\(x_j \in \{0,1\}\)</span> switches its coefficient on or off, while a continuous input <span class="math inline">\(x_j\)</span> contributes proportionally. Each coefficient <span class="math inline">\(\alpha_j\)</span> has a direct interpretation: the amount by which a one-unit increase in <span class="math inline">\(x_j\)</span> shifts the predicted value, with all other inputs held fixed.</p>
+<div id="cell-fig-linear-predictor" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div id="fig-linear-predictor" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-linear-predictor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="hybrid-models_files/figure-html/fig-linear-predictor-output-1.png" width="469" height="230" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-linear-predictor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.5: The linear predictor <span class="math inline">\(\eta = \alpha_0 + \alpha_1 x\)</span> with intercept <span class="math inline">\(\alpha_0 = 2\)</span> and slope <span class="math inline">\(\alpha_1 = -1\)</span>. Each unit increase in <span class="math inline">\(x\)</span> shifts <span class="math inline">\(\eta\)</span> by <span class="math inline">\(\alpha_1\)</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Nothing in the compositional construction requires the predictor to be linear. We can replace <span class="math inline">\(h_{\text{lin}}\)</span> with polynomial features, spline bases, or a neural network without changing anything else.</p>
+</section>
+<section id="sec-adaptor-maps" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="sec-adaptor-maps"><span class="header-section-number">4.2.3</span> Adaptor maps</h3>
+<p>An <strong>adaptor map</strong> is a deterministic function inserted before or after the base family to reshape domains. The most common ones are described below.</p>
+<p><strong>Sigmoid.</strong> The sigmoid function <span class="math inline">\(\sigma(\eta) = \frac{1}{1 + e^{-\eta}}\)</span> maps <span class="math inline">\(\mathbb{R}\)</span> into the open interval <span class="math inline">\((0,1)\)</span>. It is an S-shaped curve, centred at <span class="math inline">\(\eta = 0\)</span> where <span class="math inline">\(\sigma(0) = \tfrac{1}{2}\)</span>, and it saturates towards <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span> for large <span class="math inline">\(|\eta|\)</span>.</p>
+<div id="cell-fig-sigmoid" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div id="fig-sigmoid" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sigmoid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="hybrid-models_files/figure-html/fig-sigmoid-output-1.png" width="468" height="229" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sigmoid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.6: The sigmoid function maps <span class="math inline">\(\mathbb{R}\)</span> into <span class="math inline">\((0,1)\)</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Exponential.</strong> The exponential function <span class="math inline">\(\exp(\eta) = e^{\eta}\)</span> maps <span class="math inline">\(\mathbb{R}\)</span> into <span class="math inline">\(\mathbb{R}_{&gt;0}\)</span>. It is convex and grows rapidly for positive <span class="math inline">\(\eta\)</span>, while approaching <span class="math inline">\(0\)</span> for negative <span class="math inline">\(\eta\)</span>.</p>
+<div id="cell-fig-exponential" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div id="fig-exponential" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="hybrid-models_files/figure-html/fig-exponential-output-1.png" width="468" height="229" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.7: The exponential function maps <span class="math inline">\(\mathbb{R}\)</span> into <span class="math inline">\(\mathbb{R}_{&gt;0}\)</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Softmax.</strong> The softmax function maps <span class="math inline">\(\mathbb{R}^K\)</span> into the <strong>probability simplex</strong> <span class="math inline">\(\Delta^{K-1} = \{(p_1, \ldots, p_K) \in [0,1]^K : p_1 + \cdots + p_K = 1\}\)</span>: <span class="math display">\[
+\mathrm{softmax}(\eta_1, \ldots, \eta_K)_j = \frac{e^{\eta_j}}{\sum_{k=1}^K e^{\eta_k}}.
+\]</span> The sigmoid is the special case with <span class="math inline">\(K = 2\)</span>.</p>
+<div id="cell-fig-softmax" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div id="fig-softmax" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-softmax-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="hybrid-models_files/figure-html/fig-softmax-output-1.png" width="468" height="229" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-softmax-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.8: Softmax for <span class="math inline">\(K = 3\)</span> with <span class="math inline">\(\eta_2 = 0\)</span> and <span class="math inline">\(\eta_3 = -1\)</span> held fixed. As <span class="math inline">\(\eta_1\)</span> varies, softmax redistributes probability among the three classes.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Thresholding.</strong> The map <span class="math inline">\(n \mapsto \ivmark{n &gt; 0}\)</span> collapses a count in <span class="math inline">\(\mathbb{N}_0\)</span> to a binary indicator in <span class="math inline">\(\{0,1\}\)</span>, recording whether any events occurred.</p>
+<p>Each of these maps can play two roles in the compositional pattern. Placed between the predictor and the base family, it acts as a <strong>response map</strong> <span class="math inline">\(\varphi : H \to \Theta\)</span> converting the predictor’s output into valid parameters. Placed after the base family, it acts as an <strong>output transformation</strong> <span class="math inline">\(t : Y \to Z\)</span> redirecting the output to a different target space.</p>
+<p>For example, the exponential can serve as a response map ensuring a positive Poisson rate <span class="math inline">\(\lambda = e^\eta\)</span>, or as an output transformation turning a Gaussian into a <strong>log-normal</strong> distribution on <span class="math inline">\(\mathbb{R}_{&gt;0}\)</span>. Similarly, the sigmoid produces a Bernoulli probability <span class="math inline">\(p = \sigma(\eta)\)</span> when used as a response map, or a <strong>logit-normal</strong> distribution on <span class="math inline">\((0,1)\)</span> when applied after a Gaussian. Thresholding is used only as an output transformation: postcomposing a Poisson kernel with it gives a binary indicator, the basis of <strong>hurdle models</strong>. When no reshaping is needed, the identity serves as a trivial adaptor map.</p>
+</section>
+<section id="sec-composing-pieces" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="sec-composing-pieces"><span class="header-section-number">4.2.4</span> Composing the pieces</h3>
+<p>By assembling the above pieces, we can build parametric kernels with any desired input and output types:</p>
+<ol type="1">
+<li>Choose a base family matching the output type.</li>
+<li>Choose a predictor.</li>
+<li>Insert response and output maps as needed.</li>
+</ol>
+<p>This corresponds to the compositional pattern: <span class="math display">\[
+X \xrightarrow{\; h \;} H \xrightarrow{\;\varphi\;} \Theta \xrightarrow{\; k_{\text{base}} \;} Y \xrightarrow{\; t \;} Z,
+\]</span> where functions are interpreted as deterministic kernels. Any of the adaptor maps can be the identity when no transformation is needed. The construction is modular: changing the predictor does not affect the base family or the output transformation, and vice versa.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Connection to generalized linear models
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>When the predictor is linear and the base family belongs to the exponential family, statisticians call the resulting kernel a <strong>generalized linear model (GLM)</strong>. In that literature, <span class="math inline">\(\varphi^{-1}\)</span> is called the <em>link function</em> and <span class="math inline">\(\varphi\)</span> the <em>response function</em> or <em>inverse link</em>. Linear regression, logistic regression, and Poisson regression are the three canonical GLMs, corresponding to the Gaussian, Bernoulli, and Poisson base families with identity, sigmoid, and exponential response maps respectively.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-common-regression-kernels" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="sec-common-regression-kernels"><span class="header-section-number">4.2.5</span> Common regression kernels</h3>
+<p>We now show how the compositional pattern specializes to the standard regression kernels. Each uses the linear predictor. The table below summarizes the remaining choices.</p>
+<div id="tbl-regression-kernels" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-regression-kernels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.1: Regression kernels as instantiations of the compositional pattern <span class="math inline">\(X \xrightarrow{h} H \xrightarrow{\varphi} \Theta \xrightarrow{k_{\text{base}}} Y \xrightarrow{t} Z\)</span>.
+</figcaption>
+<div aria-describedby="tbl-regression-kernels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Kernel</th>
+<th>Base</th>
+<th>Response <span class="math inline">\(\varphi\)</span></th>
+<th>Transform <span class="math inline">\(t\)</span></th>
+<th>Effect of inputs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Linear</td>
+<td><span class="math inline">\(\mathsf{Normal}\)</span></td>
+<td>identity</td>
+<td>—</td>
+<td>additive on mean</td>
+</tr>
+<tr class="even">
+<td>Logistic</td>
+<td><span class="math inline">\(\mathsf{Bernoulli}\)</span></td>
+<td>sigmoid</td>
+<td>—</td>
+<td>additive on log-odds</td>
+</tr>
+<tr class="odd">
+<td>Categorical</td>
+<td><span class="math inline">\(\mathsf{Categorical}\)</span></td>
+<td>softmax</td>
+<td>—</td>
+<td>additive on log-odds per class</td>
+</tr>
+<tr class="even">
+<td>Log-normal</td>
+<td><span class="math inline">\(\mathsf{Normal}\)</span></td>
+<td>identity</td>
+<td><span class="math inline">\(\exp\)</span></td>
+<td>multiplicative on median</td>
+</tr>
+<tr class="odd">
+<td>Poisson</td>
+<td><span class="math inline">\(\mathsf{Poisson}\)</span></td>
+<td><span class="math inline">\(\exp\)</span></td>
+<td>—</td>
+<td>multiplicative on rate</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="sec-linear-regression" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="sec-linear-regression">Linear regression</h4>
+<p><span class="math display">\[
+\ell_k(y \mid x_1, \ldots, x_n) = \ell_{\mathsf{Normal}}(y \mid \eta,\; \sigma^2), \qquad \eta = \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n.
+\]</span></p>
+<p>The output is a bell curve centred at <span class="math inline">\(\eta\)</span>. The variance <span class="math inline">\(\sigma^2\)</span> controls the spread and does not depend on the inputs, so it represents irreducible noise. Each coefficient <span class="math inline">\(\alpha_j\)</span> tells us how much a one-unit increase in <span class="math inline">\(x_j\)</span> shifts the centre of the output distribution. In particular, <span class="math inline">\(\mathbb{E}[Y \mid x] = \eta\)</span>, so the inputs affect the output <em>additively</em>: changing <span class="math inline">\(x_j\)</span> by <span class="math inline">\(\Delta\)</span> shifts the expected output by <span class="math inline">\(\alpha_j \Delta\)</span>.</p>
+</section>
+<section id="sec-logistic-regression" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="sec-logistic-regression">Logistic regression</h4>
+<p><span class="math display">\[
+k(y = 1 \mid x_1, \ldots, x_n) = \sigma(\eta), \qquad \eta = \beta_0 + \beta_1 x_1 + \cdots + \beta_n x_n.
+\]</span></p>
+<p>The sigmoid squashes <span class="math inline">\(\eta \in \mathbb{R}\)</span> into a probability <span class="math inline">\(p = \sigma(\eta)\)</span>. Because <span class="math inline">\(\sigma\)</span> is nonlinear, the inputs do not affect <span class="math inline">\(p\)</span> additively. Instead, they act additively on the <strong>log-odds</strong> scale: <span class="math inline">\(\log\!\bigl(p/(1{-}p)\bigr) = \eta\)</span>, so increasing <span class="math inline">\(x_j\)</span> by one unit shifts the log-odds by <span class="math inline">\(\beta_j\)</span>, or equivalently multiplies the odds by <span class="math inline">\(e^{\beta_j}\)</span>.</p>
+</section>
+<section id="sec-categorical-regression" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="sec-categorical-regression">Categorical regression</h4>
+<p><span class="math display">\[
+k(y = j \mid x_1, \ldots, x_n) = \frac{e^{\eta_j}}{\sum_{k=1}^K e^{\eta_k}}, \qquad \eta_j = \beta_{j,0} + \beta_{j,1} x_1 + \cdots + \beta_{j,n} x_n.
+\]</span></p>
+<p>Each class <span class="math inline">\(j\)</span> gets its own linear predictor <span class="math inline">\(\eta_j\)</span>, and softmax converts <span class="math inline">\((\eta_1, \ldots, \eta_K)\)</span> into a probability distribution over <span class="math inline">\(K\)</span> classes. Each coefficient <span class="math inline">\(\beta_{j,i}\)</span> controls how input <span class="math inline">\(x_i\)</span> shifts the log-odds of class <span class="math inline">\(j\)</span> relative to the others. For <span class="math inline">\(K = 2\)</span>, writing <span class="math inline">\(\eta = \eta_1 - \eta_2\)</span> recovers logistic regression.</p>
+</section>
+<section id="sec-lognormal-regression" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="sec-lognormal-regression">Log-normal regression</h4>
+<p><span class="math display">\[
+\ell_k(z \mid x_1, \ldots, x_n) = \ell_{\mathsf{LogNormal}}(z \mid \eta,\; \tau^2), \qquad \eta = \gamma_0 + \gamma_1 x_1 + \cdots + \gamma_n x_n.
+\]</span></p>
+<p>Equivalently, <span class="math inline">\(Z = e^{Y}\)</span> where <span class="math inline">\(Y \sim \mathsf{Normal}(\eta, \tau^2)\)</span>. Since <span class="math inline">\(\exp\)</span> maps <span class="math inline">\(\mathbb{R}\)</span> onto <span class="math inline">\(\mathbb{R}_{&gt;0}\)</span>, the output is automatically positive and right-skewed. The inputs affect the output <em>multiplicatively</em>: increasing <span class="math inline">\(x_j\)</span> by one unit multiplies the median by <span class="math inline">\(e^{\gamma_j}\)</span>.</p>
+</section>
+<section id="sec-poisson-regression" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="sec-poisson-regression">Poisson regression</h4>
+<p><span class="math display">\[
+k(y \mid x_1, \ldots, x_n) = \ell_{\mathsf{Poisson}}(y \mid \lambda), \qquad \lambda = e^{\eta}, \qquad \eta = \delta_0 + \delta_1 x_1 + \cdots + \delta_n x_n.
+\]</span></p>
+<p>The exponential response map ensures <span class="math inline">\(\lambda &gt; 0\)</span>. The expected count is <span class="math inline">\(\mathbb{E}[Y \mid x] = \lambda = e^{\eta}\)</span>, and the variance also equals <span class="math inline">\(\lambda\)</span>. As with the log-normal kernel, the inputs act multiplicatively: increasing <span class="math inline">\(x_j\)</span> by one unit multiplies the expected count by <span class="math inline">\(e^{\delta_j}\)</span>.</p>
+</section>
+</section>
+</section>
+<section id="bibliographic-notes" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="bibliographic-notes">Bibliographic notes</h2>
+<!-- References: measure-theoretic probability, generalized linear models. -->
+
+
+
 </section>
 
 </main> <!-- /main -->

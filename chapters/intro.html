@@ -265,6 +265,12 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parametric kernels reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">PyTorch Tutorial</span></a>
   </div>
@@ -382,8 +388,11 @@ window.Quarto = {
 </ul>
 <p>We assign every subset <span class="math inline">\(E \subseteq \Omega\)</span> a number <span class="math inline">\(p(E)\)</span> that captures how likely we think <span class="math inline">\(E\)</span> is. If our assignment satisfies the following two properties, we call <span class="math inline">\(p\)</span> a <strong>probability measure / distribution</strong> on <span class="math inline">\(\Omega\)</span>:</p>
 <ol type="1">
-<li><p><strong>Normalization.</strong> <span class="math inline">\(p(\emptyset) = 0\)</span> and <span class="math inline">\(p(\Omega) = 1.\)</span> We could choose a different scale, but this is the most convenient one.</p></li>
-<li><p><strong>Additivity.</strong> Whenever <span class="math inline">\(E_1\)</span> and <span class="math inline">\(E_2\)</span> have no elements in common, we have <span class="math inline">\(p(E_1 \cup E_2) = p(E_1) + p(E_2).\)</span> Such events are called <em>mutually exclusive</em> because they can’t both happen at the same time. Additivity says that the probability of either <span class="math inline">\(E_1\)</span> or <span class="math inline">\(E_2\)</span> happening is the sum of their individual probabilities.</p></li>
+<li><strong>Normalization.</strong> <span class="math inline">\(p(\emptyset) = 0\)</span> and <span class="math inline">\(p(\Omega) = 1.\)</span> We could choose a different scale, but this is the most convenient one.</li>
+</ol>
+<!-- Might be good to first introduce measure, then probability measure. -->
+<ol start="2" type="1">
+<li><strong>Additivity.</strong> Whenever <span class="math inline">\(E_1\)</span> and <span class="math inline">\(E_2\)</span> have no elements in common, we have <span class="math inline">\(p(E_1 \cup E_2) = p(E_1) + p(E_2).\)</span> Such events are called <em>mutually exclusive</em> because they can’t both happen at the same time. Additivity says that the probability of either <span class="math inline">\(E_1\)</span> or <span class="math inline">\(E_2\)</span> happening is the sum of their individual probabilities.</li>
 </ol>
 <p>It <span class="math inline">\(E \subseteq F\)</span>, we can write <span class="math inline">\(F = E \cup (F \setminus E)\)</span>, so that by additivity <span class="math inline">\(p(E) \leq p(F)\)</span>. Additivity also implies that the probability of <span class="math inline">\(E\)</span> <em>not</em> happening is <span class="math inline">\(p(E^\text{c}) = 1 - p(E)\)</span>.</p>
 <!-- This section could be improved -->
@@ -668,7 +677,7 @@ p(d) = \sum_{h \in \mathcal{H}} p(h, d) = \sum_{h \in \mathcal{H}} p(d \mid h) \
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We now call the inference function to get our estimates:</p>
-<div id="f77ad383" class="cell" data-execution_count="4">
+<div id="c5cbb3d4" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">42</span>)</span>
@@ -731,7 +740,7 @@ Both twins affected: 0.1236</code></pre>
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> at_least_one, both</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We now call the vectorized inference function:</p>
-<div id="82c76f0c" class="cell" data-execution_count="7">
+<div id="8b308f13" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
