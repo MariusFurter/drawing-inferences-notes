@@ -8,7 +8,7 @@ $$
 
 # Exercise 6: Swiss Health Model {.unnumbered}
 
-This exercise applies the parametric kernels from the [chapter on hybrid models](../chapters/hybrid-models.qmd) to a concrete example: a model of six Swiss health variables relating lifestyle factors to disease risk and healthcare costs. We proceed in three stages: first exploring each regression kernel individually, then writing the complete model, and finally conditioning on observed evidence. To foreshadow the [next chapter](../chapters/intervening.qmd), we include cases that preview the distinction between *observing* and *forcing* a variable.
+This exercise applies the parametric kernels from the [chapter on hybrid models](../chapters/hybrid-models.qmd) to a concrete example: a model of six Swiss health variables relating lifestyle factors to disease risk and healthcare costs. We proceed in three stages: first exploring each regression kernel individually, then writing the complete model, and finally conditioning on observed evidence.
 
 ::: {.callout-note collapse="true" title="Prerequisites: Python libraries"}
 This exercise uses the following libraries:
@@ -44,32 +44,21 @@ Smoking status, age, and physical activity are root variables with no parents. T
 %%| height: 10em
 ```
 
-The parameters below are grounded in publicly available Swiss summary statistics. Where a parameter corresponds to a published statistic we read its value directly; where possible, we derive regression coefficients from published relative risks. The remaining coefficients are calibrated so that the model's marginal distributions reproduce published target values.
-
-<!--
-::: {.callout-note collapse="true"}
-## Data sources
-
-- **BFS Gesundheit — Taschenstatistik 2025** (based on the Swiss Health Survey, SGB 2022): smoking prevalence (p. 20), overweight and obesity rates (pp. 20–21), diabetes prevalence (pp. 8–9), physical activity (p. 20), doctor consultations (p. 31), and healthcare costs (p. 32).
-- **Obsan Bericht 10/2020: Diabetes Mellitus** (Fürst & Probst-Hensch, 2020): disease burden and care in Switzerland. Reference data include diabetes prevalence by age and data source (ch. 8), BMI $\geq$ 25 prevalence among diabetics (SAPALDIA: 79–83% vs. 50–56% among non-diabetics, p. 49), and direct healthcare costs for diabetic patients (CHF 8,239/year, Helsana 2011, p. 47).
-- **Kosten von nichtübertragbaren Krankheiten in der Schweiz** (Stucki et al., 2025, ZHAW/Uni Luzern/BFH for BAG): full NCD cost report (156 pp.). Relative risks for diabetes type 2 from overweight: RR = 2.25 (M) / 2.30 (F); from obesity: RR = 5.50 (M) / 7.00 (F) (Tables 20–21, from Lobstein & Leach, 2010). Physical inactivity relative risk for diabetes: RR = 1.17 (Kyu et al., 2016). For obesity: OR = 1.49 (Bell et al., 2014, Table 28). Total healthcare costs attributable to overweight/obesity: CHF 3.7 billion (2022), of which diabetes type 2 accounts for CHF 1.07 billion, with an additional CHF 2.9 billion in productivity losses (Tables 22–25). 150,315 DALYs (Table 26), of which diabetes type 2 accounts for 58,293 (39%).
-- **CoLaus study** (Kaiser et al., 2012, *Diabetic Medicine* 29: 190–197): population-based study of 6,188 subjects (35–75 years) in Lausanne. Multivariable-adjusted odds ratios for type 2 diabetes (Table 4): BMI overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78); physical activity OR = 0.64 (0.51–0.80); age 65–75 vs. 35–44 OR = 8.20 (5.22–12.9). T2D prevalence 6.3%; mean BMI of diabetics 30.2 vs. 25.5 for non-diabetics.
-- **Sport Schweiz 2020** (BASPO / Lamprecht & Stamm): physical activity categories and sport behavior (pp. 12–16).
-- **WHO Global Health Observatory**: mean BMI by country (age-standardized).
-- **IDF Diabetes Atlas**: diabetes prevalence by country.
-- **OECD Health at a Glance (2023)**: doctor consultations per capita.
-- **BFS Population Statistics (STATPOP)**: median age and age distribution.
-- **Dare et al. (2015)** (*BMJ Open* 5: e008330): cross-sectional study showing current smokers have BMI roughly 0.3–0.7 kg/m² lower than non-smokers.
-:::
--->
+The root distributions are sourced from published Swiss statistics (see below). The regression coefficients are reasonable choices calibrated so that the model reproduces the target summary statistics in Part 2; no claim is made that they are individually sourced.
 
 ### Root distributions
 
-The three root variables are specified by marginal distributions (kernels $I \kernel X$ with trivial input):
+The three root variables are specified by marginal distributions:
 
-- **Smoking** $S \sim \mathsf{Bernoulli}(0.24)$. BFS Taschenstatistik 2025 / SGB 2022 reports 27% (men) and 21% (women); we use the average $0.24$.
-- **Age** $A \sim \mathsf{Gamma}(6,\, \tfrac{6}{43})$, with mean $43$ and standard deviation $\approx 17.5$. The Gamma approximates the right-skewed adult age distribution; BFS-reported median ages are 41.9 years (men) and 44.0 years (women), giving a combined median of $\approx 43$ years.
-- **Physical activity** $P \sim \mathsf{Gamma}(1.60,\, 0.42)$, with mean $\approx 3.8$ and standard deviation $\approx 3.0$, measured in hours of sport per week. Parameters moment-matched to the Sport Schweiz 2020 weekly hours distribution (never 16%, <2h 10%, 2h 15%, 3–4h 25%, 5–6h 16%, 7+h 18%) using all six category midpoints 0, 1, 2, 3.5, 5.5, and 9 hours. Note: the Gamma distribution has support $(0,\infty)$ and cannot represent the 16% point mass at $P=0$; the fitted distribution approximates but underweights the never-exerciser group.
+- **Smoking** $S \sim \mathsf{Bernoulli}(0.24)$.
+- **Age** $A \sim \mathsf{Gamma}(6,\, \tfrac{6}{43})$, with mean $43$ and standard deviation $\approx 17.5$.
+- **Physical activity** $P \sim \mathsf{Gamma}(1.60,\, 0.42)$, with mean $\approx 3.8$ and standard deviation $\approx 3.0$, measured in hours of sport per week.
+
+::: {.callout-note collapse="true" title="Data sources for root distributions"}
+- **Smoking.** BFS Taschenstatistik 2025 / SGB 2022 reports 27% (men) and 21% (women); we use the average $0.24$.
+- **Age.** The Gamma approximates the right-skewed adult age distribution. BFS-reported median ages are 41.9 years (men) and 44.0 years (women), giving a combined median of $\approx 43$ years.
+- **Physical activity.** Parameters moment-matched to the Sport Schweiz 2020 weekly hours distribution (never 16%, <2h 10%, 2h 15%, 3–4h 25%, 5–6h 16%, 7+h 18%) using all six category midpoints 0, 1, 2, 3.5, 5.5, and 9 hours. Note: the Gamma distribution has support $(0,\infty)$ and cannot represent the 16% point mass at $P=0$; the fitted distribution approximates but underweights the never-exerciser group.
+:::
 
 ## Setup
 
@@ -168,7 +157,7 @@ Although BMI is positive, the Normal distribution is used here as a standard mod
 
 **Task 1 — BMI kernel.**
 
-Write `@model bmi_model(S_val, A_val, P_val)` that takes fixed values for $S$, $A$, $P$ as arguments and samples $B$ from the linear regression kernel using $\alpha_0 = 25.0$, $\alpha_S = -0.5$, $\alpha_A = 0.05$, $\alpha_P = -0.3$, $\sigma = 3.8$. Then answer the following:
+Write `@model bmi_model(S_val, A_val, P_val)` that takes fixed values for $S$, $A$, $P$ as arguments and samples $B$ from the linear regression kernel using $\alpha_0 = 23.2$, $\alpha_S = -0.5$, $\alpha_A = 0.05$, $\alpha_P = -0.3$, $\sigma = 4.8$. Then answer the following:
 
 a. Run with typical values $S=0$, $A=42$, $P=5$ and 10,000 particles. Plot the distribution of $B$ and compute the sample mean. What does the predictor formula give for $\mu$?
 b. What happens to $\mu$ when $S$ changes from $0$ to $1$, with $A=42$ and $P=5$ fixed? First predict from the formula, then verify numerically.
@@ -192,8 +181,8 @@ Plug both sets of values into the predictor formula and compute the difference.
 #| code-fold: false
 @model
 def bmi_model(S_val, A_val, P_val):
-    eta_B = 25.0 + (-0.5) * S_val + 0.05 * A_val + (-0.3) * P_val
-    B = sample("B", dist.Normal(eta_B, 3.8))
+    eta_B = 23.2 + (-0.5) * S_val + 0.05 * A_val + (-0.3) * P_val
+    B = sample("B", dist.Normal(eta_B, 4.8))
 
 result_base = bmi_model(0.0, 42.0, 5.0, num_particles=10_000)
 B_base = result_base["B"]
@@ -210,7 +199,7 @@ plt.show()
 print(f"Sample mean E[B | S=0, A=42, P=5] = {B_base.mean():.2f}")
 ```
 
-The predictor gives $\mu = 25.0 + (-0.5)\cdot 0 + 0.05\cdot 42 + (-0.3)\cdot 5 = 25.6$; the sample mean should be close.
+The predictor gives $\mu = 23.2 + (-0.5)\cdot 0 + 0.05\cdot 42 + (-0.3)\cdot 5 = 23.8$; the sample mean should be close.
 
 ---
 
@@ -250,8 +239,8 @@ The total effect scales linearly with $\Delta A$: 20 years at $\alpha_A = 0.05$ 
 
 ```{python}
 #| code-fold: false
-mu_highrisk = 25.0 + (-0.5)*1 + 0.05*65 + (-0.3)*1
-print(f"Predicted μ = 25.0 + (-0.5)·1 + 0.05·65 + (-0.3)·1 = {mu_highrisk:.2f}")
+mu_highrisk = 23.2 + (-0.5)*1 + 0.05*65 + (-0.3)*1
+print(f"Predicted μ = 23.2 + (-0.5)·1 + 0.05·65 + (-0.3)·1 = {mu_highrisk:.2f}")
 
 result_highrisk = bmi_model(1.0, 65.0, 1.0, num_particles=10_000)
 print(f"E[B | S=1, A=65, P=1] = {result_highrisk['B'].mean():.2f}  (predicted: {mu_highrisk:.2f})")
@@ -274,8 +263,8 @@ print(f"Predicted shift: +{predicted_alpha_shift:.2f} BMI units")
 
 @model
 def bmi_model_alt(S_val, A_val, P_val):
-    eta_B = 25.0 + (-0.5) * S_val + 0.10 * A_val + (-0.3) * P_val  # α_A doubled
-    B = sample("B", dist.Normal(eta_B, 3.8))
+    eta_B = 23.2 + (-0.5) * S_val + 0.10 * A_val + (-0.3) * P_val  # α_A doubled
+    B = sample("B", dist.Normal(eta_B, 4.8))
 
 result_alt = bmi_model_alt(0.0, 42.0, 5.0, num_particles=10_000)
 
@@ -297,7 +286,7 @@ $$
 
 **Task 2 — Diabetes kernel.**
 
-Write `@model diabetes_model(B_val, A_val)` that takes fixed BMI and age values and samples $D$ from the logistic regression kernel using $\beta_0 = -9.6$, $\beta_1 = 0.15$, and $\beta_2 = 0.07$. Then answer the following:
+Write `@model diabetes_model(B_val, A_val)` that takes fixed BMI and age values and samples $D$ from the logistic regression kernel using $\beta_0 = -10.3$, $\beta_1 = 0.15$, and $\beta_2 = 0.07$. Then answer the following:
 
 a. Run with $B_{\mathsf{val}} = 25$ and $B_{\mathsf{val}} = 30$ at typical age $A_{\mathsf{val}} = 42$ using 10,000 particles each. For each, compute the fraction of samples with $D=1$ and compare to the formula $P(D=1 \mid B, A) = \sigma(\beta_0 + \beta_1 B + \beta_2 A)$.
 b. Plot $P(D=1 \mid B, A)$ as a function of $B$ for three fixed ages ($A = 25$, $A = 42$, $A = 65$) in two panels:
@@ -316,7 +305,7 @@ d. Fix $B = 25$ and vary age. Compute $P(D=1 \mid B=25, A=25)$ and $P(D=1 \mid B
 #| code-fold: false
 @model
 def diabetes_model(B_val, A_val):
-    eta_D = torch.tensor(-9.6 + 0.15 * B_val + 0.07 * A_val)
+    eta_D = torch.tensor(-10.3 + 0.15 * B_val + 0.07 * A_val)
     D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
 ```
 
@@ -329,8 +318,8 @@ def diabetes_model(B_val, A_val):
 result_D25 = diabetes_model(25.0, 42.0, num_particles=10_000)
 result_D30 = diabetes_model(30.0, 42.0, num_particles=10_000)
 
-p25 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 25.0 + 0.07 * 42.0)))
-p30 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 30.0 + 0.07 * 42.0)))
+p25 = float(torch.sigmoid(torch.tensor(-10.3 + 0.15 * 25.0 + 0.07 * 42.0)))
+p30 = float(torch.sigmoid(torch.tensor(-10.3 + 0.15 * 30.0 + 0.07 * 42.0)))
 
 print(f"B = 25, A = 42:  formula {p25:.4f},  sample {result_D25['D'].mean():.4f}")
 print(f"B = 30, A = 42:  formula {p30:.4f},  sample {result_D30['D'].mean():.4f}")
@@ -349,10 +338,10 @@ ages = [25.0, 42.0, 65.0]
 colors = ["steelblue", "darkorange", "crimson"]
 
 # threshold BMIs where P(D=1) = 0.1 and 0.5 for each age:
-# σ(β_0 + β_1 B + β_2 A) = 0.1  ⟹  B_10 = (log(0.1/0.9) + 9.6 - 0.07·A) / 0.15
-# σ(β_0 + β_1 B + β_2 A) = 0.5  ⟹  B_50 = (9.6 - 0.07·A) / 0.15
-B_10 = {a: (torch.log(torch.tensor(0.1 / 0.9)).item() + 9.6 - 0.07 * a) / 0.15 for a in ages}
-B_50 = {a: (9.6 - 0.07 * a) / 0.15 for a in ages}
+# σ(β_0 + β_1 B + β_2 A) = 0.1  ⟹  B_10 = (log(0.1/0.9) + 10.3 - 0.07·A) / 0.15
+# σ(β_0 + β_1 B + β_2 A) = 0.5  ⟹  B_50 = (10.3 - 0.07·A) / 0.15
+B_10 = {a: (torch.log(torch.tensor(0.1 / 0.9)).item() + 10.3 - 0.07 * a) / 0.15 for a in ages}
+B_50 = {a: (10.3 - 0.07 * a) / 0.15 for a in ages}
 ```
 
 ```{python}
@@ -360,8 +349,8 @@ B_50 = {a: (9.6 - 0.07 * a) / 0.15 for a in ages}
 fig, axes = plt.subplots(1, 2, figsize=(11, 3.5))
 
 for a, col in zip(ages, colors):
-    p_w = torch.sigmoid(-9.6 + 0.15 * B_wide + 0.07 * a)
-    p_z = torch.sigmoid(-9.6 + 0.15 * B_zoom + 0.07 * a)
+    p_w = torch.sigmoid(-10.3 + 0.15 * B_wide + 0.07 * a)
+    p_z = torch.sigmoid(-10.3 + 0.15 * B_zoom + 0.07 * a)
     axes[0].plot(B_wide.numpy(), p_w.numpy(), color=col, linewidth=2, label=f"$A={int(a)}$")
     axes[1].plot(B_zoom.numpy(), p_z.numpy(), color=col, linewidth=2, label=f"$A={int(a)}$")
     axes[1].axvline(B_10[a], linestyle=":", color=col, linewidth=0.9)
@@ -394,10 +383,10 @@ plt.show()
 
 ```{python}
 #| code-fold: false
-p20 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 20.0 + 0.07 * 42.0)))
-p21 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 21.0 + 0.07 * 42.0)))
-p33 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 33.0 + 0.07 * 42.0)))
-p34 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 34.0 + 0.07 * 42.0)))
+p20 = float(torch.sigmoid(torch.tensor(-10.3 + 0.15 * 20.0 + 0.07 * 42.0)))
+p21 = float(torch.sigmoid(torch.tensor(-10.3 + 0.15 * 21.0 + 0.07 * 42.0)))
+p33 = float(torch.sigmoid(torch.tensor(-10.3 + 0.15 * 33.0 + 0.07 * 42.0)))
+p34 = float(torch.sigmoid(torch.tensor(-10.3 + 0.15 * 34.0 + 0.07 * 42.0)))
 
 print(f"B=20 → 21  (A=42):  P shifts by {p21 - p20:.5f}")
 print(f"B=33 → 34  (A=42):  P shifts by {p34 - p33:.5f}")
@@ -415,8 +404,8 @@ We can always compare $P(D=1)$ at any two BMI values directly by plugging into t
 
 ```{python}
 #| code-fold: false
-p_young = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 25.0 + 0.07 * 25.0)))
-p_old   = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 25.0 + 0.07 * 65.0)))
+p_young = float(torch.sigmoid(torch.tensor(-10.3 + 0.15 * 25.0 + 0.07 * 25.0)))
+p_old   = float(torch.sigmoid(torch.tensor(-10.3 + 0.15 * 25.0 + 0.07 * 65.0)))
 
 print(f"P(D=1 | B=25, A=25): {p_young:.4f}")
 print(f"P(D=1 | B=25, A=65): {p_old:.4f}")
@@ -454,7 +443,7 @@ $$
 
 **Task 3 — Cost kernel.**
 
-Write `@model cost_model(S_val, D_val, B_val)` that takes fixed values for $S$, $D$, and $B$ and samples $C$ from the log-normal regression kernel using $\gamma_0 = 7.5$, $\gamma_S = 0.2$, $\gamma_D = 0.65$, $\gamma_B = 0.03$, $\tau = 0.6$.
+Write `@model cost_model(S_val, D_val, B_val)` that takes fixed values for $S$, $D$, and $B$ and samples $C$ from the log-normal regression kernel using $\gamma_0 = 7.3$, $\gamma_S = 0.2$, $\gamma_D = 0.65$, $\gamma_B = 0.03$, $\tau = 0.6$.
 Then answer the following:
 
 a. Run the model twice: once with $S=0, D=0, B=25$ and once with $S=0, D=1, B=25$. Plot the two predictive distributions side by side.
@@ -471,7 +460,7 @@ a. Run the model twice: once with $S=0, D=0, B=25$ and once with $S=0, D=1, B=25
 #| code-fold: false
 @model
 def cost_model(S_val, D_val, B_val):
-    eta_C = 7.5 + 0.2 * S_val + 0.65 * D_val + 0.03 * B_val
+    eta_C = 7.3 + 0.2 * S_val + 0.65 * D_val + 0.03 * B_val
     C = sample("C", dist.LogNormal(eta_C, 0.6))
 ```
 
@@ -531,14 +520,14 @@ Write `@model swiss_health()` that samples all six variables in a single model:
 3. Sample $D$ from the diabetes kernel (logistic regression on $B$ and $A$).
 4. Sample $C$ from the cost kernel (log-normal regression on $D$, $B$).
 
-Run with 10,000 particles, print the `summary`, and verify that the model reproduces the following published Swiss benchmarks:
+Run with 10,000 particles, print the `summary`, and verify that the model reproduces the following published Swiss benchmarks in [BFS Taschenstatistik Gesundheit 2025](https://www.bfs.admin.ch/bfs/de/home/aktuell/neue-veroeffentlichungen.assetdetail.34027817.html):
 
 | Quantity | Target |
 |---|---|
-| $P(B \geq 25)$ — overweight or obese | ~43% (SGB 2022) |
-| $P(B \geq 30)$ — obese | ~12% (SGB 2022) |
-| $P(D = 1)$ — diabetes prevalence | ~5–7% (SGB 2022) |
-| Median annual cost | ~CHF 3,300 (BFS Taschenstatistik 2025: KVG CHF 264/month + VVG CHF 68/month, adjusted for LogNormal skew) |
+| $P(B \geq 25)$ — overweight or obese | ~43% |
+| $P(B \geq 30)$ — obese | ~12% |
+| $P(D = 1)$ — diabetes prevalence | ~5–7% |
+| Median annual cost | ~CHF 3,300 |
 
 ::: {.callout-tip collapse="true" title="Solution"}
 ```{python}
@@ -548,11 +537,11 @@ def swiss_health():
     S = sample("S", dist.Bernoulli(0.24))
     A = sample("A", dist.Gamma(6.0, 6.0/43.0))
     P = sample("P", dist.Gamma(1.60, 0.42))
-    eta_B = 25.0 + (-0.5) * S + 0.05 * A + (-0.3) * P
-    B = sample("B", dist.Normal(eta_B, 3.8))
-    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    eta_B = 23.2 + (-0.5) * S + 0.05 * A + (-0.3) * P
+    B = sample("B", dist.Normal(eta_B, 4.8))
+    eta_D = -10.3 + 0.15 * B + 0.07 * A
     D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
-    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    eta_C = 7.3 + 0.2 * S + 0.65 * D + 0.03 * B
     C = sample("C", dist.LogNormal(eta_C, 0.6))
 
 result = swiss_health(num_particles=10_000)
@@ -568,7 +557,7 @@ C_vals = result["C"]
 print(f"P(BMI >= 25):       {(B_vals >= 25).float().mean():.3f}   (target ~0.43)")
 print(f"P(BMI >= 30):       {(B_vals >= 30).float().mean():.3f}   (target ~0.12)")
 print(f"P(Diabetes = 1):    {D_vals.mean():.3f}   (target ~0.05–0.07)")
-print(f"Median cost (CHF):  {C_vals.median().item():,.0f}      (target ~3,900)")
+print(f"Median cost (CHF):  {C_vals.median().item():,.0f}      (target ~3,300)")
 ```
 :::
 
@@ -596,11 +585,11 @@ def swiss_health_age(A_val):
     S = sample("S", dist.Bernoulli(0.24))
     A = observe(A_val, dist.Gamma(6.0, 6.0/43.0))
     P = sample("P", dist.Gamma(1.60, 0.42))
-    eta_B = 25.0 + (-0.5) * S + 0.05 * A + (-0.3) * P
-    B = sample("B", dist.Normal(eta_B, 3.8))
-    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    eta_B = 23.2 + (-0.5) * S + 0.05 * A + (-0.3) * P
+    B = sample("B", dist.Normal(eta_B, 4.8))
+    eta_D = -10.3 + 0.15 * B + 0.07 * A
     D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
-    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    eta_C = 7.3 + 0.2 * S + 0.65 * D + 0.03 * B
     C = sample("C", dist.LogNormal(eta_C, 0.6))
 ```
 
@@ -676,11 +665,11 @@ def swiss_health_diabetes(D_val):
     S = sample("S", dist.Bernoulli(0.24))
     A = sample("A", dist.Gamma(6.0, 6.0/43.0))
     P = sample("P", dist.Gamma(1.60, 0.42))
-    eta_B = 25.0 + (-0.5) * S + 0.05 * A + (-0.3) * P
-    B = sample("B", dist.Normal(eta_B, 3.8))
-    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    eta_B = 23.2 + (-0.5) * S + 0.05 * A + (-0.3) * P
+    B = sample("B", dist.Normal(eta_B, 4.8))
+    eta_D = -10.3 + 0.15 * B + 0.07 * A
     D = observe(D_val, dist.Bernoulli(torch.sigmoid(eta_D)))
-    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    eta_C = 7.3 + 0.2 * S + 0.65 * D + 0.03 * B
     C = sample("C", dist.LogNormal(eta_C, 0.6))
 ```
 
@@ -743,11 +732,11 @@ def swiss_health_bmi(B_val):
     S = sample("S", dist.Bernoulli(0.24))
     A = sample("A", dist.Gamma(6.0, 6.0/43.0))
     P = sample("P", dist.Gamma(1.60, 0.42))
-    eta_B = 25.0 + (-0.5) * S + 0.05 * A + (-0.3) * P
-    B = observe(B_val, dist.Normal(eta_B, 3.8))
-    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    eta_B = 23.2 + (-0.5) * S + 0.05 * A + (-0.3) * P
+    B = observe(B_val, dist.Normal(eta_B, 4.8))
+    eta_D = -10.3 + 0.15 * B + 0.07 * A
     D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
-    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    eta_C = 7.3 + 0.2 * S + 0.65 * D + 0.03 * B
     C = sample("C", dist.LogNormal(eta_C, 0.6))
 ```
 
@@ -773,19 +762,29 @@ print(f"P(S=1) | see(B=32):     {P_S1_post:.3f}")
 ```
 
 ```{python}
-#| code-fold: true
+# | code-fold: true
 idx = torch.multinomial(weights, 10_000, replacement=True)
 C_B32 = result_B32["C"][idx]
 C_prior = result["C"]
 
 fig, ax = plt.subplots(figsize=(7, 3.5))
-ax.hist(C_prior.numpy(), bins=80, density=True, alpha=0.5,
-        label=f"unconditional  median=CHF {C_prior.median().item():,.0f}")
-ax.hist(C_B32.numpy(), bins=80, density=True, alpha=0.5,
-        label=f"see(B=32)  median=CHF {C_B32.median().item():,.0f}")
+ax.hist(
+    C_prior,
+    bins=80,
+    density=True,
+    alpha=0.5,
+    label=f"unconditional  median=CHF {C_prior.median().item():,.0f}",
+)
+ax.hist(
+    C_B32,
+    bins=80,
+    density=True,
+    alpha=0.5,
+    label=f"see(B=32)  median=CHF {C_B32.median().item():,.0f}",
+)
 ax.set_xlabel("Annual cost (CHF)")
 ax.set_ylabel("Density")
-ax.set_xlim(0, 120_000)
+ax.set_xlim(0, 30_000)
 ax.legend(fontsize=9)
 plt.tight_layout()
 plt.show()
@@ -805,9 +804,9 @@ def swiss_health_do_bmi():
     A = sample("A", dist.Gamma(6.0, 6.0/43.0))
     P = sample("P", dist.Gamma(1.60, 0.42))
     B = 32.0  # fixed constant — no sample, no observe
-    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    eta_D = -10.3 + 0.15 * B + 0.07 * A
     D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
-    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    eta_C = 7.3 + 0.2 * S + 0.65 * D + 0.03 * B
     C = sample("C", dist.LogNormal(eta_C, 0.6))
 
 result_do_B = swiss_health_do_bmi(num_particles=10_000)
