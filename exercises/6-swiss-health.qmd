@@ -1,6 +1,14 @@
+:::{.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+ \def\ivmark#1{[\![#1]\!]}
+$$
+:::
+
 # Exercise 6: Swiss Health Model {.unnumbered}
 
-We apply the framework from the [chapter on hybrid models](../chapters/hybrid-models.qmd) to a concrete example: a model of Swiss health variables relating lifestyle factors to disease risk and healthcare costs. The model is assembled entirely from the parametric kernels introduced in that chapter, composed via the string-diagrammatic operations of @sec-string-diagrams-carry-over. We describe the variables and their relationships, instantiate the kernels with parameters calibrated to Swiss population statistics, and demonstrate forward sampling and conditioning using `WeightedSampling.torch`.
+This exercise applies the parametric kernels from the [chapter on hybrid models](../chapters/hybrid-models.qmd) to a concrete example: a model of six Swiss health variables relating lifestyle factors to disease risk and healthcare costs. We proceed in three stages: first exploring each regression kernel individually, then writing the complete model, and finally conditioning on observed evidence. To foreshadow the [next chapter](../chapters/intervening.qmd), we include cases that preview the distinction between *observing* and *forcing* a variable.
 
 ::: {.callout-note collapse="true" title="Prerequisites: Python libraries"}
 This exercise uses the following libraries:
@@ -19,162 +27,799 @@ If any packages are missing, run `pip install torch matplotlib` in your terminal
 
 The model relates six variables:
 
-| Variable | Symbol | Type | Role |
-|---|---|---|---|
-| Smoking status | $S$ | $\{0,1\}$ | root |
-| Age | $A$ | $\mathbb{R}_{\geq 0}$ | root |
-| Physical activity | $P$ | $\mathbb{R}_{\geq 0}$ | root |
-| BMI | $B$ | $\mathbb{R}$ | intermediate |
-| Diabetes | $D$ | $\{0,1\}$ | intermediate |
-| Healthcare costs | $C$ | $\mathbb{R}_{>0}$ | leaf |
+| Variable | Symbol | Type |
+|---|---|---|
+| Smoking status | $S$ | $\{0,1\}$ |
+| Age | $A$ | $\mathbb{R}_{\geq 0}$ |
+| Physical activity | $P$ | $\mathbb{R}_{\geq 0}$ |
+| BMI | $B$ | $\mathbb{R}_{>0}$ |
+| Diabetes | $D$ | $\{0,1\}$ |
+| Healthcare costs | $C$ | $\mathbb{R}_{>0}$ |
 
-: Variables in the Swiss health model. {#tbl-swiss-health-vars}
+Smoking status, age, and physical activity are root variables with no parents. Together they influence BMI through a linear regression kernel. BMI and age jointly determine diabetes risk through a logistic regression kernel. Finally, diabetes status, smoking status, and BMI jointly determine healthcare costs through a log-normal regression kernel. BMI appears as a parent of both $D$ and $C$; age appears as a parent of both $B$ and $D$; smoking appears as a parent of both $B$ and $C$.
 
-The causal story runs as follows. Smoking status, age, and physical activity are root variables with no parents in the model. Together, they influence BMI through a linear regression kernel. BMI in turn influences diabetes risk through a logistic regression kernel. Finally, diabetes status and BMI jointly determine healthcare costs through a log-normal regression kernel. The graph is a directed chain with one fan-out: BMI feeds into both the diabetes kernel and the cost kernel.
+``` {.tikz file="exercises/swiss-health-model.tikz"}
+%%| label: fig-swiss-health-model
+%%| fig-cap: String diagram for the Swiss health model.
+%%| height: 10em
+```
 
-The parameters appearing below are grounded in publicly available Swiss summary statistics. Where a parameter corresponds directly to a published statistic (a prevalence, a mean, or a rate), we read its value from the source; where possible, we derive regression coefficients from published relative risks. The remaining coefficients are calibrated so that the model's marginal distributions reproduce the published target values. In the [next chapter](../chapters/parameter-estimation.qmd), we explain how parameter estimates are obtained systematically from data.
+The parameters below are grounded in publicly available Swiss summary statistics. Where a parameter corresponds to a published statistic we read its value directly; where possible, we derive regression coefficients from published relative risks. The remaining coefficients are calibrated so that the model's marginal distributions reproduce published target values.
 
+<!--
 ::: {.callout-note collapse="true"}
 ## Data sources
 
-- [BFS Gesundheit — Taschenstatistik 2025](https://www.bfs.admin.ch/bfs/en/home/statistics/health.assetdetail.33427753.html) (based on the [Swiss Health Survey](https://www.bfs.admin.ch/bfs/en/home/statistics/health/surveys/sgb.html), SGB 2022): smoking prevalence (p. 20), overweight and obesity rates (pp. 20–21), diabetes prevalence (pp. 8–9), physical activity (p. 20), doctor consultations (p. 31), and healthcare costs (p. 32).
-- [Obsan Bericht 10/2020: Diabetes Mellitus](https://www.obsan.admin.ch/de/publikationen/2020-diabetes-mellitus) (Fürst & Probst-Hensch, 2020): disease burden and care in Switzerland. Reference data include diabetes prevalence by age and data source (ch. 8), BMI $\geq$ 25 prevalence among diabetics (SAPALDIA: 79–83% vs. 50–56% among non-diabetics, p. 49), and direct healthcare costs for diabetic patients (CHF 8,239/year, Helsana 2011, p. 47).
-- [Kosten von nichtübertragbaren Krankheiten in der Schweiz](https://www.bag.admin.ch/bag/de/home/das-bag/publikationen/forschungsberichte/forschungsberichte-ncd.html) (Stucki et al., 2025, ZHAW/Uni Luzern/BFH for BAG): full NCD cost report (156 pp.). Relative risks for diabetes type 2 from overweight: RR = 2.25 (M) / 2.30 (F); from obesity: RR = 5.50 (M) / 7.00 (F) (Tables 20–21, from Lobstein & Leach, 2010). Physical inactivity relative risk for diabetes: RR = 1.17 (Kyu et al., 2016). For obesity: OR = 1.49 (Bell et al., 2014, Table 28). Total healthcare costs attributable to overweight/obesity: CHF 3.7 billion (2022), of which diabetes type 2 accounts for CHF 1.07 billion, with an additional CHF 2.9 billion in productivity losses (Tables 22–25). 150,315 DALYs (Table 26), of which diabetes type 2 accounts for 58,293 (39%).
-- [CoLaus study](https://doi.org/10.1111/j.1464-5491.2011.03422.x) (Kaiser et al., 2012, *Diabetic Medicine* 29: 190–197): population-based study of 6,188 subjects (35–75 years) in Lausanne. Multivariable-adjusted odds ratios for type 2 diabetes (Table 4): BMI overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78); physical activity OR = 0.64 (0.51–0.80); age 65–75 vs. 35–44 OR = 8.20 (5.22–12.9). T2D prevalence 6.3%; mean BMI of diabetics 30.2 vs. 25.5 for non-diabetics.
-- [Sport Schweiz 2020](https://www.sportobs.ch/sport-schweiz/) (BASPO / Lamprecht & Stamm): physical activity categories and sport behavior (pp. 12–16).
-- [WHO Global Health Observatory](https://www.who.int/data/gho): mean BMI by country (age-standardized).
-- [IDF Diabetes Atlas](https://diabetesatlas.org/): diabetes prevalence by country.
-- [OECD Health at a Glance](https://www.oecd.org/health/health-at-a-glance/) (2023): doctor consultations per capita.
-- [BFS Population Statistics](https://www.bfs.admin.ch/bfs/en/home/statistics/population.html) (STATPOP): median age and age distribution.
+- **BFS Gesundheit — Taschenstatistik 2025** (based on the Swiss Health Survey, SGB 2022): smoking prevalence (p. 20), overweight and obesity rates (pp. 20–21), diabetes prevalence (pp. 8–9), physical activity (p. 20), doctor consultations (p. 31), and healthcare costs (p. 32).
+- **Obsan Bericht 10/2020: Diabetes Mellitus** (Fürst & Probst-Hensch, 2020): disease burden and care in Switzerland. Reference data include diabetes prevalence by age and data source (ch. 8), BMI $\geq$ 25 prevalence among diabetics (SAPALDIA: 79–83% vs. 50–56% among non-diabetics, p. 49), and direct healthcare costs for diabetic patients (CHF 8,239/year, Helsana 2011, p. 47).
+- **Kosten von nichtübertragbaren Krankheiten in der Schweiz** (Stucki et al., 2025, ZHAW/Uni Luzern/BFH for BAG): full NCD cost report (156 pp.). Relative risks for diabetes type 2 from overweight: RR = 2.25 (M) / 2.30 (F); from obesity: RR = 5.50 (M) / 7.00 (F) (Tables 20–21, from Lobstein & Leach, 2010). Physical inactivity relative risk for diabetes: RR = 1.17 (Kyu et al., 2016). For obesity: OR = 1.49 (Bell et al., 2014, Table 28). Total healthcare costs attributable to overweight/obesity: CHF 3.7 billion (2022), of which diabetes type 2 accounts for CHF 1.07 billion, with an additional CHF 2.9 billion in productivity losses (Tables 22–25). 150,315 DALYs (Table 26), of which diabetes type 2 accounts for 58,293 (39%).
+- **CoLaus study** (Kaiser et al., 2012, *Diabetic Medicine* 29: 190–197): population-based study of 6,188 subjects (35–75 years) in Lausanne. Multivariable-adjusted odds ratios for type 2 diabetes (Table 4): BMI overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78); physical activity OR = 0.64 (0.51–0.80); age 65–75 vs. 35–44 OR = 8.20 (5.22–12.9). T2D prevalence 6.3%; mean BMI of diabetics 30.2 vs. 25.5 for non-diabetics.
+- **Sport Schweiz 2020** (BASPO / Lamprecht & Stamm): physical activity categories and sport behavior (pp. 12–16).
+- **WHO Global Health Observatory**: mean BMI by country (age-standardized).
+- **IDF Diabetes Atlas**: diabetes prevalence by country.
+- **OECD Health at a Glance (2023)**: doctor consultations per capita.
+- **BFS Population Statistics (STATPOP)**: median age and age distribution.
+- **Dare et al. (2015)** (*BMJ Open* 5: e008330): cross-sectional study showing current smokers have BMI roughly 0.3–0.7 kg/m² lower than non-smokers.
 :::
+-->
 
 ### Root distributions
 
-The three root variables have no parents, so they are specified by marginal distributions (kernels $I \kernel X$ with trivial input):
+The three root variables are specified by marginal distributions (kernels $I \kernel X$ with trivial input):
 
-- **Smoking** $S \sim \mathsf{Bernoulli}(0.27)$. The SGB 2022 reports that 27.1% of men and 20.8% of women smoke daily or occasionally; we use $0.27$ as a round approximation.
-- **Age** $A \sim \mathsf{Normal}(42, 17^2)$. The Swiss median age is 42.7 years (BFS STATPOP). The standard deviation of 17 is chosen to approximate the adult age distribution.
-- **Physical activity** $P \sim \mathsf{Normal}(5, 2^2)$, measured in hours of sport per week. Sport Schweiz 2020 reports that 51% of adults are "trained" ($\geq 3$ hours/week), 27% "sufficiently active," 16% "partly active," and 6% "inactive."
+- **Smoking** $S \sim \mathsf{Bernoulli}(0.24)$. BFS Taschenstatistik 2025 / SGB 2022 reports 27% (men) and 21% (women); we use the average $0.24$.
+- **Age** $A \sim \mathsf{Gamma}(6,\, \tfrac{6}{43})$, with mean $43$ and standard deviation $\approx 17.5$. The Gamma approximates the right-skewed adult age distribution; BFS-reported median ages are 41.9 years (men) and 44.0 years (women), giving a combined median of $\approx 43$ years.
+- **Physical activity** $P \sim \mathsf{Gamma}(1.60,\, 0.42)$, with mean $\approx 3.8$ and standard deviation $\approx 3.0$, measured in hours of sport per week. Parameters moment-matched to the Sport Schweiz 2020 weekly hours distribution (never 16%, <2h 10%, 2h 15%, 3–4h 25%, 5–6h 16%, 7+h 18%) using all six category midpoints 0, 1, 2, 3.5, 5.5, and 9 hours. Note: the Gamma distribution has support $(0,\infty)$ and cannot represent the 16% point mass at $P=0$; the fitted distribution approximates but underweights the never-exerciser group.
 
-### The BMI kernel (linear regression) {#sec-bmi-kernel}
-
-BMI is a continuous variable influenced by a mix of discrete and continuous parents — exactly the setting for which the linear regression kernel (@sec-linear-regression) is designed:
-$$
-B \mid S, A, P \;\sim\; \mathsf{Normal}(\alpha_0 + \alpha_S\, S + \alpha_A\, A + \alpha_P\, P,\; \sigma^2).
-$$
-
-::: {.callout-note collapse="true"}
-## Parameter sourcing — BMI kernel
-
-- *Intercept* $\alpha_0 = 25.0$: set so that $\mathbb{E}[B] \approx 25.3$ at the population means, matching the WHO age-standardized estimate of Switzerland's mean BMI.
-- *Smoking slope* $\alpha_S = -0.5$: epidemiological studies consistently find that current smokers have slightly lower BMI than non-smokers, owing to nicotine's appetite-suppressive effect. A meta-analysis (Dare et al., 2015, *BMJ Open* 5: e008330) reports that current smokers have BMI roughly 0.3–0.7 kg/m² lower than never-smokers after adjusting for confounders.
-- *Age slope* $\alpha_A = 0.05$: the SGB 2022 shows overweight-plus-obesity prevalence rising from roughly 30% in the 25–34 age group to 55% at ages 55–64. A slope of 0.05 BMI units per year produces a 1.5-unit increase over 30 years, consistent with this gradient.
-- *Activity slope* $\alpha_P = -0.3$: the NCD cost report (Stucki et al., 2025, Table 28) reports a physical inactivity → obesity odds ratio of 1.49 (Bell et al., 2014), confirming the direction. The magnitude is approximate.
-- *Residual standard deviation* $\sigma = 3.8$: calibrated so that the model produces approximately 43% overweight (BMI $\geq$ 25) and 12% obese (BMI $>$ 30), matching SGB 2022 rates.
-:::
-
-### The diabetes kernel (logistic regression) {#sec-diabetes-kernel}
-
-Diabetes status is binary and depends on BMI — the setting for the logistic regression kernel (@sec-logistic-regression):
-$$
-D \mid B \;\sim\; \mathsf{Bernoulli}\bigl(\sigma(\beta_0 + \beta_1\, B)\bigr).
-$$
-
-::: {.callout-note collapse="true"}
-## Parameter sourcing — diabetes kernel
-
-- *Intercept* $\beta_0 = -6.7$: calibrated so that the marginal diabetes prevalence at average BMI matches the Swiss rate. The IDF Diabetes Atlas reports 5.3% (ages 20–79). The SGB 2022 reports 6.9% of men and 4.0% of women, giving a combined rate of approximately 5.4%. The Obsan diabetes report (pp. 47–49) compiles prevalence estimates from multiple Swiss data sources (SGB, Helsana, CoLaus, SAPALDIA), all converging on 5–7%.
-- *Slope* $\beta_1 = 0.15$: the Stucki et al. (2025) NCD cost report compiles relative risks for diabetes type 2: overweight (BMI 25–30) vs. normal weight gives RR = 2.25 (men) / 2.30 (women); obesity (BMI $\geq$ 30) vs. normal weight gives RR = 5.50 (men) / 7.00 (women). The CoLaus study (Kaiser et al., 2012) reports multivariable-adjusted odds ratios: overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78). Approximating a log-linear relationship from the Stucki RRs gives $\beta_1 \approx \log(2.25)/5.5 \approx 0.15$.
-:::
-
-### The cost kernel (log-normal regression) {#sec-cost-kernel}
-
-Annual healthcare costs are strictly positive and right-skewed — the setting for the log-normal regression kernel (@sec-lognormal-regression). Costs depend on both diabetes status and BMI:
-$$
-\log C \mid D, B \;\sim\; \mathsf{Normal}(\gamma_0 + \gamma_D\, D + \gamma_B\, B,\; \tau^2).
-$$
-
-::: {.callout-note collapse="true"}
-## Parameter sourcing — cost kernel
-
-- *Intercept* $\gamma_0 = 7.5$: calibrated so that the median cost for a non-diabetic adult at average BMI is roughly CHF 3,900. For reference, total Swiss healthcare expenditure in 2022 was CHF 869 per person per month (CHF 10,428 per year; BFS Taschenstatistik 2025, p. 32).
-- *Diabetes slope* $\gamma_D = 0.65$: the Obsan diabetes report (p. 47) cites Helsana data showing direct healthcare costs of CHF 8,239/year per diabetic patient (2011), roughly twice the non-diabetic baseline. Taking the log ratio gives $\gamma_D \approx \ln(8239/3900) \approx 0.75$; we use the slightly conservative value $0.65$ to account for the fact that not all of the cost differential is attributable to diabetes status alone.
-- *BMI slope* $\gamma_B = 0.03$: encodes the qualitatively correct direction (higher BMI increases costs). The NCD cost report attributes 70% of diabetes type 2 productivity losses to overweight/obesity, confirming the strong cost linkage. The per-unit magnitude is approximate.
-- *Dispersion* $\tau = 0.6$: reflects the typically right-skewed cost distribution.
-:::
-
-### Composing the full model
-
-Compose root measures + regression kernels via sequential/parallel composition + copy/swap.
-     Draw the complete string diagram: {S, A, P} → B → D → C, with B also feeding into C.
-     Show how the compositional structure encodes the causal story.
-
-``` {.tikz}
-%%| label: fig-swiss-health-model
-%%| fig-cap: String diagram for the Swiss health model.
-%%| height: 8em
-% TODO: draw the composed string diagram
-```
-
-### Forward sampling
-
-We implement the full model in `WeightedSampling.torch` by composing the root distributions and regression kernels:
+## Setup
 
 ```{python}
-# | code-fold: false
+#| code-fold: false
+#| output: false
 import torch
 import torch.distributions as dist
-from weighted_sampling import model, sample, observe, summary, expectation
+import matplotlib.pyplot as plt
+from weighted_sampling import model, sample, observe, deterministic, summary, expectation
+
+torch.manual_seed(42)
+```
+
+::: {.callout-note title="Torch compatibility reminder"}
+All computations on sampled tensors must use **torch-compatible operations** — `torch.sigmoid(x)` not `math.sigmoid(x)`, `.float()` before arithmetic on boolean tensors, etc. See the [appendix](../appendix/WeightedSampling.qmd#sec-torch-compat) for details.
+:::
+
+## Part 0: Visualizing the root distributions {#sec-roots}
+
+Before building the regression kernels, it is useful to visualize the three root distributions to develop intuition for the range of inputs the model will encounter.
+
+**Task 0 — Plot the root distributions.**
+
+Write `@model root_distributions()` that samples $S$, $A$, $P$ from their respective root distributions. Run with 10,000 particles and produce a figure with three panels:
+
+1. A bar chart of $S$ showing $P(S=0)$ and $P(S=1)$.
+2. A histogram of $A$ with the theoretical $\mathsf{Gamma}(6,\, \tfrac{6}{43})$ density overlaid. Use `torch.linspace` to create a grid of values and `dist.Gamma(...).log_prob(grid).exp()` to compute the density.
+3. A histogram of $P$ with the theoretical $\mathsf{Gamma}(1.60,\, 0.42)$ density overlaid.
+
+Bonus: Look up the actual age distribution of Swiss adults. How does this compare to the Gamma distribution used in the model?
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{python}
+#| code-fold: false
+@model
+def root_distributions():
+    S = sample("S", dist.Bernoulli(0.24))
+    A = sample("A", dist.Gamma(6.0, 6.0/43.0))
+    P = sample("P", dist.Gamma(1.60, 0.42))
+
+result_roots = root_distributions(num_particles=10_000)
+S_vals = result_roots["S"]
+A_vals = result_roots["A"]
+P_vals = result_roots["P"]
 ```
 
 ```{python}
-#| echo: true
+#| code-fold: true
+fig, axes = plt.subplots(1, 3, figsize=(12, 3.5))
+
+# S: bar chart
+axes[0].bar([0, 1],
+            [(S_vals == 0).float().mean().item(), (S_vals == 1).float().mean().item()],
+            color=["steelblue", "darkorange"], width=0.5)
+axes[0].set_xticks([0, 1])
+axes[0].set_xticklabels(["S = 0\n(non-smoker)", "S = 1\n(smoker)"])
+axes[0].set_ylabel("Proportion")
+axes[0].set_title("Smoking status $S$")
+axes[0].set_ylim(0, 1)
+
+# A: histogram + theoretical density
+A_grid = torch.linspace(1e-3, 120, 500)
+A_density = dist.Gamma(6.0, 6.0 / 43.0).log_prob(A_grid).exp()
+axes[1].hist(A_vals.numpy(), bins=60, density=True, alpha=0.5, color="steelblue")
+axes[1].plot(A_grid.numpy(), A_density.numpy(), color="steelblue", linewidth=2)
+axes[1].set_xlabel("Age (years)")
+axes[1].set_title("Age $A \\sim \\mathrm{Gamma}(6,\\, \\frac{6}{43})$")
+
+# P: histogram + theoretical density
+P_grid = torch.linspace(1e-3, 15, 500)
+P_density = dist.Gamma(1.60, 0.42).log_prob(P_grid).exp()
+axes[2].hist(P_vals.numpy(), bins=60, density=True, alpha=0.5, color="darkorange")
+axes[2].plot(P_grid.numpy(), P_density.numpy(), color="darkorange", linewidth=2)
+axes[2].set_xlabel("Hours of sport per week")
+axes[2].set_title("Physical activity $P \\sim \\mathrm{Gamma}(1.60,\\, 0.42)$")
+
+plt.tight_layout()
+plt.show()
+```
+
+The actual age distribution is flatter on and has several plateaus. In particular, the Gamma approximation vastly underestimates the number of young people. A more accurate mode could use a custom distribution fitted to the empirical age distribution.
+
+:::
+
+## Part 1: Regression kernels {#sec-kernels}
+
+In this part we explore each regression kernel by writing a small `@model` that samples the relevant inputs and applies the kernel. In Part 2 we will combine all three into a single model.
+
+### 1.1 BMI kernel (linear regression) {#sec-bmi-task}
+
+BMI depends on all three root variables via a linear regression kernel with linear predictor
+$$B \mid S, A, P \sim \mathsf{Normal}(\eta_B, \sigma^2), \qquad \eta_B = \alpha_0 + \alpha_S S + \alpha_A A + \alpha_P P$$
+
+Although BMI is positive, the Normal distribution is used here as a standard modeling approximation; with the calibrated parameters, fewer than 0.1% of samples fall below zero.
+
+**Task 1 — BMI kernel.**
+
+Write `@model bmi_model(S_val, A_val, P_val)` that takes fixed values for $S$, $A$, $P$ as arguments and samples $B$ from the linear regression kernel using $\alpha_0 = 25.0$, $\alpha_S = -0.5$, $\alpha_A = 0.05$, $\alpha_P = -0.3$, $\sigma = 3.8$. Then answer the following:
+
+a. Run with typical values $S=0$, $A=42$, $P=5$ and 10,000 particles. Plot the distribution of $B$ and compute the sample mean. What does the predictor formula give for $\mu$?
+b. What happens to $\mu$ when $S$ changes from $0$ to $1$, with $A=42$ and $P=5$ fixed? First predict from the formula, then verify numerically.
+c. What happens to $\mu$ when $A$ increases by $20$, from $42$ to $62$, with $S=0$ and $P=5$ fixed? Predict, then verify.
+d. Consider a 65-year-old smoker with low physical activity: $S=1$, $A=65$, $P=1$. Compute $\mu$ directly, verify numerically, and express the total shift from the baseline $(S=0, A=42, P=5)$ as a sum of three individual contributions.
+e. What would happen to $\mu$ if $\alpha_A$ were doubled to $0.10$ (with $S=0$, $A=42$, $P=5$)? Predict from the formula, then verify by running a modified model.
+
+::: {.callout-note collapse="true" title="Hint"}
+Plug both sets of values into the predictor formula and compute the difference.
+:::
+
+::: {.callout-tip collapse="true" title="Solutions"}
+
+**Key observation.** The Normal distribution is parametrized directly by its mean, so $\mathbb{E}[B \mid S, A, P] = \mu = \eta_B$. Hence, the linear predictor *is* the conditional expectation. This is a special property of the Normal. As a consequence, changing one input by $\Delta$ while holding all others fixed shifts $\mu$ by exactly $\alpha \cdot \Delta$: each coefficient is the *rate of change of the mean per unit increase in that variable, with all other variables held constant*.
+
+---
+
+**Part a.**
+
+```{python}
 #| code-fold: false
-
 @model
-def swiss_health():
-    # --- Root distributions ---
-    S = sample("S", dist.Bernoulli(0.27))          # smoking
-    A = sample("A", dist.Normal(42.0, 17.0))       # age
-    P = sample("P", dist.Normal(5.0, 2.0))         # activity (hours/week)
-
-    # --- BMI kernel (linear regression) ---
-    eta_B = 25.0 + (-0.5) * S + 0.05 * A - 0.3 * P
+def bmi_model(S_val, A_val, P_val):
+    eta_B = 25.0 + (-0.5) * S_val + 0.05 * A_val + (-0.3) * P_val
     B = sample("B", dist.Normal(eta_B, 3.8))
 
-    # --- Diabetes kernel (logistic regression) ---
-    eta_D = -6.7 + 0.15 * B
+result_base = bmi_model(0.0, 42.0, 5.0, num_particles=10_000)
+B_base = result_base["B"]
+
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.hist(B_base.numpy(), bins=60, density=True, alpha=0.7, color="steelblue")
+ax.axvline(B_base.mean().item(), color="red", linewidth=1.5,
+           label=f"mean = {B_base.mean():.2f}")
+ax.set_xlabel("BMI ($B$)")
+ax.set_ylabel("Density")
+ax.legend()
+plt.tight_layout()
+plt.show()
+print(f"Sample mean E[B | S=0, A=42, P=5] = {B_base.mean():.2f}")
+```
+
+The predictor gives $\mu = 25.0 + (-0.5)\cdot 0 + 0.05\cdot 42 + (-0.3)\cdot 5 = 25.6$; the sample mean should be close.
+
+---
+
+**Part b.**
+
+```{python}
+#| code-fold: false
+result_smoker = bmi_model(1.0, 42.0, 5.0, num_particles=10_000)
+
+print(f"E[B | S=0]: {B_base.mean():.2f}")
+print(f"E[B | S=1]: {result_smoker['B'].mean():.2f}")
+print(f"Shift:      {result_smoker['B'].mean() - B_base.mean():.3f}  (predicted: α_S = -0.5)")
+```
+
+The shift in $\mu$ is exactly $\alpha_S = -0.5$: going from non-smoker to smoker decreases $\mu$ — and hence $\mathbb{E}[B]$ — by $0.5$ BMI units, with $A$ and $P$ held fixed.
+
+---
+
+**Part c.**
+
+The predicted shift is $\alpha_A \cdot \Delta A = 0.05 \times 20 = +1.0$.
+
+```{python}
+#| code-fold: false
+result_older = bmi_model(0.0, 62.0, 5.0, num_particles=10_000)
+
+print(f"E[B | A=42]: {B_base.mean():.3f}")
+print(f"E[B | A=62]: {result_older['B'].mean():.3f}")
+print(f"Shift:       {result_older['B'].mean() - B_base.mean():.3f}  (predicted: +1.0)")
+```
+
+The total effect scales linearly with $\Delta A$: 20 years at $\alpha_A = 0.05$ gives $+1.0$.
+
+---
+
+**Part d.**
+
+```{python}
+#| code-fold: false
+mu_highrisk = 25.0 + (-0.5)*1 + 0.05*65 + (-0.3)*1
+print(f"Predicted μ = 25.0 + (-0.5)·1 + 0.05·65 + (-0.3)·1 = {mu_highrisk:.2f}")
+
+result_highrisk = bmi_model(1.0, 65.0, 1.0, num_particles=10_000)
+print(f"E[B | S=1, A=65, P=1] = {result_highrisk['B'].mean():.2f}  (predicted: {mu_highrisk:.2f})")
+
+total_shift = (-0.5)*1 + 0.05*(65-42) + (-0.3)*(1-5)
+print(f"\nShift from baseline: α_S·ΔS + α_A·ΔA + α_P·ΔP")
+print(f"  = (-0.5)·1 + 0.05·23 + (-0.3)·(-4) = {total_shift:.2f}")
+```
+
+The shifts decompose as: smoking $(-0.5)$, older age $(+1.15)$, lower activity $(+1.2)$, for a combined $+1.85$ above baseline.
+
+---
+
+**Part e.**
+
+```{python}
+#| code-fold: false
+predicted_alpha_shift = (0.10 - 0.05) * 42.0
+print(f"Predicted shift: +{predicted_alpha_shift:.2f} BMI units")
+
+@model
+def bmi_model_alt(S_val, A_val, P_val):
+    eta_B = 25.0 + (-0.5) * S_val + 0.10 * A_val + (-0.3) * P_val  # α_A doubled
+    B = sample("B", dist.Normal(eta_B, 3.8))
+
+result_alt = bmi_model_alt(0.0, 42.0, 5.0, num_particles=10_000)
+
+print(f"E[B] (α_A=0.05): {B_base.mean():.2f}")
+print(f"E[B] (α_A=0.10): {result_alt['B'].mean():.2f}")
+print(f"Shift: {result_alt['B'].mean() - B_base.mean():.2f}  (predicted: +{predicted_alpha_shift:.2f})")
+```
+
+Changing a coefficient rescales its variable's contribution to $\eta_B$: $\mu$ shifts by exactly the change in the predictor value at the current inputs, $\Delta\alpha_A \times A = 0.05 \times 42 = 2.1$.
+
+:::
+
+### 1.2 Diabetes kernel (logistic regression) {#sec-diabetes-task}
+
+Diabetes depends on BMI and age via a logistic regression kernel:
+$$
+D \mid B, A \;\sim\; \mathsf{Bernoulli}\bigl(\sigma(\beta_0 + \beta_1\, B + \beta_2\, A)\bigr), \qquad \sigma(x) = \tfrac{1}{1+e^{-x}}.
+$$
+
+**Task 2 — Diabetes kernel.**
+
+Write `@model diabetes_model(B_val, A_val)` that takes fixed BMI and age values and samples $D$ from the logistic regression kernel using $\beta_0 = -9.6$, $\beta_1 = 0.15$, and $\beta_2 = 0.07$. Then answer the following:
+
+a. Run with $B_{\mathsf{val}} = 25$ and $B_{\mathsf{val}} = 30$ at typical age $A_{\mathsf{val}} = 42$ using 10,000 particles each. For each, compute the fraction of samples with $D=1$ and compare to the formula $P(D=1 \mid B, A) = \sigma(\beta_0 + \beta_1 B + \beta_2 A)$.
+b. Plot $P(D=1 \mid B, A)$ as a function of $B$ for three fixed ages ($A = 25$, $A = 42$, $A = 65$) in two panels:
+
+  - a wide view over $B \in [0, 60]$ to show the full S-shape of the sigmoid
+  - a zoomed view over $B \in [15, 45]$ (the realistic BMI range) where you can read off threshold BMIs at which the risk for each age group crosses 10% and 50%.
+
+c. Looking at the plot, does a 1-unit increase in BMI always shift $P(D=1)$ by the same amount? At age $A = 42$, compute $P(D=1)$ at $B=20$ and $B=21$, and again at $B=33$ and $B=34$, and compare the two differences. What does $\beta_1 = 0.15$ actually control?
+d. Fix $B = 25$ and vary age. Compute $P(D=1 \mid B=25, A=25)$ and $P(D=1 \mid B=25, A=65)$. What is the odds ratio for a 40-year increase in age? How does $\beta_2 = 0.07$ relate to the CoLaus reported OR of $8.20$ for ages 65–75 vs. 35–44?
+
+::: {.callout-tip collapse="true" title="Solutions"}
+
+**Model.**
+
+```{python}
+#| code-fold: false
+@model
+def diabetes_model(B_val, A_val):
+    eta_D = torch.tensor(-9.6 + 0.15 * B_val + 0.07 * A_val)
     D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
+```
 
-    # --- Cost kernel (log-normal regression) ---
-    eta_C = 7.5 + 0.65 * D + 0.03 * B
+---
+
+**Part a.**
+
+```{python}
+#| code-fold: false
+result_D25 = diabetes_model(25.0, 42.0, num_particles=10_000)
+result_D30 = diabetes_model(30.0, 42.0, num_particles=10_000)
+
+p25 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 25.0 + 0.07 * 42.0)))
+p30 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 30.0 + 0.07 * 42.0)))
+
+print(f"B = 25, A = 42:  formula {p25:.4f},  sample {result_D25['D'].mean():.4f}")
+print(f"B = 30, A = 42:  formula {p30:.4f},  sample {result_D30['D'].mean():.4f}")
+```
+
+---
+
+**Part b.**
+
+```{python}
+#| code-fold: false
+B_wide = torch.linspace(0, 60, 500)
+B_zoom = torch.linspace(15, 45, 300)
+
+ages = [25.0, 42.0, 65.0]
+colors = ["steelblue", "darkorange", "crimson"]
+
+# threshold BMIs where P(D=1) = 0.1 and 0.5 for each age:
+# σ(β_0 + β_1 B + β_2 A) = 0.1  ⟹  B_10 = (log(0.1/0.9) + 9.6 - 0.07·A) / 0.15
+# σ(β_0 + β_1 B + β_2 A) = 0.5  ⟹  B_50 = (9.6 - 0.07·A) / 0.15
+B_10 = {a: (torch.log(torch.tensor(0.1 / 0.9)).item() + 9.6 - 0.07 * a) / 0.15 for a in ages}
+B_50 = {a: (9.6 - 0.07 * a) / 0.15 for a in ages}
+```
+
+```{python}
+#| code-fold: true
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.5))
+
+for a, col in zip(ages, colors):
+    p_w = torch.sigmoid(-9.6 + 0.15 * B_wide + 0.07 * a)
+    p_z = torch.sigmoid(-9.6 + 0.15 * B_zoom + 0.07 * a)
+    axes[0].plot(B_wide.numpy(), p_w.numpy(), color=col, linewidth=2, label=f"$A={int(a)}$")
+    axes[1].plot(B_zoom.numpy(), p_z.numpy(), color=col, linewidth=2, label=f"$A={int(a)}$")
+    axes[1].axvline(B_10[a], linestyle=":", color=col, linewidth=0.9)
+
+# Left: full S-curves
+axes[0].set_xlabel("BMI ($B$)")
+axes[0].set_ylabel(r"$P(D=1 \mid B, A)$")
+axes[0].set_title("Full S-curves by age")
+axes[0].set_ylim(-0.02, 1.02)
+axes[0].legend(fontsize=9)
+
+# Right: zoomed to realistic BMI range with thresholds and sample points
+axes[1].axhline(0.1, linestyle="--", color="gray", linewidth=0.8)
+axes[1].axhline(0.5, linestyle="--", color="gray", linewidth=0.8)
+axes[1].scatter([25.0, 30.0],
+                [result_D25["D"].mean().item(), result_D30["D"].mean().item()],
+                color="black", zorder=5, s=40, label="samples ($A=42$)")
+axes[1].set_xlabel("BMI ($B$)")
+axes[1].set_ylabel(r"$P(D=1 \mid B, A)$")
+axes[1].set_title("Zoomed: realistic BMI range")
+axes[1].legend(fontsize=8)
+
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+**Part c.**
+
+```{python}
+#| code-fold: false
+p20 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 20.0 + 0.07 * 42.0)))
+p21 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 21.0 + 0.07 * 42.0)))
+p33 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 33.0 + 0.07 * 42.0)))
+p34 = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 34.0 + 0.07 * 42.0)))
+
+print(f"B=20 → 21  (A=42):  P shifts by {p21 - p20:.5f}")
+print(f"B=33 → 34  (A=42):  P shifts by {p34 - p33:.5f}")
+```
+
+The shifts are very different even though both inputs change by exactly $1$. Near $B=20$ the curve is nearly flat (diabetes is so rare that an extra BMI unit barely moves the needle), while near $B=33$ — where risk is around 10–20% — the curve is much steeper.
+
+What $\beta_1 = 0.15$ does control is how much each unit of $B$ shifts the **predictor** $\eta_D = \beta_0 + \beta_1 B + \beta_2 A$: a fixed additive shift of $+0.15$ in $\eta_D$ per BMI unit, every time, regardless of $B$ or $A$. The sigmoid then converts that predictor shift into a probability change, but this conversion is steep when $\eta_D \approx 0$ (near the 50% mark) and nearly flat when $|\eta_D|$ is large. As a result, the same coefficient $\beta_1$ produces large probability swings in the mid-risk range and tiny ones in the tails.
+
+We can always compare $P(D=1)$ at any two BMI values directly by plugging into the formula. But $\beta_1$ does not give us a fixed "probability increase per BMI unit."
+
+---
+
+**Part d.**
+
+```{python}
+#| code-fold: false
+p_young = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 25.0 + 0.07 * 25.0)))
+p_old   = float(torch.sigmoid(torch.tensor(-9.6 + 0.15 * 25.0 + 0.07 * 65.0)))
+
+print(f"P(D=1 | B=25, A=25): {p_young:.4f}")
+print(f"P(D=1 | B=25, A=65): {p_old:.4f}")
+
+or_40 = torch.exp(torch.tensor(0.07 * 40)).item()
+or_30 = torch.exp(torch.tensor(0.07 * 30)).item()
+print(f"\nOR for 40-year increase: exp(0.07 × 40) = {or_40:.2f}")
+print(f"OR for 30-year increase (CoLaus-like): exp(0.07 × 30) = {or_30:.2f}  (CoLaus: 8.20)")
+```
+
+The odds ratio for a 40-year age increase is $e^{0.07 \times 40} = e^{2.8} \approx 16.4$: fixing BMI, the odds of diabetes are about 16 times higher at age 65 than at age 25. For the CoLaus reference (age midpoints ~70 vs. ~40, a 30-year gap), the model gives $e^{0.07 \times 30} = e^{2.1} \approx 8.17$ — very close to the published OR of $8.20$. The age effect is independent of BMI: both $B$ and $A$ enter the predictor additively, so their contributions separate, and changing one variable always multiplies the odds by the same factor regardless of the other variable's value.
+
+:::
+
+::: {.callout-note title="Interpreting logistic regression coefficients via odds" collapse="true"}
+The **risk** of diabetes at a given BMI is the probability $p = P(D=1 \mid B)$. One way to quantify how that risk compares to its complement is the **odds**:
+$$\text{odds}(B) = \frac{P(D=1 \mid B)}{P(D=0 \mid B)} = \frac{p}{1-p}.$$
+Odds and probability carry the same information but they scale differently. A risk of 1% corresponds to odds of 1:99 ($\approx 0.01$); a risk of 50% to odds of 1:1 ($= 1$); a risk of 90% to odds of 9:1 ($= 9$).
+
+The predictor $\eta_D = \beta_0 + \beta_1 B + \beta_2 A$ is exactly the **log-odds** (also called the **logit**) of $D=1$:
+$$\eta_D = \ln\!\frac{P(D=1 \mid B, A)}{P(D=0 \mid B, A)},$$
+since $\sigma(\eta) = p$ implies $\eta = \ln(p/(1-p))$. On this scale the model is linear, and each coefficient has a clean interpretation: a one-unit increase in $B$ (or $A$) adds $\beta_1$ (or $\beta_2$) to the log-odds, which is equivalent to **multiplying the odds by $e^{\beta_1}$** (or $e^{\beta_2}$). These multiplicative factors are called **odds ratios**.
+
+For this model, $e^{\beta_1} = e^{0.15} \approx 1.16$: each additional BMI unit multiplies the odds of diabetes by $1.16$, a 16% increase in the odds, holding age fixed. Similarly, $e^{\beta_2} = e^{0.07} \approx 1.07$: each additional year of age multiplies the odds by about $1.07$, holding BMI fixed. Importantly, both multiplicative factors are constant — they do not depend on where on the S-curve you are. In contrast, the corresponding changes in risk (probability) depend on the baseline: a 16% odds increase near a baseline risk of 1% shifts probability by very little, while the same odds increase near 10% risk produces a noticeably larger absolute shift.
+
+So the right way to read a logistic regression coefficient is: $\beta > 0$ means the covariate increases the odds of $D=1$, and $e^{\beta}$ tells you by what multiplicative factor, with all other covariates held fixed. For predictions at specific inputs, always use the full formula $\sigma(\beta_0 + \beta_1 B + \beta_2 A)$ directly.
+:::
+
+### 1.3 Cost kernel (log-normal regression) {#sec-cost-task}
+
+Annual healthcare costs are strictly positive and right-skewed. They depend on diabetes status, smoking status, and BMI via a log-normal regression kernel:
+$$
+\log C \mid S, D, B \;\sim\; \mathsf{Normal}(\gamma_0 + \gamma_S\, S + \gamma_D\, D + \gamma_B\, B,\; \tau^2).
+$$
+
+**Task 3 — Cost kernel.**
+
+Write `@model cost_model(S_val, D_val, B_val)` that takes fixed values for $S$, $D$, and $B$ and samples $C$ from the log-normal regression kernel using $\gamma_0 = 7.5$, $\gamma_S = 0.2$, $\gamma_D = 0.65$, $\gamma_B = 0.03$, $\tau = 0.6$.
+Then answer the following:
+
+a. Run the model twice: once with $S=0, D=0, B=25$ and once with $S=0, D=1, B=25$. Plot the two predictive distributions side by side.
+
+**Bonus (Part b).** The **median** of a distribution is the value $m$ such that $P(X \leq m) = \tfrac{1}{2}$. Show that if $f$ is strictly monotone increasing and $m$ is the median of $X$, then $f(m)$ is the median of $f(X)$.
+
+**Bonus (Part c).** Use Part b to derive a formula for $\mathrm{median}(C \mid S, D, B)$, recalling that $C = e^X$ with $X \sim \mathsf{Normal}(\eta_C, \tau^2)$ and that $\mathrm{median}(X) = \eta_C$. Use this formula to interpret the coefficients $\gamma_S$, $\gamma_D$, and $\gamma_B$. *Hint: Take the ratio of the median at two inputs that differ only in one variable.*
+
+::: {.callout-tip collapse="true" title="Solutions"}
+
+**Model.**
+
+```{python}
+#| code-fold: false
+@model
+def cost_model(S_val, D_val, B_val):
+    eta_C = 7.5 + 0.2 * S_val + 0.65 * D_val + 0.03 * B_val
     C = sample("C", dist.LogNormal(eta_C, 0.6))
+```
 
+---
+
+**Part a.**
+
+```{python}
+#| code-fold: false
+result_nd = cost_model(0.0, 0.0, 25.0, num_particles=10_000)
+result_d  = cost_model(0.0, 1.0, 25.0, num_particles=10_000)
+C_nd = result_nd["C"]
+C_d  = result_d["C"]
+```
+
+```{python}
+#| code-fold: true
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.5), sharey=True)
+for ax, vals, label in zip(axes, [C_nd, C_d], ["D=0 (no diabetes)", "D=1 (diabetes)"]):
+    ax.hist(vals.numpy(), bins=80, density=True, alpha=0.7)
+    ax.set_title(label)
+    ax.set_xlabel("Annual cost (CHF)")
+axes[0].set_ylabel("Density")
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+**Bonus (Part b).**
+
+Let $m$ be the median of $X$, so $P(X \leq m) = \tfrac{1}{2}$. Since $f$ is strictly increasing, $f(X) \leq f(m)$ iff $X \leq m$, so $P(f(X) \leq f(m)) = P(X \leq m) = \tfrac{1}{2}$. Hence $f(m)$ is the median of $f(X)$.
+
+---
+
+**Bonus (Part c).**
+
+Applying Part b with $f = \exp$:
+$$\mathrm{median}(C \mid S, D, B) = e^{\mathrm{median}(X)} = e^{\eta_C} = e^{\gamma_0 + \gamma_S S + \gamma_D D + \gamma_B B}.$$
+
+Changing any single input while holding the others fixed multiplies the median by the corresponding exponential factor. For example, the ratio of medians at $D + \Delta$ and $D$ (with $S$ and $B$ fixed) is $e^{\gamma_D \Delta}$. In particular:
+- Having diabetes ($\Delta = 1$) multiplies the median by $e^{0.65} \approx 1.92$.
+- Smoking ($S: 0 \to 1$) multiplies the median by $e^{0.2} \approx 1.22$.
+- Each additional BMI unit multiplies the median by $e^{0.03} \approx 1.03$.
+
+Note that $\tau$ plays no role.
+:::
+
+## Part 2: The full model {#sec-assembly}
+
+**Task 4 — Write and verify the full model.**
+
+Write `@model swiss_health()` that samples all six variables in a single model:
+
+1. Sample $S$, $A$, $P$ from their root distributions.
+2. Sample $B$ from the BMI kernel (linear regression on $S$, $A$, $P$).
+3. Sample $D$ from the diabetes kernel (logistic regression on $B$ and $A$).
+4. Sample $C$ from the cost kernel (log-normal regression on $D$, $B$).
+
+Run with 10,000 particles, print the `summary`, and verify that the model reproduces the following published Swiss benchmarks:
+
+| Quantity | Target |
+|---|---|
+| $P(B \geq 25)$ — overweight or obese | ~43% (SGB 2022) |
+| $P(B \geq 30)$ — obese | ~12% (SGB 2022) |
+| $P(D = 1)$ — diabetes prevalence | ~5–7% (SGB 2022) |
+| Median annual cost | ~CHF 3,300 (BFS Taschenstatistik 2025: KVG CHF 264/month + VVG CHF 68/month, adjusted for LogNormal skew) |
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{python}
+#| code-fold: false
+@model
+def swiss_health():
+    S = sample("S", dist.Bernoulli(0.24))
+    A = sample("A", dist.Gamma(6.0, 6.0/43.0))
+    P = sample("P", dist.Gamma(1.60, 0.42))
+    eta_B = 25.0 + (-0.5) * S + 0.05 * A + (-0.3) * P
+    B = sample("B", dist.Normal(eta_B, 3.8))
+    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
+    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    C = sample("C", dist.LogNormal(eta_C, 0.6))
 
 result = swiss_health(num_particles=10_000)
 print(summary(result))
 ```
 
-We can verify the model against known Swiss statistics:
-
 ```{python}
-#| echo: true
 #| code-fold: false
-
 B_vals = result["B"]
 D_vals = result["D"]
 C_vals = result["C"]
 
-print(f"P(BMI >= 25):       {(B_vals >= 25).float().mean():.3f}")
-print(f"P(BMI >= 30):       {(B_vals >= 30).float().mean():.3f}")
-print(f"P(Diabetes):        {D_vals.mean():.3f}")
-print(f"Median cost (CHF):  {C_vals.median().item():,.0f}")
+print(f"P(BMI >= 25):       {(B_vals >= 25).float().mean():.3f}   (target ~0.43)")
+print(f"P(BMI >= 30):       {(B_vals >= 30).float().mean():.3f}   (target ~0.12)")
+print(f"P(Diabetes = 1):    {D_vals.mean():.3f}   (target ~0.05–0.07)")
+print(f"Median cost (CHF):  {C_vals.median().item():,.0f}      (target ~3,900)")
+```
+:::
+
+## Part 3: Conditioning {#sec-conditioning}
+
+We now condition the model on observed evidence. The key mechanical point: **replace `x = sample(...)` with `x = observe(x_val, ...)`**. Since `observe` returns the observed value, the rest of the model is unchanged. To ensure reusability, models are written to accept observed values as arguments.
+
+### Task 5: Forward prediction — age and healthcare costs {#sec-forward-prediction}
+
+Age influences BMI, which in turn influences both diabetes risk and costs. By conditioning on a specific age we obtain a predictive distribution for costs at that age.
+
+Write `@model swiss_health_age(A_val)` that takes a fixed age value as an argument and conditions on it. Then:
+
+a. Run with $A_{\mathsf{val}} = 25$ and $A_{\mathsf{val}} = 65$ using 10,000 particles each. Plot the two predictive cost distributions side by side.
+b. For each age, compute $\mathbb{E}[B]$ and $P(D=1)$. How do each of these impact cost?
+
+::: {.callout-tip collapse="true" title="Solutions"}
+
+**Model.**
+
+```{python}
+#| code-fold: false
+@model
+def swiss_health_age(A_val):
+    S = sample("S", dist.Bernoulli(0.24))
+    A = observe(A_val, dist.Gamma(6.0, 6.0/43.0))
+    P = sample("P", dist.Gamma(1.60, 0.42))
+    eta_B = 25.0 + (-0.5) * S + 0.05 * A + (-0.3) * P
+    B = sample("B", dist.Normal(eta_B, 3.8))
+    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
+    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    C = sample("C", dist.LogNormal(eta_C, 0.6))
 ```
 
-### Conditioning on continuous observations {#sec-conditioning-continuous}
+The only change from `swiss_health` is replacing `sample("A", ...)` with `observe(A_val, ...)`. Since $A$ is a root, this adds the log-density $\log p_{\mathsf{Gamma}}(A_{\mathsf{val}})$ as an importance weight and fixes $A = A_{\mathsf{val}}$ for all downstream computations.
 
-Extend the graphical conditioning procedure from Chapter 3: pre-condition on density values. Worked example: condition on observed BMI B = b.
+```{python}
+#| code-fold: false
+result_age25 = swiss_health_age(25.0, num_particles=10_000)
+result_age65 = swiss_health_age(65.0, num_particles=10_000)
+```
 
-### Conditioning on discrete observations {#sec-conditioning-discrete}
+---
 
-Same as the discrete case. Example: condition on D = 1 (has diabetes). What does this tell us about likely health costs? 
+**Part a.**
+
+```{python}
+#| code-fold: true
+fig, axes = plt.subplots(1, 2, figsize=(10, 3.5), sharey=True)
+for ax, res, label in zip(
+    axes,
+    [result_age25, result_age65],
+    ["A = 25", "A = 65"],
+):
+    C_vals = res["C"]
+    ax.hist(C_vals.numpy(), bins=80, density=True, alpha=0.7)
+    ax.axvline(C_vals.median().item(), color="red", linewidth=1.5,
+               label=f"median = CHF {C_vals.median().item():,.0f}")
+    ax.set_title(label)
+    ax.set_xlabel("Annual cost (CHF)")
+    ax.set_xlim(0, 120_000)
+    ax.legend(fontsize=9)
+axes[0].set_ylabel("Density")
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+**Part b.**
+
+```{python}
+#| code-fold: false
+E_B_25 = result_age25["B"].mean().item()
+E_B_65 = result_age65["B"].mean().item()
+P_D_25 = result_age25["D"].mean().item()
+P_D_65 = result_age65["D"].mean().item()
+
+print(f"         A=25    A=65")
+print(f"E[B]:    {E_B_25:.2f}   {E_B_65:.2f}")
+print(f"P(D=1):  {P_D_25:.3f}   {P_D_65:.3f}")
+```
+
+Both $\mathbb{E}[B]$ and $P(D=1)$ are higher at age 65 than at age 25. Higher BMI impacts cost directly via the $\gamma_B B$ term in the cost predictor, and indirectly via the $\gamma_D D$ term since higher BMI increases diabetes risk. In the updated model, age also has a direct effect on diabetes risk ($A \to D$), so the age-related increase in $P(D=1)$ is driven by both the indirect path $A \to B \to D$ (higher BMI at older ages) and the direct path $A \to D$.
+
+:::
+
+### Task 6: Backward inference — what does diabetes tell us about age? {#sec-backward-inference}
+
+Information flows both ways in a probabilistic model. Observing that a variable takes a particular value can update our beliefs about its causes, not just its effects. Here, $D$ has $B$ as a parent and $B$ has $A$ as a parent, so conditioning on $D=1$ should alter our beliefs about $A$.
+
+Write `@model swiss_health_diabetes(D_val)` that takes a diabetes observation as an argument and conditions on it. Then:
+
+a. Run with $D_{\mathsf{val}} = 1$ using 20,000 particles. Compare the posterior distribution of $A$ to its unconditional distribution from Task 4. Why does observing diabetes shift beliefs about age?
+
+::: {.callout-tip collapse="true" title="Solutions"}
+
+**Model.**
+
+```{python}
+#| code-fold: false
+@model
+def swiss_health_diabetes(D_val):
+    S = sample("S", dist.Bernoulli(0.24))
+    A = sample("A", dist.Gamma(6.0, 6.0/43.0))
+    P = sample("P", dist.Gamma(1.60, 0.42))
+    eta_B = 25.0 + (-0.5) * S + 0.05 * A + (-0.3) * P
+    B = sample("B", dist.Normal(eta_B, 3.8))
+    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    D = observe(D_val, dist.Bernoulli(torch.sigmoid(eta_D)))
+    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    C = sample("C", dist.LogNormal(eta_C, 0.6))
+```
+
+The only change from `swiss_health` is replacing `sample("D", ...)` with `observe(D_val, ...)`. Since $D$ is not a root, each particle is weighted by the likelihood $P(D = D_{\mathsf{val}} \mid B)$.
+
+```{python}
+#| code-fold: false
+result_D1 = swiss_health_diabetes(1.0, num_particles=20_000)
+
+print(summary(result_D1))
+```
+
+---
+
+**Part a.**
+
+```{python}
+#| code-fold: true
+A_prior = result["A"]
+A_post  = result_D1["A"]
+
+# Resample from the posterior using importance weights
+weights = torch.softmax(result_D1.log_weights, dim=0)
+idx = torch.multinomial(weights, 10_000, replacement=True)
+A_post_resamp = A_post[idx]
+
+fig, ax = plt.subplots(figsize=(7, 3.5))
+ax.hist(A_prior.numpy(), bins=60, density=True, alpha=0.5,
+        label=f"prior  mean={A_prior.mean():.1f}")
+ax.hist(A_post_resamp.numpy(), bins=60, density=True, alpha=0.5,
+        label=f"posterior | D=1  mean={A_post_resamp.mean():.1f}")
+ax.set_xlabel("Age $A$ (years)")
+ax.set_ylabel("Density")
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+The posterior over $A$ shifts upward when we observe $D=1$. In the updated model, the reasoning runs backwards along two causal paths: the direct path $A \to D$ (age increases diabetes risk directly) and the indirect path $A \to B \to D$ (older age leads to higher BMI, which in turn increases diabetes risk). Both paths make older ages more credible when diabetes is observed, producing a stronger posterior shift than either path alone.
+:::
+
+### Task 7: Conditioning on BMI {#sec-see-vs-do}
+
+$B$ is **not** a root: it depends on $S$, $A$, and $P$. Observing $B=32$ is therefore informative about the values of those variables.
+
+Write `@model swiss_health_bmi(B_val)` that takes a fixed BMI value as an argument and conditions on it. Then:
+
+a. Run with $B_{\mathsf{val}} = 32$ using 20,000 particles. Compare $P(S=1)$ in the posterior to its prior value $0.24$. Why does the posterior shift in the direction it does? Also plot the predictive distribution of $C$ and compare to the unconditional distribution from Task 4.
+
+**Bonus.** Instead of conditioning on $B=32$, write a model that simply sets `B = 32.0` as a constant (no `sample`, no `observe`). Run with 10,000 particles and compare $P(S=1)$ to part a. What do you observe, and can you explain why the two approaches give different results?
+
+::: {.callout-tip collapse="true" title="Solutions"}
+
+**Model.**
+
+```{python}
+#| code-fold: false
+@model
+def swiss_health_bmi(B_val):
+    S = sample("S", dist.Bernoulli(0.24))
+    A = sample("A", dist.Gamma(6.0, 6.0/43.0))
+    P = sample("P", dist.Gamma(1.60, 0.42))
+    eta_B = 25.0 + (-0.5) * S + 0.05 * A + (-0.3) * P
+    B = observe(B_val, dist.Normal(eta_B, 3.8))
+    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
+    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    C = sample("C", dist.LogNormal(eta_C, 0.6))
+```
+
+The only change from `swiss_health` is replacing `sample("B", ...)` with `observe(B_val, ...)`. Since $\eta_B$ depends on $S$, $A$, and $P$, particles whose upstream values make $B_{\mathsf{val}}$ plausible receive higher weight, propagating the observation backwards.
+
+```{python}
+#| code-fold: false
+result_B32 = swiss_health_bmi(32.0, num_particles=20_000)
+
+print(summary(result_B32))
+```
+
+---
+
+**Part a.**
+
+```{python}
+#| code-fold: false
+weights = torch.softmax(result_B32.log_weights, dim=0)
+P_S1_post = (result_B32["S"] * weights).sum().item()
+print(f"P(S=1) prior:           {0.24:.3f}")
+print(f"P(S=1) | see(B=32):     {P_S1_post:.3f}")
+```
+
+```{python}
+#| code-fold: true
+idx = torch.multinomial(weights, 10_000, replacement=True)
+C_B32 = result_B32["C"][idx]
+C_prior = result["C"]
+
+fig, ax = plt.subplots(figsize=(7, 3.5))
+ax.hist(C_prior.numpy(), bins=80, density=True, alpha=0.5,
+        label=f"unconditional  median=CHF {C_prior.median().item():,.0f}")
+ax.hist(C_B32.numpy(), bins=80, density=True, alpha=0.5,
+        label=f"see(B=32)  median=CHF {C_B32.median().item():,.0f}")
+ax.set_xlabel("Annual cost (CHF)")
+ax.set_ylabel("Density")
+ax.set_xlim(0, 120_000)
+ax.legend(fontsize=9)
+plt.tight_layout()
+plt.show()
+```
+
+The posterior probability of smoking decreases because $B=32$ (overweight) is harder to reconcile with smoking, which lowers BMI. This lower smoking posterior feeds into costs via the direct edge $S \to C$, partially offsetting the higher cost prediction from $B=32$ itself.
+
+---
+
+**Bonus.**
+
+```{python}
+#| code-fold: false
+@model
+def swiss_health_do_bmi():
+    S = sample("S", dist.Bernoulli(0.24))
+    A = sample("A", dist.Gamma(6.0, 6.0/43.0))
+    P = sample("P", dist.Gamma(1.60, 0.42))
+    B = 32.0  # fixed constant — no sample, no observe
+    eta_D = -9.6 + 0.15 * B + 0.07 * A
+    D = sample("D", dist.Bernoulli(torch.sigmoid(eta_D)))
+    eta_C = 7.5 + 0.2 * S + 0.65 * D + 0.03 * B
+    C = sample("C", dist.LogNormal(eta_C, 0.6))
+
+result_do_B = swiss_health_do_bmi(num_particles=10_000)
+```
+
+```{python}
+#| code-fold: false
+P_S1_do = result_do_B["S"].mean().item()
+print(f"P(S=1) prior:           {0.24:.3f}")
+print(f"P(S=1) | observe(B=32): {P_S1_post:.3f}")
+print(f"P(S=1) | B=32 fixed:    {P_S1_do:.3f}")
+```
+
+When $B$ is fixed to $32$ as a constant, $S$, $A$, and $P$ are sampled freely from their prior distributions without any information from the value of $B$. In particular, $P(S=1)$ stays at its prior $0.24$, whereas conditioning on $B=32$ drives $P(S=1)$ below $0.24$ because high BMI is less consistent with smoking ($\alpha_S = -0.5$).
+:::
