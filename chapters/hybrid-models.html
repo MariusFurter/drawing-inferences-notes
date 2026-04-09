@@ -217,6 +217,12 @@ window.Quarto = {
  <span class="menu-text">Exercise 5: Inverse Physics</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -231,7 +237,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parametric kernels reference</span></span></a>
+ <span class="menu-text">Parametric kernels reference</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -493,7 +499,7 @@ g_{\mid U = \bar{u}}(B \mid x) = \int_B \ell_g(\bar{u}, v \mid x) \, \nu_V(dv).
 <!-- In the following section, insert suitable references to the appendix (parametric-kernels.qmd) for further details. -->
 <section id="sec-base-families" class="level3" data-number="4.2.1">
 <h3 data-number="4.2.1" class="anchored" data-anchor-id="sec-base-families"><span class="header-section-number">4.2.1</span> Base families</h3>
-<p>Each parametric distribution defines a <strong>base family</strong> — a kernel <span class="math inline">\(k_{\text{base}} : \Theta \kernel Y\)</span> that takes a parameter value as input and returns the corresponding distribution. We discuss the three most common ones here; <a href="../appendix/parametric-kernels.html" class="quarto-xref"><span>Chapter 5</span></a> lists further families available in PyTorch.</p>
+<p>Each parametric distribution defines a <strong>base family</strong> — a kernel <span class="math inline">\(k_{\text{base}} : \Theta \kernel Y\)</span> that takes a parameter value as input and returns the corresponding distribution. We discuss the three most common ones here; <a href="../appendix/parametric-kernels.html#sec-distributional-families-appendix" class="quarto-xref"><span>Section 1</span></a> lists further families available in PyTorch.</p>
 <p><strong>Gaussian</strong> (<span class="math inline">\(Y = \mathbb{R}\)</span>). The Gaussian (normal) family is parameterised by a mean <span class="math inline">\(\mu \in \mathbb{R}\)</span> and variance <span class="math inline">\(\sigma^2 &gt; 0\)</span>, with density <span class="math display">\[
 \ell(y \mid \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\Bigl(-\frac{(y - \mu)^2}{2\sigma^2}\Bigr).
 \]</span> Its graph is the bell curve from <a href="#exm-gaussian-kernel">Example&nbsp;4.5</a>: centred at <span class="math inline">\(\mu\)</span>, with spread controlled by <span class="math inline">\(\sigma^2\)</span>. The Gaussian family is the default for real-valued outputs because the central limit theorem guarantees that any quantity arising as a sum of many small, independent effects will be approximately normally distributed.</p>

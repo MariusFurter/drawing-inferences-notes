@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Exercise 6: Swiss Health Model – Drawing Inferences</title>
+<title>Exercise 6: Swiss health – Drawing Inferences</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,7 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../appendix/pytorch.html" rel="next">
+<link href="../appendix/parametric-kernels.html" rel="next">
 <link href="../exercises/5-physics.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -154,7 +154,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/6-swiss-health.html">Exercise 6: Swiss Health Model</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/6-swiss-health.html">Exercise 6: Swiss health</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -255,7 +255,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Exercise 6: Swiss Health Model</span></a>
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
   </div>
 </li>
       </ul>
@@ -269,6 +269,12 @@ window.Quarto = {
           </a> 
       </div>
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
@@ -299,16 +305,24 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#the-model" id="toc-the-model" class="nav-link active" data-scroll-target="#the-model">The model</a>
+  <li><a href="#the-swiss-health-model" id="toc-the-swiss-health-model" class="nav-link active" data-scroll-target="#the-swiss-health-model">The Swiss health model</a>
   <ul class="collapse">
   <li><a href="#root-distributions" id="toc-root-distributions" class="nav-link" data-scroll-target="#root-distributions">Root distributions</a></li>
-  <li><a href="#sec-bmi-kernel" id="toc-sec-bmi-kernel" class="nav-link" data-scroll-target="#sec-bmi-kernel">The BMI kernel (linear regression)</a></li>
-  <li><a href="#sec-diabetes-kernel" id="toc-sec-diabetes-kernel" class="nav-link" data-scroll-target="#sec-diabetes-kernel">The diabetes kernel (logistic regression)</a></li>
-  <li><a href="#sec-cost-kernel" id="toc-sec-cost-kernel" class="nav-link" data-scroll-target="#sec-cost-kernel">The cost kernel (log-normal regression)</a></li>
-  <li><a href="#composing-the-full-model" id="toc-composing-the-full-model" class="nav-link" data-scroll-target="#composing-the-full-model">Composing the full model</a></li>
-  <li><a href="#forward-sampling" id="toc-forward-sampling" class="nav-link" data-scroll-target="#forward-sampling">Forward sampling</a></li>
-  <li><a href="#sec-conditioning-continuous" id="toc-sec-conditioning-continuous" class="nav-link" data-scroll-target="#sec-conditioning-continuous">Conditioning on continuous observations</a></li>
-  <li><a href="#sec-conditioning-discrete" id="toc-sec-conditioning-discrete" class="nav-link" data-scroll-target="#sec-conditioning-discrete">Conditioning on discrete observations</a></li>
+  </ul></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#sec-roots" id="toc-sec-roots" class="nav-link" data-scroll-target="#sec-roots">Part 0: Visualizing the root distributions</a></li>
+  <li><a href="#sec-kernels" id="toc-sec-kernels" class="nav-link" data-scroll-target="#sec-kernels">Part 1: Regression kernels</a>
+  <ul class="collapse">
+  <li><a href="#sec-bmi-task" id="toc-sec-bmi-task" class="nav-link" data-scroll-target="#sec-bmi-task">1.1 BMI kernel (linear regression)</a></li>
+  <li><a href="#sec-diabetes-task" id="toc-sec-diabetes-task" class="nav-link" data-scroll-target="#sec-diabetes-task">1.2 Diabetes kernel (logistic regression)</a></li>
+  <li><a href="#sec-cost-task" id="toc-sec-cost-task" class="nav-link" data-scroll-target="#sec-cost-task">1.3 Cost kernel (log-normal regression)</a></li>
+  </ul></li>
+  <li><a href="#sec-assembly" id="toc-sec-assembly" class="nav-link" data-scroll-target="#sec-assembly">Part 2: The full model</a></li>
+  <li><a href="#sec-conditioning" id="toc-sec-conditioning" class="nav-link" data-scroll-target="#sec-conditioning">Part 3: Conditioning</a>
+  <ul class="collapse">
+  <li><a href="#sec-forward-prediction" id="toc-sec-forward-prediction" class="nav-link" data-scroll-target="#sec-forward-prediction">Task 5: Forward prediction — age and healthcare costs</a></li>
+  <li><a href="#sec-backward-inference" id="toc-sec-backward-inference" class="nav-link" data-scroll-target="#sec-backward-inference">Task 6: Backward inference — what does diabetes tell us about age?</a></li>
+  <li><a href="#sec-bmi-conditioning" id="toc-sec-bmi-conditioning" class="nav-link" data-scroll-target="#sec-bmi-conditioning">Task 7: Conditioning on BMI</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -316,9 +330,9 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/6-swiss-health.html">Exercise 6: Swiss Health Model</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/6-swiss-health.html">Exercise 6: Swiss health</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Exercise 6: Swiss Health Model</h1>
+<h1 class="title">Exercise 6: Swiss health</h1>
 </div>
 
 
@@ -335,7 +349,14 @@ window.Quarto = {
 </header>
 
 
-<p>We apply the framework from the <a href="../chapters/hybrid-models.html">chapter on hybrid models</a> to a concrete example: a model of Swiss health variables relating lifestyle factors to disease risk and healthcare costs. The model is assembled entirely from the parametric kernels introduced in that chapter, composed via the string-diagrammatic operations of <a href="../chapters/hybrid-models.html#sec-string-diagrams-carry-over" class="quarto-xref"><span>String diagrams carry over</span></a>. We describe the variables and their relationships, instantiate the kernels with parameters calibrated to Swiss population statistics, and demonstrate forward sampling and conditioning using <code>WeightedSampling.torch</code>.</p>
+<div class="hidden">
+<p><span class="math display">\[
+\def\then{\mathbin{;}}
+\def\kernel{\rightsquigarrow}
+\def\ivmark#1{[\![#1]\!]}
+\]</span></p>
+</div>
+<p>This exercise applies the parametric kernels from the <a href="../chapters/hybrid-models.html">chapter on hybrid models</a> to a concrete example: a model of six Swiss health variables relating lifestyle factors to disease risk and healthcare costs. We proceed in three stages: first exploring each regression kernel individually, then writing the complete model, and finally conditioning on observed evidence.</p>
 <div class="callout callout-style-default callout-note callout-titled" title="Prerequisites: Python libraries">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -359,22 +380,20 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<section id="the-model" class="level2">
-<h2 class="anchored" data-anchor-id="the-model">The model</h2>
-<p>The model relates six variables:</p>
-<div id="tbl-swiss-health-vars" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-swiss-health-vars-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: Variables in the Swiss health model.
-</figcaption>
-<div aria-describedby="tbl-swiss-health-vars-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<section id="the-swiss-health-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-swiss-health-model">The Swiss health model</h2>
+<p>We aim to model the following six variables:</p>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Variable</th>
 <th>Symbol</th>
 <th>Type</th>
-<th>Role</th>
 </tr>
 </thead>
 <tbody>
@@ -382,237 +401,1016 @@ Table&nbsp;1: Variables in the Swiss health model.
 <td>Smoking status</td>
 <td><span class="math inline">\(S\)</span></td>
 <td><span class="math inline">\(\{0,1\}\)</span></td>
-<td>root</td>
 </tr>
 <tr class="even">
 <td>Age</td>
 <td><span class="math inline">\(A\)</span></td>
 <td><span class="math inline">\(\mathbb{R}_{\geq 0}\)</span></td>
-<td>root</td>
 </tr>
 <tr class="odd">
-<td>Physical activity</td>
+<td>Physical activity (hours per week)</td>
 <td><span class="math inline">\(P\)</span></td>
 <td><span class="math inline">\(\mathbb{R}_{\geq 0}\)</span></td>
-<td>root</td>
 </tr>
 <tr class="even">
 <td>BMI</td>
 <td><span class="math inline">\(B\)</span></td>
-<td><span class="math inline">\(\mathbb{R}\)</span></td>
-<td>intermediate</td>
+<td><span class="math inline">\(\mathbb{R}_{&gt;0}\)</span></td>
 </tr>
 <tr class="odd">
 <td>Diabetes</td>
 <td><span class="math inline">\(D\)</span></td>
 <td><span class="math inline">\(\{0,1\}\)</span></td>
-<td>intermediate</td>
 </tr>
 <tr class="even">
-<td>Healthcare costs</td>
+<td>Healthcare costs (paid claims per person-year)</td>
 <td><span class="math inline">\(C\)</span></td>
 <td><span class="math inline">\(\mathbb{R}_{&gt;0}\)</span></td>
-<td>leaf</td>
 </tr>
 </tbody>
 </table>
-</div>
+<p>Smoking status, age, and physical activity are root variables with no parents. Together they influence BMI through a linear regression kernel. BMI and age jointly determine diabetes risk through a logistic regression kernel. Finally, diabetes status, smoking status, and BMI jointly determine healthcare costs through a log-normal regression kernel:</p>
+<div id="fig-swiss-health-model" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="6-swiss-health_files/mediabag/5a644b7152f6c5e5d45b24db4bd4de1d0c824d66.svg" style="height:10em" class="figure-img"></p>
+<figcaption>String diagram for the Swiss health model.</figcaption>
 </figure>
 </div>
-<p>The causal story runs as follows. Smoking status, age, and physical activity are root variables with no parents in the model. Together, they influence BMI through a linear regression kernel. BMI in turn influences diabetes risk through a logistic regression kernel. Finally, diabetes status and BMI jointly determine healthcare costs through a log-normal regression kernel. The graph is a directed chain with one fan-out: BMI feeds into both the diabetes kernel and the cost kernel.</p>
-<p>The parameters appearing below are grounded in publicly available Swiss summary statistics. Where a parameter corresponds directly to a published statistic (a prevalence, a mean, or a rate), we read its value from the source; where possible, we derive regression coefficients from published relative risks. The remaining coefficients are calibrated so that the model’s marginal distributions reproduce the published target values. In the <a href="../chapters/parameter-estimation.qmd">next chapter</a>, we explain how parameter estimates are obtained systematically from data.</p>
-<div class="callout callout-style-default callout-note callout-titled">
+<p>The root distributions are sourced from published Swiss statistics (see below). The regression coefficients are reasonable choices calibrated so that the model reproduces the target summary statistics in Part 2. We will see later in the course how such coefficients can be learned from data.</p>
+<section id="root-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="root-distributions">Root distributions</h3>
+<p>The three root variables are specified by marginal distributions:</p>
+<ul>
+<li><strong>Smoking</strong> <span class="math inline">\(S \sim \mathsf{Bernoulli}(0.24)\)</span>.</li>
+<li><strong>Age</strong> <span class="math inline">\(A \sim \mathsf{Gamma}(6,\, \tfrac{6}{43})\)</span>, with mean <span class="math inline">\(43\)</span> and standard deviation <span class="math inline">\(\approx 17.5\)</span>.</li>
+<li><strong>Physical activity</strong> <span class="math inline">\(P \sim \mathsf{Gamma}(1.60,\, 0.42)\)</span>, with mean <span class="math inline">\(\approx 3.8\)</span> and standard deviation <span class="math inline">\(\approx 3.0\)</span>, measured in hours of sport per week.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="Data sources for root distributions">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Data sources
+<span class="screen-reader-only">Note</span>Data sources for root distributions
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><a href="https://www.bfs.admin.ch/bfs/en/home/statistics/health.assetdetail.33427753.html">BFS Gesundheit — Taschenstatistik 2025</a> (based on the <a href="https://www.bfs.admin.ch/bfs/en/home/statistics/health/surveys/sgb.html">Swiss Health Survey</a>, SGB 2022): smoking prevalence (p.&nbsp;20), overweight and obesity rates (pp.&nbsp;20–21), diabetes prevalence (pp.&nbsp;8–9), physical activity (p.&nbsp;20), doctor consultations (p.&nbsp;31), and healthcare costs (p.&nbsp;32).</li>
-<li><a href="https://www.obsan.admin.ch/de/publikationen/2020-diabetes-mellitus">Obsan Bericht 10/2020: Diabetes Mellitus</a> (Fürst &amp; Probst-Hensch, 2020): disease burden and care in Switzerland. Reference data include diabetes prevalence by age and data source (ch.&nbsp;8), BMI <span class="math inline">\(\geq\)</span> 25 prevalence among diabetics (SAPALDIA: 79–83% vs.&nbsp;50–56% among non-diabetics, p.&nbsp;49), and direct healthcare costs for diabetic patients (CHF 8,239/year, Helsana 2011, p.&nbsp;47).</li>
-<li><a href="https://www.bag.admin.ch/bag/de/home/das-bag/publikationen/forschungsberichte/forschungsberichte-ncd.html">Kosten von nichtübertragbaren Krankheiten in der Schweiz</a> (Stucki et al., 2025, ZHAW/Uni Luzern/BFH for BAG): full NCD cost report (156 pp.). Relative risks for diabetes type 2 from overweight: RR = 2.25 (M) / 2.30 (F); from obesity: RR = 5.50 (M) / 7.00 (F) (Tables 20–21, from Lobstein &amp; Leach, 2010). Physical inactivity relative risk for diabetes: RR = 1.17 (Kyu et al., 2016). For obesity: OR = 1.49 (Bell et al., 2014, Table 28). Total healthcare costs attributable to overweight/obesity: CHF 3.7 billion (2022), of which diabetes type 2 accounts for CHF 1.07 billion, with an additional CHF 2.9 billion in productivity losses (Tables 22–25). 150,315 DALYs (Table 26), of which diabetes type 2 accounts for 58,293 (39%).</li>
-<li><a href="https://doi.org/10.1111/j.1464-5491.2011.03422.x">CoLaus study</a> (Kaiser et al., 2012, <em>Diabetic Medicine</em> 29: 190–197): population-based study of 6,188 subjects (35–75 years) in Lausanne. Multivariable-adjusted odds ratios for type 2 diabetes (Table 4): BMI overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78); physical activity OR = 0.64 (0.51–0.80); age 65–75 vs.&nbsp;35–44 OR = 8.20 (5.22–12.9). T2D prevalence 6.3%; mean BMI of diabetics 30.2 vs.&nbsp;25.5 for non-diabetics.</li>
-<li><a href="https://www.sportobs.ch/sport-schweiz/">Sport Schweiz 2020</a> (BASPO / Lamprecht &amp; Stamm): physical activity categories and sport behavior (pp.&nbsp;12–16).</li>
-<li><a href="https://www.who.int/data/gho">WHO Global Health Observatory</a>: mean BMI by country (age-standardized).</li>
-<li><a href="https://diabetesatlas.org/">IDF Diabetes Atlas</a>: diabetes prevalence by country.</li>
-<li><a href="https://www.oecd.org/health/health-at-a-glance/">OECD Health at a Glance</a> (2023): doctor consultations per capita.</li>
-<li><a href="https://www.bfs.admin.ch/bfs/en/home/statistics/population.html">BFS Population Statistics</a> (STATPOP): median age and age distribution.</li>
+<li><strong>Smoking.</strong> <a href="(https://www.bfs.admin.ch/bfs/de/home/aktuell/neue-veroeffentlichungen.assetdetail.34027817.html):">BFS Taschenstatistik 2025</a> reports 27% (men) and 21% (women); we use the average <span class="math inline">\(0.24\)</span>.</li>
+<li><strong>Age.</strong> The Gamma approximates the right-skewed adult age distribution. BFS-reported median ages are 41.9 years (men) and 44.0 years (women), giving a combined median of <span class="math inline">\(\approx 43\)</span> years.</li>
+<li><strong>Physical activity.</strong> Parameters moment-matched to the <a href="https://www.baspo.admin.ch/de/sport-schweiz">Sport Schweiz 2020</a> weekly hours distribution (never 16%, &lt;2h 10%, 2h 15%, 3–4h 25%, 5–6h 16%, 7+h 18%) using all six category midpoints 0, 1, 2, 3.5, 5.5, and 9 hours. Note: the Gamma distribution has support <span class="math inline">\((0,\infty)\)</span> and cannot represent the 16% point mass at <span class="math inline">\(P=0\)</span>; the fitted distribution approximates but underweights the never-exerciser group.</li>
 </ul>
 </div>
 </div>
 </div>
-<section id="root-distributions" class="level3">
-<h3 class="anchored" data-anchor-id="root-distributions">Root distributions</h3>
-<p>The three root variables have no parents, so they are specified by marginal distributions (kernels <span class="math inline">\(I \kernel X\)</span> with trivial input):</p>
-<ul>
-<li><strong>Smoking</strong> <span class="math inline">\(S \sim \mathsf{Bernoulli}(0.27)\)</span>. The SGB 2022 reports that 27.1% of men and 20.8% of women smoke daily or occasionally; we use <span class="math inline">\(0.27\)</span> as a round approximation.</li>
-<li><strong>Age</strong> <span class="math inline">\(A \sim \mathsf{Normal}(42, 17^2)\)</span>. The Swiss median age is 42.7 years (BFS STATPOP). The standard deviation of 17 is chosen to approximate the adult age distribution.</li>
-<li><strong>Physical activity</strong> <span class="math inline">\(P \sim \mathsf{Normal}(5, 2^2)\)</span>, measured in hours of sport per week. Sport Schweiz 2020 reports that 51% of adults are “trained” (<span class="math inline">\(\geq 3\)</span> hours/week), 27% “sufficiently active,” 16% “partly active,” and 6% “inactive.”</li>
-</ul>
 </section>
-<section id="sec-bmi-kernel" class="level3">
-<h3 class="anchored" data-anchor-id="sec-bmi-kernel">The BMI kernel (linear regression)</h3>
-<p>BMI is a continuous variable influenced by a mix of discrete and continuous parents — exactly the setting for which the linear regression kernel (<a href="../chapters/hybrid-models.html#sec-linear-regression" class="quarto-xref"><span>Linear regression kernel</span></a>) is designed: <span class="math display">\[
-B \mid S, A, P \;\sim\; \mathsf{Normal}(\alpha_0 + \alpha_S\, S + \alpha_A\, A + \alpha_P\, P,\; \sigma^2).
-\]</span></p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<div id="27d02bec" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.distributions <span class="im">as</span> dist</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> model, sample, observe, deterministic, summary, expectation</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Torch compatibility reminder">
+<div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Parameter sourcing — BMI kernel
+<span class="screen-reader-only">Note</span>Torch compatibility reminder
 </div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ul>
-<li><em>Intercept</em> <span class="math inline">\(\alpha_0 = 25.0\)</span>: set so that <span class="math inline">\(\mathbb{E}[B] \approx 25.3\)</span> at the population means, matching the WHO age-standardized estimate of Switzerland’s mean BMI.</li>
-<li><em>Smoking slope</em> <span class="math inline">\(\alpha_S = -0.5\)</span>: epidemiological studies consistently find that current smokers have slightly lower BMI than non-smokers, owing to nicotine’s appetite-suppressive effect. A meta-analysis (Dare et al., 2015, <em>BMJ Open</em> 5: e008330) reports that current smokers have BMI roughly 0.3–0.7 kg/m² lower than never-smokers after adjusting for confounders.</li>
-<li><em>Age slope</em> <span class="math inline">\(\alpha_A = 0.05\)</span>: the SGB 2022 shows overweight-plus-obesity prevalence rising from roughly 30% in the 25–34 age group to 55% at ages 55–64. A slope of 0.05 BMI units per year produces a 1.5-unit increase over 30 years, consistent with this gradient.</li>
-<li><em>Activity slope</em> <span class="math inline">\(\alpha_P = -0.3\)</span>: the NCD cost report (Stucki et al., 2025, Table 28) reports a physical inactivity → obesity odds ratio of 1.49 (Bell et al., 2014), confirming the direction. The magnitude is approximate.</li>
-<li><em>Residual standard deviation</em> <span class="math inline">\(\sigma = 3.8\)</span>: calibrated so that the model produces approximately 43% overweight (BMI <span class="math inline">\(\geq\)</span> 25) and 12% obese (BMI <span class="math inline">\(&gt;\)</span> 30), matching SGB 2022 rates.</li>
-</ul>
-</div>
+<p>All computations on sampled tensors must use <strong>torch-compatible operations</strong> — <code>torch.sigmoid(x)</code> not <code>math.sigmoid(x)</code>, <code>.float()</code> before arithmetic on boolean tensors, etc. See the <a href="../appendix/WeightedSampling.html#sec-torch-compat">appendix</a> for details.</p>
 </div>
 </div>
 </section>
-<section id="sec-diabetes-kernel" class="level3">
-<h3 class="anchored" data-anchor-id="sec-diabetes-kernel">The diabetes kernel (logistic regression)</h3>
-<p>Diabetes status is binary and depends on BMI — the setting for the logistic regression kernel (<a href="../chapters/hybrid-models.html#sec-logistic-regression" class="quarto-xref"><span>Logistic regression kernel</span></a>): <span class="math display">\[
-D \mid B \;\sim\; \mathsf{Bernoulli}\bigl(\sigma(\beta_0 + \beta_1\, B)\bigr).
-\]</span></p>
-<div class="callout callout-style-default callout-note callout-titled">
+<section id="sec-roots" class="level2">
+<h2 class="anchored" data-anchor-id="sec-roots">Part 0: Visualizing the root distributions</h2>
+<p>Before building the regression kernels, it is useful to visualize the three root distributions to develop intuition for the range of inputs the model will encounter.</p>
+<p><strong>Task 0 — Plot the root distributions.</strong></p>
+<p>Write <code>@model root_distributions()</code> that samples <span class="math inline">\(S\)</span>, <span class="math inline">\(A\)</span>, <span class="math inline">\(P\)</span> from their respective root distributions. Run with 10,000 particles and produce a figure with three panels:</p>
+<ol type="1">
+<li>A bar chart of <span class="math inline">\(S\)</span> showing <span class="math inline">\(P(S=0)\)</span> and <span class="math inline">\(P(S=1)\)</span>.</li>
+<li>A histogram of <span class="math inline">\(A\)</span> with the theoretical <span class="math inline">\(\mathsf{Gamma}(6,\, \tfrac{6}{43})\)</span> density overlaid. Use <code>torch.linspace</code> to create a grid of values and <code>dist.Gamma(...).log_prob(grid).exp()</code> to compute the density.</li>
+<li>A histogram of <span class="math inline">\(P\)</span> with the theoretical <span class="math inline">\(\mathsf{Gamma}(1.60,\, 0.42)\)</span> density overlaid.</li>
+</ol>
+<p>Bonus: Look up the actual age distribution of Swiss adults. How does this compare to the Gamma distribution used in the model?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Parameter sourcing — diabetes kernel
+<span class="screen-reader-only">Tip</span>Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ul>
-<li><em>Intercept</em> <span class="math inline">\(\beta_0 = -6.7\)</span>: calibrated so that the marginal diabetes prevalence at average BMI matches the Swiss rate. The IDF Diabetes Atlas reports 5.3% (ages 20–79). The SGB 2022 reports 6.9% of men and 4.0% of women, giving a combined rate of approximately 5.4%. The Obsan diabetes report (pp.&nbsp;47–49) compiles prevalence estimates from multiple Swiss data sources (SGB, Helsana, CoLaus, SAPALDIA), all converging on 5–7%.</li>
-<li><em>Slope</em> <span class="math inline">\(\beta_1 = 0.15\)</span>: the Stucki et al.&nbsp;(2025) NCD cost report compiles relative risks for diabetes type 2: overweight (BMI 25–30) vs.&nbsp;normal weight gives RR = 2.25 (men) / 2.30 (women); obesity (BMI <span class="math inline">\(\geq\)</span> 30) vs.&nbsp;normal weight gives RR = 5.50 (men) / 7.00 (women). The CoLaus study (Kaiser et al., 2012) reports multivariable-adjusted odds ratios: overweight OR = 1.51 (1.07–2.12), obese OR = 5.14 (3.39–7.78). Approximating a log-linear relationship from the Stucki RRs gives <span class="math inline">\(\beta_1 \approx \log(2.25)/5.5 \approx 0.15\)</span>.</li>
-</ul>
+<div id="52a91517" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> root_distributions():</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> sample(<span class="st">"S"</span>, dist.Bernoulli(<span class="fl">0.24</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> sample(<span class="st">"A"</span>, dist.Gamma(<span class="fl">6.0</span>, <span class="fl">6.0</span><span class="op">/</span><span class="fl">43.0</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> sample(<span class="st">"P"</span>, dist.Gamma(<span class="fl">1.60</span>, <span class="fl">0.42</span>))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>result_roots <span class="op">=</span> root_distributions(num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_roots))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>S_vals <span class="op">=</span> result_roots[<span class="st">"S"</span>]</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>A_vals <span class="op">=</span> result_roots[<span class="st">"A"</span>]</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>P_vals <span class="op">=</span> result_roots[<span class="st">"P"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=10000, log_evidence=0.0000, ESS=10000.0)
+
+          │ █            ▂ │ ▁▃▆█▇▃▂▁       │ ▇█▆▂▂▁         │
+          │       S        │       A        │       P        │
+──────────┼────────────────┼────────────────┼────────────────┤
+     mean │     0.2378     │    42.8751     │     3.8131     │
+      std │     0.4257     │    17.4401     │     3.0297     │
+ n_unique │       2        │      9996      │     10000      │</code></pre>
+</div>
+</div>
+<div id="1a868fcb" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, width_ratios<span class="op">=</span>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>], figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">3</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># S: bar chart</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].bar(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">1</span>],</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    [expectation(result_roots, <span class="kw">lambda</span> S: (S <span class="op">==</span> <span class="dv">0</span>).<span class="bu">float</span>()).item(),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>     expectation(result_roots, <span class="kw">lambda</span> S: (S <span class="op">==</span> <span class="dv">1</span>).<span class="bu">float</span>()).item()],</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>[<span class="st">"steelblue"</span>, <span class="st">"darkorange"</span>],</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    width<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xticks([<span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xticklabels([<span class="st">"S = 0</span><span class="ch">\n</span><span class="st">(non-smoker)"</span>, <span class="st">"S = 1</span><span class="ch">\n</span><span class="st">(smoker)"</span>])</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"Proportion"</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">"Smoking status $S$"</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># A: histogram + theoretical density</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>A_grid <span class="op">=</span> torch.linspace(<span class="fl">1e-3</span>, <span class="dv">120</span>, <span class="dv">500</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>A_density <span class="op">=</span> dist.Gamma(<span class="fl">6.0</span>, <span class="fl">6.0</span> <span class="op">/</span> <span class="fl">43.0</span>).log_prob(A_grid).exp()</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].hist(A_vals, bins<span class="op">=</span><span class="dv">60</span>, density<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">"steelblue"</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(A_grid, A_density, color<span class="op">=</span><span class="st">"steelblue"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">"Age (years)"</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">"Age $A </span><span class="ch">\\</span><span class="st">sim </span><span class="ch">\\</span><span class="st">mathrm</span><span class="sc">{Gamma}</span><span class="st">(6,</span><span class="ch">\\</span><span class="st">, </span><span class="ch">\\</span><span class="st">frac</span><span class="sc">{6}{43}</span><span class="st">)$"</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co"># P: histogram + theoretical density</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>P_grid <span class="op">=</span> torch.linspace(<span class="fl">1e-3</span>, <span class="dv">15</span>, <span class="dv">500</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>P_density <span class="op">=</span> dist.Gamma(<span class="fl">1.60</span>, <span class="fl">0.42</span>).log_prob(P_grid).exp()</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].hist(P_vals, bins<span class="op">=</span><span class="dv">60</span>, density<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">"darkorange"</span>)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].plot(P_grid, P_density, color<span class="op">=</span><span class="st">"darkorange"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].set_xlabel(<span class="st">"Hours of activity per week"</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].set_title(<span class="st">"Physical activity $P </span><span class="ch">\\</span><span class="st">sim </span><span class="ch">\\</span><span class="st">mathrm</span><span class="sc">{Gamma}</span><span class="st">(1.60,</span><span class="ch">\\</span><span class="st">, 0.42)$"</span>)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="6-swiss-health_files/figure-html/cell-4-output-1.png" width="961" height="277" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The actual age distribution is flatter and has several plateaus. In particular, the Gamma approximation vastly underestimates the number of young people. A more accurate model could use a custom distribution fitted to the empirical age distribution.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-cost-kernel" class="level3">
-<h3 class="anchored" data-anchor-id="sec-cost-kernel">The cost kernel (log-normal regression)</h3>
-<p>Annual healthcare costs are strictly positive and right-skewed — the setting for the log-normal regression kernel (<a href="../chapters/hybrid-models.html#sec-lognormal-regression" class="quarto-xref"><span>Log-normal regression kernel</span></a>). Costs depend on both diabetes status and BMI: <span class="math display">\[
-\log C \mid D, B \;\sim\; \mathsf{Normal}(\gamma_0 + \gamma_D\, D + \gamma_B\, B,\; \tau^2).
-\]</span></p>
-<div class="callout callout-style-default callout-note callout-titled">
+<section id="sec-kernels" class="level2">
+<h2 class="anchored" data-anchor-id="sec-kernels">Part 1: Regression kernels</h2>
+<p>In this part we explore each regression kernel by writing a small <code>@model</code> that samples the relevant inputs and applies the kernel. In Part 2 we will combine all three into a single model.</p>
+<section id="sec-bmi-task" class="level3">
+<h3 class="anchored" data-anchor-id="sec-bmi-task">1.1 BMI kernel (linear regression)</h3>
+<p>BMI depends on all three root variables via a linear regression kernel with linear predictor <span class="math display">\[B \mid S, A, P \sim \mathsf{Normal}(\mu, \sigma^2), \qquad \mu = \alpha_0 + \alpha_S S + \alpha_A A + \alpha_P P\]</span></p>
+<p>Recall that <span class="math inline">\(\mu\)</span> is the mean of the Normal distribution. Although BMI is positive, the Normal distribution is used here as a standard modeling approximation; with the calibrated parameters, fewer than 0.1% of samples fall below zero.</p>
+<p><strong>Task 1 — BMI kernel.</strong></p>
+<p>Write <code>@model bmi_model(S, A, P)</code> that takes fixed values for <span class="math inline">\(S\)</span>, <span class="math inline">\(A\)</span>, <span class="math inline">\(P\)</span> as arguments and samples <span class="math inline">\(B\)</span> from the linear regression kernel using <span class="math inline">\(\alpha_0 = 23.2\)</span>, <span class="math inline">\(\alpha_S = -0.5\)</span>, <span class="math inline">\(\alpha_A = 0.05\)</span>, <span class="math inline">\(\alpha_P = -0.3\)</span>, <span class="math inline">\(\sigma = 4.8\)</span>. Then answer the following:</p>
+<ol type="a">
+<li>Run with typical values <span class="math inline">\(S=0\)</span>, <span class="math inline">\(A=42\)</span>, <span class="math inline">\(P=5\)</span> and 10,000 particles. Plot the distribution of <span class="math inline">\(B\)</span> and compute the sample mean. What does the predictor formula give for <span class="math inline">\(\mu\)</span>?</li>
+<li>What happens to <span class="math inline">\(\mu\)</span> when <span class="math inline">\(S\)</span> changes from <span class="math inline">\(0\)</span> to <span class="math inline">\(1\)</span>, with <span class="math inline">\(A=42\)</span> and <span class="math inline">\(P=5\)</span> fixed? First predict from the formula, then verify numerically.</li>
+<li>What happens to <span class="math inline">\(\mu\)</span> when <span class="math inline">\(A\)</span> increases by <span class="math inline">\(20\)</span>, from <span class="math inline">\(42\)</span> to <span class="math inline">\(62\)</span>, with <span class="math inline">\(S=0\)</span> and <span class="math inline">\(P=5\)</span> fixed? Predict, then verify.</li>
+<li>Consider a 65-year-old smoker with low physical activity: <span class="math inline">\(S=1\)</span>, <span class="math inline">\(A=65\)</span>, <span class="math inline">\(P=1\)</span>. Compute <span class="math inline">\(\mu\)</span> directly, verify numerically, and express the total shift from the baseline <span class="math inline">\((S=0, A=42, P=5)\)</span> as a sum of three individual contributions.</li>
+<li>What would happen to <span class="math inline">\(\mu\)</span> if <span class="math inline">\(\alpha_A\)</span> were doubled to <span class="math inline">\(0.10\)</span> (with <span class="math inline">\(S=0\)</span>, <span class="math inline">\(A=42\)</span>, <span class="math inline">\(P=5\)</span>)? Predict from the formula, then verify by running a modified model.</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Parameter sourcing — cost kernel
+<span class="screen-reader-only">Note</span>Hint
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ul>
-<li><em>Intercept</em> <span class="math inline">\(\gamma_0 = 7.5\)</span>: calibrated so that the median cost for a non-diabetic adult at average BMI is roughly CHF 3,900. For reference, total Swiss healthcare expenditure in 2022 was CHF 869 per person per month (CHF 10,428 per year; BFS Taschenstatistik 2025, p.&nbsp;32).</li>
-<li><em>Diabetes slope</em> <span class="math inline">\(\gamma_D = 0.65\)</span>: the Obsan diabetes report (p.&nbsp;47) cites Helsana data showing direct healthcare costs of CHF 8,239/year per diabetic patient (2011), roughly twice the non-diabetic baseline. Taking the log ratio gives <span class="math inline">\(\gamma_D \approx \ln(8239/3900) \approx 0.75\)</span>; we use the slightly conservative value <span class="math inline">\(0.65\)</span> to account for the fact that not all of the cost differential is attributable to diabetes status alone.</li>
-<li><em>BMI slope</em> <span class="math inline">\(\gamma_B = 0.03\)</span>: encodes the qualitatively correct direction (higher BMI increases costs). The NCD cost report attributes 70% of diabetes type 2 productivity losses to overweight/obesity, confirming the strong cost linkage. The per-unit magnitude is approximate.</li>
-<li><em>Dispersion</em> <span class="math inline">\(\tau = 0.6\)</span>: reflects the typically right-skewed cost distribution.</li>
-</ul>
+<p>Plug the values into the predictor formula. To see how the formula changes, compute the difference between the predictor with two sets of values.</p>
 </div>
 </div>
 </div>
-</section>
-<section id="composing-the-full-model" class="level3">
-<h3 class="anchored" data-anchor-id="composing-the-full-model">Composing the full model</h3>
-<p>Compose root measures + regression kernels via sequential/parallel composition + copy/swap. Draw the complete string diagram: {S, A, P} → B → D → C, with B also feeding into C. Show how the compositional structure encodes the causal story.</p>
-<div id="fig-swiss-health-model" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="6-swiss-health_files/mediabag/c180873eab03380b3eca175e1097db4d53d6449e.svg" style="height:8em" class="figure-img"></p>
-<figcaption>String diagram for the Swiss health model.</figcaption>
-</figure>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solutions">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
-</section>
-<section id="forward-sampling" class="level3">
-<h3 class="anchored" data-anchor-id="forward-sampling">Forward sampling</h3>
-<p>We implement the full model in <code>WeightedSampling.torch</code> by composing the root distributions and regression kernels:</p>
-<div id="ddd12d8c" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.distributions <span class="im">as</span> dist</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> model, sample, observe, summary, expectation</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solutions
 </div>
-<div id="6b8052a6" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> swiss_health():</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Root distributions ---</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> sample(<span class="st">"S"</span>, dist.Bernoulli(<span class="fl">0.27</span>))          <span class="co"># smoking</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> sample(<span class="st">"A"</span>, dist.Normal(<span class="fl">42.0</span>, <span class="fl">17.0</span>))       <span class="co"># age</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> sample(<span class="st">"P"</span>, dist.Normal(<span class="fl">5.0</span>, <span class="fl">2.0</span>))         <span class="co"># activity (hours/week)</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- BMI kernel (linear regression) ---</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    eta_B <span class="op">=</span> <span class="fl">25.0</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">0.5</span>) <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.05</span> <span class="op">*</span> A <span class="op">-</span> <span class="fl">0.3</span> <span class="op">*</span> P</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    B <span class="op">=</span> sample(<span class="st">"B"</span>, dist.Normal(eta_B, <span class="fl">3.8</span>))</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Diabetes kernel (logistic regression) ---</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    eta_D <span class="op">=</span> <span class="op">-</span><span class="fl">6.7</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> sample(<span class="st">"D"</span>, dist.Bernoulli(torch.sigmoid(eta_D)))</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Cost kernel (log-normal regression) ---</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    eta_C <span class="op">=</span> <span class="fl">7.5</span> <span class="op">+</span> <span class="fl">0.65</span> <span class="op">*</span> D <span class="op">+</span> <span class="fl">0.03</span> <span class="op">*</span> B</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> sample(<span class="st">"C"</span>, dist.LogNormal(eta_C, <span class="fl">0.6</span>))</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> swiss_health(num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Key observation.</strong> In the linear predictor, each coefficient <span class="math inline">\(\alpha\)</span> controls how much the corresponding variable shifts <span class="math inline">\(\mu\)</span> per unit change, holding all other variables fixed. For example, <span class="math inline">\(\alpha_A = 0.05\)</span> means that increasing age by 1 year increases <span class="math inline">\(\mu\)</span> by 0.05. You can see this by computing the difference in <span class="math inline">\(\mu\)</span> between <span class="math inline">\(A=a\)</span> and <span class="math inline">\(A=a+1\)</span> while keeping <span class="math inline">\(S\)</span> and <span class="math inline">\(P\)</span> fixed: <span class="math display">\[ \mu_{A=a+1} - \mu_{A=a} = (\alpha_0 + \alpha_S \cdot S + \alpha_A \cdot (a+1) + \alpha_P \cdot P) - (\alpha_0 + \alpha_S \cdot S + \alpha_A \cdot a + \alpha_P \cdot P) = \alpha_A. \]</span></p>
+<p>Note that this shift does not depend on the value of <span class="math inline">\(a\)</span>. For discrete variables like <span class="math inline">\(S\)</span>, <span class="math inline">\(\alpha_S\)</span> represents the change in <span class="math inline">\(\mu\)</span> when <span class="math inline">\(S\)</span> changes from 0 to 1. This is the effect of moving from non-smoker to smoker, holding <span class="math inline">\(A\)</span> and <span class="math inline">\(P\)</span> fixed.</p>
+<hr>
+<p><strong>Part a.</strong></p>
+<div id="5cb54cb0" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bmi_model(S, A, P):</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">23.2</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">0.5</span>) <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.05</span> <span class="op">*</span> A <span class="op">+</span> (<span class="op">-</span><span class="fl">0.3</span>) <span class="op">*</span> P</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    B <span class="op">=</span> sample(<span class="st">"B"</span>, dist.Normal(mu, <span class="fl">4.8</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>result_base <span class="op">=</span> bmi_model(<span class="fl">0.0</span>, <span class="fl">42.0</span>, <span class="fl">5.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_base))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>SMC Summary (N=10000, log_evidence=0.0000, ESS=10000.0)
 
-          │ █            ▃ │    ▁▂▆██▆▃▁    │    ▂▃▇██▇▂▁    │    ▁▂▅██▇▃▁    │ █            ▁ │ ██▃▁           │
+          │     ▁▄▅██▅▃▁   │
+          │       B        │
+──────────┼────────────────┤
+     mean │    23.8580     │
+      std │     4.8380     │
+ n_unique │      9993      │</code></pre>
+</div>
+</div>
+<p>The exact computation gives <span class="math inline">\(\mu = 23.2 + (-0.5)\cdot 0 + 0.05\cdot 42 + (-0.3)\cdot 5 = 23.8\)</span>, which is close to the sample mean displayed in the summary.</p>
+<div id="11e567b9" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>B_base <span class="op">=</span> result_base[<span class="st">"B"</span>]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>E_B_base <span class="op">=</span> expectation(result_base, <span class="kw">lambda</span> B: B).item()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>ax.hist(B_base, bins<span class="op">=</span><span class="dv">60</span>, density<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">"steelblue"</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>ax.axvline(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    E_B_base,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"red"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="ss">f"mean = </span><span class="sc">{</span>E_B_base<span class="sc">:.2f}</span><span class="ss">"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"BMI ($B$)"</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="6-swiss-health_files/figure-html/cell-6-output-1.png" width="566" height="277" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p><strong>Part b.</strong></p>
+<p>The predicted shift in <span class="math inline">\(\mu\)</span> is <span class="math inline">\(\alpha_S = -0.5\)</span>, as discussed above.</p>
+<div id="68d53d45" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>result_smoker <span class="op">=</span> bmi_model(<span class="fl">1.0</span>, <span class="fl">42.0</span>, <span class="fl">5.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>E_B_base <span class="op">=</span> expectation(result_base, <span class="kw">lambda</span> B: B)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>E_B_smoker <span class="op">=</span> expectation(result_smoker, <span class="kw">lambda</span> B: B)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[B | S=0]: </span><span class="sc">{</span>E_B_base<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[B | S=1]: </span><span class="sc">{</span>E_B_smoker<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Shift:      </span><span class="sc">{</span>E_B_smoker <span class="op">-</span> E_B_base<span class="sc">:.3f}</span><span class="ss">  (predicted: α_S = -0.5)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[B | S=0]: 23.86
+E[B | S=1]: 23.31
+Shift:      -0.550  (predicted: α_S = -0.5)</code></pre>
+</div>
+</div>
+<hr>
+<p><strong>Part c.</strong></p>
+<p>The predicted shift is <span class="math inline">\(\alpha_A \cdot \Delta A = 0.05 \times 20 = +1.0\)</span>.</p>
+<div id="3db92867" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>result_older <span class="op">=</span> bmi_model(<span class="fl">0.0</span>, <span class="fl">62.0</span>, <span class="fl">5.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>E_B_base <span class="op">=</span> expectation(result_base, <span class="kw">lambda</span> B: B)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>E_B_older <span class="op">=</span> expectation(result_older, <span class="kw">lambda</span> B: B)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[B | A=42]: </span><span class="sc">{</span>E_B_base<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[B | A=62]: </span><span class="sc">{</span>E_B_older<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Shift:       </span><span class="sc">{</span>E_B_older <span class="op">-</span> E_B_base<span class="sc">:.3f}</span><span class="ss">  (predicted: +1.0)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[B | A=42]: 23.858
+E[B | A=62]: 24.894
+Shift:       1.036  (predicted: +1.0)</code></pre>
+</div>
+</div>
+<hr>
+<p><strong>Part d.</strong></p>
+<p>The predicted shift in <span class="math inline">\(\mu\)</span> is</p>
+<p><span class="math display">\[\alpha_S \cdot \Delta S + \alpha_A \cdot \Delta A + \alpha_P \cdot \Delta P = (-0.5) \cdot 1 + 0.05 \cdot 23 + (-0.3) \cdot (-4) = 1.85.\]</span></p>
+<div id="169f00ab" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>result_highrisk <span class="op">=</span> bmi_model(<span class="fl">1.0</span>, <span class="fl">65.0</span>, <span class="fl">1.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>E_B_base <span class="op">=</span> expectation(result_base, <span class="kw">lambda</span> B: B)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>E_B_highrisk <span class="op">=</span> expectation(result_highrisk, <span class="kw">lambda</span> B: B)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[B | S=1, A=65, P=1] = </span><span class="sc">{</span>E_B_highrisk<span class="sc">:.2f}</span><span class="ss">  (predicted: 25.65)"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Shift from baseline: </span><span class="sc">{</span>E_B_highrisk <span class="op">-</span> E_B_base<span class="sc">:.2f}</span><span class="ss">  (predicted: +1.85)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[B | S=1, A=65, P=1] = 25.67  (predicted: 25.65)
+Shift from baseline: 1.81  (predicted: +1.85)</code></pre>
+</div>
+</div>
+<hr>
+<p><strong>Part e.</strong></p>
+<p>The predicted shift from replacing <span class="math inline">\(\alpha_A = 0.05\)</span> with <span class="math inline">\(\alpha_A' = 0.10\)</span> is <span class="math inline">\(\Delta \mu = (\alpha_A' - \alpha_A) \cdot A = (0.10 - 0.05) \cdot 42 = 2.1\)</span>. Hence, the linear predictor is also linear in its coefficients.</p>
+<div id="7669db88" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bmi_model_alt(S, A, P):</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">23.2</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">0.5</span>) <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.10</span> <span class="op">*</span> A <span class="op">+</span> (<span class="op">-</span><span class="fl">0.3</span>) <span class="op">*</span> P  <span class="co"># α_A doubled</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    B <span class="op">=</span> sample(<span class="st">"B"</span>, dist.Normal(mu, <span class="fl">4.8</span>))</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>result_alt <span class="op">=</span> bmi_model_alt(<span class="fl">0.0</span>, <span class="fl">42.0</span>, <span class="fl">5.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>E_B_base <span class="op">=</span> expectation(result_base, <span class="kw">lambda</span> B: B)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>E_B_alt <span class="op">=</span> expectation(result_alt, <span class="kw">lambda</span> B: B)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[B] (α_A=0.05): </span><span class="sc">{</span>E_B_base<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[B] (α_A=0.10): </span><span class="sc">{</span>E_B_alt<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Shift: </span><span class="sc">{</span>E_B_alt <span class="op">-</span> E_B_base<span class="sc">:.2f}</span><span class="ss">  (predicted: +2.10)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[B] (α_A=0.05): 23.86
+E[B] (α_A=0.10): 25.94
+Shift: 2.08  (predicted: +2.10)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-diabetes-task" class="level3">
+<h3 class="anchored" data-anchor-id="sec-diabetes-task">1.2 Diabetes kernel (logistic regression)</h3>
+<p>Diabetes depends on BMI and age via a logistic regression kernel: <span class="math display">\[
+D \mid B, A \;\sim\; \mathsf{Bernoulli}\bigl(\sigma(\beta_0 + \beta_1\, B + \beta_2\, A)\bigr), \qquad \sigma(x) = \tfrac{1}{1+e^{-x}}.
+\]</span></p>
+<p>The function <span class="math inline">\(\sigma(x)\)</span> is called the <strong>sigmoid</strong> function and is implemented as <code>torch.sigmoid</code>.</p>
+<p><strong>Task 2 — Diabetes kernel.</strong></p>
+<p>Write <code>@model diabetes_model(B, A)</code> that takes fixed BMI and age values and samples <span class="math inline">\(D\)</span> from the logistic regression kernel using <span class="math inline">\(\beta_0 = -10.3\)</span>, <span class="math inline">\(\beta_1 = 0.15\)</span>, and <span class="math inline">\(\beta_2 = 0.07\)</span>. Then answer the following:</p>
+<ol type="a">
+<li>Run with <span class="math inline">\(B = 25\)</span> and <span class="math inline">\(B = 30\)</span> at typical age <span class="math inline">\(A = 42\)</span> using 10,000 particles each. For each, compute the fraction of samples with <span class="math inline">\(D=1\)</span> (expectation of <span class="math inline">\(D\)</span>) and compare to the formula <span class="math inline">\(p(D=1 \mid B, A) = \sigma(\beta_0 + \beta_1 B + \beta_2 A)\)</span>.</li>
+<li>Plot <span class="math inline">\(p(D=1 \mid B, A)\)</span> as a function of <span class="math inline">\(B\)</span> for three fixed ages (<span class="math inline">\(A = 25\)</span>, <span class="math inline">\(A = 42\)</span>, <span class="math inline">\(A = 65\)</span>) in two panels: 1) a wide view over <span class="math inline">\(B \in [0, 100]\)</span> to show the full S-shape of the sigmoid; 2) a zoomed view over <span class="math inline">\(B \in [15, 45]\)</span> (the realistic BMI range) where you can read off threshold BMIs at which the risk for each age group crosses 10% and 50%.</li>
+<li>Looking at the plot, does a 1-unit increase in BMI always shift <span class="math inline">\(p(D=1)\)</span> by the same amount? At age <span class="math inline">\(A = 42\)</span>, compute <span class="math inline">\(p(D=1)\)</span> at <span class="math inline">\(B=20\)</span> and <span class="math inline">\(B=21\)</span>, and again at <span class="math inline">\(B=33\)</span> and <span class="math inline">\(B=34\)</span>, and compare the two differences. What does <span class="math inline">\(\beta_1 = 0.15\)</span> actually control?</li>
+<li>Fix <span class="math inline">\(B = 25\)</span>. What is the increase in the probability of diabetes from age 25 to age 65? Is this increase the same at other BMI values?</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solutions">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solutions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Model.</strong></p>
+<div id="243ff7d1" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> diabetes_model(B, A):</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> A))  <span class="co"># sigmoid needs a tensor, even if B and A are floats.</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> sample(<span class="st">"D"</span>, dist.Bernoulli(p))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+<p><strong>Part a.</strong></p>
+<div id="f3cc969c" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>result_D25 <span class="op">=</span> diabetes_model(<span class="fl">25.0</span>, <span class="fl">42.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>result_D30 <span class="op">=</span> diabetes_model(<span class="fl">30.0</span>, <span class="fl">42.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>p25 <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">25.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">42.0</span>)))</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>p30 <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">30.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">42.0</span>)))</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"B = 25, A = 42:  formula </span><span class="sc">{</span>p25<span class="sc">:.4f}</span><span class="ss">,  sample </span><span class="sc">{</span>expectation(result_D25, <span class="kw">lambda</span> D: D)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"B = 30, A = 42:  formula </span><span class="sc">{</span>p30<span class="sc">:.4f}</span><span class="ss">,  sample </span><span class="sc">{</span>expectation(result_D30, <span class="kw">lambda</span> D: D)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>B = 25, A = 42:  formula 0.0263,  sample 0.0261
+B = 30, A = 42:  formula 0.0542,  sample 0.0498</code></pre>
+</div>
+</div>
+<hr>
+<p><strong>Part b.</strong></p>
+<div id="8649f5e5" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>B_wide <span class="op">=</span> torch.linspace(<span class="dv">0</span>, <span class="dv">100</span>, <span class="dv">500</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>B_zoom <span class="op">=</span> torch.linspace(<span class="dv">15</span>, <span class="dv">45</span>, <span class="dv">300</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>ages <span class="op">=</span> [<span class="fl">25.0</span>, <span class="fl">42.0</span>, <span class="fl">65.0</span>]</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"steelblue"</span>, <span class="st">"darkorange"</span>, <span class="st">"crimson"</span>]</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">3.5</span>))</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> a, col <span class="kw">in</span> <span class="bu">zip</span>(ages, colors):</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    p_w <span class="op">=</span> torch.sigmoid(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B_wide <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> a)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    p_z <span class="op">=</span> torch.sigmoid(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B_zoom <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> a)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].plot(B_wide, p_w, color<span class="op">=</span>col, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="ss">f"$A=</span><span class="sc">{</span><span class="bu">int</span>(a)<span class="sc">}</span><span class="ss">$"</span>)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].plot(B_zoom, p_z, color<span class="op">=</span>col, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="ss">f"$A=</span><span class="sc">{</span><span class="bu">int</span>(a)<span class="sc">}</span><span class="ss">$"</span>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: full S-curves</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">"BMI ($B$)"</span>)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="vs">r"</span><span class="dv">$</span><span class="vs">p</span><span class="kw">(</span><span class="vs">D=1 </span><span class="dv">\m</span><span class="vs">id B, A</span><span class="kw">)</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">"Full S-curves"</span>)</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylim(<span class="op">-</span><span class="fl">0.02</span>, <span class="fl">1.02</span>)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">"BMI ($B$)"</span>)</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="vs">r"</span><span class="dv">$</span><span class="vs">p</span><span class="kw">(</span><span class="vs">D=1 </span><span class="dv">\m</span><span class="vs">id B, A</span><span class="kw">)</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">"Realistic BMI range"</span>)</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend()</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="6-swiss-health_files/figure-html/cell-13-output-1.png" width="949" height="325" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p><strong>Part c.</strong></p>
+<div id="94f54b2e" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>p20 <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">20.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">42.0</span>)))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>p21 <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">21.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">42.0</span>)))</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>p33 <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">33.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">42.0</span>)))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>p34 <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">34.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">42.0</span>)))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"B=20 → 21  (A=42):  p shifts by </span><span class="sc">{</span>p21 <span class="op">-</span> p20<span class="sc">:.5f}</span><span class="ss">"</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"B=33 → 34  (A=42):  p shifts by </span><span class="sc">{</span>p34 <span class="op">-</span> p33<span class="sc">:.5f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>B=20 → 21  (A=42):  p shifts by 0.00201
+B=33 → 34  (A=42):  p shifts by 0.01208</code></pre>
+</div>
+</div>
+<p>The shifts are very different even though both inputs change by exactly <span class="math inline">\(1\)</span>. Near <span class="math inline">\(B=20\)</span> the curve is nearly flat, while near <span class="math inline">\(B=33\)</span> — where risk is around 10% — the curve is much steeper. Hence, unlike in linear regression, the increase in p(D=1) depends on the absolute values of the predictors you are manipulating (not just their difference).</p>
+<p>What <span class="math inline">\(\beta_1 = 0.15\)</span> does control is how much each unit of <span class="math inline">\(B\)</span> shifts the linear predictor <span class="math inline">\(\beta_0 + \beta_1 B + \beta_2 A\)</span> <em>before</em> the sigmoid is applied. The space in which the model is linear is the <strong>log-odds</strong> space, not the probability space. See the box below for a detailed discussion of how to interpret logistic regression coefficients.</p>
+<p>We can always compare <span class="math inline">\(p(D=1)\)</span> at any two BMI values directly by plugging into the formula. But <span class="math inline">\(\beta_1\)</span> does not give us a fixed “probability increase per BMI unit.”</p>
+<hr>
+<p><strong>Part d.</strong></p>
+<div id="d34693cb" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>p_young <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">25.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">25.0</span>)))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>p_old   <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">25.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">65.0</span>)))</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(D=1 | B=25, A=25): </span><span class="sc">{</span>p_young<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(D=1 | B=25, A=65): </span><span class="sc">{</span>p_old<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Increase:            </span><span class="sc">{</span>p_old <span class="op">-</span> p_young<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>p(D=1 | B=25, A=25): 0.0082
+p(D=1 | B=25, A=65): 0.1192
+Increase:            0.1110</code></pre>
+</div>
+</div>
+<p>At fixed <span class="math inline">\(B = 25\)</span>, diabetes risk rises from about <span class="math inline">\(0.08\%\)</span> at age 25 to about <span class="math inline">\(12\%\)</span> at age 65. Note that unlike for the linear regression kernel, this increase depends on what BMI value was fixed. For example, for <span class="math inline">\(B=35\)</span> the increase from age 25 to 65 is much higher at <span class="math inline">\(34\%\)</span>.</p>
+<div id="f0613d3c" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>p_young <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">35.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">25.0</span>)))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>p_old   <span class="op">=</span> <span class="bu">float</span>(torch.sigmoid(torch.tensor(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="fl">35.0</span> <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> <span class="fl">65.0</span>)))</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(D=1 | B=35, A=25): </span><span class="sc">{</span>p_young<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(D=1 | B=35, A=65): </span><span class="sc">{</span>p_old<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Increase:            </span><span class="sc">{</span>p_old <span class="op">-</span> p_young<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>p(D=1 | B=35, A=25): 0.0356
+p(D=1 | B=35, A=65): 0.3775
+Increase:            0.3420</code></pre>
+</div>
+</div>
+<p>Hence, unlike linear regression, the increase in p(D=1) depends on the fixed values of all other predictors in the model.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Interpreting logistic regression coefficients via odds">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Interpreting logistic regression coefficients via odds
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The <strong>risk</strong> of diabetes at a given BMI is the probability <span class="math inline">\(p = p(D=1 \mid B)\)</span>. One way to quantify how that risk compares to its complement is the <strong>odds</strong>: <span class="math display">\[\text{odds}(B) = \frac{p(D=1 \mid B)}{p(D=0 \mid B)} = \frac{p}{1-p}.\]</span> Odds and probability carry the same information but they scale differently. A risk of 1% corresponds to odds of 1:99 (<span class="math inline">\(\approx 0.01\)</span>); a risk of 50% to odds of 1:1 (<span class="math inline">\(= 1\)</span>); a risk of 90% to odds of 9:1 (<span class="math inline">\(= 9\)</span>).</p>
+<p>The linear combination <span class="math inline">\(\beta_0 + \beta_1 B + \beta_2 A\)</span> is exactly the <strong>log-odds</strong> (also called the <strong>logit</strong>) of <span class="math inline">\(D=1\)</span>: <span class="math display">\[\beta_0 + \beta_1 B + \beta_2 A = \ln\frac{p(D=1 \mid B, A)}{p(D=0 \mid B, A)}.\]</span> You can see this by solving <span class="math inline">\(\sigma(\eta) = p\)</span> for <span class="math inline">\(\eta = \ln(p/(1-p))\)</span>. On this scale the model is linear, and each coefficient has a clean interpretation: a one-unit increase in <span class="math inline">\(B\)</span> (or <span class="math inline">\(A\)</span>) adds <span class="math inline">\(\beta_1\)</span> (or <span class="math inline">\(\beta_2\)</span>) to the log-odds, which is equivalent to <strong>multiplying the odds by <span class="math inline">\(e^{\beta_1}\)</span></strong> (or <span class="math inline">\(e^{\beta_2}\)</span>). These multiplicative factors are called <strong>odds ratios</strong>.</p>
+<p>For the diabetes model, <span class="math inline">\(e^{\beta_1} = e^{0.15} \approx 1.16\)</span>: each additional BMI unit multiplies the odds of diabetes by <span class="math inline">\(1.16\)</span>, a 16% increase in the odds, holding age fixed. Similarly, <span class="math inline">\(e^{\beta_2} = e^{0.07} \approx 1.07\)</span>: each additional year of age multiplies the odds by about <span class="math inline">\(1.07\)</span>, holding BMI fixed. Importantly, both multiplicative factors are constant — they do not depend on where on the S-curve you are. In contrast, the corresponding changes in risk (probability) depend on the baseline: a 16% odds increase near a baseline risk of 1% shifts probability by very little, while the same odds increase near 10% risk produces a noticeably larger absolute shift.</p>
+<p>In summary: the coefficient <span class="math inline">\(\beta\)</span> means that increasing the corresponding variable multiplies the odds of <span class="math inline">\(D=1\)</span> by a factor <span class="math inline">\(e^{\beta}\)</span>, holding all other variables fixed. Hence, a positive <span class="math inline">\(\beta\)</span> increases the odds, while a negative <span class="math inline">\(\beta\)</span> decreases them. To obtain the actual probability at specific input values, plug them into <span class="math inline">\(\sigma(\beta_0 + \beta_1 B + \beta_2 A)\)</span>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-cost-task" class="level3">
+<h3 class="anchored" data-anchor-id="sec-cost-task">1.3 Cost kernel (log-normal regression)</h3>
+<p>Annual healthcare costs are strictly positive and right-skewed. They depend on diabetes status, smoking status, and BMI via a log-normal regression kernel: <span class="math display">\[
+C \mid S, D, B \;\sim\; \mathsf{LogNormal}(\mu, \tau^2), \qquad \mu = \gamma_0 + \gamma_S\, S + \gamma_D\, D + \gamma_B\, B$
+\]</span></p>
+<p><strong>Task 3 — Cost kernel.</strong></p>
+<p>Write <code>@model cost_model(S, D, B)</code> that takes fixed values for <span class="math inline">\(S\)</span>, <span class="math inline">\(D\)</span>, and <span class="math inline">\(B\)</span> and samples <span class="math inline">\(C\)</span> from the log-normal regression kernel using <span class="math inline">\(\gamma_0 = 7.3\)</span>, <span class="math inline">\(\gamma_S = 0.2\)</span>, <span class="math inline">\(\gamma_D = 0.65\)</span>, <span class="math inline">\(\gamma_B = 0.03\)</span>, <span class="math inline">\(\tau = 0.6\)</span>. Then answer the following:</p>
+<ol type="a">
+<li>Run the model twice: once with <span class="math inline">\(S=0, D=0, B=25\)</span> and once with <span class="math inline">\(S=0, D=1, B=25\)</span>. Plot the two predictive distributions side by side.</li>
+</ol>
+<p><strong>Bonus (Part b).</strong> The <strong>median</strong> of a distribution is the value <span class="math inline">\(m\)</span> such that <span class="math inline">\(p(X \leq m) = \tfrac{1}{2}\)</span>. Show that if <span class="math inline">\(f\)</span> is strictly monotone increasing and <span class="math inline">\(m\)</span> is the median of <span class="math inline">\(X\)</span>, then <span class="math inline">\(f(m)\)</span> is the median of <span class="math inline">\(f(X)\)</span>.</p>
+<p><strong>Bonus (Part c).</strong> Use Part b to derive a formula for <span class="math inline">\(\mathrm{median}(C \mid S, D, B)\)</span>, recalling that <span class="math inline">\(C = e^X\)</span> with <span class="math inline">\(X \sim \mathsf{Normal}(\mu, \tau^2)\)</span> and that <span class="math inline">\(\mathrm{median}(X) = \mu\)</span>. Use this formula to interpret the coefficients <span class="math inline">\(\gamma_S\)</span>, <span class="math inline">\(\gamma_D\)</span>, and <span class="math inline">\(\gamma_B\)</span>. <em>Hint: Take the ratio of the median at two inputs that differ only in one variable.</em></p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solutions">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solutions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Model.</strong></p>
+<div id="b601c303" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cost_model(S, D, B):</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">7.3</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.65</span> <span class="op">*</span> D <span class="op">+</span> <span class="fl">0.03</span> <span class="op">*</span> B</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> sample(<span class="st">"C"</span>, dist.LogNormal(mu, <span class="fl">0.6</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+<p><strong>Part a.</strong></p>
+<div id="77032663" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>result_nd <span class="op">=</span> cost_model(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">25.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>result_d  <span class="op">=</span> cost_model(<span class="fl">0.0</span>, <span class="fl">1.0</span>, <span class="fl">25.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>C_nd <span class="op">=</span> result_nd[<span class="st">"C"</span>]</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>C_d  <span class="op">=</span> result_d[<span class="st">"C"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We observe that the cost distribution for diabetes patients is skewed more towards higher values, as expected.</p>
+<div id="7457a482" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">3.5</span>), sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, vals, label <span class="kw">in</span> <span class="bu">zip</span>(axes, [C_nd, C_d], [<span class="st">"D=0 (no diabetes)"</span>, <span class="st">"D=1 (diabetes)"</span>]):</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    ax.hist(vals, bins<span class="op">=</span><span class="dv">80</span>, density<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    ax.set_title(label)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"Annual cost (CHF)"</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="6-swiss-health_files/figure-html/cell-19-output-1.png" width="854" height="326" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p><strong>Bonus (Part b).</strong></p>
+<p>Let <span class="math inline">\(m\)</span> be the median of <span class="math inline">\(X\)</span>, so <span class="math inline">\(p(X \leq m) = \tfrac{1}{2}\)</span>. Since <span class="math inline">\(f\)</span> is strictly increasing, <span class="math inline">\(f(X) \leq f(m)\)</span> iff <span class="math inline">\(X \leq m\)</span>, so <span class="math inline">\(p(f(X) \leq f(m)) = p(X \leq m) = \tfrac{1}{2}\)</span>. Hence <span class="math inline">\(f(m)\)</span> is the median of <span class="math inline">\(f(X)\)</span>.</p>
+<hr>
+<p><strong>Bonus (Part c).</strong></p>
+<p>Applying Part b with <span class="math inline">\(f = \exp\)</span>: <span class="math display">\[\mathrm{median}(C \mid S, D, B) = e^{\mathrm{median}(X)} = e^{\mu} = e^{\gamma_0 + \gamma_S S + \gamma_D D + \gamma_B B}.\]</span></p>
+<p>Changing any single input while holding the others fixed multiplies the median by the corresponding exponential factor. For example, the ratio of medians at <span class="math inline">\(D + \Delta\)</span> and <span class="math inline">\(D\)</span> (with <span class="math inline">\(S\)</span> and <span class="math inline">\(B\)</span> fixed) is <span class="math inline">\(e^{\gamma_D \Delta}\)</span>. In particular:</p>
+<ul>
+<li>Having diabetes (<span class="math inline">\(\Delta = 1\)</span>) multiplies the median by <span class="math inline">\(e^{0.65} \approx 1.92\)</span>.</li>
+<li>Smoking (<span class="math inline">\(S: 0 \to 1\)</span>) multiplies the median by <span class="math inline">\(e^{0.2} \approx 1.22\)</span>.</li>
+<li>Each additional BMI unit multiplies the median by <span class="math inline">\(e^{0.03} \approx 1.03\)</span>.</li>
+</ul>
+<p>Note that <span class="math inline">\(\tau\)</span> plays no role.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-assembly" class="level2">
+<h2 class="anchored" data-anchor-id="sec-assembly">Part 2: The full model</h2>
+<p><strong>Task 4 — Write and verify the full model.</strong></p>
+<p>Write <code>@model swiss_health()</code> that samples all six variables in a single model:</p>
+<ol type="1">
+<li>Sample <span class="math inline">\(S\)</span>, <span class="math inline">\(A\)</span>, <span class="math inline">\(P\)</span> from their root distributions.</li>
+<li>Sample <span class="math inline">\(B\)</span> from the BMI kernel (linear regression on <span class="math inline">\(S\)</span>, <span class="math inline">\(A\)</span>, <span class="math inline">\(P\)</span>).</li>
+<li>Sample <span class="math inline">\(D\)</span> from the diabetes kernel (logistic regression on <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span>).</li>
+<li>Sample <span class="math inline">\(C\)</span> from the cost kernel (log-normal regression on <span class="math inline">\(D\)</span>, <span class="math inline">\(B\)</span>).</li>
+</ol>
+<p>Run with 10,000 particles, print the <code>summary</code>, and verify that the model reproduces the following published Swiss benchmarks in <a href="https://www.bfs.admin.ch/bfs/de/home/aktuell/neue-veroeffentlichungen.assetdetail.34027817.html">BFS Taschenstatistik Gesundheit 2025</a>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Quantity</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(p(B \geq 25)\)</span> — overweight or obese</td>
+<td>~43%</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(p(B \geq 30)\)</span> — obese</td>
+<td>~12%</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(p(D = 1)\)</span> — diabetes prevalence</td>
+<td>~5–7%</td>
+</tr>
+<tr class="even">
+<td>Median annual cost</td>
+<td>~CHF 3,300</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="0400c492" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> swiss_health():</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> sample(<span class="st">"S"</span>, dist.Bernoulli(<span class="fl">0.24</span>))</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> sample(<span class="st">"A"</span>, dist.Gamma(<span class="fl">6.0</span>, <span class="fl">6.0</span><span class="op">/</span><span class="fl">43.0</span>))</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> sample(<span class="st">"P"</span>, dist.Gamma(<span class="fl">1.60</span>, <span class="fl">0.42</span>))</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">23.2</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">0.5</span>) <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.05</span> <span class="op">*</span> A <span class="op">+</span> (<span class="op">-</span><span class="fl">0.3</span>) <span class="op">*</span> P</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    B <span class="op">=</span> sample(<span class="st">"B"</span>, dist.Normal(mu, <span class="fl">4.8</span>))</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> torch.sigmoid(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> A)</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> sample(<span class="st">"D"</span>, dist.Bernoulli(p))</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">7.3</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.65</span> <span class="op">*</span> D <span class="op">+</span> <span class="fl">0.03</span> <span class="op">*</span> B</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> sample(<span class="st">"C"</span>, dist.LogNormal(mu, <span class="fl">0.6</span>))</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> swiss_health(num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=10000, log_evidence=0.0000, ESS=10000.0)
+
+          │ █            ▃ │  ▂▅█▇▅▃▁▁      │ ▇█▆▂▂▁         │    ▁▂▆██▇▃▂    │ █            ▁ │ █▇▃            │
           │       S        │       A        │       P        │       B        │       D        │       C        │
 ──────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
-     mean │     0.2667     │    41.9036     │     4.9561     │    25.5952     │     0.0653     │   5024.3169    │
-      std │     0.4422     │    16.8802     │     2.0211     │     3.9358     │     0.2471     │   3815.4209    │
- n_unique │       2        │      9996      │      9995      │      9997      │       2        │      9977      │</code></pre>
+     mean │     0.2442     │    42.8834     │     3.7769     │    23.9871     │     0.0610     │   4121.6899    │
+      std │     0.4296     │    17.5411     │     2.9583     │     5.0038     │     0.2393     │   3032.3650    │
+ n_unique │       2        │      9998      │      9998      │      9996      │       2        │      9988      │</code></pre>
 </div>
 </div>
-<p>We can verify the model against known Swiss statistics:</p>
-<div id="31089b45" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>B_vals <span class="op">=</span> result[<span class="st">"B"</span>]</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>D_vals <span class="op">=</span> result[<span class="st">"D"</span>]</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>C_vals <span class="op">=</span> result[<span class="st">"C"</span>]</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(BMI &gt;= 25):       </span><span class="sc">{</span>(B_vals <span class="op">&gt;=</span> <span class="dv">25</span>)<span class="sc">.</span><span class="bu">float</span>()<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(BMI &gt;= 30):       </span><span class="sc">{</span>(B_vals <span class="op">&gt;=</span> <span class="dv">30</span>)<span class="sc">.</span><span class="bu">float</span>()<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(Diabetes):        </span><span class="sc">{</span>D_vals<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Median cost (CHF):  </span><span class="sc">{</span>C_vals<span class="sc">.</span>median()<span class="sc">.</span>item()<span class="sc">:,.0f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="5ad0a848" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(BMI &gt;= 25):       </span><span class="sc">{</span>expectation(result, <span class="kw">lambda</span> B: (B <span class="op">&gt;=</span> <span class="dv">25</span>).<span class="bu">float</span>())<span class="sc">:.3f}</span><span class="ss">   (target ~0.43)"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(BMI &gt;= 30):       </span><span class="sc">{</span>expectation(result, <span class="kw">lambda</span> B: (B <span class="op">&gt;=</span> <span class="dv">30</span>).<span class="bu">float</span>())<span class="sc">:.3f}</span><span class="ss">   (target ~0.12)"</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(Diabetes = 1):    </span><span class="sc">{</span>expectation(result, <span class="kw">lambda</span> D: D)<span class="sc">:.3f}</span><span class="ss">   (target ~0.05–0.07)"</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Median cost (CHF):  </span><span class="sc">{</span>result[<span class="st">'C'</span>]<span class="sc">.</span>median()<span class="sc">.</span>item()<span class="sc">:,.0f}</span><span class="ss">      (target ~3,300)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>P(BMI &gt;= 25):       0.559
-P(BMI &gt;= 30):       0.131
-P(Diabetes):        0.065
-Median cost (CHF):  4,022</code></pre>
+<pre><code>p(BMI &gt;= 25):       0.418   (target ~0.43)
+p(BMI &gt;= 30):       0.116   (target ~0.12)
+p(Diabetes = 1):    0.061   (target ~0.05–0.07)
+Median cost (CHF):  3,299      (target ~3,300)</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </section>
-<section id="sec-conditioning-continuous" class="level3">
-<h3 class="anchored" data-anchor-id="sec-conditioning-continuous">Conditioning on continuous observations</h3>
-<p>Extend the graphical conditioning procedure from Chapter 3: pre-condition on density values. Worked example: condition on observed BMI B = b.</p>
+<section id="sec-conditioning" class="level2">
+<h2 class="anchored" data-anchor-id="sec-conditioning">Part 3: Conditioning</h2>
+<p>We now condition the model on observed evidence. For this, simply <strong>replace <code>x = sample(...)</code> with <code>x = observe(x, ...)</code></strong>. Since <code>observe</code> returns the observed value, the rest of the model is unchanged. To ensure reusability, models are written to accept observed values as arguments.</p>
+<section id="sec-forward-prediction" class="level3">
+<h3 class="anchored" data-anchor-id="sec-forward-prediction">Task 5: Forward prediction — age and healthcare costs</h3>
+<p>Age influences BMI, which in turn influences both diabetes risk and costs. By conditioning on a specific age we obtain a predictive distribution for costs at that age.</p>
+<p>Write <code>@model swiss_health_age(A)</code> that takes a fixed age value as an argument and conditions on it. Then:</p>
+<ol type="a">
+<li>Run with <span class="math inline">\(A = 25\)</span> and <span class="math inline">\(A = 65\)</span> using 10,000 particles each. Plot the two predictive cost distributions side by side.</li>
+<li>For each age, compute the expected values of <span class="math inline">\(B\)</span> and <span class="math inline">\(D\)</span>. How do each of these variables impact cost?</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solutions">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solutions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Model.</strong></p>
+<div id="f06c35d1" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> swiss_health_age(A):</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> sample(<span class="st">"S"</span>, dist.Bernoulli(<span class="fl">0.24</span>))</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> observe(A, dist.Gamma(<span class="fl">6.0</span>, <span class="fl">6.0</span><span class="op">/</span><span class="fl">43.0</span>))</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> sample(<span class="st">"P"</span>, dist.Gamma(<span class="fl">1.60</span>, <span class="fl">0.42</span>))</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">23.2</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">0.5</span>) <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.05</span> <span class="op">*</span> A <span class="op">+</span> (<span class="op">-</span><span class="fl">0.3</span>) <span class="op">*</span> P</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    B <span class="op">=</span> sample(<span class="st">"B"</span>, dist.Normal(mu, <span class="fl">4.8</span>))</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> torch.sigmoid(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> A)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> sample(<span class="st">"D"</span>, dist.Bernoulli(p))</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">7.3</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.65</span> <span class="op">*</span> D <span class="op">+</span> <span class="fl">0.03</span> <span class="op">*</span> B</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> sample(<span class="st">"C"</span>, dist.LogNormal(mu, <span class="fl">0.6</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The only change from <code>swiss_health</code> is replacing <code>sample("A", ...)</code> with <code>observe(A, ...)</code>. This adds the log-density <span class="math inline">\(\log p_{\mathsf{Gamma}}(A)\)</span> as an importance weight to each particle and fixes <span class="math inline">\(A\)</span> for all downstream computations. Since every particle receives the same fixed value, the added weight is an identical constant for all particles.</p>
+<hr>
+<p><strong>Part a.</strong></p>
+<p>We run the model twice with different age values to obtain predictive cost distributions for each age group.</p>
+<div id="3b4eccfc" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>result_age25 <span class="op">=</span> swiss_health_age(<span class="fl">25.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>result_age65 <span class="op">=</span> swiss_health_age(<span class="fl">65.0</span>, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_age25))</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_age65))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=10000, log_evidence=0.0000, ESS=10000.0)
+
+          │ █            ▃ │ ▇█▅▂▁          │     ▁▃▅██▅▃▁   │ █              │ ▄█▅▁▁          │
+          │       S        │       P        │       B        │       D        │       C        │
+──────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+     mean │     0.2437     │     3.7925     │    23.1175     │     0.0070     │   3770.2659    │
+      std │     0.4293     │     3.0288     │     4.8225     │     0.0834     │   2626.6230    │
+ n_unique │       2        │      9998      │      9998      │       2        │      9978      │
+SMC Summary (N=10000, log_evidence=0.0000, ESS=10000.0)
+
+          │ █            ▃ │ ▇█▆▂▁          │     ▁▃▅█▇▄▂    │ █            ▁ │ █▆▂            │
+          │       S        │       P        │       B        │       D        │       C        │
+──────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+     mean │     0.2395     │     3.8391     │    25.2251     │     0.1499     │   4625.3911    │
+      std │     0.4268     │     3.0367     │     4.8375     │     0.3570     │   3709.1304    │
+ n_unique │       2        │      9996      │      9993      │       2        │      9982      │</code></pre>
+</div>
+</div>
+<div id="956c40e0" class="cell" data-execution_count="23">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">3.5</span>), sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, res, label <span class="kw">in</span> <span class="bu">zip</span>(</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    axes,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    [result_age25, result_age65],</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"A = 25"</span>, <span class="st">"A = 65"</span>],</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    C_vals <span class="op">=</span> res[<span class="st">"C"</span>]</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    ax.hist(C_vals, bins<span class="op">=</span><span class="dv">80</span>, density<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    ax.axvline(</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>        C_vals.median().item(),</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"red"</span>,</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>        linewidth<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f"median = CHF </span><span class="sc">{</span>C_vals<span class="sc">.</span>median()<span class="sc">.</span>item()<span class="sc">:,.0f}</span><span class="ss">"</span>,</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    ax.set_title(label)</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"Annual cost (CHF)"</span>)</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>    ax.set_xlim(<span class="dv">0</span>, <span class="dv">30_000</span>)</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>    ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="6-swiss-health_files/figure-html/cell-24-output-1.png" width="950" height="326" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p><strong>Part b.</strong></p>
+<div id="7f2bf93d" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>E_B_25 <span class="op">=</span> expectation(result_age25, <span class="kw">lambda</span> B: B).item()</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>E_B_65 <span class="op">=</span> expectation(result_age65, <span class="kw">lambda</span> B: B).item()</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>P_D_25 <span class="op">=</span> expectation(result_age25, <span class="kw">lambda</span> D: D).item()</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>P_D_65 <span class="op">=</span> expectation(result_age65, <span class="kw">lambda</span> D: D).item()</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"         A=25    A=65"</span>)</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[B]:    </span><span class="sc">{</span>E_B_25<span class="sc">:.2f}</span><span class="ss">   </span><span class="sc">{</span>E_B_65<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(D=1):  </span><span class="sc">{</span>P_D_25<span class="sc">:.3f}</span><span class="ss">   </span><span class="sc">{</span>P_D_65<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         A=25    A=65
+E[B]:    23.12   25.23
+p(D=1):  0.007   0.150</code></pre>
+</div>
+</div>
+<p>Note that <span class="math inline">\(\mathbb{E}[D] = p(D=1)\)</span> since <span class="math inline">\(D\)</span> is a binary variable. Both expected BMI <span class="math inline">\(\mathbb{E}[B]\)</span> and diabetes risk <span class="math inline">\(p(D=1)\)</span> are higher at age 65 than at age 25. Higher BMI impacts cost directly via the <span class="math inline">\(\gamma_B B\)</span> term in the cost predictor, and indirectly via the <span class="math inline">\(\gamma_D D\)</span> term since higher BMI increases diabetes risk.</p>
+</div>
+</div>
+</div>
 </section>
-<section id="sec-conditioning-discrete" class="level3">
-<h3 class="anchored" data-anchor-id="sec-conditioning-discrete">Conditioning on discrete observations</h3>
-<p>Same as the discrete case. Example: condition on D = 1 (has diabetes). What does this tell us about likely health costs?</p>
+<section id="sec-backward-inference" class="level3">
+<h3 class="anchored" data-anchor-id="sec-backward-inference">Task 6: Backward inference — what does diabetes tell us about age?</h3>
+<p>Information flows both ways in a probabilistic model. Observing that a variable takes a particular value can update our beliefs about its causes, not just its effects. Here, <span class="math inline">\(D\)</span> has <span class="math inline">\(B\)</span> as a parent and <span class="math inline">\(B\)</span> has <span class="math inline">\(A\)</span> as a parent, so conditioning on <span class="math inline">\(D=1\)</span> should alter our beliefs about <span class="math inline">\(A\)</span>.</p>
+<p>Write <code>@model swiss_health_diabetes(D)</code> that takes a diabetes observation as an argument and conditions on it. Then:</p>
+<ol type="a">
+<li>Run with <span class="math inline">\(D = 1\)</span> using 20,000 particles. Compare the posterior distribution of <span class="math inline">\(A\)</span> to its unconditional distribution from Task 4. Why does observing diabetes shift beliefs about age?</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solutions">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solutions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Model.</strong></p>
+<div id="e13058b4" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> swiss_health_diabetes(D):</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> sample(<span class="st">"S"</span>, dist.Bernoulli(<span class="fl">0.24</span>))</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> sample(<span class="st">"A"</span>, dist.Gamma(<span class="fl">6.0</span>, <span class="fl">6.0</span><span class="op">/</span><span class="fl">43.0</span>))</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> sample(<span class="st">"P"</span>, dist.Gamma(<span class="fl">1.60</span>, <span class="fl">0.42</span>))</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">23.2</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">0.5</span>) <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.05</span> <span class="op">*</span> A <span class="op">+</span> (<span class="op">-</span><span class="fl">0.3</span>) <span class="op">*</span> P</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    B <span class="op">=</span> sample(<span class="st">"B"</span>, dist.Normal(mu, <span class="fl">4.8</span>))</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> torch.sigmoid(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> A)</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> observe(D, dist.Bernoulli(p))</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">7.3</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.65</span> <span class="op">*</span> D <span class="op">+</span> <span class="fl">0.03</span> <span class="op">*</span> B</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> sample(<span class="st">"C"</span>, dist.LogNormal(mu, <span class="fl">0.6</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The only change from <code>swiss_health</code> is replacing <code>sample("D", ...)</code> with <code>observe(D, ...)</code>. Behind the scenes, each particle is weighted by the Bernoulli likelihood evaluated at the observed value of <span class="math inline">\(D\)</span>.</p>
+<hr>
+<p><strong>Part a.</strong></p>
+<p>We run the model with <span class="math inline">\(D=1\)</span> to obtain a posterior distribution over <span class="math inline">\(A\)</span> given that diabetes is observed.</p>
+<div id="940bc2a5" class="cell" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>result_D1 <span class="op">=</span> swiss_health_diabetes(<span class="fl">1.0</span>, num_particles<span class="op">=</span><span class="dv">20_000</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_D1))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=20000, log_evidence=-2.7588, ESS=20000.0)
+
+          │ █            ▂ │   ▁▄▅██▆▅▂▁    │ ▆█▆▃▂▁         │      ▂▃▇█▇▆▂▁  │ ██▃            │
+          │       S        │       A        │       P        │       B        │       C        │
+──────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+     mean │     0.2193     │    67.4328     │     3.5363     │    28.0119     │   8244.6357    │
+      std │     0.4138     │    20.9794     │     2.7447     │     4.6840     │   5610.8994    │
+ n_unique │       2        │      7655      │      7654      │      7651      │     19910      │</code></pre>
+</div>
+</div>
+<div id="d4a5fd2f" class="cell" data-execution_count="27">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>A_prior <span class="op">=</span> result[<span class="st">"A"</span>]</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The particles in result_D1 carry non-uniform importance weights reflecting how</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="co"># well each particle's (B, A) values explain D=1. Plotting the raw particle values</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="co"># directly would show the prior, not the posterior. To visualise the posterior, we</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="co"># resample: draw new indices proportional to the weights so that high-weight</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="co"># particles are duplicated and low-weight ones are dropped. The resulting particles</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a><span class="co"># are equally weighted and represent the posterior. See the appendix for details.</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>resampled_D1 <span class="op">=</span> result_D1.sample()</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>A_post_resamp <span class="op">=</span> resampled_D1[<span class="st">"A"</span>]</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.5</span>))</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>ax.hist(A_prior, bins<span class="op">=</span><span class="dv">60</span>, density<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f"prior  mean=</span><span class="sc">{</span>expectation(result, <span class="kw">lambda</span> A: A)<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>ax.hist(A_post_resamp, bins<span class="op">=</span><span class="dv">60</span>, density<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f"posterior | D=1  mean=</span><span class="sc">{</span>expectation(result_D1, <span class="kw">lambda</span> A: A)<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Age $A$ (years)"</span>)</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="6-swiss-health_files/figure-html/cell-28-output-1.png" width="662" height="324" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The posterior over <span class="math inline">\(A\)</span> shifts upward when we observe <span class="math inline">\(D=1\)</span>. In the updated model, the reasoning runs backwards along two causal paths: the direct path <span class="math inline">\(A \to D\)</span> (age increases diabetes risk directly) and the indirect path <span class="math inline">\(A \to B \to D\)</span> (older age leads to higher BMI, which in turn increases diabetes risk). Both paths make older ages more credible when diabetes is observed, producing the observed shift.</p>
+<p>Note that the posterior predicts very high ages, since these are not completely ruled out by the prior. This suggests that we should have used a more realistic age distribution with a hard upper bound, so that we do not predict ages above 120. This is an example of how using the model can show flaws in its specification, prompting us to improve it.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-bmi-conditioning" class="level3">
+<h3 class="anchored" data-anchor-id="sec-bmi-conditioning">Task 7: Conditioning on BMI</h3>
+<p><span class="math inline">\(B\)</span> depends on <span class="math inline">\(S\)</span>, <span class="math inline">\(A\)</span>, and <span class="math inline">\(P\)</span>. Observing <span class="math inline">\(B=32\)</span> is therefore informative about the values of those variables.</p>
+<p>Write <code>@model swiss_health_bmi(B)</code> that takes a fixed BMI value as an argument and conditions on it. Then:</p>
+<ol type="a">
+<li>Run with <span class="math inline">\(B = 32\)</span> using 20,000 particles. Compare <span class="math inline">\(p(S=1)\)</span> in the posterior to its prior value <span class="math inline">\(0.24\)</span>. Why does the posterior shift in the direction it does? Also compute the median cost and compare to the unconditional median from Task 4.</li>
+</ol>
+<p><strong>Bonus.</strong> Instead of conditioning on <span class="math inline">\(B=32\)</span>, write a model that simply sets <code>B = 32.0</code> as a constant (no <code>sample</code>, no <code>observe</code>). Run with 10,000 particles and compare <span class="math inline">\(p(S=1)\)</span> to part a. What do you observe, and can you explain why the two approaches give different results?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solutions">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solutions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Model.</strong></p>
+<div id="0fea77d8" class="cell" data-execution_count="28">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> swiss_health_bmi(B):</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> sample(<span class="st">"S"</span>, dist.Bernoulli(<span class="fl">0.24</span>))</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> sample(<span class="st">"A"</span>, dist.Gamma(<span class="fl">6.0</span>, <span class="fl">6.0</span><span class="op">/</span><span class="fl">43.0</span>))</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> sample(<span class="st">"P"</span>, dist.Gamma(<span class="fl">1.60</span>, <span class="fl">0.42</span>))</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">23.2</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">0.5</span>) <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.05</span> <span class="op">*</span> A <span class="op">+</span> (<span class="op">-</span><span class="fl">0.3</span>) <span class="op">*</span> P</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    B <span class="op">=</span> observe(B, dist.Normal(mu, <span class="fl">4.8</span>))</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> torch.sigmoid(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> A)</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> sample(<span class="st">"D"</span>, dist.Bernoulli(p))</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">7.3</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.65</span> <span class="op">*</span> D <span class="op">+</span> <span class="fl">0.03</span> <span class="op">*</span> B</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> sample(<span class="st">"C"</span>, dist.LogNormal(mu, <span class="fl">0.6</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The only change from <code>swiss_health</code> is replacing <code>sample("B", ...)</code> with <code>observe(B, ...)</code>. Since <span class="math inline">\(\mu\)</span> depends on <span class="math inline">\(S\)</span>, <span class="math inline">\(A\)</span>, and <span class="math inline">\(P\)</span>, particles whose upstream values make <span class="math inline">\(B\)</span> plausible receive higher weight, propagating the observation backwards.</p>
+<hr>
+<p><strong>Part a.</strong></p>
+<p>We run the model with <span class="math inline">\(B=32\)</span> and plot the posterior distribution of <span class="math inline">\(A\)</span>.</p>
+<div id="ca03e2e5" class="cell" data-execution_count="29">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>result_B32 <span class="op">=</span> swiss_health_bmi(<span class="fl">32.0</span>, num_particles<span class="op">=</span><span class="dv">20_000</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_B32))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=20000, log_evidence=-3.7868, ESS=17192.3)
+
+          │ █            ▂ │  ▂▄██▆▄▂▁      │ █▇▃▁           │ █            ▂ │ █▄▁            │
+          │       S        │       A        │       P        │       D        │       C        │
+──────────┼────────────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+     mean │     0.2089     │    48.4150     │     3.0387     │     0.1695     │   5557.0586    │
+      std │     0.4065     │    19.5417     │     2.3535     │     0.3752     │   4159.1895    │
+ n_unique │       2        │     19986      │     19992      │       2        │     19921      │</code></pre>
+</div>
+</div>
+<div id="fe142ed4" class="cell" data-execution_count="30">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>P_S1_post <span class="op">=</span> expectation(result_B32, <span class="kw">lambda</span> S: S.<span class="bu">float</span>()).item()</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(S=1) prior:           </span><span class="sc">{</span><span class="fl">0.24</span><span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(S=1) | B=32):     </span><span class="sc">{</span>P_S1_post<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(S=1) prior:           0.240
+P(S=1) | B=32):     0.209</code></pre>
+</div>
+</div>
+<p>The posterior probability of smoking decreases because <span class="math inline">\(B=32\)</span> (overweight) is harder to reconcile with smoking, which lowers BMI (<span class="math inline">\(\alpha_S = -0.5\)</span>). This lower smoking posterior feeds into costs via the direct edge <span class="math inline">\(S \to C\)</span>, partially offsetting the higher cost prediction from <span class="math inline">\(B=32\)</span> itself.</p>
+<p>To compute the median cost, we use <code>.sample()</code> to <strong>resample</strong> the particles proportional to their importance weights. The resampled particles are equally weighted and represent draws from the posterior. We can then compute the median directly on the resampled values:</p>
+<div id="01f0aba7" class="cell" data-execution_count="31">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>resampled_B32 <span class="op">=</span> result_B32.sample()</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>C_B32 <span class="op">=</span> resampled_B32[<span class="st">"C"</span>]</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>C_prior <span class="op">=</span> result[<span class="st">"C"</span>]</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Median cost (prior):    CHF </span><span class="sc">{</span>C_prior<span class="sc">.</span>median()<span class="sc">.</span>item()<span class="sc">:,.0f}</span><span class="ss">"</span>)</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Median cost (B = 32):   CHF </span><span class="sc">{</span>C_B32<span class="sc">.</span>median()<span class="sc">.</span>item()<span class="sc">:,.0f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Median cost (prior):    CHF 3,299
+Median cost (B = 32):   CHF 4,464</code></pre>
+</div>
+</div>
+<p>As expected, observing a high BMI shifts the cost distribution upward, despite the offsetting effect of a lower smoking probability.</p>
+<hr>
+<p><strong>Bonus.</strong></p>
+<p>We write a model that sets <span class="math inline">\(B\)</span> to the fixed constant <span class="math inline">\(32\)</span>. This corresponds to an <strong>intervention</strong> where we forcibly set the value of <span class="math inline">\(B\)</span> independently of the other variables. In our model, it would correspond to an experiment where we instantly change everyone’s BMI to 32 regardless of their smoking status, age, or physical activity. In contrast, conditioning on <span class="math inline">\(B=32\)</span> corresponds to an observational scenario where we only look at people with <span class="math inline">\(B=32\)</span>.</p>
+<div id="48c1948f" class="cell" data-execution_count="32">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> swiss_health_do_bmi():</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> sample(<span class="st">"S"</span>, dist.Bernoulli(<span class="fl">0.24</span>))</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> sample(<span class="st">"A"</span>, dist.Gamma(<span class="fl">6.0</span>, <span class="fl">6.0</span><span class="op">/</span><span class="fl">43.0</span>))</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> sample(<span class="st">"P"</span>, dist.Gamma(<span class="fl">1.60</span>, <span class="fl">0.42</span>))</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    B <span class="op">=</span> <span class="fl">32.0</span>  <span class="co"># fixed constant — no sample, no observe</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> torch.sigmoid(<span class="op">-</span><span class="fl">10.3</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> B <span class="op">+</span> <span class="fl">0.07</span> <span class="op">*</span> A)</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> sample(<span class="st">"D"</span>, dist.Bernoulli(p))</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">7.3</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> S <span class="op">+</span> <span class="fl">0.65</span> <span class="op">*</span> D <span class="op">+</span> <span class="fl">0.03</span> <span class="op">*</span> B</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> sample(<span class="st">"C"</span>, dist.LogNormal(mu, <span class="fl">0.6</span>))</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>result_do_B <span class="op">=</span> swiss_health_do_bmi(num_particles<span class="op">=</span><span class="dv">10_000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="a127ac58" class="cell" data-execution_count="33">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>P_S1_post <span class="op">=</span> expectation(result_B32, <span class="kw">lambda</span> S: S.<span class="bu">float</span>()).item()  <span class="co"># recompute in case cells run out of order</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>P_S1_do <span class="op">=</span> expectation(result_do_B, <span class="kw">lambda</span> S: S.<span class="bu">float</span>()).item()</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(S=1) prior:           </span><span class="sc">{</span><span class="fl">0.24</span><span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(S=1 | B=32): </span><span class="sc">{</span>P_S1_post<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(S=1 | do(B=32)):    </span><span class="sc">{</span>P_S1_do<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>p(S=1) prior:           0.240
+p(S=1 | B=32): 0.209
+p(S=1 | do(B=32)):    0.241</code></pre>
+</div>
+</div>
+<p>We denote the values of <span class="math inline">\(p(S=1)\)</span> in the model where <span class="math inline">\(B\)</span> is fixed to <span class="math inline">\(32\)</span> as <span class="math inline">\(p(S=1 \mid \mathsf{do}(B=32))\)</span>. We see that this value is the same as the prior <span class="math inline">\(p(S=1)\)</span>. This is because forcing the values of <span class="math inline">\(B\)</span>, regardless of the other variables, does not provide any new information about <span class="math inline">\(S\)</span>. In contrast, observing <span class="math inline">\(B=32\)</span> changes the value of <span class="math inline">\(p(S=1)\)</span>, since people with high BMI are less likely to be smokers in the model. We will see in the next chapter that in contrast to conditioning, interventions sever the dependencies between the intervened variable and its parents. In other words, the forced value of <span class="math inline">\(B\)</span> is no longer influenced by <span class="math inline">\(S\)</span>, <span class="math inline">\(A\)</span>, or <span class="math inline">\(P\)</span>, so knowing it does not change our beliefs about those variables.</p>
+</div>
+</div>
+</div>
 
 
 
@@ -1027,8 +1825,8 @@ Median cost (CHF):  4,022</code></pre>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../appendix/pytorch.html" class="pagination-link" aria-label="PyTorch Tutorial">
-        <span class="nav-page-text">PyTorch Tutorial</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../appendix/parametric-kernels.html" class="pagination-link" aria-label="Parametric kernels reference">
+        <span class="nav-page-text">Parametric kernels reference</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

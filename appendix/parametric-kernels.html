@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>5&nbsp; Parametric kernels reference – Drawing Inferences</title>
+<title>Parametric kernels reference – Drawing Inferences</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -31,7 +31,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../appendix/pytorch.html" rel="next">
-<link href="../exercises/5-physics.html" rel="prev">
+<link href="../exercises/6-swiss-health.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -119,7 +119,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Appendix</a></li><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parametric kernels reference</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Appendix</a></li><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Parametric kernels reference</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -217,6 +217,12 @@ window.Quarto = {
  <span class="menu-text">Exercise 5: Inverse Physics</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -231,7 +237,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parametric kernels reference</span></span></a>
+ <span class="menu-text">Parametric kernels reference</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -264,31 +270,31 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-distributional-families-appendix" id="toc-sec-distributional-families-appendix" class="nav-link active" data-scroll-target="#sec-distributional-families-appendix"><span class="header-section-number">5.1</span> Distributional families</a>
+  <li><a href="#sec-distributional-families-appendix" id="toc-sec-distributional-families-appendix" class="nav-link active" data-scroll-target="#sec-distributional-families-appendix">Distributional families</a>
   <ul class="collapse">
-  <li><a href="#binary-outputs" id="toc-binary-outputs" class="nav-link" data-scroll-target="#binary-outputs"><span class="header-section-number">5.1.1</span> Binary outputs</a></li>
-  <li><a href="#categorical-outputs" id="toc-categorical-outputs" class="nav-link" data-scroll-target="#categorical-outputs"><span class="header-section-number">5.1.2</span> Categorical outputs</a></li>
-  <li><a href="#count-data" id="toc-count-data" class="nav-link" data-scroll-target="#count-data"><span class="header-section-number">5.1.3</span> Count data</a></li>
-  <li><a href="#real-valued-outputs" id="toc-real-valued-outputs" class="nav-link" data-scroll-target="#real-valued-outputs"><span class="header-section-number">5.1.4</span> Real-valued outputs</a></li>
-  <li><a href="#positive-real-valued-outputs" id="toc-positive-real-valued-outputs" class="nav-link" data-scroll-target="#positive-real-valued-outputs"><span class="header-section-number">5.1.5</span> Positive real-valued outputs</a></li>
-  <li><a href="#unit-interval-outputs" id="toc-unit-interval-outputs" class="nav-link" data-scroll-target="#unit-interval-outputs"><span class="header-section-number">5.1.6</span> Unit-interval outputs</a></li>
-  <li><a href="#simplex-valued-outputs" id="toc-simplex-valued-outputs" class="nav-link" data-scroll-target="#simplex-valued-outputs"><span class="header-section-number">5.1.7</span> Simplex-valued outputs</a></li>
-  <li><a href="#multivariate-real-valued-outputs" id="toc-multivariate-real-valued-outputs" class="nav-link" data-scroll-target="#multivariate-real-valued-outputs"><span class="header-section-number">5.1.8</span> Multivariate real-valued outputs</a></li>
-  <li><a href="#circular-outputs" id="toc-circular-outputs" class="nav-link" data-scroll-target="#circular-outputs"><span class="header-section-number">5.1.9</span> Circular outputs</a></li>
+  <li><a href="#binary-outputs" id="toc-binary-outputs" class="nav-link" data-scroll-target="#binary-outputs">Binary outputs</a></li>
+  <li><a href="#categorical-outputs" id="toc-categorical-outputs" class="nav-link" data-scroll-target="#categorical-outputs">Categorical outputs</a></li>
+  <li><a href="#count-data" id="toc-count-data" class="nav-link" data-scroll-target="#count-data">Count data</a></li>
+  <li><a href="#real-valued-outputs" id="toc-real-valued-outputs" class="nav-link" data-scroll-target="#real-valued-outputs">Real-valued outputs</a></li>
+  <li><a href="#positive-real-valued-outputs" id="toc-positive-real-valued-outputs" class="nav-link" data-scroll-target="#positive-real-valued-outputs">Positive real-valued outputs</a></li>
+  <li><a href="#unit-interval-outputs" id="toc-unit-interval-outputs" class="nav-link" data-scroll-target="#unit-interval-outputs">Unit-interval outputs</a></li>
+  <li><a href="#simplex-valued-outputs" id="toc-simplex-valued-outputs" class="nav-link" data-scroll-target="#simplex-valued-outputs">Simplex-valued outputs</a></li>
+  <li><a href="#multivariate-real-valued-outputs" id="toc-multivariate-real-valued-outputs" class="nav-link" data-scroll-target="#multivariate-real-valued-outputs">Multivariate real-valued outputs</a></li>
+  <li><a href="#circular-outputs" id="toc-circular-outputs" class="nav-link" data-scroll-target="#circular-outputs">Circular outputs</a></li>
   </ul></li>
-  <li><a href="#sec-predictors-appendix" id="toc-sec-predictors-appendix" class="nav-link" data-scroll-target="#sec-predictors-appendix"><span class="header-section-number">5.2</span> Predictors</a></li>
-  <li><a href="#sec-response-maps-appendix" id="toc-sec-response-maps-appendix" class="nav-link" data-scroll-target="#sec-response-maps-appendix"><span class="header-section-number">5.3</span> Response maps</a></li>
-  <li><a href="#sec-output-transforms-appendix" id="toc-sec-output-transforms-appendix" class="nav-link" data-scroll-target="#sec-output-transforms-appendix"><span class="header-section-number">5.4</span> Output transformations</a></li>
-  <li><a href="#sec-input-transforms-appendix" id="toc-sec-input-transforms-appendix" class="nav-link" data-scroll-target="#sec-input-transforms-appendix"><span class="header-section-number">5.5</span> Input transformations</a></li>
+  <li><a href="#sec-predictors-appendix" id="toc-sec-predictors-appendix" class="nav-link" data-scroll-target="#sec-predictors-appendix">Predictors</a></li>
+  <li><a href="#sec-response-maps-appendix" id="toc-sec-response-maps-appendix" class="nav-link" data-scroll-target="#sec-response-maps-appendix">Response maps</a></li>
+  <li><a href="#sec-output-transforms-appendix" id="toc-sec-output-transforms-appendix" class="nav-link" data-scroll-target="#sec-output-transforms-appendix">Output transformations</a></li>
+  <li><a href="#sec-input-transforms-appendix" id="toc-sec-input-transforms-appendix" class="nav-link" data-scroll-target="#sec-input-transforms-appendix">Input transformations</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Appendix</a></li><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parametric kernels reference</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Appendix</a></li><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Parametric kernels reference</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-parametric-families-appendix" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parametric kernels reference</span></span></h1>
+<h1 class="title"><span id="sec-parametric-families-appendix" class="quarto-section-identifier">Parametric kernels reference</span></h1>
 </div>
 
 
@@ -305,12 +311,21 @@ window.Quarto = {
 </header>
 
 
-<p>This appendix collects the building blocks of parametric kernels: distributional families (<a href="#sec-distributional-families-appendix" class="quarto-xref"><span>Section 5.1</span></a>), predictors (<a href="#sec-predictors-appendix" class="quarto-xref"><span>Section 5.2</span></a>), response maps (<a href="#sec-response-maps-appendix" class="quarto-xref"><span>Section 5.3</span></a>), output transformations (<a href="#sec-output-transforms-appendix" class="quarto-xref"><span>Section 5.4</span></a>), and input transformations (<a href="#sec-input-transforms-appendix" class="quarto-xref"><span>Section 5.5</span></a>). Each parametric kernel is assembled by composing one choice from each category, as described in <a href="../chapters/hybrid-models.html#sec-parametric-kernels" class="quarto-xref"><span>Section 4.2</span></a>.</p>
-<section id="sec-distributional-families-appendix" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="sec-distributional-families-appendix"><span class="header-section-number">5.1</span> Distributional families</h2>
+<!-- Proof-read this! -->
+<p>This appendix collects the building blocks of parametric kernels:</p>
+<ul>
+<li><a href="#sec-distributional-families-appendix" class="quarto-xref"><span>Distributional families</span></a> ,</li>
+<li><a href="#sec-predictors-appendix" class="quarto-xref"><span>Predictors</span></a> ,</li>
+<li><a href="#sec-response-maps-appendix" class="quarto-xref"><span>Response maps</span></a> ,</li>
+<li><a href="#sec-output-transforms-appendix" class="quarto-xref"><span>Output transformations</span></a> ,</li>
+<li><a href="#sec-input-transforms-appendix" class="quarto-xref"><span>Input transformations</span></a> .</li>
+</ul>
+<p>Each parametric kernel is assembled by composing one choice from each category, as described in <a href="../chapters/hybrid-models.html#sec-parametric-kernels" class="quarto-xref"><span>Parametric kernels</span></a>.</p>
+<section id="sec-distributional-families-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-distributional-families-appendix">Distributional families</h2>
 <p>The entries below list the most useful distributional families available in PyTorch via <code>torch.distributions</code>, grouped by output type. Each entry gives the PyTorch class, parameter space, support, and typical use cases. For the full API, see the <a href="https://docs.pytorch.org/docs/main/distributions.html">PyTorch distributions documentation</a>.</p>
-<section id="binary-outputs" class="level3" data-number="5.1.1">
-<h3 data-number="5.1.1" class="anchored" data-anchor-id="binary-outputs"><span class="header-section-number">5.1.1</span> Binary outputs</h3>
+<section id="binary-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="binary-outputs">Binary outputs</h3>
 <dl>
 <dt><strong>Bernoulli</strong> (<code>Bernoulli</code>): <span class="math inline">\(p \in (0,1) \to \{0,1\}\)</span></dt>
 <dd>
@@ -318,8 +333,8 @@ Single binary outcome. The default for yes/no events (disease present, click occ
 </dd>
 </dl>
 </section>
-<section id="categorical-outputs" class="level3" data-number="5.1.2">
-<h3 data-number="5.1.2" class="anchored" data-anchor-id="categorical-outputs"><span class="header-section-number">5.1.2</span> Categorical outputs</h3>
+<section id="categorical-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="categorical-outputs">Categorical outputs</h3>
 <dl>
 <dt><strong>Categorical</strong> (<code>Categorical</code>): <span class="math inline">\(\mathbf{p} \in \Delta^{K-1} \to \{0,\ldots,K{-}1\}\)</span></dt>
 <dd>
@@ -329,14 +344,17 @@ Returns an integer class label. Standard choice for unordered multi-class outcom
 <dd>
 Same probabilities as Categorical but returns a one-hot vector. Useful when downstream computation needs a vector representation.
 </dd>
+</dl>
+<!-- Explain what one-hot means-->
+<dl>
 <dt><strong>Multinomial</strong> (<code>Multinomial</code>): <span class="math inline">\(n \in \mathbb{N},\; \mathbf{p} \in \Delta^{K-1} \to \{0,\ldots,n\}^K\)</span> with sum <span class="math inline">\(= n\)</span></dt>
 <dd>
 Counts across <span class="math inline">\(K\)</span> categories in <span class="math inline">\(n\)</span> independent trials. Models category frequencies (word counts, allele counts).
 </dd>
 </dl>
 </section>
-<section id="count-data" class="level3" data-number="5.1.3">
-<h3 data-number="5.1.3" class="anchored" data-anchor-id="count-data"><span class="header-section-number">5.1.3</span> Count data</h3>
+<section id="count-data" class="level3">
+<h3 class="anchored" data-anchor-id="count-data">Count data</h3>
 <dl>
 <dt><strong>Poisson</strong> (<code>Poisson</code>): <span class="math inline">\(\lambda &gt; 0 \to \mathbb{N}_0\)</span></dt>
 <dd>
@@ -356,8 +374,8 @@ Number of failures before the first success. Models waiting times in discrete tr
 </dd>
 </dl>
 </section>
-<section id="real-valued-outputs" class="level3" data-number="5.1.4">
-<h3 data-number="5.1.4" class="anchored" data-anchor-id="real-valued-outputs"><span class="header-section-number">5.1.4</span> Real-valued outputs</h3>
+<section id="real-valued-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="real-valued-outputs">Real-valued outputs</h3>
 <dl>
 <dt><strong>Normal</strong> (<code>Normal</code>): <span class="math inline">\(\mu \in \mathbb{R},\; \sigma &gt; 0 \to \mathbb{R}\)</span></dt>
 <dd>
@@ -381,8 +399,8 @@ Models the maximum of many samples. Appears in extreme-value theory (flood level
 </dd>
 </dl>
 </section>
-<section id="positive-real-valued-outputs" class="level3" data-number="5.1.5">
-<h3 data-number="5.1.5" class="anchored" data-anchor-id="positive-real-valued-outputs"><span class="header-section-number">5.1.5</span> Positive real-valued outputs</h3>
+<section id="positive-real-valued-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="positive-real-valued-outputs">Positive real-valued outputs</h3>
 <dl>
 <dt><strong>Exponential</strong> (<code>Exponential</code>): <span class="math inline">\(\text{rate} &gt; 0 \to [0, \infty)\)</span></dt>
 <dd>
@@ -422,8 +440,8 @@ Power-law tail. Models phenomena where large values are rare but extreme (city s
 </dd>
 </dl>
 </section>
-<section id="unit-interval-outputs" class="level3" data-number="5.1.6">
-<h3 data-number="5.1.6" class="anchored" data-anchor-id="unit-interval-outputs"><span class="header-section-number">5.1.6</span> Unit-interval outputs</h3>
+<section id="unit-interval-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="unit-interval-outputs">Unit-interval outputs</h3>
 <dl>
 <dt><strong>Beta</strong> (<code>Beta</code>): <span class="math inline">\(\alpha &gt; 0,\; \beta &gt; 0 \to (0, 1)\)</span></dt>
 <dd>
@@ -439,8 +457,8 @@ Similar to Beta but with a closed-form CDF, making sampling and density evaluati
 </dd>
 </dl>
 </section>
-<section id="simplex-valued-outputs" class="level3" data-number="5.1.7">
-<h3 data-number="5.1.7" class="anchored" data-anchor-id="simplex-valued-outputs"><span class="header-section-number">5.1.7</span> Simplex-valued outputs</h3>
+<section id="simplex-valued-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="simplex-valued-outputs">Simplex-valued outputs</h3>
 <dl>
 <dt><strong>Dirichlet</strong> (<code>Dirichlet</code>): <span class="math inline">\(\boldsymbol{\alpha} \in \mathbb{R}_{&gt;0}^K \to \Delta^{K-1}\)</span></dt>
 <dd>
@@ -448,8 +466,8 @@ Distribution over probability vectors. The multivariate generalisation of Beta. 
 </dd>
 </dl>
 </section>
-<section id="multivariate-real-valued-outputs" class="level3" data-number="5.1.8">
-<h3 data-number="5.1.8" class="anchored" data-anchor-id="multivariate-real-valued-outputs"><span class="header-section-number">5.1.8</span> Multivariate real-valued outputs</h3>
+<section id="multivariate-real-valued-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="multivariate-real-valued-outputs">Multivariate real-valued outputs</h3>
 <dl>
 <dt><strong>Multivariate Normal</strong> (<code>MultivariateNormal</code>): <span class="math inline">\(\boldsymbol{\mu} \in \mathbb{R}^d,\; \boldsymbol{\Sigma} \succ 0 \to \mathbb{R}^d\)</span></dt>
 <dd>
@@ -469,8 +487,8 @@ Prior over correlation matrices. At <span class="math inline">\(\eta = 1\)</span
 </dd>
 </dl>
 </section>
-<section id="circular-outputs" class="level3" data-number="5.1.9">
-<h3 data-number="5.1.9" class="anchored" data-anchor-id="circular-outputs"><span class="header-section-number">5.1.9</span> Circular outputs</h3>
+<section id="circular-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="circular-outputs">Circular outputs</h3>
 <dl>
 <dt><strong>Von Mises</strong> (<code>VonMises</code>): <span class="math inline">\(\text{loc} \in \mathbb{R},\; \text{concentration} &gt; 0 \to (-\pi, \pi]\)</span></dt>
 <dd>
@@ -479,9 +497,9 @@ The circular analogue of the Normal distribution. Used for angular data (wind di
 </dl>
 </section>
 </section>
-<section id="sec-predictors-appendix" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="sec-predictors-appendix"><span class="header-section-number">5.2</span> Predictors</h2>
-<p>A predictor is a deterministic function <span class="math inline">\(h : X_1 \otimes \cdots \otimes X_n \to H\)</span> that maps the inputs into a predictor space <span class="math inline">\(H\)</span>. A response map (<a href="#sec-response-maps-appendix" class="quarto-xref"><span>Section 5.3</span></a>) then converts <span class="math inline">\(H\)</span> into valid parameters for the base family. The entries below list the main classes, in order of increasing flexibility.</p>
+<section id="sec-predictors-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-predictors-appendix">Predictors</h2>
+<p>A predictor is a deterministic function <span class="math inline">\(h : X_1 \otimes \cdots \otimes X_n \to H\)</span> that maps the inputs into a predictor space <span class="math inline">\(H\)</span>. A response map (<a href="#sec-response-maps-appendix" class="quarto-xref"><span>Response maps</span></a>) then converts <span class="math inline">\(H\)</span> into valid parameters for the base family. The entries below list the main classes, in order of increasing flexibility.</p>
 <dl>
 <dt><strong>Linear</strong>: <span class="math inline">\(h(\mathbf{x}) = \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n\)</span></dt>
 <dd>
@@ -510,8 +528,8 @@ The circular analogue of the Normal distribution. Used for angular data (wind di
 </dl>
 <p>All predictors slot into the same compositional pattern: <span class="math inline">\(k = k_h \then k_\varphi \then k_{\text{base}} \then k_t\)</span>. Replacing one predictor with another changes only the deterministic kernel <span class="math inline">\(k_h\)</span>; the base family, response map, and output transformation are unaffected.</p>
 </section>
-<section id="sec-response-maps-appendix" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="sec-response-maps-appendix"><span class="header-section-number">5.3</span> Response maps</h2>
+<section id="sec-response-maps-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-response-maps-appendix">Response maps</h2>
 <p>A response map <span class="math inline">\(\varphi : H \to \Theta\)</span> converts the output of a predictor (in a predictor space <span class="math inline">\(H\)</span>, typically <span class="math inline">\(\mathbb{R}\)</span>) into a valid parameter for the base family. In the GLM literature, the inverse <span class="math inline">\(\varphi^{-1}\)</span> is called the <em>link function</em>.</p>
 <dl>
 <dt><strong>Identity</strong>: <span class="math inline">\(\varphi(\eta) = \eta\)</span>, <span class="math inline">\(\;\mathbb{R} \to \mathbb{R}\)</span></dt>
@@ -552,8 +570,8 @@ Alternative to sigmoid for binary outcomes. <span class="math inline">\(\Phi\)</
 </dd>
 </dl>
 </section>
-<section id="sec-output-transforms-appendix" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="sec-output-transforms-appendix"><span class="header-section-number">5.4</span> Output transformations</h2>
+<section id="sec-output-transforms-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-output-transforms-appendix">Output transformations</h2>
 <p>An output transformation <span class="math inline">\(f : Y \to Z\)</span> is applied after sampling from the base family to redirect the output to a different target space. In PyTorch, many of these are implemented via <code>TransformedDistribution</code>.</p>
 <dl>
 <dt><strong>Exponential</strong> (<code>ExpTransform</code>): <span class="math inline">\(f(y) = e^y\)</span>, <span class="math inline">\(\;\mathbb{R} \to \mathbb{R}_{&gt;0}\)</span></dt>
@@ -602,8 +620,8 @@ Collapses a count to a binary indicator (any occurrence vs.&nbsp;none). Basis of
 </dd>
 </dl>
 </section>
-<section id="sec-input-transforms-appendix" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="sec-input-transforms-appendix"><span class="header-section-number">5.5</span> Input transformations</h2>
+<section id="sec-input-transforms-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-input-transforms-appendix">Input transformations</h2>
 <p>Input transformations reshape predictor variables before they enter the predictor. They expand the class of relationships that a linear model can capture.</p>
 <dl>
 <dt><strong>Polynomial features</strong>: <span class="math inline">\(x \mapsto (x, x^2, \ldots, x^d)\)</span></dt>
@@ -1039,8 +1057,8 @@ General feature map using chosen basis functions (splines, radial basis function
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../exercises/5-physics.html" class="pagination-link" aria-label="Exercise 5: Inverse Physics">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exercise 5: Inverse Physics</span>
+      <a href="../exercises/6-swiss-health.html" class="pagination-link" aria-label="Exercise 6: Swiss health">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exercise 6: Swiss health</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
