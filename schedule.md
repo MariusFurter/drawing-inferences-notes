@@ -45,7 +45,7 @@ April 17:
 
 - Intervening
 - Derive classical causal stuff
-- Exercise: Intervening in Swiss health
+- Exercise: Intervening
 
 --- Bayesian Data Analysis ---
 

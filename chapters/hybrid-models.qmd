@@ -326,7 +326,7 @@ We introduce each ingredient in turn, then show how composing them yields the st
 
 ### Base families {#sec-base-families}
 
-Each parametric distribution defines a **base family** — a kernel $k_{\text{base}} : \Theta \kernel Y$ that takes a parameter value as input and returns the corresponding distribution. We discuss the three most common ones here; @sec-parametric-families-appendix lists further families available in PyTorch.
+Each parametric distribution defines a **base family** — a kernel $k_{\text{base}} : \Theta \kernel Y$ that takes a parameter value as input and returns the corresponding distribution. We discuss the three most common ones here; @sec-distributional-families-appendix lists further families available in PyTorch.
 
 **Gaussian** ($Y = \mathbb{R}$). The Gaussian (normal) family is parameterised by a mean $\mu \in \mathbb{R}$ and variance $\sigma^2 > 0$, with density
 $$
