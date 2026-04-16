@@ -1,0 +1,48 @@
+Plan for the next 3 sheets:
+
+Here is the self-contained, comprehensive lecture outline. The structure integrates the theoretical objectives, the specific `numpyro` and `arviz` implementation strategies (incorporating the `y=None` simulation pattern), and a critical evaluation of the provided `ChangePoint.ipynb` example for each step.
+
+### Lecture Outline: The Principled Bayesian Modeling Workflow
+
+**I. Exploring Data and Problem Specification**
+* **Focus:** Defining the data-generating process, identifying domain constraints, and performing exploratory visualization of the empirical data.
+* **ChangePoint Example:** **Covered.** The notebook explicitly sets up the time-series array of UK coal mining disasters and identifies the target context.
+
+**II. Conceiving of the Model**
+* **Focus:** Formulating the joint probability model $P(y, \theta) = P(y|\theta)P(\theta)$, specifying the functional forms of the emission distribution and the latent state space.
+* **ChangePoint Example:** **Covered.** Formulates a Poisson emission model parameterized by a latent, discrete switchpoint (`tau`).
+
+**III. Implementing in NumPyro**
+* **Focus:** Translating the mathematical model into computational code via primitive distributions and deterministic transformations. Designing the model signature with an optional observation argument (e.g., `def model(..., y=None):`) so that `numpyro.sample('y', dist, obs=y)` acts as a likelihood function when $y$ is provided, and a generative node when $y$ is `None`.
+* **ChangePoint Example:** **Covered.** Uses `numpyro.sample` and `numpyro.deterministic` to construct the random variables and trace the latent rate vector.
+
+**IV. Fake-Data Simulation and Parameter Recovery (Simulation-Based Calibration)**
+* **Focus:** Establishing structural identifiability within the joint distribution and validating the computational pipeline before conditioning on empirical data. 
+* **Implementation:** By leaving the observation argument as `y=None`, the model acts as a pure generative process. Use `numpyro.infer.Predictive` on this unconditioned model to generate synthetic datasets $y^{sim}$. Condition the MCMC sampler on $y^{sim}$ and verify that the resulting posterior accurately recovers the known true generating parameters $\theta^{true}$. 
+* **ChangePoint Example:** **Not covered.** **V. Choosing Priors and Prior Predictive Checks**
+* **Focus:** Encoding domain expertise into prior distributions. Simulating from the marginal prior predictive distribution $P(\tilde{y}) = \int P(\tilde{y}|\theta)P(\theta) d\theta$ to ensure generated data stays within physically or logically possible bounds before conditioning on the data.
+* **Implementation:** Call `Predictive(model, num_samples=N)` without passing empirical data. Pass the resulting prior samples into `arviz.from_numpyro` and use `arviz.plot_ppc()` to visualize the prior predictive density.
+* **ChangePoint Example:** **Partially covered.** The code implements the chosen priors (Exponential and Categorical distributions) but completely omits the actual prior predictive checks.
+
+**VI. Running Inference and Diagnostics**
+* **Focus:** Executing the sampler and traversing the posterior geometry. Validating Markov chain convergence and mixing efficiency using the potential scale reduction factor ($\hat{R}$) and Effective Sample Size (ESS).
+* **ChangePoint Example:** **Covered.** Implements `DiscreteHMCGibbs(NUTS(model))`, executes sampling, and generates summary statistics containing $\hat{R}$ and ESS.
+
+**VII. Exploring Posteriors**
+* **Focus:** Marginalizing the posterior distribution to extract point estimates, Highest Density Intervals (HDI), and visualizing trace plots to assess the geometry of the target density.
+* **ChangePoint Example:** **Covered.** Uses `arviz` to generate summary tables (`az.summary`) and visualizes trace plots alongside marginal densities (`az.plot_trace`).
+
+**VIII. Posterior Predictive Checks (PPC)**
+* **Focus:** Simulating replicated data $y^{rep}$ from the posterior predictive distribution $P(y^{rep}|y) = \int P(y^{rep}|\theta)P(\theta|y) d\theta$. Comparing the empirical distribution of the observed data to the simulated ensembles to detect systematic structural discrepancies.
+* **Implementation:** Call `Predictive(model, posterior_samples=samples)` to push the MCMC trace back through the emission distribution. Inject this into ArviZ and use `az.plot_ppc()` to verify if the empirical CDF of the observed data aligns with the simulated predictive ensembles.
+* **ChangePoint Example:** **Not covered.** Although the `Predictive` utility is imported at the top of the notebook, no PPCs are executed.
+
+**IX. Sensitivity Analysis**
+* **Focus:** Quantifying the robustness of the posterior measure to perturbations in the prior distributions, determining whether the posterior is data-dominated or highly sensitive to prior boundary conditions.
+* **Implementation:** Rather than computationally expensive MCMC re-runs, treat this as a change of measure via importance sampling. Weight the existing MCMC samples by the Radon-Nikodym derivative $w^{(s)} = \frac{P_{new}(\theta^{(s)})}{P_{old}(\theta^{(s)})}$. Use `arviz.psis` (Pareto Smoothed Importance Sampling) to fit a generalized Pareto distribution to the tail of the weights, smoothing them and stabilizing the variance.
+* **ChangePoint Example:** **Not covered.**
+
+**X. Model Criticism, Comparison, and Improvements**
+* **Focus:** Evaluating predictive performance utilizing out-of-sample deviance approximations. Facilitating iterative model expansion or contraction based on information criteria.
+* **Implementation:** Compute the expected log pointwise predictive density ($\text{elpd}$). Extract the pointwise log-likelihood matrix using `numpyro.infer.log_likelihood(model, posterior_samples, y=obs_data)`. Pass this to `arviz.loo()` to compute Leave-One-Out Cross-Validation via PSIS. For evaluating multiple structural hypotheses, use `arviz.compare()` to compute stacking or pseudo-BMA weights.
+* **ChangePoint Example:** **Not covered.**

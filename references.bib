@@ -229,14 +229,58 @@
   isbn      = {9780262194402}
 }
 
-@Book{KadanePrinciples2020,
+@book{KadanePrinciples2020,
   author    = {Kadane, Joseph B.},
   publisher = {Chapman and Hall/CRC},
   title     = {Principles of Uncertainty},
   year      = {2020},
   isbn      = {9781315167565},
   month     = nov,
-  doi       = {https://doi.org/10.1201/9781315167565},
+  doi       = {https://doi.org/10.1201/9781315167565}
 }
+
+
+@misc{GelmanBayesianWorkflow2020,
+  title     = {Bayesian {Workflow}},
+  copyright = {Creative Commons Attribution 4.0 International},
+  url       = {https://arxiv.org/abs/2011.01808},
+  doi       = {10.48550/ARXIV.2011.01808},
+  abstract  = {The Bayesian approach to data analysis provides a powerful way to handle uncertainty in all observations, model parameters, and model structure using probability theory. Probabilistic programming languages make it easier to specify and fit Bayesian models, but this still leaves us with many options regarding constructing, evaluating, and using these models, along with many remaining challenges in computation. Using Bayesian inference to solve real-world problems requires not only statistical skills, subject matter knowledge, and programming, but also awareness of the decisions made in the process of data analysis. All of these aspects can be understood as part of a tangled workflow of applied Bayesian statistics. Beyond inference, the workflow also includes iterative model building, model checking, validation and troubleshooting of computational problems, model understanding, and model comparison. We review all these aspects of workflow in the context of several examples, keeping in mind that in practice we will be fitting many models for any given problem, even if only a subset of them will ultimately be relevant for our conclusions.},
+  urldate   = {2026-04-16},
+  publisher = {arXiv},
+  author    = {Gelman, Andrew and Vehtari, Aki and Simpson, Daniel and Margossian, Charles C. and Carpenter, Bob and Yao, Yuling and Kennedy, Lauren and Gabry, Jonah and Bürkner, Paul-Christian and Modrák, Martin},
+  year      = {2020},
+  keywords  = {Methodology (stat.ME), FOS: Computer and information sciences, FOS: Computer and information sciences}
+}
+
+@article{MartinEABM2025,
+  title    = {Exploratory {Analysis} of {Bayesian} {Models}},
+  url      = {https://arviz-devs.github.io/EABM/},
+  doi      = {10.5281/zenodo.15127548},
+  language = {en},
+  urldate  = {2026-04-16},
+  author   = {Martin, Osvaldo A. and Abril-Pla, Oriol and Deklerk, Jordan and {ArviZ-devs}},
+  month    = apr,
+  year     = {2025}
+}
+
+@article{Kallioinen2024,
+  title    = {Detecting and diagnosing prior and likelihood sensitivity with power-scaling},
+  volume   = {34},
+  issn     = {0960-3174, 1573-1375},
+  url      = {https://link.springer.com/10.1007/s11222-023-10366-5},
+  doi      = {10.1007/s11222-023-10366-5},
+  abstract = {Abstract
+              Determining the sensitivity of the posterior to perturbations of the prior and likelihood is an important part of the Bayesian workflow. We introduce a practical and computationally efficient sensitivity analysis approach using importance sampling to estimate properties of posteriors resulting from power-scaling the prior or likelihood. On this basis, we suggest a diagnostic that can indicate the presence of prior-data conflict or likelihood noninformativity and discuss limitations to this power-scaling approach. The approach can be easily included in Bayesian workflows with minimal effort by the model builder and we present an implementation in our new R package . We further demonstrate the workflow on case studies of real data using models varying in complexity from simple linear models to Gaussian process models.},
+  language = {en},
+  number   = {1},
+  urldate  = {2026-04-16},
+  journal  = {Statistics and Computing},
+  author   = {Kallioinen, Noa and Paananen, Topi and Bürkner, Paul-Christian and Vehtari, Aki},
+  month    = feb,
+  year     = {2024},
+  pages    = {57}
+}
+
 
 @Comment{jabref-meta: databaseType:bibtex;}

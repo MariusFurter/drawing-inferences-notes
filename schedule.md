@@ -41,36 +41,43 @@ April 3:
 April 10:
 ---- Easter break ----
 
-April 17:
-
-- Intervening
-- Derive classical causal stuff
-- Exercise: Intervening
-
 --- Bayesian Data Analysis ---
 
-April 24:
-
-- Parameter learning (From complete and incomplete data)
+April 17:
+- Parameter learning
 - MCMC
+- Exercise: Robust regression
+
+April 24:
+- MCMC theory
+- More detail on limitations 
 - Exercise: Multilevel regression
+
 
 May 1:
 ---- Tag der Arbeit ----
 
-May 8:
-
-- More with MCMC
+May 8: Being smart about MCMC
+- Factorizing parameter learning
 - Exploiting conjugacies?
+- Exercise: Dose-response model (maybe fit sub-models from empirical data)
 
-May 15:
+May 15: How Bayesian workflow handles reality
+- Missing data (e.g MNAR dropouts in clinical trails)
+- Censored data
 
-- State-space models
+May 22:
+- State-space models (SIR-type model?)
 - SMC
 - Exercise: State-space model
 
-May 22:
-
-- Variational inference
-
 May 29:
+- Variational inference
+- E.g. BNNs on MedMNIST.
+- E.g LDA Topic Modeling on scRNA-seq data.
+
+
+--- Put somewhere ---
+- Intervening
+- Derive classical causal stuff
+- Exercise: Intervening
