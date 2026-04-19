@@ -287,6 +287,12 @@ window.Quarto = {
  <span class="menu-text">Exercise 6: Swiss health</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -522,7 +528,8 @@ Figure&nbsp;5.1: Observed count of UK coal mining disasters (10+ deaths) per yea
 \lambda_t &amp;= \begin{cases} \rho_1 &amp; \text{if } t &lt; \tau, \\ \rho_2 &amp; \text{if } t \geq \tau, \end{cases} \\
 y_t &amp;\sim \text{Poisson}(\lambda_t), \quad t = 1, \ldots, T.
 \end{aligned}
-\]</span> Reading from top to bottom, this is a <em>generative recipe</em>: first draw the rates and the switchpoint, then construct the piecewise-constant rate vector, then draw the observed counts. Note that <span class="math inline">\(\tau\)</span> is <strong>discrete</strong>, which has consequences for inference. We will need a sampler that handles the mix of discrete and continuous parameters (<a href="#sec-inference" class="quarto-xref"><span>Section 5.6</span></a>).</p>
+\]</span></p>
+<p>Each sampling statement draws a value from a specified kernel. Reading from top to bottom, this is a <em>generative recipe</em>: first draw the rates and the switchpoint, then construct the piecewise-constant rate vector, then draw the observed counts. Note that <span class="math inline">\(\tau\)</span> is <strong>discrete</strong>, which has consequences for inference<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. We will need a sampler that handles the mix of discrete and continuous parameters (<a href="#sec-inference" class="quarto-xref"><span>Section 5.6</span></a>).</p>
 <p>As a string diagram we can depict the model as follows:</p>
 <div id="Change-point model" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -679,7 +686,7 @@ obs       shape=(112,)</code></pre>
 <section id="visualizing-prior-predictive-draws" class="level3" data-number="5.4.2">
 <h3 data-number="5.4.2" class="anchored" data-anchor-id="visualizing-prior-predictive-draws"><span class="header-section-number">5.4.2</span> Visualizing prior predictive draws</h3>
 <p>What should we look for in the prior predictive draws? In general, the simulated data should look like <em>reasonable data</em> under our prior assumptions - data that we would not be surprised to encounter in practice. If we have strong domain knowledge, we can judge this directly: a domain expert on mining safety might immediately spot that rates above 10 per year are implausible. But even without domain expertise, the observed data itself can inform our sense of what is reasonable. In our time series of counts, the observed variation already tells us that rates in the single digits are typical. We should not treat the observed data as the <em>only</em> possibility. Other datasets from the same process would show some variation, but it gives us a useful sanity check. If the prior predictive routinely produces data that looks nothing like anything we would ever expect to see, the priors need revision.</p>
-<p><a href="#fig-prior-predictive" class="quarto-xref">Figure&nbsp;<span>5.2</span></a> overlays the prior predictive rate envelope on the observed data. The envelope shows the mean rate across prior draws and the credible interval where 90% of the draws fall. We want the observed counts to fall roughly within this envelope. If the envelope is very wide, the prior may be too vague; if it is too narrow and misses the data, the prior is too informative or miscentered.</p>
+<p><a href="../exercises/7-robust-regression.html#fig-prior-predictive" class="quarto-xref">Figure&nbsp;<span>4</span></a> overlays the prior predictive rate envelope on the observed data. The envelope shows the mean rate across prior draws and the credible interval where 90% of the draws fall. We want the observed counts to fall roughly within this envelope. If the envelope is very wide, the prior may be too vague; if it is too narrow and misses the data, the prior is too informative or miscentered.</p>
 <div id="cell-fig-prior-predictive" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
@@ -817,11 +824,11 @@ Figure&nbsp;5.4: Simulated disaster counts with known parameters (<span class="m
 <div id="fake-data-inference" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>mcmc.run(random.PRNGKey(<span class="dv">1</span>), n_years, counts<span class="op">=</span>fake_counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>To inspect the results, we convert the MCMC output to an ArviZ <code>InferenceData</code> object and call <code>az.summary</code>:</p>
+<p>To inspect the results, we convert the MCMC output to an ArviZ <code>DataTree</code> and call <code>az.summary</code>:</p>
 <div id="cell-fake-data-summary" class="cell" data-execution_count="13">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>idata_fake <span class="op">=</span> az.from_numpyro(mcmc)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>az.summary(idata_fake, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="fake-data-summary" class="cell-output cell-output-display" data-execution_count="325">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dt_fake <span class="op">=</span> az.from_numpyro(mcmc)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>az.summary(dt_fake, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="fake-data-summary" class="cell-output cell-output-display" data-execution_count="13">
 <div>
 
 
@@ -889,7 +896,7 @@ Figure&nbsp;5.4: Simulated disaster counts with known parameters (<span class="m
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">4</span>, <span class="dv">5</span>))</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>posterior <span class="op">=</span> idata_fake[<span class="st">"posterior"</span>].to_dataset()</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>posterior <span class="op">=</span> dt_fake[<span class="st">"posterior"</span>]</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, var, true_val, label <span class="kw">in</span> <span class="bu">zip</span>(</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    axes,</span>
@@ -924,7 +931,7 @@ Figure&nbsp;5.5: Posterior marginals for inference on simulated data. Red dashed
 </section>
 <section id="inference-on-the-observed-data" class="level3" data-number="5.6.3">
 <h3 data-number="5.6.3" class="anchored" data-anchor-id="inference-on-the-observed-data"><span class="header-section-number">5.6.3</span> Inference on the observed data</h3>
-<p>Having verified the pipeline on fake data, we now condition on the real observations. Each call to <code>mcmc.run()</code> replaces the previous results. This is why we saved the fake-data output as <code>idata_fake</code> above. Now we run on the actual coal mining data:</p>
+<p>Having verified the pipeline on fake data, we now condition on the real observations. Each call to <code>mcmc.run()</code> replaces the previous results. This is why we saved the fake-data output as <code>dt_fake</code> above. Now we run on the actual coal mining data:</p>
 <div id="run-mcmc" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>mcmc.run(random.PRNGKey(<span class="dv">0</span>), n_years, counts<span class="op">=</span>counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -935,11 +942,11 @@ Figure&nbsp;5.5: Posterior marginals for inference on simulated data. Red dashed
 <p>MCMC is an <em>approximate</em> inference algorithm. There is no guarantee that the samples faithfully represent the posterior. The chains might not have run long enough to explore the full distribution, or they might be stuck in a local mode. Convergence diagnostics are the tools we use to detect these problems. We approach them in two complementary ways: <strong>numerical summaries</strong> that flag problems automatically, and <strong>visual checks</strong> that reveal subtler issues the numbers can miss.</p>
 <section id="numerical-diagnostics" class="level4" data-number="5.6.4.1">
 <h4 data-number="5.6.4.1" class="anchored" data-anchor-id="numerical-diagnostics"><span class="header-section-number">5.6.4.1</span> Numerical diagnostics</h4>
-<p>We convert the MCMC output to an ArviZ <code>InferenceData</code> object and call <code>az.summary</code>:</p>
+<p>We convert the MCMC output to an ArviZ <code>DataTree</code> and call <code>az.summary</code>:</p>
 <div id="cell-mcmc-summary" class="cell" data-execution_count="16">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>idata <span class="op">=</span> az.from_numpyro(mcmc)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>az.summary(idata, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="mcmc-summary" class="cell-output cell-output-display" data-execution_count="328">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dt <span class="op">=</span> az.from_numpyro(mcmc)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>az.summary(dt, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="mcmc-summary" class="cell-output cell-output-display" data-execution_count="16">
 <div>
 
 
@@ -1015,7 +1022,7 @@ Figure&nbsp;5.5: Posterior marginals for inference on simulated data. Red dashed
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>az.plot_trace(</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    idata, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>], figure_kwargs<span class="op">=</span>{<span class="st">"figsize"</span>: (<span class="dv">7</span>, <span class="dv">2</span>)}</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    dt, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>], figure_kwargs<span class="op">=</span>{<span class="st">"figsize"</span>: (<span class="dv">7</span>, <span class="dv">2</span>)}</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
@@ -1046,7 +1053,7 @@ Figure&nbsp;5.6: Trace plots for the change-point model parameters. Each color r
 <div id="cell-fig-rank-plots" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>az.plot_rank(idata, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>], figure_kwargs<span class="op">=</span>{<span class="st">"figsize"</span>: (<span class="dv">7</span>, <span class="dv">2</span>)})</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>az.plot_rank(dt, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>], figure_kwargs<span class="op">=</span>{<span class="st">"figsize"</span>: (<span class="dv">7</span>, <span class="dv">2</span>)})</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
@@ -1080,7 +1087,7 @@ Figure&nbsp;5.7: Rank plots for the change-point model parameters. Deviations fr
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>az.plot_pair(</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    idata,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    dt,</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>],</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    marginal<span class="op">=</span><span class="va">True</span>,</span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    figure_kwargs<span class="op">=</span>{<span class="st">"figsize"</span>: (<span class="dv">6</span>, <span class="dv">5</span>)},</span>
@@ -1138,7 +1145,7 @@ Figure&nbsp;5.9: Posterior mean and 90% credible interval of the disaster rate o
 </div>
 </div>
 <p><a href="#fig-posterior-rate" class="quarto-xref">Figure&nbsp;<span>5.9</span></a> shows the result. The blue line is the posterior mean rate at each year, and the shaded band is the 90% credible interval. Before the transition, the mean rate is roughly 3 disasters per year; after it, roughly 1. The band widens visibly in the transition zone around 1890, reflecting uncertainty about the exact switchpoint year. We also observe that there is a higher uncertainty in the early years, which is a consequence of the fact that the earlier data displays more variability.</p>
-<p>Compare this to <a href="#fig-prior-predictive" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>, which showed the <em>prior</em> predictive rate envelope. The prior envelope was wide and flat, reflecting vague prior knowledge. The posterior envelope has collapsed dramatically: the data have told us where the change is and what the rates are. This before-and-after comparison is one of the most informative visual summaries of what the model has learned.</p>
+<p>Compare this to <a href="../exercises/7-robust-regression.html#fig-prior-predictive" class="quarto-xref">Figure&nbsp;<span>4</span></a>, which showed the <em>prior</em> predictive rate envelope. The prior envelope was wide and flat, reflecting vague prior knowledge. The posterior envelope has collapsed dramatically: the data have told us where the change is and what the rates are. This before-and-after comparison is one of the most informative visual summaries of what the model has learned.</p>
 </section>
 <section id="derived-quantities-and-uncertainty-propagation" class="level3" data-number="5.7.3">
 <h3 data-number="5.7.3" class="anchored" data-anchor-id="derived-quantities-and-uncertainty-propagation"><span class="header-section-number">5.7.3</span> Derived quantities and uncertainty propagation</h3>
@@ -1392,8 +1399,8 @@ Figure&nbsp;5.14: Rootogram: observed vs.&nbsp;posterior predictive count freque
 <section id="assembling-the-datatree" class="level3" data-number="5.9.1">
 <h3 data-number="5.9.1" class="anchored" data-anchor-id="assembling-the-datatree"><span class="header-section-number">5.9.1</span> Assembling the DataTree</h3>
 <p>Power-scaling sensitivity analysis and the model comparison in <a href="#sec-model-comparison" class="quarto-xref"><span>Section 5.10</span></a> both require pointwise log-likelihoods and log-priors that are not part of the default MCMC output. ArviZ’s <code>from_numpyro</code> converter can compute pointwise log-likelihoods automatically when we pass <code>log_likelihood=True</code>. It also extracts observed data from the model’s <code>obs=...</code> arguments. This handles most of the heavy lifting:</p>
-<div id="build-idata-full" class="cell" data-execution_count="28">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>idata <span class="op">=</span> az.from_numpyro(</span>
+<div id="build-dt-full" class="cell" data-execution_count="28">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>dt <span class="op">=</span> az.from_numpyro(</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    mcmc,</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    prior<span class="op">=</span>prior_samples,</span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    posterior_predictive<span class="op">=</span>ppc_samples,</span>
@@ -1418,7 +1425,7 @@ Figure&nbsp;5.14: Rootogram: observed vs.&nbsp;posterior predictive count freque
 <span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>n_draws <span class="op">=</span> log_prior_vals.shape[<span class="dv">0</span>] <span class="op">//</span> n_chains</span>
 <span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>lp_arr <span class="op">=</span> np.array(log_prior_vals).reshape(n_chains, n_draws)</span>
 <span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>idata[<span class="st">"log_prior"</span>] <span class="op">=</span> xr.DataTree(</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>dt[<span class="st">"log_prior"</span>] <span class="op">=</span> xr.DataTree(</span>
 <span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>    xr.Dataset({<span class="st">"prior"</span>: xr.DataArray(lp_arr, dims<span class="op">=</span>[<span class="st">"chain"</span>, <span class="st">"draw"</span>])})</span>
 <span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -1428,8 +1435,8 @@ Figure&nbsp;5.14: Rootogram: observed vs.&nbsp;posterior predictive count freque
 <h3 data-number="5.9.2" class="anchored" data-anchor-id="power-scaling-sensitivity-summary"><span class="header-section-number">5.9.2</span> Power-scaling sensitivity summary</h3>
 <p>The <code>psense_summary</code> function computes the sensitivity values for each parameter in a single call:</p>
 <div id="cell-sensitivity-summary" class="cell" data-execution_count="30">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>az.psense_summary(idata, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="sensitivity-summary" class="cell-output cell-output-display" data-execution_count="342">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>az.psense_summary(dt, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="sensitivity-summary" class="cell-output cell-output-display" data-execution_count="30">
 <div>
 
 
@@ -1535,9 +1542,9 @@ Figure&nbsp;5.14: Rootogram: observed vs.&nbsp;posterior predictive count freque
 </div>
 <p>Before comparing models, let us briefly inspect the sigmoid model’s posterior to make sure it converged and produced sensible results:</p>
 <div id="cell-sigmoid-summary" class="cell" data-execution_count="35">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>idata_sig <span class="op">=</span> az.from_numpyro(mcmc_sig, log_likelihood<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>az.summary(idata_sig, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>, <span class="st">"s"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="sigmoid-summary" class="cell-output cell-output-display" data-execution_count="347">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>dt_sig <span class="op">=</span> az.from_numpyro(mcmc_sig, log_likelihood<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>az.summary(dt_sig, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>, <span class="st">"s"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="sigmoid-summary" class="cell-output cell-output-display" data-execution_count="35">
 <div>
 
 
@@ -1642,21 +1649,21 @@ Figure&nbsp;5.15: Posterior rate trajectory of the sigmoid change-point model ov
 </section>
 <section id="computing-loo-cv" class="level3" data-number="5.10.4">
 <h3 data-number="5.10.4" class="anchored" data-anchor-id="computing-loo-cv"><span class="header-section-number">5.10.4</span> Computing LOO-CV</h3>
-<p>With all three models fit, we extract or construct their <code>InferenceData</code> objects with pointwise log-likelihoods and pass them to <code>az.compare</code>:</p>
+<p>With all three models fit, we extract or construct their <code>DataTree</code> objects with pointwise log-likelihoods and pass them to <code>az.compare</code>:</p>
 <div id="cell-compute-loo" class="cell" data-execution_count="37">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>idata_const <span class="op">=</span> az.from_numpyro(mcmc_const, log_likelihood<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co"># idata already has log_likelihood from the DataTree built in the sensitivity section</span></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>idata_cp <span class="op">=</span> idata</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>dt_const <span class="op">=</span> az.from_numpyro(mcmc_const, log_likelihood<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co"># dt already has log_likelihood from the DataTree built in the sensitivity section</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>dt_cp <span class="op">=</span> dt</span>
 <span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>comparison <span class="op">=</span> az.compare(</span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"Constant rate"</span>: idata_const, <span class="st">"Discrete change point"</span>: idata_cp, <span class="st">"Sigmoid change point"</span>: idata_sig}</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"Constant rate"</span>: dt_const, <span class="st">"Discrete change point"</span>: dt_cp, <span class="st">"Sigmoid change point"</span>: dt_sig}</span>
 <span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>comparison</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>/Users/mariusfurter/Documents/repos/drawing-inferences-notes/.venv/lib/python3.12/site-packages/arviz_stats/loo/helper_loo.py:1143: UserWarning: Estimated shape parameter of Pareto distribution is greater than 0.70 for one or more samples. You should consider using a more robust model, this is because importance sampling is less likely to work well if the marginal posterior and LOO posterior are very different. This is more likely to happen with a non-robust model and highly influential observations.
   warnings.warn(</code></pre>
 </div>
-<div id="compute-loo" class="cell-output cell-output-display" data-execution_count="349">
+<div id="compute-loo" class="cell-output cell-output-display" data-execution_count="37">
 <div>
 
 
@@ -1749,7 +1756,7 @@ Figure&nbsp;5.16: Model comparison using LOO-CV. Higher elpd (further right) ind
 <div id="cell-fig-khat" class="cell" data-execution_count="39">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>loo_cp <span class="op">=</span> az.loo(idata_cp, var_name<span class="op">=</span><span class="st">"obs"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>loo_cp <span class="op">=</span> az.loo(dt_cp, var_name<span class="op">=</span><span class="st">"obs"</span>)</span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>az.plot_khat(loo_cp)</span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1831,6 +1838,12 @@ Martin, Osvaldo A., Oriol Abril-Pla, Jordan Deklerk, and ArviZ-devs. 2025. <span
 </div>
 </div>
 </section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>You might be tempted to treat <span class="math inline">\(\tau\)</span> as a continuous parameter. While this is fine mathematically, the step-like nature of the rate function means that the likelihood is not smooth in <span class="math inline">\(\tau\)</span>, which causes problems for gradient-based samplers. The discrete formulation is more natural and computationally tractable for this model.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
 </section>
 
 </main> <!-- /main -->
