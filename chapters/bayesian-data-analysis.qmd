@@ -118,7 +118,9 @@ y_t &\sim \text{Poisson}(\lambda_t), \quad t = 1, \ldots, T.
 \end{aligned}
 $$
 
-Each sampling statement draws a value from a specified kernel. Reading from top to bottom, this is a *generative recipe*: first draw the rates and the switchpoint, then construct the piecewise-constant rate vector, then draw the observed counts. Note that $\tau$ is **discrete**, which has consequences for inference. We will need a sampler that handles the mix of discrete and continuous parameters (@sec-inference).
+Each sampling statement draws a value from a specified kernel. Reading from top to bottom, this is a *generative recipe*: first draw the rates and the switchpoint, then construct the piecewise-constant rate vector, then draw the observed counts. Note that $\tau$ is **discrete**, which has consequences for inference[^1]. We will need a sampler that handles the mix of discrete and continuous parameters (@sec-inference).
+
+[^1]: You might be tempted to treat $\tau$ as a continuous parameter. While this is fine mathematically, the step-like nature of the rate function means that the likelihood is not smooth in $\tau$, which causes problems for gradient-based samplers. The discrete formulation is more natural and computationally tractable for this model.
 
 As a string diagram we can depict the model as follows:
 
@@ -382,13 +384,13 @@ The minimal requirement for any inference pipeline is **parameter recovery**: if
 mcmc.run(random.PRNGKey(1), n_years, counts=fake_counts)
 ```
 
-To inspect the results, we convert the MCMC output to an ArviZ `InferenceData` object and call `az.summary`:
+To inspect the results, we convert the MCMC output to an ArviZ `DataTree` and call `az.summary`:
 
 ```{python}
 #| label: fake-data-summary
 #| code-fold: false
-idata_fake = az.from_numpyro(mcmc)
-az.summary(idata_fake, var_names=["rho_1", "rho_2", "tau"])
+dt_fake = az.from_numpyro(mcmc)
+az.summary(dt_fake, var_names=["rho_1", "rho_2", "tau"])
 ```
 
 The summary table reports, for each parameter: the posterior **mean** and **sd** (standard deviation), the **eti89_lb** and **eti89_ub** bounds of the 89% equal-tailed interval (ETI), and several diagnostic quantities that we explain below in @sec-convergence-diagnostics. The ETI is the interval between the 5.5th and 94.5th percentiles of the posterior — that is, it chops off equal probability mass from each tail. (An alternative is the *highest-density interval* (HDI), which finds the shortest interval containing the desired probability. For symmetric, unimodal distributions the two coincide; for skewed distributions the HDI can be narrower but is harder to compute.) The true values we used to generate the fake data ($\rho_1 = 3.5$, $\rho_2 = 0.8$, $\tau = 40$) should fall within or near the credible intervals.
@@ -400,7 +402,7 @@ We can view the results in more detail by plotting the marginal posterior distri
 #| fig-cap: "Posterior marginals for inference on simulated data. Red dashed lines mark the true parameter values."
 #| code-fold: true
 fig, axes = plt.subplots(3, 1, figsize=(4, 5))
-posterior = idata_fake["posterior"].to_dataset()
+posterior = dt_fake["posterior"]
 
 for ax, var, true_val, label in zip(
     axes,
@@ -423,7 +425,7 @@ If the true values land comfortably inside the credible intervals, the implement
 
 ### Inference on the observed data
 
-Having verified the pipeline on fake data, we now condition on the real observations. Each call to `mcmc.run()` replaces the previous results. This is why we saved the fake-data output as `idata_fake` above. Now we run on the actual coal mining data:
+Having verified the pipeline on fake data, we now condition on the real observations. Each call to `mcmc.run()` replaces the previous results. This is why we saved the fake-data output as `dt_fake` above. Now we run on the actual coal mining data:
 
 ```{python}
 #| label: run-mcmc
@@ -440,13 +442,13 @@ MCMC is an *approximate* inference algorithm. There is no guarantee that the sam
 
 #### Numerical diagnostics
 
-We convert the MCMC output to an ArviZ `InferenceData` object and call `az.summary`:
+We convert the MCMC output to an ArviZ `DataTree` and call `az.summary`:
 
 ```{python}
 #| label: mcmc-summary
 #| code-fold: false
-idata = az.from_numpyro(mcmc)
-az.summary(idata, var_names=["rho_1", "rho_2", "tau"])
+dt = az.from_numpyro(mcmc)
+az.summary(dt, var_names=["rho_1", "rho_2", "tau"])
 ```
 
 The first four columns (mean, sd, eti89_lb, eti89_ub) summarize the marginal posterior, as described in the fake-data section above. The remaining columns are *diagnostics*. They tell us whether we can trust these numbers.
@@ -464,7 +466,7 @@ Numerical diagnostics compress each parameter into a few numbers. Trace plots sh
 #| fig-cap: "Trace plots for the change-point model parameters. Each color represents one of the four chains."
 #| code-fold: true
 az.plot_trace(
-    idata, var_names=["rho_1", "rho_2", "tau"], figure_kwargs={"figsize": (7, 2)}
+    dt, var_names=["rho_1", "rho_2", "tau"], figure_kwargs={"figsize": (7, 2)}
 )
 plt.show()
 ```
@@ -484,7 +486,7 @@ A modern alternative to trace plots are *rank plots*. Instead of plotting the ra
 #| label: fig-rank-plots
 #| fig-cap: "Rank plots for the change-point model parameters. Deviations from the envelope indicate poor mixing."
 #| code-fold: true
-az.plot_rank(idata, var_names=["rho_1", "rho_2", "tau"], figure_kwargs={"figsize": (7, 2)})
+az.plot_rank(dt, var_names=["rho_1", "rho_2", "tau"], figure_kwargs={"figsize": (7, 2)})
 plt.show()
 ```
 
@@ -507,7 +509,7 @@ The summary table in @sec-convergence-diagnostics reports marginal statistics fo
 #| fig-cap: "Pairwise joint posterior distributions of the model parameters."
 #| code-fold: true
 az.plot_pair(
-    idata,
+    dt,
     var_names=["rho_1", "rho_2", "tau"],
     marginal=True,
     figure_kwargs={"figsize": (6, 5)},
@@ -774,10 +776,10 @@ The ideal outcome is low prior sensitivity and high likelihood sensitivity: the 
 Power-scaling sensitivity analysis and the model comparison in @sec-model-comparison both require pointwise log-likelihoods and log-priors that are not part of the default MCMC output. ArviZ's `from_numpyro` converter can compute pointwise log-likelihoods automatically when we pass `log_likelihood=True`. It also extracts observed data from the model's `obs=...` arguments. This handles most of the heavy lifting:
 
 ```{python}
-#| label: build-idata-full
+#| label: build-dt-full
 #| code-fold: false
 
-idata = az.from_numpyro(
+dt = az.from_numpyro(
     mcmc,
     prior=prior_samples,
     posterior_predictive=ppc_samples,
@@ -806,7 +808,7 @@ n_chains = mcmc.num_chains
 n_draws = log_prior_vals.shape[0] // n_chains
 lp_arr = np.array(log_prior_vals).reshape(n_chains, n_draws)
 
-idata["log_prior"] = xr.DataTree(
+dt["log_prior"] = xr.DataTree(
     xr.Dataset({"prior": xr.DataArray(lp_arr, dims=["chain", "draw"])})
 )
 ```
@@ -820,7 +822,7 @@ The `psense_summary` function computes the sensitivity values for each parameter
 ```{python}
 #| label: sensitivity-summary
 #| code-fold: false
-az.psense_summary(idata, var_names=["rho_1", "rho_2", "tau"])
+az.psense_summary(dt, var_names=["rho_1", "rho_2", "tau"])
 ```
 
 Check the `prior` column first: if all values are well $< 0.05$, the priors are not driving the conclusions. If any value exceeds the threshold, investigate whether that prior is too narrow or whether the data simply do not inform that parameter. For instance, a higher prior sensitivity for $\tau$ than for the rates would suggest the data contain less information about *when* the switch happened — plausible given that $\tau$ is a single discrete event while each rate is informed by many years of counts on its side.
@@ -920,8 +922,8 @@ Before comparing models, let us briefly inspect the sigmoid model's posterior to
 ```{python}
 #| label: sigmoid-summary
 #| code-fold: false
-idata_sig = az.from_numpyro(mcmc_sig, log_likelihood=True)
-az.summary(idata_sig, var_names=["rho_1", "rho_2", "tau", "s"])
+dt_sig = az.from_numpyro(mcmc_sig, log_likelihood=True)
+az.summary(dt_sig, var_names=["rho_1", "rho_2", "tau", "s"])
 ```
 
 We can also visualize the posterior rate trajectory of the sigmoid model to see whether the inferred transition is abrupt or gradual:
@@ -944,17 +946,17 @@ plt.show()
 
 ### Computing LOO-CV
 
-With all three models fit, we extract or construct their `InferenceData` objects with pointwise log-likelihoods and pass them to `az.compare`:
+With all three models fit, we extract or construct their `DataTree` objects with pointwise log-likelihoods and pass them to `az.compare`:
 
 ```{python}
 #| label: compute-loo
 #| code-fold: false
-idata_const = az.from_numpyro(mcmc_const, log_likelihood=True)
-# idata already has log_likelihood from the DataTree built in the sensitivity section
-idata_cp = idata
+dt_const = az.from_numpyro(mcmc_const, log_likelihood=True)
+# dt already has log_likelihood from the DataTree built in the sensitivity section
+dt_cp = dt
 
 comparison = az.compare(
-    {"Constant rate": idata_const, "Discrete change point": idata_cp, "Sigmoid change point": idata_sig}
+    {"Constant rate": dt_const, "Discrete change point": dt_cp, "Sigmoid change point": dt_sig}
 )
 comparison
 ```
@@ -985,7 +987,7 @@ The PSIS approximation underlying LOO-CV is not always reliable. Each observatio
 #| label: fig-khat
 #| fig-cap: "Pareto $\\hat{k}$ diagnostic for the discrete change-point model. Values above 0.7 indicate unreliable LOO estimates for those observations."
 #| code-fold: true
-loo_cp = az.loo(idata_cp, var_name="obs")
+loo_cp = az.loo(dt_cp, var_name="obs")
 az.plot_khat(loo_cp)
 plt.tight_layout()
 plt.show()

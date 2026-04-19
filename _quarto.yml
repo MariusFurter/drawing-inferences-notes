@@ -32,6 +32,7 @@ book:
         - exercises/4-hidden-markov-models.qmd
         - exercises/5-physics.qmd
         - exercises/6-swiss-health.qmd
+        - exercises/7-robust-regression.qmd
     - part: "Appendix"
       chapters:
         - appendix/parametric-kernels.qmd
