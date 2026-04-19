@@ -1,0 +1,122 @@
+/*-- scss:defaults --*/
+
+// Fonts — match the book theme
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+// Brand colors
+$salmon-red: #f66164;
+$sky-blue: #5891d1;
+$seaweed: #87d6c5;
+$amber: #f0a500;
+$slate: #6c7a89;
+
+// Pale backgrounds for custom divs
+$red-pale: #fef0f0;
+$blue-pale: #eef4fb;
+$green-pale: #edf8f5;
+$amber-pale: #fef8e8;
+$slate-pale: #f2f3f4;
+
+// Reveal.js variables
+$presentation-heading-font: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+$presentation-heading-color: #2c3e50;
+$body-color: #34495e;
+$body-bg: #ffffff;
+$link-color: $sky-blue;
+$code-block-bg: #f8f9fa;
+$code-block-border-color: #e9ecef;
+
+$presentation-font-size-root: 36px;
+$code-color: $salmon-red;
+
+
+/*-- scss:rules --*/
+
+// Fix numbered and bulleted lists inside columns — prevent clipping
+.reveal .columns ol,
+.reveal .columns ul {
+  margin-left: 0.4em;
+  padding-left: 1.2em;
+}
+
+.reveal ol,
+.reveal ul {
+  margin-left: 0;
+  padding-left: 1.4em;
+}
+
+// Tighter list spacing for slides
+.reveal li {
+  margin-bottom: 0.25em;
+}
+
+// Code blocks
+.reveal pre code {
+  font-size: 1.4em !important;
+  line-height: 1.4;
+  max-height: 500px;
+}
+
+// Figure captions
+.reveal figcaption {
+  font-size: 0.6em;
+  color: #7f8c8d;
+  margin-top: 0.3em;
+}
+// Slide title styling
+.reveal h2 {
+  font-size: 1.4em !important;
+  border-bottom: 2px solid $salmon-red;
+  padding-bottom: 0.15em;
+  margin-bottom: 0.6em;
+}
+
+// ── Custom callout-style divs ──────────────────────────────────
+// Base mixin for all callout divs
+@mixin slide-box($border-color, $bg-color) {
+  background: $bg-color;
+  border-left: 5px solid $border-color;
+  border-radius: 6px;
+  padding: 0.5em 0.8em;
+  margin: 0.4em 0;
+  font-size: 0.85em;
+
+  // Underline the box title
+  .box-title {
+    font-weight: bold;
+    text-decoration: underline;
+    text-decoration-color: $border-color;
+    text-underline-offset: 0.15em;
+  }
+}
+
+// .definition — key concepts, formal definitions (blue)
+.reveal .definition {
+  @include slide-box($sky-blue, $blue-pale);
+}
+
+// .takeaway — main insight or summary point (green/seaweed)
+.reveal .takeaway {
+  @include slide-box($seaweed, $green-pale);
+}
+
+// .warning — pitfall, common mistake, caveat (red)
+.reveal .warning {
+  @include slide-box($salmon-red, $red-pale);
+}
+
+// .example — worked example, illustration (amber)
+.reveal .example {
+  @include slide-box($amber, $amber-pale);
+}
+
+// .sidenote — tangential note, reference, attribution (slate)
+.reveal .sidenote {
+  @include slide-box($slate, $slate-pale);
+}
+
+// Width utilities for boxes — center horizontally
+.reveal .w-75 { width: 75%; margin-left: auto; margin-right: auto; }
+.reveal .w-66 { width: 66%; margin-left: auto; margin-right: auto; }
+.reveal .w-50 { width: 50%; margin-left: auto; margin-right: auto; }
+.reveal .w-40 { width: 40%; margin-left: auto; margin-right: auto; }

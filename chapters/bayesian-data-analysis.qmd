@@ -117,7 +117,8 @@ $$
 y_t &\sim \text{Poisson}(\lambda_t), \quad t = 1, \ldots, T.
 \end{aligned}
 $$
-Reading from top to bottom, this is a *generative recipe*: first draw the rates and the switchpoint, then construct the piecewise-constant rate vector, then draw the observed counts. Note that $\tau$ is **discrete**, which has consequences for inference. We will need a sampler that handles the mix of discrete and continuous parameters (@sec-inference).
+
+Each sampling statement draws a value from a specified kernel. Reading from top to bottom, this is a *generative recipe*: first draw the rates and the switchpoint, then construct the piecewise-constant rate vector, then draw the observed counts. Note that $\tau$ is **discrete**, which has consequences for inference. We will need a sampler that handles the mix of discrete and continuous parameters (@sec-inference).
 
 As a string diagram we can depict the model as follows:
 
