@@ -33,6 +33,7 @@ book:
         - exercises/5-physics.qmd
         - exercises/6-swiss-health.qmd
         - exercises/7-robust-regression.qmd
+        - exercises/8-multilevel-regression.qmd
     - part: "Appendix"
       chapters:
         - appendix/parametric-kernels.qmd

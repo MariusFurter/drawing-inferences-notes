@@ -195,8 +195,8 @@ def model(n_years, counts=None):
     tau = numpyro.sample("tau", dist.Categorical(probs=jnp.ones(n_years) / n_years))
 
     # Construct the piecewise-constant rate vector
-    idx = jnp.arange(n_years)
-    lambda_t = jnp.where(idx < tau, rho_1, rho_2)
+    ts = jnp.arange(n_years)
+    lambda_t = jnp.where(ts < tau, rho_1, rho_2)
     numpyro.deterministic("rate", lambda_t)
 
     # Likelihood / generative sampling vectorized over all years
@@ -206,7 +206,7 @@ def model(n_years, counts=None):
 Let us walk through the function line by line:
 
 1. **Priors.** The first three `numpyro.sample` calls draw the unknown quantities $\rho_1$, $\rho_2$, and $\tau$ from their prior distributions. Each call returns a JAX scalar that we can use in subsequent computation.
-2. **Rate vector.** The call `jnp.where(idx < tau, rho_1, rho_2)` builds the piecewise-constant rate $\lambda_t$ as a length-$T$ array. This is the JAX equivalent of `torch.where` — a vectorized conditional that avoids Python `if/else` on array values. We record it with `numpyro.deterministic` so that we can plot the inferred rate trajectory later.
+2. **Rate vector.** The call `jnp.where(ts < tau, rho_1, rho_2)` builds the piecewise-constant rate $\lambda_t$ as a length-$T$ array. This is the JAX equivalent of `torch.where` — a vectorized conditional that avoids Python `if/else` on array values. We record it with `numpyro.deterministic` so that we can plot the inferred rate trajectory later.
 3. **Observation.** The final `numpyro.sample` with `obs=counts` handles both modes: when `counts=None` it generates a synthetic dataset of $T$ Poisson draws, and when `counts` is provided it scores the observations by a Poisson log-probability at each observed count.
 
 ### Debugging models
@@ -320,8 +320,8 @@ true_tau = 40  # corresponds to year 1891
 
 # Simulate a synthetic dataset at the true parameters
 rng_key_sim = random.PRNGKey(42)
-idx = jnp.arange(n_years)
-true_lambda = jnp.where(idx < true_tau, true_rho_1, true_rho_2)
+ts = jnp.arange(n_years)
+true_lambda = jnp.where(ts < true_tau, true_rho_1, true_rho_2)
 fake_counts = dist.Poisson(true_lambda).sample(rng_key_sim)
 ```
 
@@ -899,8 +899,8 @@ def model_sigmoid(n_years, counts=None):
     tau = numpyro.sample("tau", dist.Uniform(0, n_years))
     s = numpyro.sample("s", dist.HalfNormal(10.0))
 
-    idx = jnp.arange(n_years, dtype=jnp.float32)
-    weight = jax.nn.sigmoid(-(idx - tau) / s)
+    ts = jnp.arange(n_years, dtype=jnp.float32)
+    weight = jax.nn.sigmoid(-(ts - tau) / s)
     lambda_t = rho_2 + (rho_1 - rho_2) * weight
     numpyro.deterministic("rate", lambda_t)
     numpyro.sample("obs", dist.Poisson(lambda_t), obs=counts)

@@ -44,40 +44,45 @@ April 10:
 --- Bayesian Data Analysis ---
 
 April 17:
+
 - Parameter learning
 - MCMC
 - Exercise: Robust regression
 
-April 24:
-- MCMC theory
-- More detail on limitations 
-- Exercise: Multilevel regression
-
-
 May 1:
 ---- Tag der Arbeit ----
 
-May 8: Being smart about MCMC
+May 8th:
+
+- MCMC theory
+- More detail on limitations
+- Exercise: Multilevel regression
+
+May 15: Being smart about MCMC
+
 - Factorizing parameter learning
 - Exploiting conjugacies?
 - Exercise: Dose-response model (maybe fit sub-models from empirical data)
 
 May 15: How Bayesian workflow handles reality
+
 - Missing data (e.g MNAR dropouts in clinical trails)
 - Censored data
 
 May 22:
+
 - State-space models (SIR-type model?)
 - SMC
 - Exercise: State-space model
 
 May 29:
+
 - Variational inference
 - E.g. BNNs on MedMNIST.
 - E.g LDA Topic Modeling on scRNA-seq data.
 
-
 --- Put somewhere ---
+
 - Intervening
 - Derive classical causal stuff
 - Exercise: Intervening

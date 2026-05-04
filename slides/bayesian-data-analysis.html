@@ -305,6 +305,7 @@ y_t \sim \text{Poisson}(\lambda_t)
 \rho_1 &amp;\sim \text{Exponential}(\alpha), \\
 \rho_2 &amp;\sim \text{Exponential}(\alpha), \\
 \tau &amp;\sim \text{Categorical}\!\left(\tfrac{1}{T}, \ldots, \tfrac{1}{T}\right), \\
+\lambda_t &amp;= \begin{cases} \rho_1 &amp; \text{if } t &lt; \tau, \\ \rho_2 &amp; \text{if } t \geq \tau, \end{cases} \\
 y_t &amp;\sim \text{Poisson}(\lambda_t), \quad t = 1, \ldots, T.
 \end{aligned}
 \]</span></p>
@@ -333,7 +334,7 @@ y_t &amp;\sim \text{Poisson}(\lambda_t), \quad t = 1, \ldots, T.
 </section>
 <section id="implementing-in-numpyro" class="slide level2">
 <h2>Implementing in NumPyro</h2>
-<p>Each line of the math maps to a <code>numpyro.sample</code> call:</p>
+<p>Each sampling statement maps to a <code>numpyro.sample</code> call:</p>
 <div style="margin-bottom: 2em;">
 
 </div>
@@ -389,8 +390,8 @@ y_t &amp;\sim \text{Poisson}(\lambda_t), \quad t = 1, \ldots, T.
 <span id="cb1-8"><a href=""></a>        probs<span class="op">=</span>jnp.ones(n_years) <span class="op">/</span> n_years))</span>
 <span id="cb1-9"><a href=""></a></span>
 <span id="cb1-10"><a href=""></a>    <span class="co"># Piecewise-constant rate vector</span></span>
-<span id="cb1-11"><a href=""></a>    idx <span class="op">=</span> jnp.arange(n_years)</span>
-<span id="cb1-12"><a href=""></a>    lambda_t <span class="op">=</span> jnp.where(idx <span class="op">&lt;</span> tau, rho_1, rho_2)</span>
+<span id="cb1-11"><a href=""></a>    ts <span class="op">=</span> jnp.arange(n_years)</span>
+<span id="cb1-12"><a href=""></a>    lambda_t <span class="op">=</span> jnp.where(ts <span class="op">&lt;</span> tau, rho_1, rho_2)</span>
 <span id="cb1-13"><a href=""></a>    numpyro.deterministic(<span class="st">"rate"</span>, lambda_t)</span>
 <span id="cb1-14"><a href=""></a></span>
 <span id="cb1-15"><a href=""></a>    <span class="co"># Likelihood (or generative sampling)</span></span>
@@ -407,31 +408,40 @@ y_t &amp;\sim \text{Poisson}(\lambda_t), \quad t = 1, \ldots, T.
 </section>
 <section id="debugging-tracing-shapes" class="slide level2">
 <h2>Debugging: Tracing Shapes</h2>
-<p>Run the model once in <strong>trace</strong> mode to inspect all site shapes:</p>
+<p>Run the model once in <strong>trace</strong> mode to inspect all called sites and their shapes:</p>
 <div style="margin-bottom: 1em;">
 
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> numpyro.handlers.seed(rng_seed<span class="op">=</span><span class="dv">0</span>):</span>
+<div id="bc0b01c1" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> numpyro.handlers.seed(rng_seed<span class="op">=</span><span class="dv">0</span>):</span>
 <span id="cb2-2"><a href="" aria-hidden="true" tabindex="-1"></a>    trace <span class="op">=</span> numpyro.handlers.trace(model).get_trace(</span>
-<span id="cb2-3"><a href="" aria-hidden="true" tabindex="-1"></a>        n_years<span class="op">=</span>n_years, counts<span class="op">=</span><span class="va">None</span>)</span>
-<span id="cb2-4"><a href="" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, site <span class="kw">in</span> trace.items():</span>
-<span id="cb2-6"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> site[<span class="st">"type"</span>] <span class="kw">in</span> (<span class="st">"sample"</span>, <span class="st">"deterministic"</span>):</span>
-<span id="cb2-7"><a href="" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">:8s}</span><span class="ss">  shape=</span><span class="sc">{</span>site[<span class="st">'value'</span>]<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-3"><a href="" aria-hidden="true" tabindex="-1"></a>        n_years<span class="op">=</span>n_years, counts<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Each site is a dict with keys <code>type</code>, <code>name</code>, <code>fn</code>, <code>value</code>, <code>is_observed</code>, etc.:</p>
+<pre><code>{'type': 'sample', 'name': 'rho_1',
+ 'fn': Exponential(batch_shape=(), event_shape=()),
+ 'value': Array(0.022, dtype=float32),
+ 'is_observed': False, ...}</code></pre>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div class="fragment">
+<div id="c3326343" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, site <span class="kw">in</span> trace.items():</span>
+<span id="cb4-2"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> site[<span class="st">"type"</span>] <span class="kw">in</span> (<span class="st">"sample"</span>, <span class="st">"deterministic"</span>):</span>
+<span id="cb4-3"><a href="" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">:8s}</span><span class="ss">  shape=</span><span class="sc">{</span>site[<span class="st">'value'</span>]<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
 <pre><code>rho_1     shape=()
 rho_2     shape=()
 tau       shape=()
 rate      shape=(112,)
 obs       shape=(112,)</code></pre>
-<div style="margin-bottom: 1em;">
-
 </div>
-<div class="sidenote">
-<p>If a shape looks unexpected, this is the quickest way to catch it.</p>
 </div>
 <!-- ============================================================ -->
 <!-- PART 4: PRIORS & PRIOR PREDICTIVE CHECKS                      -->
 <!-- ============================================================ -->
+</div>
 </section>
 <section id="choosing-priors" class="slide level2">
 <h2>Choosing Priors</h2>
@@ -458,18 +468,26 @@ obs       shape=(112,)</code></pre>
 <div style="margin-bottom: 2em;">
 
 </div>
+<div class="sidenote">
+<p>The posterior mode under uniform priors is equivalent to maximum likelihood estimation.</p>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
 <div class="warning">
 <p><span class="box-title">Never assign zero prior probability</span> Unless a value is <em>truly impossible</em>. If the prior is zero somewhere, no amount of data can move the posterior there.</p>
 </div>
 <div class="fragment">
-<div style="margin-bottom: 2em;">
+<div style="margin-bottom: 1em;">
 
 </div>
-<p>Our choices:</p>
+<div class="takeaway">
+<p><span class="box-title">Our choices:</span></p>
 <ul>
-<li><span class="math inline">\(\text{Exp}(1/3)\)</span> for rates (mean = 3, sd = 3)</li>
-<li>Uniform <span class="math inline">\(\text{Categorical}\)</span> for <span class="math inline">\(\tau\)</span>.</li>
+<li><code>Exponential(1/3)</code> for rates (mean = 3, sd = 3)</li>
+<li>Uniform <code>Categorical</code> for <span class="math inline">\(\tau\)</span>.</li>
 </ul>
+</div>
 </div>
 </section>
 <section id="prior-predictive-checks" class="slide level2">
@@ -478,8 +496,10 @@ obs       shape=(112,)</code></pre>
 <div style="margin-bottom: 2em;">
 
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="" aria-hidden="true" tabindex="-1"></a>prior_predictive <span class="op">=</span> Predictive(model, num_samples<span class="op">=</span><span class="dv">500</span>)</span>
-<span id="cb4-2"><a href="" aria-hidden="true" tabindex="-1"></a>prior_samples <span class="op">=</span> prior_predictive(rng_key, n_years<span class="op">=</span>n_years, counts<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="a3b328de" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="" aria-hidden="true" tabindex="-1"></a>prior_predictive <span class="op">=</span> Predictive(model, num_samples<span class="op">=</span><span class="dv">500</span>)</span>
+<span id="cb6-2"><a href="" aria-hidden="true" tabindex="-1"></a>prior_samples <span class="op">=</span> prior_predictive(rng_key, n_years<span class="op">=</span>n_years, counts<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div style="margin-bottom: 2em;">
 
 </div>
@@ -493,6 +513,11 @@ obs       shape=(112,)</code></pre>
 </section>
 <section id="prior-predictive-rate-envelope" class="slide level2">
 <h2>Prior Predictive: Rate Envelope</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="" aria-hidden="true" tabindex="-1"></a>mean_rate <span class="op">=</span> jnp.mean(prior_samples[<span class="st">'rate'</span>], axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb7-2"><a href="" aria-hidden="true" tabindex="-1"></a>lower, upper <span class="op">=</span> jnp.percentile(prior_samples[<span class="st">'rate'</span>], jnp.array([<span class="dv">5</span>, <span class="dv">95</span>]), axis<span class="op">=</span><span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div style="margin-bottom: 2em;">
+
+</div>
 <div style="text-align: center;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -505,12 +530,15 @@ obs       shape=(112,)</code></pre>
 
 </div>
 <ul>
-<li>Wide envelope reflects vague prior — observed data falls well within it</li>
-<li>If envelope were too narrow or missed the data, priors need revision</li>
+<li>Observed data falls well within envelope</li>
+<li>Priors capture reasonable range of counts</li>
 </ul>
 </section>
 <section id="prior-predictive-simulated-datasets" class="slide level2">
 <h2>Prior Predictive: Simulated Datasets</h2>
+<p>Individual draws from the prior predictive distribution show qualitatively plausible trajectories:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, ax <span class="kw">in</span> <span class="bu">enumerate</span>(axes.flat):</span>
+<span id="cb8-2"><a href="" aria-hidden="true" tabindex="-1"></a>    ax.bar(years, prior_samples[<span class="st">'obs'</span>][i], ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div style="text-align: center;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -519,47 +547,30 @@ obs       shape=(112,)</code></pre>
 </figure>
 </div>
 </div>
-<div style="margin-bottom: 0.5em;">
-
-</div>
-<ul>
-<li>Counts are in single digits with visible changepoints — qualitatively plausible</li>
-<li>When in doubt, err on the side of <em>more diffuse</em> priors</li>
-</ul>
 <!-- ============================================================ -->
 <!-- PART 5: FAKE-DATA SIMULATION                                  -->
 <!-- ============================================================ -->
 </section>
 <section id="fake-data-simulation" class="slide level2">
 <h2>Fake-Data Simulation</h2>
-<p>Generate a synthetic dataset with <strong>known</strong> parameters — a test bed where we know the truth.</p>
+<p>Generate a synthetic dataset with <strong>known</strong> parameters to test inference pipeline:</p>
 <div style="margin-bottom: 1em;">
 
 </div>
+<div id="e43ec7d2" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="" aria-hidden="true" tabindex="-1"></a>true_rho_1 <span class="op">=</span> <span class="fl">3.5</span></span>
+<span id="cb9-2"><a href="" aria-hidden="true" tabindex="-1"></a>true_rho_2 <span class="op">=</span> <span class="fl">0.8</span></span>
+<span id="cb9-3"><a href="" aria-hidden="true" tabindex="-1"></a>true_tau <span class="op">=</span> <span class="dv">40</span>   <span class="co"># corresponds to year 1891</span></span>
+<span id="cb9-4"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="" aria-hidden="true" tabindex="-1"></a>true_lambda <span class="op">=</span> jnp.where(ts <span class="op">&lt;</span> true_tau, true_rho_1, true_rho_2)</span>
+<span id="cb9-6"><a href="" aria-hidden="true" tabindex="-1"></a>fake_counts <span class="op">=</span> dist.Poisson(true_lambda).sample(rng_key_sim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div style="margin-bottom: 1em;">
 
 </div>
-<div class="sidenote">
-<p>If the sampler can’t recover known parameters on fake data, we shouldn’t trust it on real data.</p>
-</div>
-</section>
-<section id="simulated-fake-data" class="slide level2">
-<h2>Simulated Fake Data</h2>
 <div style="text-align: center;">
-<div class="quarto-figure quarto-figure-center">
-<figure>
 <p><img data-src="images/fig-fake-data-output-1.png" style="width:70.0%"></p>
-<figcaption>Simulated disaster counts (<span class="math inline">\(\rho_1 = 3.5\)</span>, <span class="math inline">\(\rho_2 = 0.8\)</span>, <span class="math inline">\(\tau = 40\)</span>). Red dashed line marks the true switchpoint.</figcaption>
-</figure>
 </div>
-</div>
-<div style="margin-bottom: 0.5em;">
-
-</div>
-<ul>
-<li>Qualitative structure matches the observed data — single-digit counts with a visible drop</li>
-<li>We will run inference on this fake data first, then check parameter recovery</li>
-</ul>
 <!-- ============================================================ -->
 <!-- PART 6: RUNNING INFERENCE                                     -->
 <!-- ============================================================ -->
@@ -569,6 +580,10 @@ obs       shape=(112,)</code></pre>
 <p>Our model mixes <strong>discrete</strong> (<span class="math inline">\(\tau\)</span>) and <strong>continuous</strong> (<span class="math inline">\(\rho_1, \rho_2\)</span>) parameters (standard NUTS doesn’t work).</p>
 <div style="margin-bottom: 1em;">
 
+</div>
+<div id="cce5bebb" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="" aria-hidden="true" tabindex="-1"></a>kernel <span class="op">=</span> DiscreteHMCGibbs(NUTS(model), modified<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-2"><a href="" aria-hidden="true" tabindex="-1"></a>mcmc <span class="op">=</span> MCMC(kernel, num_warmup<span class="op">=</span><span class="dv">1000</span>, num_samples<span class="op">=</span><span class="dv">2000</span>, num_chains<span class="op">=</span><span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div style="margin-bottom: 1em;">
 
@@ -610,13 +625,17 @@ obs       shape=(112,)</code></pre>
 </section>
 <section id="parameter-recovery-on-fake-data" class="slide level2">
 <h2>Parameter Recovery on Fake Data</h2>
-<div id="60e8cab4" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="" aria-hidden="true" tabindex="-1"></a>mcmc.run(random.PRNGKey(<span class="dv">1</span>), n_years, counts<span class="op">=</span>fake_counts)</span>
-<span id="cb5-2"><a href="" aria-hidden="true" tabindex="-1"></a>idata_fake <span class="op">=</span> az.from_numpyro(mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Run the sampler and summarize the results:</p>
+<div id="dccce155" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="" aria-hidden="true" tabindex="-1"></a>mcmc.run(random.PRNGKey(<span class="dv">1</span>), n_years, counts<span class="op">=</span>fake_counts)</span>
+<span id="cb11-2"><a href="" aria-hidden="true" tabindex="-1"></a>idata_fake <span class="op">=</span> az.from_numpyro(mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cc7b845d" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="" aria-hidden="true" tabindex="-1"></a>az.summary(idata_fake, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
+<div style="margin-bottom: 1em;">
+
+</div>
+<div id="749a70ff" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="" aria-hidden="true" tabindex="-1"></a>az.summary(idata_fake, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="243">
 <div>
 <style scoped="">
     .dataframe tbody tr th:only-of-type {
@@ -694,7 +713,11 @@ obs       shape=(112,)</code></pre>
 
 </div>
 <div class="takeaway">
-<p><span class="box-title">Check</span> True values (<span class="math inline">\(\rho_1 = 3.5\)</span>, <span class="math inline">\(\rho_2 = 0.8\)</span>, <span class="math inline">\(\tau = 40\)</span>) should fall within the 89% credible intervals. If recovery fails — debug before touching real data.</p>
+<p><span class="box-title">Check</span></p>
+<ul>
+<li>True values (<span class="math inline">\(\rho_1 = 3.5\)</span>, <span class="math inline">\(\rho_2 = 0.8\)</span>, <span class="math inline">\(\tau = 40\)</span>) should fall within the 89% credible intervals.</li>
+<li>If recovery fails, debug before touching real data.</li>
+</ul>
 </div>
 </section>
 <section id="fake-data-posterior-marginals" class="slide level2">
@@ -702,170 +725,849 @@ obs       shape=(112,)</code></pre>
 <div style="text-align: center;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="images/fig-fake-data-marginals-output-1.png" style="width:70.0%"></p>
+<p><img data-src="images/fig-fake-data-marginals-output-1.png" style="width:40.0%"></p>
 <figcaption>Posterior marginals on simulated data. Red dashed lines mark the true parameter values.</figcaption>
 </figure>
 </div>
+</div>
+</section>
+<section id="inference-on-observed-data" class="slide level2">
+<h2>Inference on Observed Data</h2>
+<p>Having verified the pipeline on fake data, run on the real data:</p>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div id="d970a440" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="" aria-hidden="true" tabindex="-1"></a>mcmc.run(random.PRNGKey(<span class="dv">0</span>), n_years, counts<span class="op">=</span>counts)</span>
+<span id="cb13-2"><a href="" aria-hidden="true" tabindex="-1"></a>dt <span class="op">=</span> az.from_numpyro(mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div class="sidenote">
+<p>Each call to <code>mcmc.run()</code> replaces the previous results — that’s why we saved <code>idata_fake</code> before this step.</p>
+</div>
+<p>Before interpreting any results, we need to check whether the sampler <strong>converged</strong>.</p>
+</section>
+<section id="convergence-diagnostics-numerical" class="slide level2">
+<h2>Convergence Diagnostics: Numerical</h2>
+<div id="eec45f44" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="" aria-hidden="true" tabindex="-1"></a>az.summary(dt, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="245">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">rho_1</th>
+<td>3.126</td>
+<td>0.29</td>
+<td>2.7</td>
+<td>3.6</td>
+<td>6572</td>
+<td>5543</td>
+<td>1.00</td>
+<td>0.0036</td>
+<td>0.0025</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">rho_2</th>
+<td>0.932</td>
+<td>0.117</td>
+<td>0.75</td>
+<td>1.1</td>
+<td>6454</td>
+<td>5451</td>
+<td>1.00</td>
+<td>0.0015</td>
+<td>0.0011</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">tau</th>
+<td>39.89</td>
+<td>2.39</td>
+<td>36</td>
+<td>43</td>
+<td>6962</td>
+<td>7176</td>
+<td>1.00</td>
+<td>0.029</td>
+<td>0.023</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div style="margin-bottom: 2em;">
+
+</div>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Diagnostic</th>
+<th>What it measures</th>
+<th>Threshold</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>r_hat</code></td>
+<td>Between-chain vs.&nbsp;within-chain variance</td>
+<td><span class="math inline">\(&lt; 1.01\)</span></td>
+</tr>
+<tr class="even">
+<td><code>ess_bulk</code></td>
+<td>Effective sample size (center)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>ess_tail</code></td>
+<td>Effective sample size (tails)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>mcse_mean</code></td>
+<td>Numerical error on posterior mean</td>
+<td><span class="math inline">\(\ll\)</span> posterior sd</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="convergence-diagnostics-trace-plots" class="slide level2">
+<h2>Convergence Diagnostics: Trace Plots</h2>
+<p>Trace plots show the sampled parameter values across iterations for each chain:</p>
+<div id="71b4dd80" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="" aria-hidden="true" tabindex="-1"></a>az.plot_trace(dt, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="text-align: center;">
+<p><img data-src="images/fig-trace-plots-output-1.png" style="width:60.0%"></p>
+</div>
+<div style="margin-bottom: 0.5em;">
+
+</div>
+<div class="takeaway">
+<p><span class="box-title">What to look for</span></p>
+<ul>
+<li><strong>Fuzzy caterpillars</strong> — random noise around a stable level, chains overlapping</li>
+<li><strong>Trends or drift</strong> — warmup too short, posterior hard to explore</li>
+<li><strong>Stuck regions</strong> — sampler getting trapped, common with discrete parameters</li>
+<li><strong>Chain disagreement</strong> — multiple modes, chains can’t transition between them</li>
+</ul>
+</div>
+</section>
+<section id="convergence-diagnostics-rank-plots" class="slide level2">
+<h2>Convergence Diagnostics: Rank Plots</h2>
+<p>Rank plots rank all samples across all chains, then checks each chain’s ECDF against the diagonal</p>
+<div id="fe8c42ba" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="" aria-hidden="true" tabindex="-1"></a>az.plot_rank(dt, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="text-align: center;">
+<p><img data-src="images/fig-rank-plots-output-1.png" style="width:60.0%"></p>
 </div>
 <div style="margin-bottom: 0.5em;">
 
 </div>
 <ul>
-<li>True values land comfortably within the posteriors — the pipeline is working</li>
-<li>Parameters are identifiable from data of this size</li>
+<li>More sensitive than trace plots to subtle problems (chains differing slightly in mean or variance)</li>
 </ul>
-</section>
-<section id="inference-on-observed-data" class="slide level2">
-<h2>Inference on Observed Data</h2>
-<!-- Run mcmc on real counts.
-     Transition to diagnostics before interpreting results. -->
-</section>
-<section id="convergence-diagnostics-numerical" class="slide level2">
-<h2>Convergence Diagnostics: Numerical</h2>
-<!-- az.summary output: mean, sd, 89% ETI, R-hat, ESS, MCSE.
-     Explain each diagnostic and its threshold. -->
-</section>
-<section id="convergence-diagnostics-trace-plots" class="slide level2">
-<h2>Convergence Diagnostics: Trace Plots</h2>
-<!-- Trace plots (fig-trace-plots): fuzzy caterpillars = good mixing.
-     What to look for: trends, stuck regions, chain disagreement. -->
-</section>
-<section id="convergence-diagnostics-rank-plots" class="slide level2">
-<h2>Convergence Diagnostics: Rank Plots</h2>
-<!-- Rank plots (fig-rank-plots): ECDFs should follow diagonal.
-     More sensitive than trace plots to subtle problems. -->
+<div class="sidenote">
+<p>If diagnostics fail, examine the <strong>model</strong>. Computational difficulties are often symptoms of modeling problems.</p>
+</div>
 <!-- ============================================================ -->
 <!-- PART 7: EXPLORING POSTERIORS                                  -->
 <!-- ============================================================ -->
 </section>
 <section id="joint-posterior" class="slide level2">
 <h2>Joint Posterior</h2>
-<!-- Pair plot (fig-posterior-pair): pairwise joint + marginals.
-     Note: rho_1/rho_2 nearly independent; slight rho_1–tau correlation. -->
+<p>With convergence confirmed, we examine the full <strong>joint posterior</strong> over all parameters:</p>
+<div id="16b8a9e7" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="" aria-hidden="true" tabindex="-1"></a>az.plot_pair(dt, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>], marginal<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="text-align: center;">
+<p><img data-src="images/fig-posterior-pair-output-1.png" style="width:55.0%"></p>
+</div>
+<div class="takeaway">
+<ul>
+<li><span class="math inline">\(\rho_1\)</span> and <span class="math inline">\(\rho_2\)</span> are nearly independent</li>
+<li>Slight negative correlation between <span class="math inline">\(\rho_1\)</span> and <span class="math inline">\(\tau\)</span>: a later switchpoint (more years in the early regime) is associated with a lower early rate</li>
+</ul>
+</div>
 </section>
 <section id="posterior-rate-trajectory" class="slide level2">
 <h2>Posterior Rate Trajectory</h2>
-<!-- Plot (fig-posterior-rate): posterior mean + 90% CI of rate overlaid on data.
-     Compare with prior predictive envelope — dramatic collapse of uncertainty. -->
+<p>We now plot the posterior mean and 90% credible interval of the rate trajectory <span class="math inline">\(\lambda_t\)</span>:</p>
+<div id="ccbe498e" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="" aria-hidden="true" tabindex="-1"></a>posterior_samples <span class="op">=</span> mcmc.get_samples()</span>
+<span id="cb18-2"><a href="" aria-hidden="true" tabindex="-1"></a>mean_rate <span class="op">=</span> jnp.mean(posterior_samples[<span class="st">"rate"</span>], axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb18-3"><a href="" aria-hidden="true" tabindex="-1"></a>lower, upper <span class="op">=</span> jnp.percentile(posterior_samples[<span class="st">"rate"</span>], jnp.array([<span class="dv">5</span>, <span class="dv">95</span>]), axis<span class="op">=</span><span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div style="text-align: center;">
+<p><img data-src="images/fig-posterior-rate-output-1.png" style="width:75.0%"></p>
+</div>
 </section>
-<section id="derived-quantities-disasters-avoided" class="slide level2">
-<h2>Derived Quantities: Disasters Avoided</h2>
-<!-- Formula: Delta = (rho_1 - rho_2) * (T - tau).
-     Code: one line of arithmetic on posterior samples.
-     Histogram (fig-disasters-avoided) with mean + 90% CI. -->
-</section>
-<section id="uncertainty-propagation" class="slide level2">
-<h2>Uncertainty Propagation</h2>
-<!-- Key principle: any function of posterior samples inherits uncertainty for free.
-     No analytic variance formulas needed. -->
+<section id="derived-quantities-uncertainty-propagation" class="slide level2">
+<h2>Derived Quantities &amp; Uncertainty Propagation</h2>
+<div class="takeaway">
+<p><span class="box-title">Key principle</span> Any quantity that is a <strong>function of posterior samples</strong> inherits uncertainty for free.</p>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<p><strong>Example:</strong> expected <em>disasters avoided</em> due to the rate change, <span class="math inline">\(\Delta^{(s)} = (\rho_1^{(s)} - \rho_2^{(s)}) \times (T - \tau^{(s)})\)</span>:</p>
+<div id="cf1749a8" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="" aria-hidden="true" tabindex="-1"></a>rate_drop <span class="op">=</span> posterior_samples[<span class="st">"rho_1"</span>] <span class="op">-</span> posterior_samples[<span class="st">"rho_2"</span>]</span>
+<span id="cb19-2"><a href="" aria-hidden="true" tabindex="-1"></a>years_after <span class="op">=</span> n_years <span class="op">-</span> posterior_samples[<span class="st">"tau"</span>]</span>
+<span id="cb19-3"><a href="" aria-hidden="true" tabindex="-1"></a>delta <span class="op">=</span> rate_drop <span class="op">*</span> years_after</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div style="text-align: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="images/fig-disasters-avoided-output-1.png" style="width:60.0%"></p>
+<figcaption>Posterior distribution of expected disasters avoided.</figcaption>
+</figure>
+</div>
+</div>
 <!-- ============================================================ -->
 <!-- PART 8: POSTERIOR PREDICTIVE CHECKS                           -->
 <!-- ============================================================ -->
 </section>
 <section id="posterior-predictive-checks" class="slide level2">
 <h2>Posterior Predictive Checks</h2>
-<!-- Purpose: does the model generate data that looks like the observed data?
-     Contrast with prior predictive (tests priors vs. tests full model).
-     Formula for posterior predictive distribution. -->
+<p><strong>Question:</strong> Does the fitted model generate data that <em>looks like</em> the observed data?</p>
+<div id="bda187ee" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="" aria-hidden="true" tabindex="-1"></a>rng_key_ppc <span class="op">=</span> random.PRNGKey(<span class="dv">2</span>)</span>
+<span id="cb20-2"><a href="" aria-hidden="true" tabindex="-1"></a>posterior_pred <span class="op">=</span> Predictive(model, posterior_samples<span class="op">=</span>mcmc.get_samples())</span>
+<span id="cb20-3"><a href="" aria-hidden="true" tabindex="-1"></a>ppc_samples <span class="op">=</span> posterior_pred(rng_key_ppc, n_years<span class="op">=</span>n_years, counts<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<p>Same <code>Predictive</code> API as the prior predictive, but supply <code>posterior_samples</code>.</p>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div class="sidenote">
+<p><span class="box-title">Prior predictive vs.&nbsp;posterior predictive</span> - <strong>Prior predictive</strong>: tests whether priors produce plausible data, <em>before</em> fitting - <strong>Posterior predictive</strong>: tests whether the <em>fitted</em> model produces plausible data, <em>after</em> fitting</p>
+</div>
 </section>
 <section id="ppc-replicated-counts-envelope" class="slide level2">
 <h2>PPC: Replicated Counts Envelope</h2>
-<!-- Plot (fig-ppc-counts): observed bars + replicated mean & 90% CI.
-     Code: Predictive with posterior_samples. -->
+<p>Unlike the rate envelope, this shows <strong>observable counts</strong>, including Poisson scatter:</p>
+<div id="e736ac57" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb21-2"><a href="" aria-hidden="true" tabindex="-1"></a>ppc_obs <span class="op">=</span> np.array(ppc_samples[<span class="st">"obs"</span>])</span>
+<span id="cb21-3"><a href="" aria-hidden="true" tabindex="-1"></a>ppc_mean <span class="op">=</span> ppc_obs.mean(axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb21-4"><a href="" aria-hidden="true" tabindex="-1"></a>ppc_lower <span class="op">=</span> np.percentile(ppc_obs, <span class="dv">5</span>, axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb21-5"><a href="" aria-hidden="true" tabindex="-1"></a>ppc_upper <span class="op">=</span> np.percentile(ppc_obs, <span class="dv">95</span>, axis<span class="op">=</span><span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div style="text-align: center;">
+<p><img data-src="images/fig-ppc-counts-output-1.png" style="width:75.0%"></p>
+</div>
 </section>
 <section id="ppc-simulated-datasets" class="slide level2">
 <h2>PPC: Simulated Datasets</h2>
-<!-- Grid of 6 replicated datasets (fig-ppc-obs).
-     Compare with prior predictive draws — much tighter. -->
+<p>Individual draws from the posterior predictive:</p>
+<div style="text-align: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="images/fig-ppc-obs-output-1.png" style="width:75.0%"></p>
+<figcaption>Six replicated datasets drawn from the posterior predictive.</figcaption>
+</figure>
+</div>
+</div>
 </section>
 <section id="ppc-summary-statistics" class="slide level2">
 <h2>PPC: Summary Statistics</h2>
-<!-- Three-panel plot (fig-ppc-stats): mean, max, std dev.
-     Histogram of replicated statistic vs. observed (red line).
-     Detecting overdispersion. -->
+<div class="definition">
+<ul>
+<li>Choose <strong>test quantities</strong> that probe specific aspects of the model.</li>
+<li>For each replicated dataset, compute the statistic and compare to the observed value (red line)</li>
+</ul>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div style="text-align: center;">
+<p><img data-src="images/fig-ppc-stats-output-1.png" style="width:85.0%"></p>
+</div>
+<ul>
+<li>Observed summary stats should fall within the distribution of replicated stats.</li>
+</ul>
 </section>
 <section id="ppc-rootogram" class="slide level2">
 <h2>PPC: Rootogram</h2>
-<!-- Plot (fig-ppc-rootogram): observed vs. predicted count frequencies (sqrt scale).
-     Specialized diagnostic for count data. -->
+<p>A <strong>rootogram</strong> checks whether the model reproduces the <em>frequency</em> of each count value <span class="math inline">\(k\)</span>:</p>
+<div style="margin-bottom: 2em;">
+
+</div>
+<div style="text-align: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="images/fig-ppc-rootogram-output-1.png" style="width:75.0%"></p>
+<figcaption>Observed count frequencies (red ×) vs.&nbsp;posterior predictive (blue, 90% CI). √ scale.</figcaption>
+</figure>
+</div>
+</div>
 <!-- ============================================================ -->
 <!-- PART 9: SENSITIVITY ANALYSIS                                  -->
 <!-- ============================================================ -->
 </section>
 <section id="sensitivity-analysis" class="slide level2">
 <h2>Sensitivity Analysis</h2>
-<!-- Motivation: is the posterior driven by data or prior?
-     Power-scaling sensitivity analysis (Kallioinen et al. 2024).
-     Idea: perturb prior/likelihood by power alpha, reweight via PSIS. -->
-</section>
-<section id="building-the-datatree" class="slide level2">
-<h2>Building the DataTree</h2>
-<!-- Code: az.from_numpyro with log_likelihood=True.
-     Computing log-prior via numpyro log_density + block. -->
-</section>
-<section id="power-scaling-sensitivity-results" class="slide level2">
-<h2>Power-Scaling Sensitivity Results</h2>
-<!-- az.psense_summary output.
-     Thresholds: prior sensitivity > 0.05, likelihood sensitivity < 0.05.
-     Interpretation for rho_1, rho_2, tau. -->
+<p><strong>Question:</strong> Is the posterior driven by the <em>data</em> or the <em>prior</em>?</p>
+<p>Rerunning the model with difference priors or likelihoods is expensive.</p>
+<p><strong>Power-scaling</strong> <span class="citation" data-cites="Kallioinen2024">(<a href="#/modeling-tips" role="doc-biblioref" onclick="">Kallioinen et al. 2024</a>)</span>: perturb prior or likelihood by raising it to a power <span class="math inline">\(\alpha \approx 1\)</span>, then reweight existing samples via Pareto-smoothed importance sampling (PSIS).</p>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div class="definition">
+<table class="caption-top">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 23%">
+<col style="width: 53%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Raises concern if</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Prior sensitivity</td>
+<td><span class="math inline">\(&gt; 0.05\)</span></td>
+<td>prior is influencing the posterior</td>
+</tr>
+<tr class="even">
+<td>Likelihood sensitivity</td>
+<td><span class="math inline">\(&lt; 0.05\)</span></td>
+<td>data contribute little; prior dominates</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div id="07a0c884" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="" aria-hidden="true" tabindex="-1"></a>az.psense_summary(dt, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>])  <span class="co">#requires extending dt with log-likelihood and log-prior sites</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="254">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">prior</th>
+<th data-quarto-table-cell-role="th">likelihood</th>
+<th data-quarto-table-cell-role="th">diagnosis</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">rho_1</th>
+<td>0.017</td>
+<td>0.086</td>
+<td>✓</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">rho_2</th>
+<td>0.007</td>
+<td>0.096</td>
+<td>✓</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">tau</th>
+<td>0.006</td>
+<td>0.111</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
 <!-- ============================================================ -->
 <!-- PART 10: MODEL COMPARISON                                     -->
 <!-- ============================================================ -->
 </section>
-<section id="model-comparison-overview" class="slide level2">
-<h2>Model Comparison: Overview</h2>
-<!-- Three models: constant rate, discrete changepoint, sigmoid changepoint.
-     Cross-validation via LOO-CV with PSIS. -->
+<section id="alternative-models" class="slide level2">
+<h2>Alternative Models</h2>
+<p>How do we know the change-point model is the right level of complexity? We compare it against two alternatives:</p>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div class="definition">
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><strong>Constant rate</strong></p>
+<p>No change point.</p>
+<p><em>Maybe the apparent drop is just noise.</em></p>
+</div><div class="column" style="width:33%;">
+<p><strong>Discrete change point</strong></p>
+<p>Abrupt step at year <span class="math inline">\(\tau\)</span>.</p>
+<p><em>Maybe the rate changed suddenly.</em></p>
+</div><div class="column" style="width:33%;">
+<p><strong>Sigmoid change point</strong></p>
+<p>Smooth logistic transition. Width <span class="math inline">\(s\)</span> inferred from data.</p>
+<p><em>Maybe the transition was gradual.</em></p>
+</div></div>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<ul>
+<li>Each model is a different scientific hypothesis about the disaster process.</li>
+<li>Model comparison will tell us which is best supported by the data.</li>
+</ul>
 </section>
 <section id="constant-rate-model" class="slide level2">
 <h2>Constant-Rate Model</h2>
-<!-- Code: model_constant (single rho, no changepoint).
-     Fit with plain NUTS. -->
+<p>Single Poisson rate across all years:</p>
+<div id="d7cdfa25" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> model_constant(n_years, counts<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb23-2"><a href="" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> <span class="fl">3.0</span></span>
+<span id="cb23-3"><a href="" aria-hidden="true" tabindex="-1"></a>    rho <span class="op">=</span> numpyro.sample(<span class="st">"rho"</span>, dist.Exponential(alpha))</span>
+<span id="cb23-4"><a href="" aria-hidden="true" tabindex="-1"></a>    lambda_t <span class="op">=</span> jnp.full(n_years, rho)</span>
+<span id="cb23-5"><a href="" aria-hidden="true" tabindex="-1"></a>    numpyro.deterministic(<span class="st">"rate"</span>, lambda_t)</span>
+<span id="cb23-6"><a href="" aria-hidden="true" tabindex="-1"></a>    numpyro.sample(<span class="st">"obs"</span>, dist.Poisson(lambda_t), obs<span class="op">=</span>counts)</span>
+<span id="cb23-7"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="" aria-hidden="true" tabindex="-1"></a>kernel_const <span class="op">=</span> NUTS(model_constant)</span>
+<span id="cb23-9"><a href="" aria-hidden="true" tabindex="-1"></a>mcmc_const <span class="op">=</span> MCMC(kernel_const, num_warmup<span class="op">=</span><span class="dv">1000</span>, num_samples<span class="op">=</span><span class="dv">2000</span>, num_chains<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb23-10"><a href="" aria-hidden="true" tabindex="-1"></a>mcmc_const.run(random.PRNGKey(<span class="dv">10</span>), n_years, counts<span class="op">=</span>counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="13a61acb" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="" aria-hidden="true" tabindex="-1"></a>az.summary(az.from_numpyro(mcmc_const), var_names<span class="op">=</span>[<span class="st">"rho"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="256">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">rho</th>
+<td>1.709</td>
+<td>0.121</td>
+<td>1.5</td>
+<td>1.9</td>
+<td>3333</td>
+<td>3210</td>
+<td>1.00</td>
+<td>0.0021</td>
+<td>0.0015</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
 </section>
 <section id="sigmoid-change-point-model" class="slide level2">
 <h2>Sigmoid Change-Point Model</h2>
-<!-- Equation: lambda_t via sigmoid with width s.
-     Code: model_sigmoid. HalfNormal(10) prior on s.
-     All continuous → plain NUTS. -->
+<p>Replace the hard step with a smooth <strong>sigmoid</strong> transition:</p>
+<p><span class="math display">\[
+\lambda_t = \rho_2 + (\rho_1 - \rho_2) \cdot \sigma\!\left(-\tfrac{t - \tau}{s}\right), \qquad \sigma(x) = \frac{1}{1+e^{-x}}
+\]</span></p>
+<p>Width <span class="math inline">\(s \to 0\)</span> recovers the original discrete model; Large <span class="math inline">\(s\)</span> = gradual transition</p>
+<div id="43bc9e24" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> model_sigmoid(n_years, counts<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb25-2"><a href="" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> <span class="fl">3.0</span></span>
+<span id="cb25-3"><a href="" aria-hidden="true" tabindex="-1"></a>    rho_1 <span class="op">=</span> numpyro.sample(<span class="st">"rho_1"</span>, dist.Exponential(alpha))</span>
+<span id="cb25-4"><a href="" aria-hidden="true" tabindex="-1"></a>    rho_2 <span class="op">=</span> numpyro.sample(<span class="st">"rho_2"</span>, dist.Exponential(alpha))</span>
+<span id="cb25-5"><a href="" aria-hidden="true" tabindex="-1"></a>    tau   <span class="op">=</span> numpyro.sample(<span class="st">"tau"</span>, dist.Uniform(<span class="dv">0</span>, n_years))</span>
+<span id="cb25-6"><a href="" aria-hidden="true" tabindex="-1"></a>    s     <span class="op">=</span> numpyro.sample(<span class="st">"s"</span>, dist.HalfNormal(<span class="fl">10.0</span>))</span>
+<span id="cb25-7"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="" aria-hidden="true" tabindex="-1"></a>    ts <span class="op">=</span> jnp.arange(n_years, dtype<span class="op">=</span>jnp.float32)</span>
+<span id="cb25-9"><a href="" aria-hidden="true" tabindex="-1"></a>    weight <span class="op">=</span> jax.nn.sigmoid(<span class="op">-</span>(ts <span class="op">-</span> tau) <span class="op">/</span> s)</span>
+<span id="cb25-10"><a href="" aria-hidden="true" tabindex="-1"></a>    lambda_t <span class="op">=</span> rho_2 <span class="op">+</span> (rho_1 <span class="op">-</span> rho_2) <span class="op">*</span> weight</span>
+<span id="cb25-11"><a href="" aria-hidden="true" tabindex="-1"></a>    numpyro.deterministic(<span class="st">"rate"</span>, lambda_t)</span>
+<span id="cb25-12"><a href="" aria-hidden="true" tabindex="-1"></a>    numpyro.sample(<span class="st">"obs"</span>, dist.Poisson(lambda_t), obs<span class="op">=</span>counts)</span>
+<span id="cb25-13"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-14"><a href="" aria-hidden="true" tabindex="-1"></a>kernel_sig <span class="op">=</span> NUTS(model_sigmoid)</span>
+<span id="cb25-15"><a href="" aria-hidden="true" tabindex="-1"></a>mcmc_sig <span class="op">=</span> MCMC(kernel_sig, num_warmup<span class="op">=</span><span class="dv">1000</span>, num_samples<span class="op">=</span><span class="dv">2000</span>, num_chains<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb25-16"><a href="" aria-hidden="true" tabindex="-1"></a>mcmc_sig.run(random.PRNGKey(<span class="dv">30</span>), n_years, counts<span class="op">=</span>counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section>
 <section id="sigmoid-model-posterior-rate" class="slide level2">
 <h2>Sigmoid Model: Posterior Rate</h2>
-<!-- Plot (fig-sigmoid-rate): sigmoid posterior rate trajectory.
-     az.summary for rho_1, rho_2, tau, s. -->
+<div id="a0b07b90" class="cell" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="" aria-hidden="true" tabindex="-1"></a>dt_sig <span class="op">=</span> az.from_numpyro(mcmc_sig, log_likelihood<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-2"><a href="" aria-hidden="true" tabindex="-1"></a>az.summary(dt_sig, var_names<span class="op">=</span>[<span class="st">"rho_1"</span>, <span class="st">"rho_2"</span>, <span class="st">"tau"</span>, <span class="st">"s"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="258">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">rho_1</th>
+<td>3.37</td>
+<td>0.41</td>
+<td>2.8</td>
+<td>4.1</td>
+<td>2356</td>
+<td>1917</td>
+<td>1.00</td>
+<td>0.01</td>
+<td>0.01</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">rho_2</th>
+<td>0.873</td>
+<td>0.128</td>
+<td>0.67</td>
+<td>1.1</td>
+<td>2830</td>
+<td>1799</td>
+<td>1.00</td>
+<td>0.0024</td>
+<td>0.0018</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">tau</th>
+<td>37.2</td>
+<td>3.7</td>
+<td>31</td>
+<td>42</td>
+<td>2365</td>
+<td>1776</td>
+<td>1.00</td>
+<td>0.094</td>
+<td>0.096</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">s</th>
+<td>4.5</td>
+<td>3.4</td>
+<td>0.8</td>
+<td>11</td>
+<td>1740</td>
+<td>1752</td>
+<td>1.00</td>
+<td>0.1</td>
+<td>0.13</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div style="text-align: center;">
+<p><img data-src="images/fig-sigmoid-rate-output-1.png" style="width:75.0%"></p>
+</div>
+</section>
+<section id="from-external-validation-to-loo-cv" class="slide level2">
+<h2>From External Validation to LOO-CV</h2>
+<p><strong>Gold standard</strong>: Fit on training data, score predictions on a held-out test set using the <strong>log predictive density</strong>:</p>
+<p><span class="math display">\[
+\text{lpd}_{\text{test}} = \sum_{t \in \text{test}} \log p(y_t \mid y_{\text{train}})
+\]</span></p>
+<div class="fragment">
+<p>But we have only 112 years of data, and time-series structure complicates splitting. <strong>Cross-validation</strong> simulates held-out data from the training set itself:</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="definition">
+<p><span class="box-title"><span class="math inline">\(K\)</span>-fold CV</span> Split into <span class="math inline">\(K\)</span> subsets; each takes a turn as the test set. Sum the <span class="math inline">\(K\)</span> log predictive densities.</p>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="definition">
+<p><span class="box-title">Leave-one-out CV (<span class="math inline">\(K = T\)</span>)</span> Each observation is held out in turn. Least biased estimate — but requires <span class="math inline">\(T\)</span> separate model fits.</p>
+</div>
+</div></div>
+</div>
+<div class="fragment">
+<div class="warning">
+<ul>
+<li>Each Bayesian “fit” means a full MCMC run. <span class="math inline">\(T = 112\)</span> refits is prohibitive.</li>
+<li>LOO-CV approximates the leave-one-out predictive performance using a single fit.</li>
+</ul>
+</div>
+</div>
 </section>
 <section id="loo-cv-comparison" class="slide level2">
 <h2>LOO-CV Comparison</h2>
-<!-- az.compare table: elpd_loo, se, p_loo, weight.
-     Plot (fig-loo-compare). -->
+<div id="d110b0bc" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="" aria-hidden="true" tabindex="-1"></a>comparison <span class="op">=</span> az.compare({</span>
+<span id="cb27-2"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Constant rate"</span>:        dt_const,</span>
+<span id="cb27-3"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Discrete change point"</span>: dt_cp,</span>
+<span id="cb27-4"><a href="" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sigmoid change point"</span>: dt_sig,</span>
+<span id="cb27-5"><a href="" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb27-6"><a href="" aria-hidden="true" tabindex="-1"></a>comparison</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="260">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">rank</th>
+<th data-quarto-table-cell-role="th">elpd</th>
+<th data-quarto-table-cell-role="th">p</th>
+<th data-quarto-table-cell-role="th">elpd_diff</th>
+<th data-quarto-table-cell-role="th">weight</th>
+<th data-quarto-table-cell-role="th">se</th>
+<th data-quarto-table-cell-role="th">dse</th>
+<th data-quarto-table-cell-role="th">warning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Sigmoid change point</th>
+<td>0</td>
+<td>-170.0</td>
+<td>3.1</td>
+<td>0.0</td>
+<td>0.93</td>
+<td>8.2</td>
+<td>0.0</td>
+<td>False</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Discrete change point</th>
+<td>1</td>
+<td>-170.0</td>
+<td>3.0</td>
+<td>0.0</td>
+<td>0.00</td>
+<td>7.9</td>
+<td>1.2</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Constant rate</th>
+<td>2</td>
+<td>-210.0</td>
+<td>1.5</td>
+<td>30.0</td>
+<td>0.07</td>
+<td>8.6</td>
+<td>8.5</td>
+<td>False</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div style="text-align: center;">
+<p><img data-src="images/fig-loo-compare-output-1.png" style="width:75.0%"></p>
+</div>
 </section>
-<section id="loo-diagnostics-pareto-k-hat" class="slide level2">
-<h2>LOO Diagnostics: Pareto k-hat</h2>
-<!-- Plot (fig-khat): problematic observations near changepoint.
-     Explanation: influential observations ↔ unstable importance weights. -->
+<section id="loo-diagnostics-pareto-hatk" class="slide level2">
+<h2>LOO Diagnostics: Pareto <span class="math inline">\(\hat{k}\)</span></h2>
+<div id="f63e8446" class="cell" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="" aria-hidden="true" tabindex="-1"></a>loo_cp <span class="op">=</span> az.loo(dt_cp, var_name<span class="op">=</span><span class="st">"obs"</span>)</span>
+<span id="cb28-2"><a href="" aria-hidden="true" tabindex="-1"></a>az.plot_khat(loo_cp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div style="text-align: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="images/fig-khat-output-2.png" style="width:70.0%"></p>
+<figcaption>Pareto <span class="math inline">\(\hat{k}\)</span> per observation. Values <span class="math inline">\(&gt; 0.7\)</span> (dashed) flag unreliable LOO estimates.</figcaption>
+</figure>
+</div>
+</div>
+<ul>
+<li>Problematic observations cluster <strong>near the change point</strong> — removing one of them substantially shifts the posterior on <span class="math inline">\(\tau\)</span></li>
+<li>That large posterior shift makes importance-sampling reweighting unstable</li>
+</ul>
 <!-- ============================================================ -->
 <!-- PART 11: SUMMARY & MODELING TIPS                              -->
 <!-- ============================================================ -->
 </section>
 <section id="summarizing-results" class="slide level2">
 <h2>Summarizing Results</h2>
-<!-- Key findings: rho_1 ≈ 3, rho_2 ≈ 1, tau ≈ 1890.
-     PPC and sensitivity confirm robustness.
-     Both changepoint models preferred over constant; sigmoid is practical default. -->
+<p>Back to the original questions:</p>
+<div class="takeaway">
+<p><span class="box-title">1. When did the rate change?</span></p>
+<p>Posterior on <span class="math inline">\(\tau\)</span> concentrates around <strong>1890</strong> — coinciding with UK coal mining safety legislation.</p>
+</div>
+<div class="takeaway">
+<p><span class="box-title">2. By how much did it change?</span></p>
+<ul>
+<li>Early rate <span class="math inline">\(\rho_1 \approx 3\)</span> disasters/year drops to <span class="math inline">\(\rho_2 \approx 1\)</span>.</li>
+<li>Expected disasters avoided <span class="math inline">\(\Delta\)</span> — an interpretable derived quantity — has full posterior uncertainty.</li>
+</ul>
+</div>
+<div class="takeaway">
+<p><span class="box-title">3. Is there evidence for a change at all?</span></p>
+<p><strong>Yes</strong> — LOO-CV strongly prefers both change-point models over the constant-rate baseline. The data cannot distinguish an abrupt from a gradual transition.</p>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div class="definition">
+<p><span class="box-title">Conclusions are robust</span> PPC &amp; rootogram: no systematic bias. Power-scaling: posterior driven by data, not priors.</p>
+</div>
 </section>
-<section id="the-folk-theorem-of-statistical-computing" class="slide level2">
+<section id="the-folk-theorem-of-statistical-computing" class="slide level2 scrollable">
 <h2>The Folk Theorem of Statistical Computing</h2>
-<!-- "When you have computational problems, often there's a problem with your model."
-     Ladder: poor mixing → difficult geometry → weak data → add prior info. -->
+<blockquote>
+<p><em>“When you have computational problems, often there’s a problem with your model.”</em> — <span class="citation" data-cites="GelmanBayesianWorkflow2020">Gelman et al. (<a href="#/modeling-tips" role="doc-biblioref" onclick="">2020</a>)</span></p>
+</blockquote>
+<div style="margin-bottom: 1em;">
+
+</div>
+<div class="takeaway">
+<p><span class="box-title">A mental ladder</span></p>
+<ol type="1">
+<li><strong>Poor MCMC mixing</strong> indicates…</li>
+<li><strong>Difficult posterior geometry</strong> — often caused by…</li>
+<li><strong>Weakly informative data</strong> for some parameter — can be resolved by…</li>
+<li><strong>Adding prior information you already have</strong></li>
+</ol>
+</div>
+<div style="margin-bottom: 1em;">
+
+</div>
+<p><strong>Example:</strong> a sampler that struggles with the change-point model may be reacting to priors that place mass on implausible rates (in the hundreds). Tightening the prior smooths the landscape and often resolves the issue.</p>
 </section>
 <section id="modeling-tips" class="slide level2 smaller scrollable">
 <h2>Modeling Tips</h2>
-<!-- Fit fast, fail fast: start with short chains.
-     Start simple, build up: simplest model first, add complexity iteratively.
-     Modularize: swap components without rewriting everything. -->
+<div class="takeaway">
+<p><span class="box-title">Fit fast, fail fast</span></p>
+<p>Early models are provisional. Start with short chains — bugs, bad priors, and identifiability issues show up quickly. Invest in long runs only once short runs pass.</p>
+</div>
+<div class="takeaway">
+<p><span class="box-title">Start simple, build up</span></p>
+<p>Fit the simplest model first. Let PPC failures tell you <em>what to add next</em>. Models built incrementally are understood at every stage.</p>
+<div class="takeaway">
+<p><span class="box-title">Modularize</span></p>
+<p>Share priors, likelihoods, and utilities across models. In our example only the construction of <span class="math inline">\(\lambda_t\)</span> changed between constant, discrete, and sigmoid.</p>
+</div>
+<section id="references" class="slide level2">
+<h2>References</h2>
 
+</section>
+</div>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-GelmanBayesianWorkflow2020" class="csl-entry" role="listitem">
 Gelman, Andrew, Aki Vehtari, Daniel Simpson, Charles C. Margossian, Bob Carpenter, Yuling Yao, Lauren Kennedy, Jonah Gabry, Paul-Christian Bürkner, and Martin Modrák. 2020. <span>“Bayesian <span>Workflow</span>.”</span> arXiv. <a href="https://doi.org/10.48550/ARXIV.2011.01808">https://doi.org/10.48550/ARXIV.2011.01808</a>.
+</div>
+<div id="ref-Kallioinen2024" class="csl-entry" role="listitem">
+Kallioinen, Noa, Topi Paananen, Paul-Christian Bürkner, and Aki Vehtari. 2024. <span>“Detecting and Diagnosing Prior and Likelihood Sensitivity with Power-Scaling.”</span> <em>Statistics and Computing</em> 34 (1): 57. <a href="https://doi.org/10.1007/s11222-023-10366-5">https://doi.org/10.1007/s11222-023-10366-5</a>.
 </div>
 </div>
 </section>

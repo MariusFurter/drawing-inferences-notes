@@ -1,0 +1,638 @@
+# Exercise 8: Multilevel regression {.unnumbered}
+
+In Exercise 7 we fit a single regression line to all the data at once. But many real datasets have **group structure**: measurements come from different subjects, sites, batches, or schools, and each group may behave somewhat differently. A multilevel (or *hierarchical*) model treats each group as having its own parameters, while tying those parameters together through a shared prior whose hyperparameters are themselves learned from the data. This produces **partial pooling**: groups with little data borrow strength from the global pattern, while groups with lots of data are allowed to deviate. We will:
+
+- fit three regressions — **complete pooling**, **no pooling**, and **partial pooling** — and contrast their estimates,
+- standardize the inputs and switch between **centered** and **non-centered** parametrizations to study how model specification affects MCMC geometry,
+- use **posterior predictive checks** to criticize each model at the group level,
+- compare the three models with **leave-one-out cross-validation** and on a held-out set of real observations.
+
+The dataset is the classic `sleepstudy` from @BelenkySleepDoseResponse2003, in which 18 subjects had their sleep restricted to 3 hours per night for 9 nights and their reaction times measured daily on a psychomotor vigilance task.
+
+
+## Setup
+
+::: {.callout-note collapse="true" title="Prerequisites: Python libraries"}
+This exercise uses the same libraries as Exercise 7, with the addition of [**pandas**](https://pandas.pydata.org/) for loading the CSV file:
+
+- [**JAX**](https://jax.readthedocs.io/) — numerical computing backend.
+- [**NumPyro**](https://num.pyro.ai/) — probabilistic programming and MCMC inference.
+- [**ArviZ**](https://www.arviz.org/) — diagnostics and visualization.
+- [**matplotlib**](https://matplotlib.org/) — plotting.
+- [**pandas**](https://pandas.pydata.org/) — reading the CSV data file.
+
+Install via:
+```bash
+pip install jax numpyro arviz matplotlib pandas
+```
+:::
+
+```{python}
+#| label: setup
+#| code-fold: false
+#| code-summary: "Required imports"
+import matplotlib.pyplot as plt
+import pandas as pd
+
+import jax
+from jax import random
+import jax.numpy as jnp
+
+import numpyro
+import numpyro.distributions as dist
+from numpyro.infer import MCMC, NUTS, Predictive
+
+import arviz as az
+
+rng_key = random.PRNGKey(42)
+```
+
+
+## The data
+
+The `sleepstudy` dataset records the average reaction time (in milliseconds) on a 10-minute psychomotor vigilance task for each of 18 subjects on each of 10 consecutive days. Day 0 is a baseline night with normal sleep; from Day 2 onward subjects were restricted to 3 hours of sleep per night, and reaction times were measured at the end of each day. To make the multilevel structure more interesting, we use a version of the data in which some subjects have all 10 measurements, others only 5, and a few only 2.
+
+Load the data from [data/exercise-8/sleepstudy_processed.csv](../data/exercise-8/sleepstudy_processed.csv):
+
+```{python}
+#| label: load-data
+#| code-fold: false
+df = pd.read_csv("../data/exercise-8/sleepstudy_processed.csv")
+
+day = jnp.array(df["day"].to_numpy(), dtype=jnp.float32)
+reaction = jnp.array(df["reaction"].to_numpy(), dtype=jnp.float32)
+subject = jnp.array(df["subject_idx"].to_numpy(), dtype=jnp.int32)
+
+subject_ids = sorted(df["subject"].unique().tolist())
+n_subjects = int(df["subject_idx"].nunique())
+n_obs = len(df)
+n_subjects, n_obs
+```
+
+The columns are `subject` (the original numeric id), `subject_idx` (a contiguous integer index $j \in \{0, \ldots, J-1\}$ that we will use to gather per-subject parameters), `day`, and `reaction`. There are $J = 18$ subjects and $N = 110$ observations in total.
+
+**Task 0 — Visualize the per-subject trends.** Plot reaction time vs. day for each subject, with the best-fit line through each subject's points overlaid. What features do you notice that a single global regression would miss? What do you expect the per-subject lines to look like for the subjects with only 2 observations?
+
+You can fit a line through each subject's points with [`jnp.polyfit`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.polyfit.html), passing `deg=1` to obtain the slope and intercept.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+```{python}
+#| label: fig-data
+#| fig-cap: "Reaction time (ms) vs. day for each of the 18 subjects, with a best-fit line through overlaid."
+#| code-fold: true
+fig, axes = plt.subplots(5, 4, figsize=(7, 7), sharex=True, sharey=True)
+day_grid = jnp.linspace(0, 9, 50)
+
+for j, ax in enumerate(axes.flat):
+    if j >= n_subjects:
+        ax.axis("off")
+        continue
+    mask = subject == j
+    xs = day[mask]
+    ys = reaction[mask]
+    slope, intercept = jnp.polyfit(xs, ys, 1)
+    ax.scatter(xs, ys, s=15, color="black", alpha=0.7)
+    ax.plot(day_grid, intercept + slope * day_grid, color="C1", linewidth=1.2)
+    ax.set_title(f"Subject {subject_ids[j]} (n={int(mask.sum())})", fontsize=8)
+
+for ax in axes[-1, :]:
+    ax.set_xlabel("Day")
+for ax in axes[:, 0]:
+    ax.set_ylabel("Reaction (ms)")
+plt.tight_layout()
+plt.show()
+```
+
+Most subjects with enough observations show a positive trend: as the days of sleep restriction accumulate, reaction times rise. But the *amount* of degradation varies substantially across subjects, and baseline reaction times also differ markedly. A single global regression line would average these very different trajectories into a moderate slope that fits no individual particularly well.
+
+For the subjects with only 2 observations, the line is an *interpolation* rather than a fit — it passes exactly through both points by construction — and is therefore at the mercy of their noise: a single noisy measurement can flip the slope from steep to flat or even negative. We will see that this is precisely the situation in which partial pooling helps.
+
+:::
+
+
+## Standardizing the data
+
+Before fitting any model, it pays to put the predictor and the response on a common, **unit-free scale**. We do this by *standardizing* (also called *z-scoring*): for each variable $v$ we subtract the sample mean and divide by the sample standard deviation,
+$$
+z_v = \frac{v - \bar{v}}{\text{sd}(v)},
+$$
+so that $z_v$ has mean $0$ and standard deviation $1$. We will fit our models on the standardized scale, and back-transform when we want to report results in the original units (milliseconds and days).
+
+```{python}
+#| label: standardize
+#| code-fold: false
+day_mean, day_std = day.mean(), day.std()
+reaction_mean, reaction_std = reaction.mean(), reaction.std()
+
+z_day = (day - day_mean) / day_std
+z_reaction = (reaction - reaction_mean) / reaction_std
+```
+
+We keep the four constants `day_mean`, `day_std`, `reaction_mean`, `reaction_std` so that we can later un-standardize the model's predictions: a posterior draw $z_y$ on the standardized scale corresponds to $y = \bar{y} + \text{sd}(y) \cdot z_y$ on the original scale.
+
+::: {.callout-note collapse="true" title="Why standardize?"}
+
+Standardization helps in two ways: it makes priors easier to choose, and it makes the posterior easier for MCMC to explore.
+
+**Priors become easier to set.** On the standardized scale, both predictor and response have unit standard deviation by construction, so a $\text{Normal}(0, 1)$ prior on slopes and intercepts is automatically *weakly informative* in the sense of @sec-priors: it allows the data to speak while ruling out absurdly extreme values. The same prior recipe transports across datasets, since the units have been removed.
+
+**The posterior geometry becomes nicer.** When the predictor is centered, the posterior correlation between the intercept and the slope is greatly reduced. This is because moving the slope no longer drags the intercept along by a large lever arm. Less correlated posteriors are easier for MCMC to explore because they don't have narrow ridges or funnels that are tricky to navigate.
+:::
+
+
+## Part 1: Three pooling regimes
+
+We will fit three regression models that differ only in how they treat the per-subject parameters: **complete pooling** (one global line), **no pooling** (one independent line per subject), and **partial pooling** (per-subject lines tied together by a shared prior). In each subtask below we state the model mathematically and then translate it into NumPyro code.
+
+Throughout we use $i = 1, \ldots, N$ for observations and $j = 1, \ldots, J$ for subjects, and write $j[i]$ for the subject of the $i$-th observation. All three models use the standardized variables $x_i = z_{\text{day},i}$ and $y_i = z_{\text{reaction},i}$, and share a common call signature:
+
+```python
+def model_*(x, subject, y=None, n_subjects=n_subjects): ...
+```
+
+Each model records the conditional mean with `numpyro.deterministic("mu", ...)` and ends with `numpyro.sample("obs", dist.Normal(mu, sigma), obs=y)`, so the same function generates fake data when `y=None` and conditions on data when `y` is provided. The keyword argument `n_subjects=n_subjects` captures the value computed in the *Data* section as a default, so we don't have to pass it explicitly to `mcmc.run`, `Predictive`, or `log_likelihood` — handy because those calls happen many times below.
+
+### Task 1a — Complete pooling
+
+Ignore subject identity entirely: one global intercept and slope describe everyone.
+
+$$
+\begin{aligned}
+\alpha &\sim \text{Normal}(0, 1) \\
+\beta &\sim \text{Normal}(0, 1) \\
+\sigma &\sim \text{Exponential}(1) \\
+\mu_i &= \alpha + \beta \, x_i \\
+y_i &\sim \text{Normal}(\mu_i, \sigma)
+\end{aligned}
+$$
+
+This is just a Gaussian linear regression and serves as a baseline: if subject identity does not matter, this simple model will do as well as any.
+
+Write `model_pooled(x, subject, y=None)`. The argument `subject` is unused here but kept for a uniform signature.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+```{python}
+#| label: model-pooled
+#| code-fold: false
+def model_pooled(x, subject, y=None):
+    alpha = numpyro.sample("alpha", dist.Normal(0, 1))
+    beta = numpyro.sample("beta", dist.Normal(0, 1))
+    sigma = numpyro.sample("sigma", dist.Exponential(1.0))
+
+    mu = numpyro.deterministic("mu", alpha + beta * x)
+    numpyro.sample("obs", dist.Normal(mu, sigma), obs=y)
+```
+
+:::
+
+### Task 1b — No pooling
+
+Each subject gets its own independent intercept and slope, with no information shared between subjects.
+
+$$
+\begin{aligned}
+\alpha_j &\sim \text{Normal}(0, 1), \quad j = 1, \ldots, J \\
+\beta_j &\sim \text{Normal}(0, 1), \quad j = 1, \ldots, J \\
+\sigma &\sim \text{Exponential}(1) \\
+\mu_i &= \alpha_{j[i]} + \beta_{j[i]} \, x_i \\
+y_i &\sim \text{Normal}(\mu_i, \sigma)
+\end{aligned}
+$$
+
+This is the opposite extreme: each subject is fit independently, as if the other subjects did not exist. It captures the per-subject variation but cannot generalize to a new subject, and overfits subjects with very few observations.
+
+Write `model_unpooled(x, subject, y=None, n_subjects=n_subjects)` with one $(\alpha_j, \beta_j)$ pair per subject.
+
+The per-subject parameters form a vector of $J$ independent draws from the same prior. This kind of structure can be represented in NumPyro using a **plate**. See the box below for a quick introduction. Once you have $\alpha_j$ and $\beta_j$ as length-$J$ vectors, gather the right entries for each observation with array indexing: `alpha_j[subject]` produces a length-$N$ vector containing the intercept of the subject for each row.
+
+::: {.callout-note collapse="true" title="Background: NumPyro plates"}
+
+A `numpyro.plate(name, size)` is a context manager that turns a single `numpyro.sample` call into independent draws of length `size`. The plate corresponds to plate notation for diagrams introduced in @sec-implement-numpyro. The line
+
+```python
+with numpyro.plate("subjects", n_subjects):
+    alpha_j = numpyro.sample("alpha_j", dist.Normal(0, 1))
+```
+
+draws a vector of i.i.d. $\text{Normal}(0, 1)$ values of length `n_subjects` and registers them as a single inference site named `"alpha_j"`. You can have multiple `sample` statements inside the same plate. They are vectorized over the same axis.
+
+**Why not just a `for` loop?** The same model could be written without a plate as
+
+```python
+alpha_j = []
+
+for j in range(n_subjects):
+    alpha_j.append(numpyro.sample(f"alpha_{j}", dist.Normal(0, 1)))
+
+alpha_j = jnp.stack(alpha_j)
+```
+
+This loop creates `n_subjects` separate sample sites, each with its own scalar distribution. However, this runs much slower than a single vectorized sample inside a plate, and it also creates a more cluttered trace with many more sites to keep track of. Whenever you want to use a for loop to create multiple independent parameters, it's a sign that you should be using a plate instead.
+
+:::
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+```{python}
+#| label: model-unpooled
+#| code-fold: false
+def model_unpooled(x, subject, y=None, n_subjects=n_subjects):
+    with numpyro.plate("subjects", n_subjects):
+        alpha_j = numpyro.sample("alpha_j", dist.Normal(0, 1))
+        beta_j = numpyro.sample("beta_j", dist.Normal(0, 1))
+    sigma = numpyro.sample("sigma", dist.Exponential(1.0))
+
+    mu = numpyro.deterministic("mu", alpha_j[subject] + beta_j[subject] * x)
+    numpyro.sample("obs", dist.Normal(mu, sigma), obs=y)
+```
+
+:::
+
+### Task 1c — Partial pooling
+
+Each subject still has its own $(\alpha_j, \beta_j)$, but they are drawn from a common prior whose location and scale are themselves inferred. Subjects with few or noisy observations are pulled (*shrunk*) toward the population means.
+
+$$
+\begin{aligned}
+\mu_\alpha, \mu_\beta &\sim \text{Normal}(0, 1) \\
+\tau_\alpha, \tau_\beta &\sim \text{Exponential}(1) \\
+\alpha_j &\sim \text{Normal}(\mu_\alpha, \tau_\alpha), \quad j = 1, \ldots, J \\
+\beta_j &\sim \text{Normal}(\mu_\beta, \tau_\beta), \quad j = 1, \ldots, J \\
+\sigma &\sim \text{Exponential}(1) \\
+\mu_i &= \alpha_{j[i]} + \beta_{j[i]} \, x_i \\
+y_i &\sim \text{Normal}(\mu_i, \sigma)
+\end{aligned}
+$$
+
+The hyperparameters $\mu_\alpha$ and $\mu_\beta$ describe the *population-level* intercept and slope — what we would expect for an average new subject — and $\tau_\alpha$, $\tau_\beta$ describe how much subjects vary around them. The model uses the data from all subjects to learn these, then uses them as a prior on each individual $\alpha_j, \beta_j$.
+
+Write `model_partial(x, subject, y=None, n_subjects=n_subjects)`. The structure is the same as `model_unpooled`, but the priors on $\alpha_j$ and $\beta_j$ now use the learned hyperparameters $(\mu_\alpha, \tau_\alpha)$ and $(\mu_\beta, \tau_\beta)$ instead of fixed $(0, 1)$. Sample the hyperparameters *outside* the plate.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+```{python}
+#| label: model-partial-centered
+#| code-fold: false
+def model_partial(x, subject, y=None, n_subjects=n_subjects):
+    mu_alpha = numpyro.sample("mu_alpha", dist.Normal(0, 1))
+    mu_beta = numpyro.sample("mu_beta", dist.Normal(0, 1))
+    tau_alpha = numpyro.sample("tau_alpha", dist.Exponential(1.0))
+    tau_beta = numpyro.sample("tau_beta", dist.Exponential(1.0))
+
+    with numpyro.plate("subjects", n_subjects):
+        alpha_j = numpyro.sample("alpha_j", dist.Normal(mu_alpha, tau_alpha))
+        beta_j = numpyro.sample("beta_j", dist.Normal(mu_beta, tau_beta))
+    sigma = numpyro.sample("sigma", dist.Exponential(1.0))
+
+    mu = numpyro.deterministic("mu", alpha_j[subject] + beta_j[subject] * x)
+    numpyro.sample("obs", dist.Normal(mu, sigma), obs=y)
+```
+
+When you suspect a shape bug — common when wiring per-subject parameters — the *Debugging models* technique from @sec-implement-numpyro is invaluable: trace the model once with `numpyro.handlers.seed` + `numpyro.handlers.trace` and inspect the shape of every site. Here we use it to confirm that the per-subject parameters are length-$J$ and `mu` is length-$N$:
+
+```{python}
+#| label: trace-shapes
+#| code-fold: false
+with numpyro.handlers.seed(rng_seed=0):
+    trace = numpyro.handlers.trace(model_partial).get_trace(
+        x=z_day, subject=subject, y=None
+    )
+
+for name, site in trace.items():
+    print(f"{name:>10s}  shape={tuple(site['value'].shape)}")
+```
+
+:::
+
+::: {.callout-note collapse="true" title="Aside: centered vs. non-centered parametrization"}
+
+The model above is the **centered** parametrization: each $\alpha_j$ is drawn directly from $\text{Normal}(\mu_\alpha, \tau_\alpha)$, so the prior on $\alpha_j$ depends on the values of the hyperparameters. An algebraically equivalent way to write the same model introduces a standardized auxiliary variable and reconstructs $\alpha_j$ as a deterministic transform:
+
+$$
+z_j^\alpha \sim \text{Normal}(0, 1), \qquad \alpha_j = \mu_\alpha + \tau_\alpha \, z_j^\alpha,
+$$
+
+and analogously for $\beta_j$. By the change-of-variables rule the two formulations encode the same Bayesian model, so the resulting posteriors over $(\mu_\alpha, \tau_\alpha, \alpha_1, \ldots, \alpha_J)$ are identical.
+
+What is *not* identical is the geometry that NUTS sees. NUTS samples the latent variables the model registers — $\alpha_j$ in one case, $z_j^\alpha$ in the other. In the centered version the posterior of $(\log \tau_\alpha, \alpha_j)$ has a *funnel* shape: small $\tau_\alpha$ pinches the $\alpha_j$ near $\mu_\alpha$, large $\tau_\alpha$ lets them spread out, and a single step size cannot fit both regions. In the non-centered version $z_j^\alpha$ is sampled from a fixed unit Normal regardless of $\tau_\alpha$, removing the funnel from the latent geometry.
+
+```python
+def model_partial_nc(x, subject, y=None, n_subjects=n_subjects):
+    mu_alpha = numpyro.sample("mu_alpha", dist.Normal(0, 1))
+    mu_beta = numpyro.sample("mu_beta", dist.Normal(0, 1))
+    tau_alpha = numpyro.sample("tau_alpha", dist.Exponential(1.0))
+    tau_beta = numpyro.sample("tau_beta", dist.Exponential(1.0))
+
+    with numpyro.plate("subjects", n_subjects):
+        z_alpha = numpyro.sample("z_alpha", dist.Normal(0, 1))
+        z_beta = numpyro.sample("z_beta", dist.Normal(0, 1))
+    sigma = numpyro.sample("sigma", dist.Exponential(1.0))
+
+    alpha_j = numpyro.deterministic("alpha_j", mu_alpha + tau_alpha * z_alpha)
+    beta_j = numpyro.deterministic("beta_j", mu_beta + tau_beta * z_beta)
+
+    mu = numpyro.deterministic("mu", alpha_j[subject] + beta_j[subject] * x)
+    numpyro.sample("obs", dist.Normal(mu, sigma), obs=y)
+```
+
+The non-centered form is the safer default for hierarchical models, especially when the data are sparse or the population scales $\tau$ are small. For `sleepstudy` the funnel is mild — both parametrizations fit fine and produce essentially identical diagnostics — so we stick with the centered version `model_partial` in the remainder of the exercise.
+
+:::
+
+
+## Part 2: Inference
+
+We now run NUTS on each of the three models and inspect the diagnostics. To avoid repeating boilerplate, we wrap the inference in a small helper that runs four chains and returns an ArviZ `InferenceData` object. We use 1000 warmup and 2000 sampling iterations per chain. We pass `log_likelihood=True` to `az.from_numpyro` so that the per-observation log-likelihood at every posterior draw gets attached to the `InferenceData` — we will need it for the model comparison in Part 5.
+
+```{python}
+#| label: run-mcmc-helper
+#| code-fold: false
+def run_mcmc(model, rng_key, **model_kwargs):
+    kernel = NUTS(model)
+    mcmc = MCMC(
+        kernel,
+        num_warmup=1000,
+        num_samples=2000,
+        num_chains=4,
+        progress_bar=False,
+    )
+    mcmc.run(rng_key, **model_kwargs)
+    idata = az.from_numpyro(mcmc, log_likelihood=True)
+    return mcmc, idata
+```
+
+We split the master `rng_key` once so each fit uses a fresh sub-key:
+
+```{python}
+#| label: run-all
+#| code-fold: false
+k_pooled, k_unpooled, k_partial = random.split(rng_key, 3)
+data_kwargs = dict(x=z_day, subject=subject, y=z_reaction)
+
+mcmc_pooled, idata_pooled = run_mcmc(model_pooled, k_pooled, **data_kwargs)
+mcmc_unpooled, idata_unpooled = run_mcmc(model_unpooled, k_unpooled, **data_kwargs)
+mcmc_partial, idata_partial = run_mcmc(model_partial, k_partial, **data_kwargs)
+```
+
+**Task 2 — Diagnose convergence.** For each fit, call `az.summary` on the top-level parameters and check that $\hat{R} \le 1.01$ and that the effective sample sizes `ess_bulk` and `ess_tail` are at least a few hundred.
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+```{python}
+#| label: summary-pooled
+#| code-fold: false
+az.summary(idata_pooled, var_names=["alpha", "beta", "sigma"])
+```
+
+```{python}
+#| label: summary-unpooled
+#| code-fold: false
+az.summary(idata_unpooled, var_names=["alpha_j", "beta_j", "sigma"])
+```
+
+```{python}
+#| label: summary-partial
+#| code-fold: false
+az.summary(
+    idata_partial,
+    var_names=["mu_alpha", "mu_beta", "tau_alpha", "tau_beta", "sigma"],
+)
+```
+
+All three fits give $\hat{R} \approx 1.00$ and ESS values in the thousands, so we can trust the posterior summaries.
+
+:::
+
+
+## Part 3: Shrinkage
+
+The defining behaviour of partial pooling is **shrinkage**: each per-subject slope $\beta_j$ is pulled toward the population mean $\mu_\beta$ by an amount that depends on how much the data say about subject $j$. Subjects with many observations and a clear trend stay close to their no-pooling estimate; subjects with few observations or noisy data get pulled in much more strongly. We can see both effects directly by comparing the per-subject slopes under no pooling and partial pooling.
+
+**Task 3 — Forest plot of shrinkage.** For each subject, plot the posterior mean and 89% credible interval of $\beta_j$ under both the no-pooling and partial-pooling fits, side by side. Add a vertical line at the posterior mean of the population slope $\mu_\beta$ from the partial-pooling fit. Sort subjects so the pattern of shrinkage is easy to read, and pay attention to subjects with only 2 observations.
+
+::: {.callout-note collapse="true" title="Hint: extracting per-subject summaries"}
+
+Calling `mcmc.get_samples()` returns a dictionary of JAX arrays whose first axis stacks all chains and draws together. For example, `mcmc_unpooled.get_samples()["beta_j"]` has shape `(num_chains * num_samples, J)`. Reduce along axis 0 with `jnp.mean` and `jnp.quantile` to get length-$J$ vectors of posterior means and credible-interval bounds:
+
+```python
+samples_unp = mcmc_unpooled.get_samples()
+beta_unp = samples_unp["beta_j"]                          # shape (S, J)
+mean_unp = jnp.mean(beta_unp, axis=0)                     # shape (J,)
+lo_unp, hi_unp = jnp.quantile(beta_unp, jnp.array([0.055, 0.945]), axis=0)
+```
+
+Use the same pattern for `mcmc_partial`. The population mean is `jnp.mean(mcmc_partial.get_samples()["mu_beta"])`.
+
+:::
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+```{python}
+#| label: fig-shrinkage
+#| fig-cap: "Per-subject slopes $\\beta_j$ on the standardized scale under no-pooling (orange) and partial-pooling (blue) fits, with 89% credible intervals. The vertical line marks the partial-pooling population mean $\\mu_\\beta$. Subjects are sorted by their no-pooling estimate, and the count $n_j$ of observations is shown on the right."
+#| code-fold: true
+def per_subject_summary(samples, name):
+    arr = samples[name]                                       # shape (S, J)
+    mean = jnp.mean(arr, axis=0)
+    lo, hi = jnp.quantile(arr, jnp.array([0.055, 0.945]), axis=0)
+    return mean, lo, hi
+
+samples_unp = mcmc_unpooled.get_samples()
+samples_par = mcmc_partial.get_samples()
+
+mean_unp, lo_unp, hi_unp = per_subject_summary(samples_unp, "beta_j")
+mean_par, lo_par, hi_par = per_subject_summary(samples_par, "beta_j")
+mu_beta_hat = float(jnp.mean(samples_par["mu_beta"]))
+
+n_obs_per_subject = jnp.array(
+    [int((subject == j).sum()) for j in range(n_subjects)]
+)
+
+# Sort subjects by no-pooling estimate.
+order = jnp.argsort(mean_unp)
+y_pos = jnp.arange(n_subjects)
+offset = 0.18
+
+fig, ax = plt.subplots(figsize=(6, 6))
+ax.errorbar(
+    mean_unp[order], y_pos + offset,
+    xerr=jnp.stack([mean_unp[order] - lo_unp[order], hi_unp[order] - mean_unp[order]]),
+    fmt="o", color="C1", label="no pooling", capsize=2, markersize=4,
+)
+ax.errorbar(
+    mean_par[order], y_pos - offset,
+    xerr=jnp.stack([mean_par[order] - lo_par[order], hi_par[order] - mean_par[order]]),
+    fmt="o", color="C0", label="partial pooling", capsize=2, markersize=4,
+)
+ax.axvline(mu_beta_hat, color="black", linestyle="--", linewidth=1, label=r"$\mu_\beta$")
+
+ax.set_yticks(y_pos.tolist())
+ax.set_yticklabels(
+    [f"Subject {subject_ids[int(j)]} (n={int(n_obs_per_subject[int(j)])})"
+     for j in order],
+    fontsize=8,
+)
+ax.set_xlabel(r"$\beta_j$ (standardized scale)")
+ax.legend(loc="lower right", fontsize=8)
+plt.tight_layout()
+plt.show()
+```
+
+Two patterns stand out. First, the partial-pooling estimates sit closer to the dashed line $\mu_\beta$ than the no-pooling estimates do — the per-subject slopes are pulled toward the population mean. Second, the shrinkage is *not* uniform: it is strongest precisely for the subjects with only 2 observations (whose no-pooling slopes are at the mercy of two noisy points) and weakest for subjects with 10 observations and a clear trend. The credible intervals also tighten considerably under partial pooling, because each subject now also benefits from the information the other subjects provide about plausible slope values.
+
+:::
+
+
+## Part 4: Posterior predictive checks
+
+Diagnostics like $\hat R$ and ESS only tell us that MCMC converged, not whether the model is a good description of the data. For that we use **posterior predictive checks** (PPCs): we draw fake data from the fitted model and compare it to the real data. If the two look similar, the model can reproduce the patterns we care about; if not, the discrepancy tells us how the model fails.
+
+Concretely, for each posterior draw $(\alpha^{(s)}, \beta^{(s)}, \sigma^{(s)})$ we generate a replicated dataset $\tilde y^{(s)}$ from the likelihood at the *observed* predictors $x_i$ and subject indices $j[i]$. Stacking these gives a posterior predictive sample $\tilde y \in \mathbb{R}^{S \times N}$. NumPyro provides the `Predictive` class for exactly this purpose — given posterior samples and the model, it runs the model forward in batched mode.
+
+**Task 4 — Per-subject posterior predictive checks.** For each of the three models, draw posterior predictive reaction times at the observed $(x_i, j[i])$, back-transform to the original millisecond scale, and overlay the per-subject observed scatter with the posterior mean line and an 89% predictive band. What kind of mismatch does each model show?
+
+::: {.callout-note collapse="true" title="Hint: drawing posterior predictives with `Predictive`"}
+
+`Predictive(model, posterior_samples=samples)` returns a callable that runs the model once per posterior draw, conditioning on the supplied samples and re-sampling everything else. Pass `y=None` so that the `"obs"` site is sampled rather than conditioned on:
+
+```python
+predictive = Predictive(model_partial, posterior_samples=mcmc_partial.get_samples())
+ppc = predictive(rng_key_pp, x=z_day, subject=subject, y=None)
+y_rep = ppc["obs"]   # shape (S, N), on the standardized scale
+```
+
+To get back to milliseconds: `y_rep_ms = reaction_mean + reaction_std * y_rep`.
+
+:::
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+We loop over the three models, generating posterior predictive draws on the standardized scale and immediately un-standardizing them.
+
+```{python}
+#| label: posterior-predictive
+#| code-fold: false
+k_pp_pooled, k_pp_unpooled, k_pp_partial = random.split(random.PRNGKey(0), 3)
+
+def posterior_predictive(model, mcmc, rng_key_pp):
+    predictive = Predictive(model, posterior_samples=mcmc.get_samples())
+    ppc = predictive(rng_key_pp, x=z_day, subject=subject, y=None)
+    return reaction_mean + reaction_std * ppc["obs"]   # shape (S, N), milliseconds
+
+y_rep_pooled = posterior_predictive(model_pooled, mcmc_pooled, k_pp_pooled)
+y_rep_unpooled = posterior_predictive(model_unpooled, mcmc_unpooled, k_pp_unpooled)
+y_rep_partial = posterior_predictive(model_partial, mcmc_partial, k_pp_partial)
+```
+
+For each subject we summarize the predictive distribution at each observed day by its mean and 5%/95% quantiles, then overlay the observed scatter:
+
+```{python}
+#| label: fig-ppc
+#| fig-cap: "Per-subject posterior predictive checks. Black dots are the observed reaction times; the line is the posterior mean prediction and the shaded band the 89% predictive interval. Complete pooling uses one global line for everyone, no pooling fits each subject independently, and partial pooling shares strength across subjects."
+#| code-fold: true
+def ppc_summary(y_rep):
+    mean = jnp.mean(y_rep, axis=0)
+    lo, hi = jnp.quantile(y_rep, jnp.array([0.055, 0.945]), axis=0)
+    return mean, lo, hi
+
+models_to_plot = [
+    ("Complete pooling", y_rep_pooled, "C2"),
+    ("No pooling", y_rep_unpooled, "C1"),
+    ("Partial pooling", y_rep_partial, "C0"),
+]
+
+fig, axes = plt.subplots(
+    len(models_to_plot), n_subjects,
+    figsize=(14, 5), sharex=True, sharey=True,
+)
+
+for row, (title, y_rep, color) in enumerate(models_to_plot):
+    mean_pred, lo_pred, hi_pred = ppc_summary(y_rep)
+    for j in range(n_subjects):
+        ax = axes[row, j]
+        mask = subject == j
+        order = jnp.argsort(day[mask])
+        xs = day[mask][order]
+        ax.fill_between(xs, lo_pred[mask][order], hi_pred[mask][order],
+                        color=color, alpha=0.25)
+        ax.plot(xs, mean_pred[mask][order], color=color, linewidth=1.2)
+        ax.scatter(day[mask], reaction[mask], s=10, color="black", alpha=0.8)
+        if row == 0:
+            ax.set_title(f"S{subject_ids[j]}", fontsize=8)
+    axes[row, 0].set_ylabel(title, fontsize=9)
+
+for ax in axes[-1, :]:
+    ax.set_xlabel("Day")
+plt.tight_layout()
+plt.show()
+```
+
+Each model produces a visually different fit:
+
+- **Complete pooling** draws the *same* line for every subject, since it has no notion of subject identity. Subjects with steep degradation are systematically under-predicted, and subjects with flat trajectories are over-predicted. The 89% band is wide because a single $\sigma$ has to absorb all the between-subject variation as if it were noise.
+- **No pooling** fits each subject's points snugly — the line goes through the cloud and the band is narrow. But for the subjects with only 2 observations the line is essentially an interpolation through two noisy points: the slope is over-confident and would generalize poorly to a third measurement on the same subject.
+- **Partial pooling** is a compromise. Subjects with plenty of data get a line very close to the no-pooling fit; subjects with only 2 observations get a line and band that are visibly pulled toward the population trend, with a wider predictive band that honestly reflects the uncertainty.
+
+:::
+
+
+## Part 5: Model comparison
+
+The PPCs gave a qualitative picture of how the three models fit. To put a number on it, we now compare them by their **expected out-of-sample predictive accuracy** — how well each model would predict a *new* observation from the same data-generating process. The gold standard is leave-one-out cross-validation (LOO): for every observation $y_i$, refit the model without that point and score the held-out point, then sum the scores. Refitting $N$ times is expensive, but ArviZ approximates LOO directly from the existing posterior samples using **Pareto-smoothed importance sampling** (PSIS-LOO), so we get the comparison essentially for free.
+
+Concretely, `az.compare` ranks models by their **expected log pointwise predictive density** (`elpd_loo`, higher is better) together with a standard error and the differences between models. It uses the per-observation log-likelihoods that our `run_mcmc` helper already attached to each `idata`.
+
+To complement this leave-one-out estimate, we will also evaluate the models on **genuinely held-out data**. Recall that we artificially thinned the original `sleepstudy` dataset to make some subjects sparse — the dropped rows are real observations from the same experiment, sitting in [`sleepstudy_heldout.csv`](../data/exercise-8/sleepstudy_heldout.csv) (70 rows from the 11 subjects with $n_j < 10$). We will reuse the posteriors from Part 2 (already fit on exactly the training rows) and score the test points by their expected log predictive density,
+$$
+\text{ELPD}_{\text{test}} = \sum_{i \in \text{test}} \log \frac{1}{S} \sum_{s=1}^{S} p\bigl(y_i^{\text{test}} \mid x_i^{\text{test}}, \theta^{(s)}\bigr).
+$$
+
+This is the same quantity as `elpd_loo`, with two differences: the conditioning posterior is the full-data posterior rather than the leave-one-out one, and the sum is over a real test set rather than over the training points themselves.
+
+**Task 5 — Compare the three models.** First call `az.compare({name: idata})` and inspect the LOO ranking. Then load the held-out CSV, standardize it with the *training* mean and std, and compute $\text{ELPD}_{\text{test}}$ for each of the three fits. Which model is preferred under each criterion, and do the two criteria agree?
+
+::: {.callout-tip collapse="true" title="Solution"}
+
+```{python}
+#| label: loo-compare
+#| code-fold: false
+az.compare(
+    {"pooled": idata_pooled, "unpooled": idata_unpooled, "partial": idata_partial}
+)
+```
+
+Complete pooling lands far below the other two: a single global line cannot capture the per-subject variation, and LOO penalizes it heavily. The no-pooling and partial-pooling models are essentially tied on `elpd_loo`, and both produce Pareto-$\hat k$ warnings — observations whose leave-one-out posterior is too different from the full posterior for importance sampling to be reliable. The flagged points are precisely the $n_j = 2$ subjects, where dropping one of the two points genuinely changes the fit a lot.
+
+When PSIS-LOO is unreliable or two models tie, evaluating on truly held-out data gives a clean tiebreaker:
+
+```{python}
+#| label: held-out-elpd
+#| code-fold: false
+from numpyro.infer.util import log_likelihood
+
+df_test = pd.read_csv("../data/exercise-8/sleepstudy_heldout.csv")
+x_test = (jnp.array(df_test["day"].to_numpy(), dtype=jnp.float32) - day_mean) / day_std
+y_test = (jnp.array(df_test["reaction"].to_numpy(), dtype=jnp.float32) - reaction_mean) / reaction_std
+subj_test = jnp.array(df_test["subject_idx"].to_numpy(), dtype=jnp.int32)
+test_kwargs = dict(x=x_test, subject=subj_test, y=y_test)
+
+def held_out_elpd(model, mcmc):
+    # Drop the deterministic `mu` site: its stored shape matches the training
+    # data and would otherwise clash with the test predictors.
+    samples = {k: v for k, v in mcmc.get_samples().items() if k != "mu"}
+    log_lik = log_likelihood(model, samples, **test_kwargs)["obs"]    # (S, n_test)
+    pointwise = jax.scipy.special.logsumexp(log_lik, axis=0) - jnp.log(log_lik.shape[0])
+    return float(pointwise.sum())
+
+{
+    "pooled":   held_out_elpd(model_pooled,   mcmc_pooled),
+    "unpooled": held_out_elpd(model_unpooled, mcmc_unpooled),
+    "partial":  held_out_elpd(model_partial,  mcmc_partial),
+}
+```
+
+On genuinely new observations partial pooling wins clearly. The unpooled model overfits each subject's training points — its narrow per-subject posterior places too little mass near a held-out value that lies on the noisy side. Partial pooling pulls each subject's slope and intercept toward the population, giving a wider, better-calibrated predictive distribution. This is the same intuition the PPCs and the shrinkage plot suggested, now expressed as a single number per model.
+
+:::

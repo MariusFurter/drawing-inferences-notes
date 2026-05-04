@@ -1,0 +1,100 @@
+
+::: {.hidden}
+$$
+\def\then{\mathbin{;}}
+\def\kernel{\rightsquigarrow}
+$$
+:::
+
+# Mechanics of MCMC {#sec-mcmc}
+
+[Introduction. We focus on the finite case since it allows us to justify from first principles. In practice, even chains for continuous distributions are implemented as discrete approximations. The theory can be extended to continuous state spaces using measure-theoretic machinery.]
+
+## Intuition
+
+### Random dynamics and stationary distributions
+
+- Population of particles that follow random dynamics will usually reach a unique stationary distribution. Here, the individual particles still move, but the overall distribution of particles does not change over time.
+[Illustrate with simulations of particles diffusing in a box (uniform potential)]
+
+- Let $X$ denote a finite state space. 
+- The distribution of particles at time $t$ is a probability vector $p_t(x)$. 
+- We think of this as a kernel $p_t : I \kernel X$. 
+- The law of motion is given by a transition kernel $k : X \kernel X$, which is simply a stochastic matrix. 
+- Hence, the particle distribution evolves by kernel composition $p_{t+1} = p_t \then k = \sum_{x \in X} k(x' \mid x) p_t(x)$.
+- The stationary distribution $p_\infty$ is a fixed point of the kernel: $p_\infty = p_\infty \then k$.
+
+- In the example: $X$ is a finite grid on $[0,1]^2$, and $k$ given by randomly hopping to neighboring grid cells.
+
+- A Markov transition kernel $k$ is called **ergodic** if it eventually "forgets" its starting state. Formally, this means the long-term destination of a particle is entirely independent of where it starts: for any initial states $x, y$ and destination state $z$, the point-wise probability limits converge to the same value:
+$$\lim_{t \to \infty} k^t(z \mid x) = \lim_{t \to \infty} k^t(z \mid y) $$
+
+- We can now define the limiting distribution $p_\infty(z) := \lim_{t \to \infty} k^t(z \mid x)$ for any $x$. Since $\sum_z k^t(z \mid x) = 1$ for all $t$ and $x$, it follows that 
+$$\sum_z p_\infty(z) = \sum_z \lim_{t \to \infty} k^t(z \mid x) = \lim_{t \to \infty} \sum_z k^t(z \mid x) = 1,$$ 
+so $p_\infty$ is indeed a valid probability distribution.
+
+- In matrix terms, the multi-step transition kernel $k^t$ converges to a matrix where every row is exactly the identical probability vector $p_\infty$. 
+
+- This mathematical limit guarantees three critical properties about $p_\infty$:
+    1. **Universal Convergence:** Ergodicity implies that if we initialize the particles at an arbitrary distribution $p_0$, the distribution after $t$ steps converges to $p_\infty$:
+    $$ \lim_{t \to \infty} (p_0 \then k^t)(z) = \lim_{t \to \infty} \sum_{x \in X} p_0(x) k^t(z \mid x) = \sum_{x \in X} p_0(x) p_\infty(z) = p_\infty(z). $$
+    2. **Stationarity:** The target distribution $p_\infty$ is indeed a stationary distribution ($p_\infty = p_\infty \then k$). We can prove this by taking the limit of $p_t \then k$. Because the state space is finite, the kernel composition acts as a finite sum, allowing us to safely interchange the limit and the application of $k$:
+    $$ p_\infty = \lim_{t \to \infty} \Big( (p_0 \then k^t) \then k \Big) = \Big(\lim_{t \to \infty} (p_0 \then k^t)\Big) \then k = p_\infty \then k $$
+    3. **Uniqueness:** This target $p_\infty$ is the **unique** stationary distribution. If there were another stationary distribution $\pi$, we could set $p_0 = \pi$. By stationarity, the chain stays at $\pi$ forever, but by universal convergence, the limit must identical to $p_\infty$, forcing $\pi = p_\infty$.
+
+- There are two obvious obstructions to ergodicity:
+    1. **Multiple isolated components:** Suppose the state space can be partitioned into two disjoint sets $X = A \cup B$ with no transitions between them, meaning $k(x' \mid x) = 0$ whenever $x \in A$ and $x' \in B$ (and vice-versa). 
+       Assume for contradiction that the chain is ergodic. Then for any target $z \in B$, starting from $x \in A$ gives $k^t(z \mid x) = 0$ for all $t$, which structurally forces the limit $p_\infty(z) = 0$. Conversely, for any target $w \in A$, starting from $y \in B$ gives $k^t(w \mid y) = 0$, forcing $p_\infty(w) = 0$. Thus $p_\infty$ is artificially forced to be exactly zero on all of $X = A \cup B$, which directly contradicts the requirement that valid probability distributions must sum to 1 ($\sum_v p_\infty(v) = 1$).
+    2. **Deterministic cycles:** Suppose the transitions force the chain to alternate between disjoint sets $A$ and $B$ at every step. This means $k(x' \mid x) = 0$ if $x$ and $x'$ belong to the same set.
+       If we start at $x \in A$, then $k^1$ forces us to $B$, $k^2$ forces us back to $A$, $k^3$ to $B$, and so forth. The terminal probability mass oscillates indefinitely depending on whether $t$ is even or odd. The point-wise limit $\lim_{t \to \infty} k^t(z \mid x)$ structurally does not exist.
+
+- It turns out that these are the only things that can go wrong. **Conditions for Ergodicity**:
+    1. **Irreducible:** The transitions can eventually reach any state from any other state. Formally, for any $x, x' \in X$, there exists some $t > 0$ such that the multi-step transition probability is strictly positive: $k^t(x' \mid x) > 0$.
+    2. **Aperiodic:** The transitions do not get stuck in deterministic, alternating loops. Formally, let $R(x) = \{ t \ge 1 \mid k^t(x \mid x) > 0 \}$ be the set of valid return times to state $x$. The condition requires that the greatest common divisor (GCD) of $R(x)$ is $1$. This rules out the possibility that $R(x) = \{d, 2d, 3d, \dots\}$, for $d>1$, which would mean that it is possible for the chain to return to $x$ with periodicity $d$.
+
+- **The Infinite Visits Lemma:** A fundamental consequence of a finite, irreducible state space is that a particle starting anywhere will visit every state infinitely many times with probability 1. 
+  *Proof:* Suppose a trajectory never reaches a target state $z$. Since the state space is finite, this infinitely long trajectory must visit some state $w$ infinitely many times. Because the chain is irreducible, there exists a path from $w$ to $z$ taking $t > 0$ steps with strictly positive probability $k^t(z \mid w) := c > 0$. By considering only visits to $w$ spaced at least $t$ steps apart, the trajectory gets infinitely many independent chances to hit $z$. The probability of missing $z$ across $n$ such attempts is bounded by $(1-c)^n$. As $n \to \infty$, this vanishes to zero. Thus, the particle hits $z$ with probability 1. By the Markov property, once $z$ is reached, the future trajectory acts as a fresh start, which by the identical logic must eventually reach $z$ again with probability 1. This unending chain of guaranteed returns ensures $z$ is visited infinitely many times.
+
+- We can mathematically prove that these properties guarantee convergence by tracking probability paths. We fix an arbitrary target state $x$ and build the proof in three logical steps:
+  1. **Aperiodicity guarantees a limit:** Because the chain is aperiodic, the transitions do not oscillate indefinitely. This ensures the point-wise probability limits mathematically exist. Let us denote the limiting distribution for trajectories starting at $x$ as $p_x(z) = \lim_{t \to \infty} k^t(z \mid x)$.
+  2. **Irreducibility forces intersection:** We must show that from any arbitrary starting point $y$, the particle will eventually reach $x$. This is directly guaranteed by the Infinite Visits Lemma: the chance of a trajectory avoiding $x$ forever is exactly $0$. 
+  3. **The Markov property unifies the limits:** What happens to trajectories originating at $y$? We calculate the probability of ending at $z$ at time $t$ by conditioning on the *first* time $T=s$ the trajectory hits $x$. For any fixed hitting time $s \le t$, the probability of this joint sequence is the product of two parts: the probability $\mathbb{P}(T=s)$ of hitting $x$ precisely at step $s$, and the conditional probability of then proceeding to $z$ in the remaining $t-s$ steps. By the Markov property, once the particle is at $x$, it loses all memory of its initial journey from $y$. Its future trajectory behaves exactly as if it had freshly started at $x$, making this conditional probability simply $k^{t-s}(z \mid x)$. We can express the total multi-step transition probability by summing over all valid hitting times:
+     $$ k^t(z \mid y) = \sum_{s=1}^t \mathbb{P}(T=s) k^{t-s}(z \mid x) + \mathbb{P}(T > t \text{ and state is } z) $$
+     As $t \to \infty$, the rightmost term decays to exactly $0$ because the probability of avoiding $x$ vanishes. Within the summation, as $t$ grows infinitely large, the finite delay $s$ is washed away. The trajectory suffixes evaluate to $\lim_{t \to \infty} k^{t-s}(z \mid x)$, which intrinsically converges to our established limit $p_x(z)$. 
+     Because Step 2 guarantees that all paths ultimately hit $x$ with total probability mass equal to 1 ($\sum_{s=1}^\infty \mathbb{P}(T=s) = 1$), the infinite integral evaluates clearly: $k^t(z \mid y)$ is structurally just a weighted average of terms that all inevitably converge to $p_x(z)$. Therefore, the equation collapses gracefully, proving mathematically that $\lim_{t \to \infty} k^t(z \mid y) = p_x(z)$.
+- Thus, the terminal limits identically match ($p_y(z) = p_x(z)$) for all starting points $y$. The transition kernel is globally ergodic.
+
+- Suppose we track a single particle in an ergodic chain over $N$ time steps: $x_1, x_2, \dots, x_N$. How can we mathematically justify that the time average over this single dependent path converges to the global spatial expectation $\mathbb{E}_{x \sim p_\infty}[f(x)]$?
+- We can prove this by carving the single long trajectory into a sequence of functionally independent chunks, called "excursions":
+  1. **Defining Excursions:** Pick an arbitrary reference state $x^*$. By the Infinite Visits Lemma, the particle will return to $x^*$ infinitely many times. Let the time steps of these returns be $T_1, T_2, \dots$. An *excursion* is the sequence of states between two consecutive visits: $(x_{T_i}, \dots, x_{T_{i+1}-1})$.
+  2. **Independence:** Because of the Markov property, every time the particle arrives at $x^*$, it completely forgets its past. The subsequent excursion depends only on the fact that it started at $x^*$. Therefore, the sequence of excursions are independent and identically distributed (i.i.d.).
+  3. **Applying the Law of Large Numbers:** For each excursion $i$, we consider the sum of our function over its steps, $\sum_{t=T_i}^{T_{i+1}-1} f(x_t)$, alongside its duration $L_i = T_{i+1} - T_i$. Because the excursions themselves are i.i.d., these partial sums and durations act as standard independent random variables. The overall time average across $m$ complete excursions is simply the sum of all these partial sums divided by the total duration. By dividing both numerator and denominator by $m$, the Law of Large Numbers reveals the limit:
+  $$ \frac{\sum_{i=1}^m \sum_{t=T_i}^{T_{i+1}-1} f(x_t)}{\sum_{i=1}^m L_i} = \frac{\frac{1}{m} \sum_{i=1}^m \left( \sum_{t=T_i}^{T_{i+1}-1} f(x_t) \right)}{\frac{1}{m} \sum_{i=1}^m L_i} \xrightarrow{m \to \infty} \frac{\mathbb{E}\left[ \sum_{\text{excursion}} f(x_t) \right]}{\mathbb{E}[L]} $$
+  (The raw time average over $N$ steps converges to this exact same ratio, since the final incomplete excursion becomes negligible).
+  4. **Connecting to $p_\infty$:** To see why this ratio of expectations perfectly matches the spatial expectation, we unroll it in three progressive steps:
+     * **Step A (The Indicator):** Let's test an indicator function that returns $1$ if the particle is in a target state $z$, and $0$ otherwise. For this function, the inner sum simply counts the total number of visits to $z$ during one excursion. The expected limit ratio is therefore $\frac{\mathbb{E}[\text{visits to } z]}{\mathbb{E}[L]}$.
+     * **Step B (Empirical Probability):** Over the long run, the time average of this indicator function represents the empirical fraction of time the particle spends in state $z$. Because the chain is ergodic, the probability of finding the particle in state $z$ converges universally to $p_\infty(z)$. Therefore, this empirical long-term time fraction must exactly equal the stationary probability: $\frac{\mathbb{E}[\text{visits to } z]}{\mathbb{E}[L]} = p_\infty(z)$.
+     * **Step C (Linearity for general $f$):** For any general $f(x)$, we can evaluate the excursion sum by changing our perspective. Instead of summing chronologically over the time steps, we can group the terms purely by state: the total sum $\sum_{\text{excursion}} f(x_t)$ is mathematically identical to taking the value $f(z)$ multiplied by the exact number of times state $z$ was visited, summed over all possible states $z \in X$. By taking the expectation of this spatial grouping, we get $\mathbb{E}\left[ \sum_{\text{excursion}} f(x_t) \right] = \sum_{z \in X} f(z) \mathbb{E}[\text{visits to } z]$. Substituting this into our limit ratio elegantly reconstructs the global spatial expectation:
+     $$ \lim_{N \to \infty} \frac{1}{N} \sum_{t=1}^N f(x_t) = \frac{\sum_{z \in X} f(z) \mathbb{E}[\text{visits to } z]}{\mathbb{E}[L]} = \sum_{z \in X} f(z) \underbrace{\frac{\mathbb{E}[\text{visits to } z]}{\mathbb{E}[L]}}_{=\, p_\infty(z)} = \mathbb{E}_{x \sim p_\infty}[f(x)] $$
+
+- [Illustrate with simulation.]
+
+## Metropolis-Hastings
+
+- **The Engineering Goal:** In MCMC, we start with a known target distribution $p_\infty$ that we cannot sample from directly. Our goal is to engineer a transition kernel $k$ that has $p_\infty$ as its stationary distribution ($p_\infty = p_\infty \then k$). By simulating the trajectory of a particle governed by this kernel, we can treat the later states of the trajectory as approximate samples from $p_\infty$, allowing us to compute expectations.
+
+- **Detailed Balance:** Solving the global fixed-point equation $p_\infty = p_\infty \then k$ directly is difficult. Instead, we enforce a much simpler, local condition called *detailed balance*:
+  $$ p_\infty(x) k(x' \mid x) = p_\infty(x') k(x \mid x') $$
+  Intuitively, this means that in the stationary state, the flow of particles from $x$ to $x'$ identically matches the flow from $x'$ to $x$. If all pairwise flows perfectly cancel out, the total number of particles at any state never changes, implying global stationarity. We can prove this in one line:
+  $$ (p_\infty \then k)(x') = \sum_{x \in X} p_\infty(x) k(x' \mid x) \overset{\text{DB}}{=} \sum_{x \in X} p_\infty(x') k(x \mid x') = p_\infty(x') \underbrace{\sum_{x \in X} k(x \mid x')}_{=1} = p_\infty(x') $$
+
+- **Constructing the Kernel:** We start with an arbitrary proposal kernel $q(x' \mid x)$ that is easy to simulate from. If we just used $q$, the raw particle flow from $x$ to $x'$ would be $p_\infty(x) q(x' \mid x)$ and the reverse flow would be $p_\infty(x') q(x \mid x')$. Almost always, these flows are imbalanced.
+
+- **The "Turnstile" Acceptance Filter:** To enforce detailed balance, we introduce an acceptance probability $\alpha(x' \mid x)$. When a transition to $x'$ is proposed, the particle successfully moves with probability $\alpha(x' \mid x)$; otherwise, it is rejected and stays at $x$. 
+
+- **Balancing the Flows:** We use $\alpha$ to artificially throttle the larger flow so it perfectly matches the smaller reverse flow. 
+  - If the proposed flow $x \to x'$ is larger than the reverse flow $x' \to x$, we allow all reverse moves without restriction ($\alpha(x \mid x') = 1$), but we restrict the forward moves so that:
+  $$ p_\infty(x) q(x' \mid x) \alpha(x' \mid x) = p_\infty(x') q(x \mid x') \cdot 1 $$
+
+- **The Metropolis-Hastings Ratio:** Solving this balance equation gives the classic acceptance probability. The probability of accepting a proposed move from $x$ to $x'$ is exactly the ratio of the opposing raw flow to the proposed raw flow (capped at 1):
+  $$ \alpha(x' \mid x) = \min\left(1, \frac{p_\infty(x') q(x \mid x')}{p_\infty(x) q(x' \mid x)}\right) $$
