@@ -1,0 +1,15 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (0) at (-2.5, 0) {$k$};
+		\node [style=small box] (1) at (-4.5, 0) {$p_\infty$};
+		\node [style=none] (2) at (-1, 0) {};
+		\node [style=none] (3) at (0, 0) {$=$};
+		\node [style=none] (4) at (3.75, 0) {};
+		\node [style=small box] (5) at (2, 0) {$p_\infty$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (1) to (0);
+		\draw [style=edge] (0) to (2.center);
+		\draw [style=edge] (5) to (4.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
