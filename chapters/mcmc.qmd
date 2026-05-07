@@ -53,13 +53,13 @@ for _t in range(max(_ALL_T) + 1):
 
 ```{python}
 #| label: fig-particle-cloud
-#| fig-cap: "Ten insects tracked under overdamped Langevin dynamics toward the light source at the origin. Each coloured trail shows one insect's path over the preceding 30 steps. Starting scattered across the field at $t=0$, the insects drift toward the light; by $t = 400$ all ten orbit close to it."
+#| fig-cap: "Ten insects following overdamped Langevin dynamics toward the light source at the origin."
 #| echo: false
 _T1 = [0, 20, 80, 400]
 _TAIL = 30
 _LIM1 = _BOX * 1.02
 
-fig, axes = plt.subplots(2, 2, figsize=(4, 4))
+fig, axes = plt.subplots(1, 4, figsize=(7, 3))
 fig.patch.set_alpha(0)
 fig.subplots_adjust(
     wspace=0.03, hspace=0.06, left=0.01, right=0.99, top=0.97, bottom=0.01
@@ -115,19 +115,19 @@ We have already seen that this kind of model is called a **Markov chain**. In st
 ``` {.tikz file="mcmc/markov-chain.tikz"}
 %%| label: Markov chain
 %%| fig-cap: A Markov chain with transition kernel $k : X \kernel X$ and initial distribution $p_0 : I \kernel X$.
-%%| height: 2.5em
+%%| height: 3em
 ```
 
 Run the dynamics long enough and something striking happens. Although every individual particle keeps moving, the *shape* of the cloud stops changing. The population settles into a fixed pattern: as many particles flow into each region as flow out. This fixed pattern is the **stationary distribution**.
 
 ```{python}
 #| label: fig-stationary-convergence
-#| fig-cap: "All 400 particles under the same Langevin dynamics. The dashed circles mark the 1σ and 2σ contours of the stationary $\\mathcal{N}(0, I)$. Starting from a uniform scatter, the cloud contracts inward; by $t = 250$ almost all mass sits within the 2σ ring, and by $t = 400$ the empirical distribution has settled into the stationary Gaussian."
+#| fig-cap: "400 insects under the same Langevin dynamics. The dashed circles mark the 1σ and 2σ contours of the stationary $\\mathcal{N}(0, I)$. Starting from a uniform scatter, the cloud progressively contracts inward, settling into the stationary Gaussian."
 #| echo: false
 _T2 = [0, 10, 40, 100, 250, 400]
 _LIM2 = _BOX * 0.88
 
-fig2, axes2 = plt.subplots(3, 2, figsize=(4, 6))
+fig2, axes2 = plt.subplots(2, 3, figsize=(7, 3.5))
 fig2.patch.set_alpha(0)
 fig2.subplots_adjust(
     wspace=0.03, hspace=0.06, left=0.01, right=0.99, top=0.97, bottom=0.01
@@ -179,11 +179,11 @@ $$
 p_\infty = p_\infty \then k.
 $$
 
-In string diagrams, this means
+In string diagrams,
 
 ``` {.tikz file="mcmc/stationary.tikz"}
 %%| label: Stationary distribution
-%%| height: 3.5em
+%%| height: 3em
 ```
 
 :::
@@ -198,7 +198,7 @@ Imagine the population in stationarity. The reason certain regions have more par
 
 ```{python}
 #| label: fig-ergodic-visits
-#| fig-cap: "**Left:** A single insect (grey dot = start, blue dot = end) drifting under Langevin dynamics; blue segments are inside region $R$. **Right:** grey band — instantaneous fraction of a 400-particle population (drawn from $\\mathcal{N}(0,I)$) inside $R$, flat around $p_\\infty(R)$ from the start; blue — running time average of the single trajectory, which starts at 0 and converges upward to meet the population fraction. The two quantities settle at the same level, illustrating the ergodic theorem."
+#| fig-cap: "**Left:** A single insect (grey dot = start, blue dot = end) drifting under Langevin dynamics. **Right:** Instantaneous fraction of a 400-particle population inside $R$ (grey), and running time average of the single trajectory (blue). The two quantities settle at the same level, illustrating the ergodic theorem."
 #| echo: false
 #| fig-width: 7
 #| fig-height: 3.2
@@ -288,7 +288,7 @@ _axL.add_collection(
 )
 _axL.add_collection(
     LineCollection(
-        _segs_e[_inside_traj_e[:-1]], colors="#2255aa", lw=1.5, alpha=0.80, zorder=4
+        _segs_e[_inside_traj_e[:-1]], colors="#2255aa", lw=0.5, alpha=0.30, zorder=4
     )
 )
 _axL.scatter(*_traj_e[0], s=50, c="#555555", zorder=6, edgecolors="#333333", lw=0.5)
@@ -364,7 +364,9 @@ from matplotlib.collections import LineCollection
 _rng_ra = np.random.default_rng(42)
 _BLUE_RA, _RED_RA = "#3366aa", "#aa3333"
 
-_fig_ra, _axes_ra = plt.subplots(1, 2, figsize=(7, 3.2), gridspec_kw={"width_ratios": [1, 1.1]})
+_fig_ra, _axes_ra = plt.subplots(
+    1, 2, figsize=(7, 3.2), gridspec_kw={"width_ratios": [1, 1.1]}
+)
 _fig_ra.patch.set_alpha(0)
 _fig_ra.subplots_adjust(wspace=0.18, left=0.03, right=0.97, top=0.88, bottom=0.08)
 
@@ -381,7 +383,9 @@ for _sp in _axDC.spines.values():
 for _x0, _w in [(-3, 3), (0, 3)]:
     _axDC.add_patch(Rectangle((_x0, -3), _w, 6, fill=False, ec="#888888", lw=1.0))
 _axDC.axvline(0, color="#333333", lw=3.0, zorder=5)
-_axDC.text(-1.5, 3.1, "$A$", ha="center", color=_BLUE_RA, fontsize=13, fontweight="bold")
+_axDC.text(
+    -1.5, 3.1, "$A$", ha="center", color=_BLUE_RA, fontsize=13, fontweight="bold"
+)
 _axDC.text(1.5, 3.1, "$B$", ha="center", color=_RED_RA, fontsize=13, fontweight="bold")
 
 
@@ -441,9 +445,12 @@ _axTR.legend(framealpha=0.3, fontsize=8, loc="upper left")
 plt.show()
 ```
 
-Formally, the correct reachability condition is **Harris recurrence**: For all "interesting"[^1] sets $A$, the chain must return to $A$ infinitely often with probability $1$ when started from any state. 
+Formally, the correct reachability condition is **Harris recurrence**: For all "interesting" measurable sets $A$, the chain must return to $A$ infinitely often starting from any state. The qualifier "interesting" is needed to rule out sets of measure zero that the chain can never hit. Formally, such sets are quantified with respect to a reference measure $\psi$.
 
-[^1]: There exists a non-trivial $\sigma$-finite measure $\psi$ such that whenever $\psi(A) > 0$, the chain returns to $A$ infinitely often with probability $1$.
+::: {#def-harris-recurrence}
+
+A probability kernel $k: X \kernel X$ is **Harris recurrent** if there exists a non-zero $\sigma$-finite measure $\psi$ such that whenever $\psi(A) > 0$, the chain returns to $A$ infinitely often with probability $1$, starting from any state $x$.
+:::
 
 Provided the kernel has a stationary distribution, Harris recurrence is sufficient for temporal averages to converge to spatial averages over $p_\infty$. However, for the iterated kernel $k^N$ to converge to $p_\infty$ regardless of initial distribution, we need a further condition:
 
@@ -460,62 +467,111 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 
 _rng_pb = np.random.default_rng(11)
-_BLUE_PB, _RED_PB, _ORG_PB = '#3366aa', '#aa3333', '#cc6600'
+_BLUE_PB, _RED_PB, _ORG_PB = "#3366aa", "#aa3333", "#cc6600"
 _N_PB = 40
 _AX_PB, _BX_PB, _RAD_PB = -1.6, 1.6, 0.90
 
-_fig_pb, _axes_pb = plt.subplots(1, 2, figsize=(7, 3.2),
-                                   gridspec_kw={'width_ratios': [1.6, 1]})
+_fig_pb, _axes_pb = plt.subplots(
+    1, 2, figsize=(7, 3.2), gridspec_kw={"width_ratios": [1.6, 1]}
+)
 _fig_pb.patch.set_alpha(0)
 _fig_pb.subplots_adjust(wspace=0.16, left=0.04, right=0.97, top=0.88, bottom=0.10)
 
 # --- Left: blob diagram ---
 _axBL = _axes_pb[0]
-_axBL.set_facecolor('none')
-_axBL.set_xlim(-3.1, 3.1); _axBL.set_ylim(-1.8, 1.8)
-_axBL.set_aspect('equal'); _axBL.set_xticks([]); _axBL.set_yticks([])
-for _sp in _axBL.spines.values(): _sp.set_visible(False)
-for _cx, _lbl, _col in [(_AX_PB, '$A$', _BLUE_PB), (_BX_PB, '$B$', _RED_PB)]:
+_axBL.set_facecolor("none")
+_axBL.set_xlim(-3.1, 3.1)
+_axBL.set_ylim(-1.8, 1.8)
+_axBL.set_aspect("equal")
+_axBL.set_xticks([])
+_axBL.set_yticks([])
+for _sp in _axBL.spines.values():
+    _sp.set_visible(False)
+for _cx, _lbl, _col in [(_AX_PB, "$A$", _BLUE_PB), (_BX_PB, "$B$", _RED_PB)]:
     _axBL.add_patch(Circle((_cx, 0), _RAD_PB, color=_col, alpha=0.08))
-    _axBL.add_patch(Circle((_cx, 0), _RAD_PB, color=_col, fill=False, lw=1.5, ls='--', alpha=0.55))
-    _axBL.text(_cx, _RAD_PB + 0.20, _lbl, ha='center', color=_col, fontsize=13, fontweight='bold')
-_axBL.annotate('', xy=(_BX_PB - _RAD_PB - 0.10,  0.12),
-               xytext=(_AX_PB + _RAD_PB + 0.10,  0.12),
-               arrowprops=dict(arrowstyle='->', color='#555555', lw=1.4))
-_axBL.annotate('', xy=(_AX_PB + _RAD_PB + 0.10, -0.12),
-               xytext=(_BX_PB - _RAD_PB - 0.10, -0.12),
-               arrowprops=dict(arrowstyle='->', color='#555555', lw=1.4))
-_axBL.text(0, 0.30, 'every step', ha='center', color='#555555', fontsize=8)
+    _axBL.add_patch(
+        Circle((_cx, 0), _RAD_PB, color=_col, fill=False, lw=1.5, ls="--", alpha=0.55)
+    )
+    _axBL.text(
+        _cx,
+        _RAD_PB + 0.20,
+        _lbl,
+        ha="center",
+        color=_col,
+        fontsize=13,
+        fontweight="bold",
+    )
+_axBL.annotate(
+    "",
+    xy=(_BX_PB - _RAD_PB - 0.10, 0.12),
+    xytext=(_AX_PB + _RAD_PB + 0.10, 0.12),
+    arrowprops=dict(arrowstyle="->", color="#555555", lw=1.4),
+)
+_axBL.annotate(
+    "",
+    xy=(_AX_PB + _RAD_PB + 0.10, -0.12),
+    xytext=(_BX_PB - _RAD_PB - 0.10, -0.12),
+    arrowprops=dict(arrowstyle="->", color="#555555", lw=1.4),
+)
+_axBL.text(0, 0.30, "every step", ha="center", color="#555555", fontsize=8)
 _pts_A = _rng_pb.normal([_AX_PB, 0], [0.28, 0.28], (_N_PB, 2))
 _pts_B = _rng_pb.normal([_BX_PB, 0], [0.28, 0.28], (_N_PB, 2))
-_axBL.scatter(_pts_A[:,0], _pts_A[:,1], s=16, c=_BLUE_PB, alpha=0.85, zorder=4,
-              edgecolors='none', label='$t=0,2,4,\\ldots$ (in $A$)')
-_axBL.scatter(_pts_B[:,0], _pts_B[:,1], s=16, c=_RED_PB,  alpha=0.35, zorder=3,
-              edgecolors='none', label='$t=1,3,5,\\ldots$ (in $B$)')
-_axBL.set_title('Periodic 2-cycle: particles swap $A \\leftrightarrow B$ every step',
-                color='#333333', fontsize=9, pad=5)
+_axBL.scatter(
+    _pts_A[:, 0],
+    _pts_A[:, 1],
+    s=16,
+    c=_BLUE_PB,
+    alpha=0.85,
+    zorder=4,
+    edgecolors="none",
+    label="$t=0,2,4,\\ldots$ (in $A$)",
+)
+_axBL.scatter(
+    _pts_B[:, 0],
+    _pts_B[:, 1],
+    s=16,
+    c=_RED_PB,
+    alpha=0.35,
+    zorder=3,
+    edgecolors="none",
+    label="$t=1,3,5,\\ldots$ (in $B$)",
+)
+_axBL.set_title(
+    "Periodic 2-cycle: particles swap $A \\leftrightarrow B$ every step",
+    color="#333333",
+    fontsize=9,
+    pad=5,
+)
 
 # --- Right: fraction in A vs t ---
 _axFR = _axes_pb[1]
-_axFR.set_facecolor('none')
-for _sp in _axFR.spines.values(): _sp.set_color('#cccccc')
-_axFR.tick_params(colors='#555555', labelsize=8)
+_axFR.set_facecolor("none")
+for _sp in _axFR.spines.values():
+    _sp.set_color("#cccccc")
+_axFR.tick_params(colors="#555555", labelsize=8)
 _T_PB = 10
 _ts_pb = np.arange(_T_PB + 1)
 _frac_pb = np.array([1.0 if _t % 2 == 0 else 0.0 for _t in _ts_pb])
-_axFR.step(_ts_pb, _frac_pb, color=_BLUE_PB, lw=1.8, where='post', label='fraction in $A$')
-_axFR.axhline(0.5, color=_ORG_PB, ls='--', lw=1.4, label='$p_\\infty(A) = 0.5$')
-_axFR.set_xlabel('step $t$', color='#333333', fontsize=9)
-_axFR.set_ylabel('fraction in $A$', color='#333333', fontsize=9)
-_axFR.set_ylim(-0.12, 1.18); _axFR.set_xlim(0, _T_PB)
+_axFR.step(
+    _ts_pb, _frac_pb, color=_BLUE_PB, lw=1.8, where="post", label="fraction in $A$"
+)
+_axFR.axhline(0.5, color=_ORG_PB, ls="--", lw=1.4, label="$p_\\infty(A) = 0.5$")
+_axFR.set_xlabel("step $t$", color="#333333", fontsize=9)
+_axFR.set_ylabel("fraction in $A$", color="#333333", fontsize=9)
+_axFR.set_ylim(-0.4, 1.4)
+_axFR.set_xlim(0, _T_PB)
 _axFR.set_yticks([0, 0.5, 1.0])
 _axFR.set_xticks(range(0, _T_PB + 1, 2))
-_axFR.set_title('Distribution never settles', color='#333333', fontsize=9, pad=5)
-_axFR.legend(framealpha=0.4, fontsize=8, loc='upper right')
+_axFR.set_title("Distribution never settles", color="#333333", fontsize=9, pad=5)
+_axFR.legend(framealpha=0.4, fontsize=8, loc="upper right")
 plt.show()
 ```
 
-Formally, the condition that rules this out is **aperiodicity**: There is no sequence of non-empty sets $A_1, A_2, \ldots, A_k$ such that the chain must cycle through them in order.
+Formally, the condition that rules this out is **aperiodicity**: the chain must not be forced to cycle through a sequence of disjoint sets in a fixed order.
+
+::: {#def-aperiodicity}
+A probability kernel $k: X \kernel X$ is **aperiodic** if there is no sequence of non-empty disjoint measurable sets $A_1, A_2, \ldots, A_k$ with $k \ge 2$ such that the chain must cycle through them in order. In other words, we must not have $k(A_{i+1} \mid x) = 1$ for all $x \in A_i$ and $i = 1, \ldots, k$ (treating $A_{k+1} = A_1$).
+:::
 
 ## Metropolis-Hastings
 
@@ -604,7 +660,7 @@ The case $x = x'$ is trivial since the flow from $x$ to itself is just the proba
 An important feature of the formula is that $p_\infty$ enters only through the ratio $p_\infty(x') / p_\infty(x)$. Hence the algorithm only needs to evaluate $p_\infty$ up to an unknown normalizing constant. In the Bayesian setting, the target distribution is the posterior 
 $$p_\infty(\theta) = p(\theta \mid y) = \frac{p(y ,\theta)}{p(y)}.$$ 
 
-Since the normalizing constant $p(y)$ cancels in the ratio, we can compute the acceptance probability using only the joint distribution $p(y ,\theta)$ over the parameters and data. 
+Since the normalizing constant $p(y)$ cancels in the ratio $p_\infty(\theta') / p_\infty(\theta)$, we can compute the acceptance probability using only the joint distribution $p(y ,\theta)$ over the parameters and data. 
 
 In a generative model composed of several kernels, the joint distribution accross all variables factorizes into a product of kernels by copy-composition. Hence, computing this quantity is straightforward: we just multiply the densities of all kernels in the model evaluated at the current state. In practice, we work with log-densities to avoid numerical underflow and to turn products into sums.
 
@@ -635,7 +691,7 @@ Hence, Harris recurrence and aperiodicity are not usually a concern for MH sampl
 
 ### Composing MH steps
 
-So far we have treated the proposal $q$ as a single distribution that updates *all* parameters at once. Nothing in the construction forces this. If $K_1, K_2, \dots, K_m$ are each MH kernels that leave the same target $p_\infty$ stationary, then any composition $K_m \circ \cdots \circ K_1$ — applying the kernels in sequence — also leaves $p_\infty$ stationary. This gives us the freedom to **break a single MH update into a sequence of smaller MH updates**, each acting on a different *block* of parameters while holding the rest fixed.
+So far we have treated the proposal $q$ as a single distribution that updates *all* parameters at once. Nothing in the construction forces this. If $K_1, K_2, \dots, K_m$ are each MH kernels that leave the same target $p_\infty$ stationary, then any composition $K_1 ; \cdots ; K_m$ also leaves $p_\infty$ stationary. This gives us the freedom to **break a single MH update into a sequence of smaller MH updates**, each acting on a different *block* of parameters while holding the rest fixed.
 
 Concretely, partition $\theta = (\theta_1, \dots, \theta_m)$ into blocks. The $i$-th sub-step proposes a new value $\theta_i'$ from a block proposal $q_i(\theta_i' \mid \theta)$ and accepts it with the usual MH ratio, treating the other blocks as constants in the target:
 $$
@@ -646,9 +702,9 @@ Each sub-step satisfies detailed balance for $p_\infty$ on its own, so their com
 The trade-off is the same one we saw between tiny and large steps, but along a different axis. A block update changes fewer coordinates at a time, so the proposed state is "closer" to the current one in joint log-density and is more likely to be accepted. The price is that traversing the full parameter space now takes $m$ sub-steps instead of one, and each sub-step typically requires its own evaluation of $p_\infty$. Block updates are especially useful when different parameters have very different scales or when the posterior is strongly correlated only *within* certain groups of parameters: a single joint proposal would have to compromise on a step size that works for all of them, while block proposals can be tuned per-block.
 
 ### The Gibbs sampler
-The Gibbs sampler is the limiting case of block-MH in which each block proposal is the *exact* conditional distribution $q_i(\theta_i' \mid \theta) = p_\infty(\theta_i' \mid \theta_{-i})$. Plugging this into the block MH ratio, the joint density factors as $p_\infty(\theta) = p_\infty(\theta_i \mid \theta_{-i}) \, p_\infty(\theta_{-i})$, the marginal $p_\infty(\theta_{-i})$ cancels, and the conditional terms cancel against the proposal ratio. The result is $\alpha_i = 1$: every Gibbs proposal is accepted by construction. A full sweep cycles through the blocks $\theta_1, \theta_2, \dots, \theta_m$, drawing each one from its conditional given the current values of the others.
+The Gibbs sampler is the limiting case of block-MH in which each block proposal is the *exact* conditional distribution $q_i(\theta_i' \mid \theta) = p_\infty(\theta_i' \mid \theta_{-i})$, where $\theta_{-i}$ denotes all components of $\theta$ except $\theta_i$. Plugging this into the block MH ratio, the joint density factors as $p_\infty(\theta) = p_\infty(\theta_i \mid \theta_{-i}) \, p_\infty(\theta_{-i})$, the marginal $p_\infty(\theta_{-i})$ cancels, and the conditional terms cancel against the proposal ratio. The result is $\alpha_i = 1$: every Gibbs proposal is accepted by construction. A full sweep cycles through all blocks $\theta_i$, drawing each one from its conditional given the current values of the others.
 
-The appeal of Gibbs sampling is that there are no rejected steps, no autocorrelation from duplicated samples, and no proposal parameters to tune. The catch is that we need to be able to *sample exactly* from each conditional $p_\infty(\theta_i \mid \theta_{-i})$. This is only tractable for specific model structures, most notably **conditionally conjugate** Bayesian models. Outside that regime the conditionals have no closed form and Gibbs is no longer applicable. Even when it does apply, Gibbs can mix poorly along directions of strong posterior correlation, because each sub-step is constrained to move along a single coordinate axis. Modern gradient-based samplers like HMC sidestep both limitations by exploiting the joint geometry directly, which is why this chapter focuses on them.
+The appeal of Gibbs sampling is that there are no rejected steps, no autocorrelation from duplicated samples, and no proposal parameters to tune. The catch is that we need to be able to *sample exactly* from each conditional $p_\infty(\theta_i \mid \theta_{-i})$. This is only tractable for specific model structures. Outside that regime the conditionals have no closed form and Gibbs is no longer applicable. Even when it does apply, Gibbs can mix poorly along directions of strong posterior correlation, because each sub-step is constrained to move along a single coordinate axis. Modern gradient-based samplers like HMC sidestep both limitations by exploiting the joint geometry directly, which is why this chapter focuses on them.
 
 ## Coding MH samplers
 
@@ -825,17 +881,14 @@ We now implement four progressively more sophisticated proposals and compare the
 #| label: multi-chain
 #| code-fold: false
 def run_chains(key, log_p, propose, n_steps, n_chains, init_scale=0.5):
-    """Run n_chains independent chains from Gaussian starts."""
+    """Run n_chains independent chains from Gaussian starts (vectorised over chains)."""
     keys = random.split(key, 2 * n_chains)
     init_keys, run_keys = keys[:n_chains], keys[n_chains:]
 
-    trajs, all_accepts = [], []
-    for ki, kr in zip(init_keys, run_keys):
-        theta0 = init_scale * random.normal(ki, (d + 1,))
-        traj, accepts = run_mh(kr, theta0, log_p, propose, n_steps)
-        trajs.append(traj)
-        all_accepts.append(accepts)
-    return jnp.stack(trajs), jnp.stack(all_accepts)
+    theta0s = init_scale * jax.vmap(lambda k: random.normal(k, (d + 1,)))(init_keys)
+    run_one = lambda kr, t0: run_mh(kr, t0, log_p, propose, n_steps)
+    trajs, accepts = jax.vmap(run_one)(run_keys, theta0s)
+    return trajs, accepts
 ```
 
 ```{python}
@@ -844,7 +897,7 @@ def run_chains(key, log_p, propose, n_steps, n_chains, init_scale=0.5):
 import arviz as az
 import matplotlib.pyplot as plt
 
-n_steps, n_chains, warmup = 10_000, 4, 2_000
+n_steps, n_chains, warmup = 3_000, 4, 2_000
 param_names = [f"beta_{j}" for j in range(d)] + ["log_sigma"]
 
 
@@ -866,20 +919,26 @@ def evaluate(name, propose, key):
 
     # Trace plot keeps burn-in visible so we can see chains converge.
     idata_full = to_idata(trajs, warmup=0)
-    az.plot_trace(idata_full, var_names=["beta_0", "log_sigma"],
-                  figure_kwargs={"figsize": (10, 3)})
-    plt.suptitle(f"{name} — trace", y=1.02); plt.tight_layout(); plt.show()
+    az.plot_trace(
+        idata_full, var_names=["beta_0", "log_sigma"], figure_kwargs={"figsize": (7, 2)}
+    )
+    plt.suptitle(f"{name} — trace", y=1.02)
+    plt.tight_layout()
+    plt.show()
 
     # Rank plot and summary use only the post-warmup samples.
     idata = to_idata(trajs, warmup)
-    az.plot_rank(idata, var_names=["beta_0", "log_sigma"],
-                 figure_kwargs={"figsize": (10, 2)})
-    plt.suptitle(f"{name} — rank", y=1.02); plt.tight_layout(); plt.show()
+    az.plot_rank(
+        idata, var_names=["beta_0", "log_sigma"], figure_kwargs={"figsize": (7, 2)}
+    )
+    plt.suptitle(f"{name} — rank", y=1.02)
+    plt.tight_layout()
+    plt.show()
 
     return az.summary(idata)
 ```
 
-We will use the same number of steps, chains, and warmup for every proposal, so any difference in the diagnostics reflects a difference in the proposal itself rather than in the experimental setup.
+We will use the same number of steps, chains, and warmup for every proposal, so any difference in the diagnostics reflects a difference in the proposal itself rather than in the experimental setup. We purposefully include the burn-in in the trace plot so we can see how quickly the chains converge.
 
 Each proposal below is written as a small *factory* that fixes a tuning parameter (e.g. a step size) and returns the actual proposal function with the required `(key, theta, log_p) -> (theta', log_q_ratio)` signature. This keeps tuning parameters out of the sampler loop.
 
@@ -910,11 +969,11 @@ def propose_independent(scale):
 evaluate("independent(σ=1)", propose_independent(1.0), random.PRNGKey(1))
 ```
 
-The posterior occupies a tiny corner of the proposal's support, so almost every move is rejected. The acceptance rate is near zero, the trace shows chains stuck at their starting points, the rank plot is far from uniform, and $\hat R \gg 1$ — a textbook example of a chain that has not converged.
+The posterior occupies a tiny corner of the proposal's support, so almost every move is rejected. The acceptance rate is near zero, the trace shows chains stuck at their starting points, and $\hat R \gg 1$. This is a textbook example of a chain that has not converged.
 
 ### Random-walk proposal
 
-The independent proposal ignores the current state entirely, so it cannot exploit progress that the chain has already made. A **random walk** proposal fixes this by adding Gaussian noise *to the current state*: once the chain finds a high-probability region it will tend to stay nearby. The proposal is symmetric, so $\log q$-ratio $= 0$ and the chain remains aperiodic and Harris recurrent.
+The independent proposal ignores the current state entirely, so it cannot exploit progress that the chain has already made. A **random walk** proposal fixes this by adding Gaussian noise *to the current state*: once the chain finds a high-probability region it will tend to stay nearby. The proposal is symmetric, so $\log q$-ratio $= 0$. Since the Gaussian allows proposing any value, the chain remains aperiodic and Harris recurrent.
 
 ```{python}
 #| label: proposal-random-walk
@@ -933,7 +992,7 @@ def propose_random_walk(scale):
 evaluate("random-walk(σ=0.1)", propose_random_walk(0.1), random.PRNGKey(2))
 ```
 
-The chains now converge: after a short burn-in they fluctuate around the same level, the rank plot is much closer to uniform, and ESS and $\hat R$ are reasonable. The trace plots still show visible autocorrelation, however — random-walk steps are blind to the geometry of the target, so the chain wanders inefficiently.
+The chains now converge: after a short burn-in they fluctuate around the same level, the rank plot is much closer to uniform, and ESS and $\hat R$ are good. For this simple model, a random walk with a well-chosen step size is sufficient to explore the posterior. For more complex models, however, the random walk can struggle to find and traverse narrow high-probability regions, which is why we will now look at gradient-based proposals.
 
 ### MALA proposal
 
@@ -941,20 +1000,31 @@ The random walk takes uninformed steps. The **Metropolis-adjusted Langevin algor
 $$
 \theta' = \theta + \frac{\text{scale}^2}{2} \nabla \log p(\theta) + \text{scale} \cdot \varepsilon, \qquad \varepsilon \sim \mathcal{N}(0, I).
 $$
-This allows larger steps while keeping the acceptance rate high. The proposal is asymmetric — the drift is different at $\theta$ and at $\theta'$ — so we must compute a non-trivial $\log q$-ratio. JAX gives us $\nabla \log p$ for free via `jax.grad`.
+This allows larger steps while keeping the acceptance rate high. The proposal is asymmetric: the drift is different at $\theta$ and at $\theta'$. Hence, we must compute a non-trivial $\log q$-ratio. JAX gives us $\nabla \log p$ for free via `jax.grad`. Each step now requires one gradient evaluation in addition to the usual log-density evaluation. To avoid exploding gradients, we clip the gradient to a maximum L2 norm before computing the drift.
 
 ```{python}
 #| label: proposal-mala
 #| code-fold: false
-def propose_mala(scale):
-    """Langevin proposal: theta' = theta + (scale^2 / 2) ∇log p(theta) + scale ε."""
+def propose_mala(scale, max_grad_norm=10.0):
+    """Langevin proposal: theta' = theta + (scale^2 / 2) clip(∇log p(theta)) + scale ε.
+
+    Gradients are clipped to L2 norm <= max_grad_norm before computing the drift.
+    """
+
+    def clip_grad(g):
+        norm = jnp.linalg.norm(g)
+        return jnp.where(norm > max_grad_norm, g * (max_grad_norm / norm), g)
 
     def propose(key, theta, log_p):
-        grad_log_p = jax.grad(log_p)
-        mean_fwd = theta + 0.5 * scale**2 * grad_log_p(theta)
+        val_and_grad = jax.value_and_grad(log_p)
+        _, g_fwd  = val_and_grad(theta)
+        mean_fwd  = theta + 0.5 * scale**2 * clip_grad(g_fwd)
         theta_new = mean_fwd + scale * random.normal(key, theta.shape)
 
-        mean_rev = theta_new + 0.5 * scale**2 * grad_log_p(theta_new)
+        # value_and_grad at theta_new gives both the log density (reused by mh_step
+        # via the proposal cache) and the reverse-drift gradient in one pass.
+        _, g_rev  = val_and_grad(theta_new)
+        mean_rev  = theta_new + 0.5 * scale**2 * clip_grad(g_rev)
         log_q_fwd = jnp.sum(stats.norm.logpdf(theta_new, mean_fwd, scale))
         log_q_rev = jnp.sum(stats.norm.logpdf(theta, mean_rev, scale))
         log_q_ratio = log_q_rev - log_q_fwd
@@ -966,34 +1036,32 @@ def propose_mala(scale):
 ```{python}
 #| label: eval-mala
 #| code-fold: false
-evaluate("MALA(σ=0.03)", propose_mala(0.03), random.PRNGKey(3))
+evaluate("MALA(σ=0.05)", propose_mala(0.05), random.PRNGKey(5))
 ```
-
-The trace plot is visibly less autocorrelated than for the random walk, and ESS climbs accordingly. Each step now requires one gradient evaluation in addition to the usual log-density evaluation.
 
 ### HMC proposal
 
-While MALA moves in the direction of high probability, it is unable to move well between different high-probability regions. **Hamiltonian Monte Carlo (HMC)** generates long, gradient-guided proposals by simulating the physics of a frictionless skater rolling on the landscape of the negative log target (see @BetancourtHMC2018). The key trick is to *augment* the state with an auxiliary **momentum** $p \in \mathbb{R}^d$, giving a joint distribution
+While MALA moves in the direction of high probability, it is unable to move well between different high-probability regions. **Hamiltonian Monte Carlo (HMC)** generates long, gradient-guided proposals by simulating the physics of a frictionless skater rolling on the landscape of the negative log target (see @BetancourtHMC2018). The key trick is to *augment* the state with an auxiliary **momentum** $\rho \in \mathbb{R}^d$, giving a joint distribution
 $$
-p(\theta, p) \;\propto\; \exp\bigl(-H(\theta, p)\bigr), \qquad H(\theta, p) \;=\; \underbrace{-\log p(\theta)}_{\text{potential } V(\theta)} \;+\; \underbrace{\tfrac{1}{2}\|p\|^2}_{\text{kinetic } T(p)}.
+p(\theta, \rho) \;\propto\; \exp\bigl(-H(\theta, \rho)\bigr), \qquad H(\theta, \rho) \;=\; \underbrace{-\log p(\theta)}_{\text{potential } V(\theta)} \;+\; \underbrace{\tfrac{1}{2}\|\rho\|^2}_{\text{kinetic } T(\rho)}.
 $$
-Because $p$ is independent of $\theta$ in the joint, the $\theta$-marginal is unchanged. If at each step we draw a fresh $p \sim \mathcal{N}(0, I)$ and then move along a curve of constant $H$ (i.e. exactly conserving energy), the resulting move leaves the joint invariant and we can simply discard $p$ at the end.
+Because $\rho$ is independent of $\theta$ in the joint, the $\theta$-marginal is unchanged. If at each step we draw a fresh $\rho \sim \mathcal{N}(0, I)$ and then move along a curve of constant $H$ (i.e. exactly conserving energy), the resulting move leaves the joint invariant and we can simply discard $\rho$ at the end.
 
-Such an energy-preserving curve is the solution of **Hamilton's equations** $\dot\theta = \partial H/\partial p = p$ and $\dot p = -\partial H/\partial \theta = \nabla \log p(\theta)$. We approximate them with the **leapfrog integrator**, which alternates a half-kick of momentum, a full drift of position, and another half-kick:
+Such an energy-preserving curve is the solution of **Hamilton's equations** $\dot\theta = \partial H/\partial \rho = \rho$ and $\dot\rho = -\partial H/\partial \theta = \nabla \log p(\theta)$. We approximate them with the **leapfrog integrator**, which alternates a half-kick of momentum, a full drift of position, and another half-kick:
 $$
-p_{t+1/2} = p_t + \tfrac{\varepsilon}{2}\nabla\log p(\theta_t), \qquad
-\theta_{t+1} = \theta_t + \varepsilon\, p_{t+1/2}, \qquad
-p_{t+1} = p_{t+1/2} + \tfrac{\varepsilon}{2}\nabla\log p(\theta_{t+1}).
+\rho_{t+1/2} = \rho_t + \tfrac{\varepsilon}{2}\nabla\log p(\theta_t), \qquad
+\theta_{t+1} = \theta_t + \varepsilon\, \rho_{t+1/2}, \qquad
+\rho_{t+1} = \rho_{t+1/2} + \tfrac{\varepsilon}{2}\nabla\log p(\theta_{t+1}).
 $$
-Leapfrog is **symplectic** and **time-reversible**, which is what allows a clean MH correction for the small discretisation error in $H$. Because the proposal is deterministic given $p$ and reversible, the Hastings ratio reduces to the change in joint density,
+Leapfrog is **symplectic** and **time-reversible**, properties that would make $H$ exactly conserved and every proposal accepted in the continuous limit. The finite step size $\varepsilon$ introduces a small discretisation error that causes $H$ to drift, and the MH acceptance ratio corrects for it:
 $$
 \log\alpha
-  \;=\; H(\theta, p) - H(\theta', p')
+  \;=\; H(\theta, \rho) - H(\theta', \rho')
   \;=\; \underbrace{\log p(\theta') - \log p(\theta)}_{\texttt{log\_p\_prop} - \texttt{log\_p\_theta}}
-  \;+\; \underbrace{\tfrac{1}{2}\bigl(\|p\|^2 - \|p'\|^2\bigr)}_{\texttt{log\_q\_ratio}}.
+  \;+\; \underbrace{\tfrac{1}{2}\bigl(\|\rho\|^2 - \|\rho'\|^2\bigr)}_{\texttt{log\_q\_ratio}}.
 $$
 
-The price of these long trajectories is that leapfrog is only stable when the step size $\varepsilon$ is small compared to the local curvature of $V$. Heuristically, on a quadratic well with curvature $\lambda$ the integrator behaves like a discrete harmonic oscillator and is stable only for $\varepsilon < 2/\sqrt{\lambda_{\max}}$, where $\lambda_{\max}$ is the largest eigenvalue of $\nabla^2 V$ in the region being explored. Above that bound the simulated $H$ explodes ("divergent transitions" in Stan), every proposal is rejected, and the chain freezes — a failure mode that masquerades as a bug. Tuning HMC therefore requires picking $\varepsilon$ small enough for stability and $L$ large enough to traverse the typical set without retracing steps; the NUTS sampler in tools like Stan and NumPyro automates both.
+The price of these long trajectories is that leapfrog is only stable when the step size $\varepsilon$ is small compared to the local curvature of $V$. Above that bound the simulated $H$ explodes (called "divergent transitions"), every proposal is rejected, and the chain freezes. Tuning HMC therefore requires picking $\varepsilon$ small enough for stability and $L$ large enough to traverse the typical set without retracing steps; the NUTS sampler in tools like Stan and NumPyro automates both.
 
 ```{python}
 #| label: proposal-hmc
@@ -1006,19 +1074,14 @@ def propose_hmc(step_size, n_leapfrog):
         grad_log_p = jax.grad(log_p)
         p0 = random.normal(key, theta.shape)  # fresh momentum, ~ N(0, I)
 
-        # One leapfrog step: half-kick momentum, full drift, half-kick momentum.
-        def leapfrog_step(carry, _):
-            theta_t, p_t = carry
-            p_half     = p_t    + 0.5 * step_size * grad_log_p(theta_t)
-            theta_next = theta_t + step_size * p_half
-            p_next     = p_half + 0.5 * step_size * grad_log_p(theta_next)
-            return (theta_next, p_next), None
+        theta_t, p_t = theta, p0
+        for _ in range(n_leapfrog):
+            p_half = p_t + 0.5 * step_size * grad_log_p(theta_t)
+            theta_t = theta_t + step_size * p_half
+            p_t = p_half + 0.5 * step_size * grad_log_p(theta_t)
 
-        (theta_new, p_new), _ = lax.scan(
-            leapfrog_step, (theta, p0), None, length=n_leapfrog
-        )
-        log_q_ratio = 0.5 * (jnp.sum(p0**2) - jnp.sum(p_new**2))
-        return theta_new, log_q_ratio
+        log_q_ratio = 0.5 * (jnp.sum(p0**2) - jnp.sum(p_t**2))
+        return theta_t, log_q_ratio
 
     return propose
 ```
@@ -1026,14 +1089,14 @@ def propose_hmc(step_size, n_leapfrog):
 ```{python}
 #| label: eval-hmc
 #| code-fold: false
-evaluate("HMC(ε=0.03, L=10)", propose_hmc(0.03, 10), random.PRNGKey(4))
+evaluate("HMC(ε=0.035, L=10)", propose_hmc(0.035, 10), random.PRNGKey(4))
 ```
 
 HMC achieves the highest ESS of all four proposals: the trace plots look essentially uncorrelated and the rank plots are visibly closer to uniform. The cost is $L = 10$ gradient evaluations per proposed move rather than one.
 
 ### Summary
 
-The progression illustrates a single principle: *the more the proposal exploits the geometry of the target, the higher the ESS per chain*. This comes at the cost of more gradient work per step. The independent proposal ignores the state entirely and fails. The random walk uses only the current position. MALA adds the gradient. HMC adds the gradient at $L$ intermediate points along a Hamiltonian trajectory. Each of these proposals also has free parameters whose tuning matters: the rule-of-thumb acceptance targets are roughly $25\%$ for random-walk, $57\%$ for MALA, and $65\%$ for HMC. In practice these are adjusted during a warm-up phase, which is exactly what NumPyro's NUTS sampler does automatically.
+The progression illustrates a single principle: *the more the proposal exploits the geometry of the target, the higher the ESS per chain*. This comes at the cost of more gradient work per step. The independent proposal ignores the state entirely and fails. The random walk uses only the current position. MALA adds the gradient. HMC adds the gradient at $L$ intermediate points along a Hamiltonian trajectory. Each of these proposals also has free parameters whose tuning matters: the rule-of-thumb acceptance targets are roughly $25\%$ for random-walk, $57\%$ for MALA, and $65-80\%$ for HMC. In practice these are adjusted during a warm-up phase, which is exactly what NumPyro's NUTS sampler does automatically.
 
 
 ## Diagnosing convergence
@@ -1305,4 +1368,4 @@ $$
 
 ## Bibliographic notes
 
-The standard reference for general Markov chains is the classic text by Meyn and Tweedie (@MeynTweedie2009) which covers the relevant limit theorems in detail. Comprehensive coverage of Monte Carlo methods including MCMC is given by the monograph by Robert and Casella (@RobertCasella2004). I find the presentation in @Tierney much easier to follow. Hamiltonian Monte Carlo is reviewed in detail by @BetancourtHMC2018. 
+The standard reference for general Markov chains is the classic text by Meyn and Tweedie (@MeynMCMC2009) which covers the relevant limit theorems in detail. Comprehensive coverage of Monte Carlo methods including MCMC is given by the monograph by Robert and Casella (@RobertMCBook2004). I find the presentation in @TierneyMCMC1994 much easier to follow. Hamiltonian Monte Carlo is reviewed in detail by @BetancourtHMC2018.
