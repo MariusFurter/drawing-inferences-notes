@@ -441,7 +441,7 @@ _axTR.legend(framealpha=0.3, fontsize=8, loc="upper left")
 plt.show()
 ```
 
-Formally, the correct reachability condition is **Harris recurrence**: For all "interesting"^[1] sets $A$, the chain must return to $A$ infinitely often with probability $1$ when started from any state. 
+Formally, the correct reachability condition is **Harris recurrence**: For all "interesting"[^1] sets $A$, the chain must return to $A$ infinitely often with probability $1$ when started from any state. 
 
 [^1]: There exists a non-trivial $\sigma$-finite measure $\psi$ such that whenever $\psi(A) > 0$, the chain returns to $A$ infinitely often with probability $1$.
 
@@ -555,10 +555,11 @@ $$
 p_\infty(x) \, q(x' \mid x) \quad \text{and} \quad p_\infty(x') \, q(x \mid x')
 $$
 
-To balance the flows, we throttle the flow in one direction. For this, we introduce an **acceptance probability** $\alpha(x' \mid x) \in [0, 1]$. After sampling a proposed move $x \to x'$ from $q$, we accept it (and move) with probability $\alpha(x' \mid x)$, and otherwise reject it (and stay at $x$). Hence, the modified kernel $k$ transitions from $x$ to $x'$ according to $q(x' \mid x) \, \alpha(x' \mid x)$ and stays at $x$ with the remaining probability. Formally,
+To balance the flows, we throttle the flow in one direction. For this, we introduce an **acceptance probability** $\alpha(x' \mid x)$. After sampling a proposed move $x \to x'$ from $q$, we accept it (and move) with probability $\alpha(x' \mid x)$, and otherwise reject it (and stay at $x$). Hence, the modified kernel $k$ transitions from $x$ to $x'$ according to $q(x' \mid x) \, \alpha(x' \mid x)$ and stays at $x$ with the remaining probability. Formally,
 $$
-k(x' \mid x) = \begin{cases} q(x' \mid x) \, \alpha(x' \mid x) & \text{for } x' \neq x, \\ 1 - \sum_{y \neq x} q(y \mid x) \, \alpha(y \mid x) & \text{for } x' = x. \end{cases}
+k(x' \mid x) = q(x' \mid x)\,\alpha(x' \mid x) + \delta_x(x')\int \bigl[1 - \alpha(y \mid x)\bigr]\,q(dy \mid x),
 $$
+where $\delta_x$ is the Dirac delta at $x$. The first term accounts for accepted moves, and the second term accounts for rejected moves.
 
 To enforce detailed balance, we must choose $\alpha$ such that the flow in both directions is equal.
 $$
@@ -584,20 +585,34 @@ The kernel $k$ obtained by combining the proposal $q$ with the Metropolis-Hastin
 :::
 
 ::: {.proof}
-For $x \neq x'$, assume without loss of generality that $p_\infty(x') q(x \mid x') \le p_\infty(x) q(x' \mid x)$. Then $\alpha(x' \mid x) = p_\infty(x') q(x \mid x') / (p_\infty(x) q(x' \mid x))$ and $\alpha(x \mid x') = 1$, so
+For $x \neq x'$, assume without loss of generality that $p_\infty(x') q(x \mid x') \le p_\infty(x) q(x' \mid x)$. Then $\alpha(x \mid x') = 1$ and 
+$$\alpha(x' \mid x) = \frac{p_\infty(x') q(x \mid x')}{p_\infty(x) q(x' \mid x)}.$$
+
+Hence
 $$
-p_\infty(x) k(x' \mid x) = p_\infty(x) q(x' \mid x) \alpha(x' \mid x) = p_\infty(x') q(x \mid x') = p_\infty(x') k(x \mid x').
+p_\infty(x) \, k(x' \mid x) 
+= p_\infty(x) \, q(x' \mid x) \, \alpha(x' \mid x) 
+= p_\infty(x') \, q(x \mid x') 
+= p_\infty(x') \, k(x \mid x').
 $$
-The case $x = x'$ is trivial.
+
+The case $x = x'$ is trivial since the flow from $x$ to itself is just the probability of rejecting a move, which is automatically balanced.
 :::
 
-A useful feature of the formula is that $p_\infty$ enters only through the *ratio* $p_\infty(x') / p_\infty(x)$. The unknown normalizing constant of the target cancels, so the algorithm only needs to evaluate $p_\infty$ up to a constant.
+### Using MH in Bayesian inference
+
+An important feature of the formula is that $p_\infty$ enters only through the ratio $p_\infty(x') / p_\infty(x)$. Hence the algorithm only needs to evaluate $p_\infty$ up to an unknown normalizing constant. In the Bayesian setting, the target distribution is the posterior 
+$$p_\infty(\theta) = p(\theta \mid y) = \frac{p(y ,\theta)}{p(y)}.$$ 
+
+Since the normalizing constant $p(y)$ cancels in the ratio, we can compute the acceptance probability using only the joint distribution $p(y ,\theta)$ over the parameters and data. 
+
+In a generative model composed of several kernels, the joint distribution accross all variables factorizes into a product of kernels by copy-composition. Hence, computing this quantity is straightforward: we just multiply the densities of all kernels in the model evaluated at the current state. In practice, we work with log-densities to avoid numerical underflow and to turn products into sums.
 
 ### Optimality of the acceptance ratio
 
-There are many ways to define $\alpha$ that balance the flows — for example, by scaling both directions down by an arbitrary common factor. The Metropolis-Hastings choice is the one that *maximizes* the acceptance probability in each direction. The following heuristic argument explains why this is the right choice.
+There are many ways to define $\alpha$ that balance the flows, for example, by scaling both directions down by an arbitrary common factor. The Metropolis-Hastings choice is the one that *maximizes* the acceptance probability in each direction. The following heuristic argument explains why this is the right choice.
 
-Whenever the chain rejects a proposal, the trajectory records a duplicate of the current state. Lower acceptance rates produce more duplicate samples, increasing the **autocorrelation** of the trajectory. Because the Monte Carlo estimator averages over the trajectory, correlated samples carry less independent information than uncorrelated ones, slowing the convergence in @thm-ergodic-theorem. By accepting as often as possible while preserving detailed balance, the Metropolis-Hastings ratio minimizes this stickiness and gives the lowest asymptotic variance among all detailed-balance corrections of $q$.
+Whenever the chain rejects a proposal, the trajectory records a duplicate of the current state. Lower acceptance rates produce more duplicate samples, increasing the **autocorrelation** of the trajectory. Because the Monte Carlo estimator averages over the trajectory, correlated samples carry less independent information than uncorrelated ones, slowing the convergence in the ergodic theorem. By accepting as often as possible while preserving detailed balance, the Metropolis-Hastings ratio gives the lowest asymptotic variance among all detailed-balance corrections of $q$.
 
 ### Choosing the proposal
 
@@ -608,34 +623,49 @@ Although the Metropolis-Hastings ratio is optimal *given* a proposal, the practi
 
 A good proposal balances these extremes: it takes the largest steps that still maintain a reasonably high acceptance rate.
 
-<!-- Illustration: histograms of trajectories from MH chains with proposals of varying step size, with effective sample size annotated for each. -->
+### Harris recurrence and aperiodicity of MH
+
+We have constructed the MH kernel to satisfy detailed balance with respect to $p_\infty$, so $p_\infty$ is stationary. However, for MCMC to be theoretically justified, we also need to check that the kernel is Harris recurrent and aperiodic. 
+
+Aperiodicity is guaranteed as long as the proposal has some chance of being rejected. This is usually the case, with the notable exception of Gibbs samplers which always accept their proposals. 
+
+Harris recurrence is guaranteed for MH kernels as long as the chain can eventually reach every region $A$ of the state space for which $p_\infty(A) > 0$ from any starting point. For example, this is easily satsified if the proposal is positive everywhere. 
+
+Hence, Harris recurrence and aperiodicity are not usually a concern for MH samplers. The choice of proposal is a much more important practical concern.
+
+### Composing MH steps
+
+So far we have treated the proposal $q$ as a single distribution that updates *all* parameters at once. Nothing in the construction forces this. If $K_1, K_2, \dots, K_m$ are each MH kernels that leave the same target $p_\infty$ stationary, then any composition $K_m \circ \cdots \circ K_1$ — applying the kernels in sequence — also leaves $p_\infty$ stationary. This gives us the freedom to **break a single MH update into a sequence of smaller MH updates**, each acting on a different *block* of parameters while holding the rest fixed.
+
+Concretely, partition $\theta = (\theta_1, \dots, \theta_m)$ into blocks. The $i$-th sub-step proposes a new value $\theta_i'$ from a block proposal $q_i(\theta_i' \mid \theta)$ and accepts it with the usual MH ratio, treating the other blocks as constants in the target:
+$$
+\alpha_i \;=\; \min\!\left(1,\; \frac{p_\infty(\theta_1, \dots, \theta_i', \dots, \theta_m)}{p_\infty(\theta_1, \dots, \theta_i, \dots, \theta_m)} \cdot \frac{q_i(\theta_i \mid \theta_1, \dots, \theta_i', \dots)}{q_i(\theta_i' \mid \theta)}\right).
+$$
+Each sub-step satisfies detailed balance for $p_\infty$ on its own, so their composition is a valid MH sampler.
+
+The trade-off is the same one we saw between tiny and large steps, but along a different axis. A block update changes fewer coordinates at a time, so the proposed state is "closer" to the current one in joint log-density and is more likely to be accepted. The price is that traversing the full parameter space now takes $m$ sub-steps instead of one, and each sub-step typically requires its own evaluation of $p_\infty$. Block updates are especially useful when different parameters have very different scales or when the posterior is strongly correlated only *within* certain groups of parameters: a single joint proposal would have to compromise on a step size that works for all of them, while block proposals can be tuned per-block.
+
+### The Gibbs sampler
+The Gibbs sampler is the limiting case of block-MH in which each block proposal is the *exact* conditional distribution $q_i(\theta_i' \mid \theta) = p_\infty(\theta_i' \mid \theta_{-i})$. Plugging this into the block MH ratio, the joint density factors as $p_\infty(\theta) = p_\infty(\theta_i \mid \theta_{-i}) \, p_\infty(\theta_{-i})$, the marginal $p_\infty(\theta_{-i})$ cancels, and the conditional terms cancel against the proposal ratio. The result is $\alpha_i = 1$: every Gibbs proposal is accepted by construction. A full sweep cycles through the blocks $\theta_1, \theta_2, \dots, \theta_m$, drawing each one from its conditional given the current values of the others.
+
+The appeal of Gibbs sampling is that there are no rejected steps, no autocorrelation from duplicated samples, and no proposal parameters to tune. The catch is that we need to be able to *sample exactly* from each conditional $p_\infty(\theta_i \mid \theta_{-i})$. This is only tractable for specific model structures, most notably **conditionally conjugate** Bayesian models. Outside that regime the conditionals have no closed form and Gibbs is no longer applicable. Even when it does apply, Gibbs can mix poorly along directions of strong posterior correlation, because each sub-step is constrained to move along a single coordinate axis. Modern gradient-based samplers like HMC sidestep both limitations by exploiting the joint geometry directly, which is why this chapter focuses on them.
 
 ## Coding MH samplers
 
-We now put the theory to work. To make things concrete we need a target distribution to sample from — ideally one whose shape we control, so that we can compare proposals on a target whose ground truth is known. The simplest non-trivial choice is **Bayesian linear regression**: we observe pairs $(x_n, y_n)$ with $x_n \in \mathbb{R}^d$ and $y_n \in \mathbb{R}$ and model
+In @sec-bayesian-data-analysis we saw how to use NumPyro to run MCMC samplers. We will now implement a simple Metropolis-Hastings sampler from scratch in JAX. This will give us a deeper understanding of how the algorithm works and how to choose proposals.
+
+To keep things simple, we focus on **Bayesian linear regression**: we observe pairs $(x_n, y_n)$ with $x_n \in \mathbb{R}^d$ and $y_n \in \mathbb{R}$ and model
 $$
 y_n \mid x_n, \beta, \sigma \;\sim\; \mathcal{N}\!\bigl(x_n^\top \beta,\, \sigma^2\bigr),
 $$
-with regression coefficients $\beta \in \mathbb{R}^d$ and noise scale $\sigma > 0$. The unknowns form a $(d+1)$-dimensional continuous parameter space — small enough to inspect by hand, large enough that the geometry of the proposal matters.
+with regression coefficients $\beta \in \mathbb{R}^d$ and noise scale $\sigma > 0$. The unknowns form a $(d+1)$-dimensional continuous parameter space.
 
 We will fit the model to **synthetic data** generated from known $\beta, \sigma$. This lets us check parameter recovery and isolate the effect of the proposal.
 
-### The generative model in JAX
-
-Two small considerations shape the implementation. First, MCMC is happiest in *unconstrained* coordinates: we work with $\log \sigma \in \mathbb{R}$ rather than $\sigma > 0$, so the chain never has to bounce off a boundary. Second, we add weakly informative Gaussian priors,
-$$
-\beta_j \sim \mathcal{N}(0, \tau_\beta^2), \qquad \log \sigma \sim \mathcal{N}(0, \tau_{\log\sigma}^2),
-$$
-which discourage absurd values without committing to specific ones. The full joint factors as
-$$
-p(\beta, \log\sigma, y \mid X) \;=\; \underbrace{p(\beta) \, p(\log \sigma)}_{\text{prior}} \cdot \underbrace{\prod_{n=1}^N \mathcal{N}\!\bigl(y_n \mid x_n^\top \beta,\, \sigma^2\bigr)}_{\text{likelihood}}.
-$$
-
-The implementation mirrors this factorisation line by line.
 
 ```{python}
 #| label: setup
-#| code-fold: true
+#| code-fold: false
 #| code-summary: "Imports"
 import jax
 import jax.numpy as jnp
@@ -645,7 +675,7 @@ from jax.scipy import stats
 
 ```{python}
 #| label: synth-data
-#| code-fold: true
+#| code-fold: false
 #| code-summary: "Generate a small synthetic regression dataset"
 N, d = 100, 4
 true_beta = jnp.array([1.0, -0.5, 2.0, 0.3])
@@ -653,40 +683,62 @@ true_sigma = 0.7
 
 key_x, key_eps = random.split(random.PRNGKey(0))
 X_cov = random.normal(key_x, (N, d - 1))
-X = jnp.concatenate([jnp.ones((N, 1)), X_cov], axis=1)   # design matrix with intercept
+X = jnp.concatenate([jnp.ones((N, 1)), X_cov], axis=1)  # design matrix with intercept
 y = X @ true_beta + true_sigma * random.normal(key_eps, (N,))
 ```
 
-We pack all parameters into a single flat vector `theta` of length $d + 1$, with the regression coefficients in the first $d$ entries and $\log \sigma$ in the last. This matches the fact that MH operates on a single point in $\mathbb{R}^{d+1}$ — every proposal will just add Gaussian noise to a vector — and avoids treating $\beta$ and $\log \sigma$ as separate objects in the sampler.
+### The generative model in JAX
+
+MCMC works best in *unconstrained* coordinates. Hence, we work with $\log \sigma \in \mathbb{R}$ rather than $\sigma > 0$, so the chain never has to bounce off a boundary. Under this choice, the full model is
+$$
+\begin{aligned}
+\beta_j &\sim \mathcal{N}(0,\, \tau_\beta^2), \quad j = 1, \ldots, d, \\
+\log \sigma &\sim \mathcal{N}(0,\, \tau_{\log\sigma}^2), \\
+y_n \mid x_n, \beta, \sigma &\sim \mathcal{N}\!\bigl(x_n^\top \beta,\, \sigma^2\bigr), \quad n = 1, \ldots, N.
+\end{aligned}
+$$
+
+We choose weakly informative Gaussian priors, which discourage absurd values without committing to specific ones. We pack all parameters into a single flat vector `theta` of length $d + 1,$ with the regression coefficients in the first $d$ entries and $\log \sigma$ in the last.
+
+To run MCMC, we need to be able to compute the full joint distribution
+$$
+p(\beta, \log\sigma, y \mid X) \;=\; \underbrace{p(\beta) \, p(\log \sigma)}_{\text{prior}} \cdot \underbrace{\prod_{n=1}^N \mathcal{N}\!\bigl(y_n \mid x_n^\top \beta,\, \sigma^2\bigr)}_{\text{likelihood}}.
+$$
+
+For numerical stability, we will work with the log joint distribution, which turns products into sums. This means the log joint function can walk through the model from top to bottom and add up the log densities of all kernels evaluated at the current state. 
 
 ```{python}
 #| label: model
-def log_joint(theta, X, y, tau_beta=5.0, tau_ls=1.0):
+#| code-fold: false
+@jax.jit
+def log_joint(theta, X, y, tau_beta=5.0, tau_log_sigma=1.0):
     """Log p(beta, log_sigma, y | X) with theta = [beta_0, ..., beta_{d-1}, log_sigma]."""
+    # Unpack: first d entries are the regression coefficients, last is log sigma.
     beta, log_sigma = theta[:-1], theta[-1]
     sigma = jnp.exp(log_sigma)
 
-    log_lik = jnp.sum(stats.norm.logpdf(y, X @ beta, sigma))
-    log_prior_beta = jnp.sum(stats.norm.logpdf(beta, 0.0, tau_beta))
-    log_prior_ls = stats.norm.logpdf(log_sigma, 0.0, tau_ls)
+    # Sum log-densities of priors and likelihood (= log of their product).
+    log_prior_beta      = jnp.sum(stats.norm.logpdf(beta, 0.0, tau_beta))
+    log_prior_log_sigma = stats.norm.logpdf(log_sigma, 0.0, tau_log_sigma)
+    log_lik             = jnp.sum(stats.norm.logpdf(y, X @ beta, sigma))
+    return log_prior_beta + log_prior_log_sigma + log_lik
 
-    return log_lik + log_prior_beta + log_prior_ls
-
-# Curry away the data so the sampler sees a function of theta only.
-target = lambda theta: log_joint(theta, X, y)
+# Bake in X and y so the sampler only sees a function of theta.
+target = jax.jit(lambda theta: log_joint(theta, X, y))
 ```
 
 A few remarks on the JAX-specific bits:
 
 - `jax.numpy` (imported as `jnp`) is a near drop-in replacement for `numpy` whose arrays live on the accelerator and can be differentiated.
 - `jax.scipy.stats.norm.logpdf` is the same density function you would use in NumPyro priors and likelihoods, just exposed directly as a numerical function rather than wrapped in a sample statement.
-- We work with $\log \sigma \in \mathbb{R}$ rather than $\sigma > 0$ so the chain never has to bounce off a boundary — the same change of variables NumPyro does automatically when you put `dist.HalfNormal` on `sigma`.
-- `target` is a scalar-valued function of a single vector — exactly what `jax.grad` will need for MALA later.
+- We work with $\log \sigma \in \mathbb{R}$ rather than $\sigma > 0$ so the chain never has to bounce off a boundary. NumPyro performs such transforms automatically.
+- The `@jax.jit` decorator **just-in-time compiles** the function: on the first call JAX traces through the Python code, builds a computation graph, and compiles it to optimised machine code. All subsequent calls skip the Python interpreter entirely and run the compiled version directly. Without JIT, each call re-executes the Python, which adds overhead proportional to the number of operations. Here we JIT both `log_joint` and `target` so that every log-density evaluation inside the sampler is as fast as possible.
 
 As a sanity check, we evaluate the log joint at zero and at the ground-truth parameters; the truth should score considerably higher.
 
 ```{python}
 #| label: sanity-check
+#| code-fold: false
 theta_zeros = jnp.zeros(d + 1)
 theta_truth = jnp.concatenate([true_beta, jnp.array([jnp.log(true_sigma)])])
 
@@ -696,21 +748,36 @@ print(f"log p at truth: {float(target(theta_truth)):.1f}")
 
 ### One Metropolis-Hastings step
 
-We can now translate @def-mh-acceptance into code. The state is the current $\theta$, together with its log-density (cached so that we don't recompute it every step). Each step delegates the actual jump to a `propose` function, evaluates the log target at the proposal, and applies the MH accept/reject rule.
+We now translate @def-mh-acceptance into code. The state is the current $\theta$, together with its log-density (so we don't recompute it every time). Each step delegates the actual jump to a `propose` function, evaluates the log target at the proposal, and applies the MH accept/reject rule.
 
-A note on JAX random numbers: unlike NumPy, JAX's RNG is *stateless*. A "key" `random.PRNGKey(seed)` is a small array that you must pass into every random function, and `random.split(key, n)` produces $n$ fresh keys from one. This is what makes a JAX program reproducible regardless of how it is parallelised.
+Recall that JAX's RNG is *stateless*. A "key" `random.PRNGKey(seed)` is a small array that you must pass into every random function, and `random.split(key, n)` produces $n$ fresh keys from one. This is what makes a JAX program reproducible regardless of how it is parallelised.
 
 ```{python}
 #| label: mh-step
+#| code-fold: false
 def mh_step(key, theta, log_p_theta, log_p, propose):
-    """One MH step. Returns (theta_new, log_p_new, accepted)."""
+    """One Metropolis-Hastings step.
+
+    Args:
+        key:         JAX PRNG key.
+        theta:       current state.
+        log_p_theta: cached value of log_p(theta).
+        log_p:       function theta -> log target density.
+        propose:     function (key, theta, log_p) -> (theta', log_q_ratio).
+
+    Returns: (theta_new, log_p_new, accepted).
+    """
     k_prop, k_acc = random.split(key)
+
+    # Propose a move and evaluate the target there.
     theta_prop, log_q_ratio = propose(k_prop, theta, log_p)
     log_p_prop = log_p(theta_prop)
 
+    # MH acceptance rule (in log space).
     log_alpha = log_p_prop - log_p_theta + log_q_ratio
     accepted = jnp.log(random.uniform(k_acc)) < log_alpha
 
+    # Either jump to the proposal or stay put.
     theta_new = jnp.where(accepted, theta_prop, theta)
     log_p_new = jnp.where(accepted, log_p_prop, log_p_theta)
     return theta_new, log_p_new, accepted
@@ -720,16 +787,20 @@ The `propose` argument has signature `(key, theta, log_p) -> (theta_proposal, lo
 $$
 r_q(\theta, \theta') := \log q(\theta \mid \theta') - \log q(\theta' \mid \theta),
 $$
-which is the only piece of the acceptance probability that depends on the proposal. Symmetric proposals just return $r_q = 0$. By keeping the MH formula in `mh_step` and putting the proposal-specific logic in `propose`, the code matches the structure of the math: one accept/reject rule, three exchangeable proposals.
+which is the only piece of the acceptance probability that depends on the proposal. Symmetric proposals just return $r_q = 0$. By keeping the MH formula in `mh_step` and putting the proposal-specific logic in `propose`, we can easily swap in different proposals and compare their performance.
 
 ### Running the chain
 
-To run the chain for `n_steps`, we need a loop that threads the state $(\theta_t, \log p(\theta_t))$ through. A plain Python `for` loop would work, but JAX provides `lax.scan`, which compiles the entire loop into a single accelerator program. It expects a step function with signature `(carry, x) -> (new_carry, output)`: `scan` threads the carry through the loop and stacks the per-step outputs into arrays.
+To run the chain for `n_steps`, we need a loop that updates the state $(\theta_t, \log p(\theta_t))$. A plain Python `for` loop would work, but JAX provides `lax.scan`, which compiles the entire loop into a single accelerator program. It expects a step function with signature `(carry, x) -> (new_carry, output)`. Then `scan` threads the carry through the loop and stacks the per-step outputs into arrays. It outputs the final carry and the stacked outputs.
 
 ```{python}
 #| label: mh-driver
+#| code-fold: false
+import functools
 from jax import lax
 
+# log_p, propose, n_steps are Python callables / ints, not arrays — mark them static.
+@functools.partial(jax.jit, static_argnums=(2, 3, 4))
 def run_mh(key, theta0, log_p, propose, n_steps):
     """Run an MH chain for n_steps. Returns (trajectory, accepted_flags)."""
     log_p0 = log_p(theta0)
@@ -744,81 +815,20 @@ def run_mh(key, theta0, log_p, propose, n_steps):
     return trajectory, accepts
 ```
 
-The output `trajectory` has shape `(n_steps, d + 1)` — one row per draw — and `accepts` is a boolean array of the same length.
+Because `log_p`, `propose`, and `n_steps` are Python-level values that JAX cannot represent as abstract arrays, they are declared *static* via `static_argnums`: JAX traces and caches a separate compiled version for each distinct combination of these arguments, which is fine since we only use a handful of proposal/target pairs.
 
-### Three proposals
+### Comparing proposals
 
-Each proposal is now a tiny function. The contrast between them is exactly the contrast in the math: a fixed independent distribution, a symmetric local jump, or a gradient-informed local jump.
-
-```{python}
-#| label: proposal-independent
-def propose_independent(scale):
-    """q(theta' | theta) = N(0, scale^2 I): independent of the current state."""
-    def propose(key, theta, log_p):
-        theta_new = scale * random.normal(key, theta.shape)
-        # log q(theta) - log q(theta_new), with q ∝ exp(-||·||^2 / (2 scale^2))
-        log_q_ratio = (jnp.sum(theta_new**2) - jnp.sum(theta**2)) / (2 * scale**2)
-        return theta_new, log_q_ratio
-    return propose
-```
-
-```{python}
-#| label: proposal-random-walk
-def propose_random_walk(scale):
-    """q(theta' | theta) = N(theta, scale^2 I): symmetric, so log_q_ratio = 0."""
-    def propose(key, theta, log_p):
-        theta_new = theta + scale * random.normal(key, theta.shape)
-        return theta_new, 0.0
-    return propose
-```
-
-For MALA we need the gradient of the log target. `jax.grad(f)` returns a new function that computes $\nabla f$ via reverse-mode automatic differentiation — the same machinery that lets NumPyro fit gradient-based samplers like NUTS automatically. Because we wrote `log_joint` in pure `jnp`, no extra annotation is needed.
-
-```{python}
-#| label: proposal-mala
-def propose_mala(scale):
-    """Langevin proposal: theta' = theta + (scale^2 / 2) ∇log p(theta) + scale ε."""
-    def propose(key, theta, log_p):
-        grad_log_p = jax.grad(log_p)
-        drift = lambda t: t + 0.5 * scale**2 * grad_log_p(t)
-        mean_fwd = drift(theta)
-        theta_new = mean_fwd + scale * random.normal(key, theta.shape)
-
-        mean_rev = drift(theta_new)
-        log_q_ratio = (
-            jnp.sum((theta_new - mean_fwd) ** 2) - jnp.sum((theta - mean_rev) ** 2)
-        ) / (2 * scale**2)
-        return theta_new, log_q_ratio
-    return propose
-```
-
-To check that the plumbing works, we run a short random-walk chain on the regression posterior and report its acceptance rate:
-
-```{python}
-#| label: smoke-test
-key = random.PRNGKey(0)
-traj, accepts = run_mh(key, theta_zeros, target, propose_random_walk(0.1), n_steps=2000)
-print(f"acceptance rate: {accepts.mean():.3f}")
-print(f"final log p:     {float(target(traj[-1])):.2f}")
-```
-
-We will compare the three proposals systematically in the next subsection.
-
-### Comparing the three proposals
-
-A chain that explores well produces approximately independent samples from the target. To make that statement quantitative we use two standard diagnostics:
-
-- The **effective sample size (ESS)** estimates how many independent draws a correlated trajectory of length $T$ is worth. With $\mathrm{ESS} \ll T$ the chain is sticky and our Monte Carlo estimates have higher variance than the trajectory length suggests.
-- The **potential scale reduction $\hat R$** runs several chains from overdispersed starting points and compares the within-chain variance to the across-chain variance. If the chains have not yet forgotten where they started, the across-chain variance is inflated and $\hat R > 1$. A common rule of thumb is to require $\hat R < 1.01$ before trusting the samples.
-
-Both are implemented by `arviz`. To make $\hat R$ informative we run several chains from overdispersed starts, which we do with a plain Python loop — `run_mh` is already JIT-compiled inside, so the loop only pays the Python overhead of starting four chains.
+We now implement four progressively more sophisticated proposals and compare them as we go. To keep the code per proposal tight, we first set up everything that is shared: a routine to run multiple chains in parallel, an ArviZ converter, and an `evaluate` helper that runs a proposal, prints its acceptance rate, and produces a posterior summary along with trace and rank plots.
 
 ```{python}
 #| label: multi-chain
+#| code-fold: false
 def run_chains(key, log_p, propose, n_steps, n_chains, init_scale=0.5):
-    """Run n_chains independent chains from overdispersed Gaussian starts."""
+    """Run n_chains independent chains from Gaussian starts."""
     keys = random.split(key, 2 * n_chains)
     init_keys, run_keys = keys[:n_chains], keys[n_chains:]
+
     trajs, all_accepts = [], []
     for ki, kr in zip(init_keys, run_keys):
         theta0 = init_scale * random.normal(ki, (d + 1,))
@@ -828,124 +838,246 @@ def run_chains(key, log_p, propose, n_steps, n_chains, init_scale=0.5):
     return jnp.stack(trajs), jnp.stack(all_accepts)
 ```
 
-We collect each proposal's acceptance rate, minimum ESS, maximum $\hat R$, and runtime — minimum and maximum *over parameters*, because we want bounds across all coordinates of $\theta$.
-
 ```{python}
-#| label: diagnostics
-import time
-import numpy as np
+#| label: diagnostics-setup
+#| code-fold: false
 import arviz as az
-import pandas as pd
-
-
-def benchmark(name, propose, n_steps, n_chains, warmup, key):
-    # Warm the JIT cache so the timed run measures only sampling.
-    run_chains(random.PRNGKey(0), target, propose, 50, 2)
-    t0 = time.time()
-    trajs, accepts = run_chains(key, target, propose, n_steps, n_chains)
-    jax.block_until_ready(accepts)
-    elapsed = time.time() - t0
-
-    samples = np.array(trajs[:, warmup:, :])  # (chains, draws, d+1)
-    idata = az.from_dict({"posterior": {"theta": samples}})
-    ess_min = float(az.ess(idata).theta.min())
-    rhat_max = float(az.rhat(idata).theta.max())
-    return {
-        "proposal": name,
-        "acc rate": float(accepts.mean()),
-        "ESS_min": ess_min,
-        "Rhat_max": rhat_max,
-        "time (s)": elapsed,
-        "ESS/s": ess_min / elapsed,
-        "ESS/step": ess_min / (n_steps - warmup),
-    }
-
-
-n_steps, n_chains, warmup = 10_000, 4, 2_000
-proposals = [
-    ("independent(σ=1)",   propose_independent(1.0)),
-    ("random-walk(σ=0.1)", propose_random_walk(0.1)),
-    ("MALA(σ=0.04)",       propose_mala(0.04)),
-]
-
-key = random.PRNGKey(42)
-rows = []
-for name, prop in proposals:
-    k, key = random.split(key)
-    rows.append(benchmark(name, prop, n_steps, n_chains, warmup, k))
-
-summary = pd.DataFrame(rows).set_index("proposal")
-summary.style.format({
-    "acc rate": "{:.3f}", "ESS_min": "{:.0f}", "Rhat_max": "{:.2f}",
-    "time (s)": "{:.2f}", "ESS/s": "{:.1f}", "ESS/step": "{:.4f}",
-})
-```
-
-The numbers tell the story we expect from the geometry of each proposal:
-
-- The **independent** proposal samples from a fixed Gaussian centred at zero. The posterior is concentrated in a small neighbourhood of the true parameters, so almost every proposal lands in a low-density region and is rejected. The acceptance rate is essentially zero, the chain barely moves, and $\hat R \gg 1$.
-- The **random-walk** proposal at scale $0.1$ lands close to the rule-of-thumb optimum of about $20$–$40\%$ acceptance for random-walk Metropolis on a smooth target. The chain mixes well and $\hat R$ approaches $1$.
-- **MALA** uses the gradient of $\log p$ to drift toward higher-density regions before adding noise, so it can take much larger effective steps than plain random-walk and still maintain a high acceptance rate. The result here is the highest ESS *per step*. Each step is more expensive than a plain function evaluation, though, so the wall-clock advantage is smaller than the per-step advantage — and on this small, well-conditioned target the random-walk proposal is competitive in ESS-per-second.
-
-### Visualising the chains
-
-The cleanest way to *see* this contrast is to plot what each chain actually does. Well-mixing chains forget where they started within a few hundred steps and then fluctuate around the same level; poorly mixing ones drift, stay stuck, or settle in different places.
-
-We start with the log-posterior along four chains for each proposal. `jax.vmap(f)` takes a function defined on a single example and turns it into a function that runs on a batch — we use it here to evaluate `target` along every step of a trajectory at once.
-
-```{python}
-#| label: trace-plot
-#| fig-cap: "Log-posterior along four independent chains for each proposal, started from $\\mathcal{N}(0, 0.5^2 I)$. The independent proposal stays near its starting log-posterior; the random-walk and MALA chains all burn in within a few hundred steps and then fluctuate around the same typical set, the visual signature of a chain that has reached its stationary distribution."
 import matplotlib.pyplot as plt
 
-n_trace_chains, n_trace_steps = 4, 5_000
+n_steps, n_chains, warmup = 10_000, 4, 2_000
+param_names = [f"beta_{j}" for j in range(d)] + ["log_sigma"]
 
-fig, axes = plt.subplots(1, 3, figsize=(11, 3.2), sharey=True)
-for ax, (name, prop) in zip(axes, proposals):
-    trajs, _ = run_chains(random.PRNGKey(0), target, prop,
-                          n_trace_steps, n_trace_chains, init_scale=0.3)
-    for i in range(n_trace_chains):
-        lp = jax.vmap(target)(trajs[i])
-        ax.plot(np.array(lp), lw=0.8, alpha=0.8)
-    ax.set_title(name)
-    ax.set_xlabel("step")
-axes[0].set_ylabel("log posterior")
-axes[0].set_ylim(-450, -100)
-plt.tight_layout()
-plt.show()
+
+def to_idata(trajs, warmup):
+    """Convert a (chains, steps, params) array to an ArviZ InferenceData."""
+    draws = trajs[:, warmup:, :]
+    return az.from_dict(
+        {"posterior": {name: draws[:, :, i] for i, name in enumerate(param_names)}}
+    )
+
+
+def evaluate(name, propose, key):
+    """Run chains for one proposal and report all four diagnostics in order:
+    acceptance rate, trace plot (with burn-in visible), rank plot, and az.summary.
+    Quarto displays the returned summary as the cell's output.
+    """
+    trajs, accepts = run_chains(key, target, propose, n_steps, n_chains)
+    print(f"{name}: acceptance rate {float(accepts.mean()):.3f}")
+
+    # Trace plot keeps burn-in visible so we can see chains converge.
+    idata_full = to_idata(trajs, warmup=0)
+    az.plot_trace(idata_full, var_names=["beta_0", "log_sigma"],
+                  figure_kwargs={"figsize": (10, 3)})
+    plt.suptitle(f"{name} — trace", y=1.02); plt.tight_layout(); plt.show()
+
+    # Rank plot and summary use only the post-warmup samples.
+    idata = to_idata(trajs, warmup)
+    az.plot_rank(idata, var_names=["beta_0", "log_sigma"],
+                 figure_kwargs={"figsize": (10, 2)})
+    plt.suptitle(f"{name} — rank", y=1.02); plt.tight_layout(); plt.show()
+
+    return az.summary(idata)
 ```
 
-We can also look at a single parameter directly. The intercept $\beta_0$ has true value $1.0$; well-mixing chains should rapidly forget their starting point and concentrate around the posterior mean, while a stuck chain will sit wherever it was initialised.
+We will use the same number of steps, chains, and warmup for every proposal, so any difference in the diagnostics reflects a difference in the proposal itself rather than in the experimental setup.
+
+Each proposal below is written as a small *factory* that fixes a tuning parameter (e.g. a step size) and returns the actual proposal function with the required `(key, theta, log_p) -> (theta', log_q_ratio)` signature. This keeps tuning parameters out of the sampler loop.
+
+### Independent proposal
+
+Our simplest proposal draws a value from a Gaussian distribution centred at the origin, independent of the current state. Since the Gaussian can propose any value (including worse ones), the resulting MH chain is aperiodic and Harris recurrent.
 
 ```{python}
-#| label: trace-plot-beta0
-#| fig-cap: "Trace of $\\beta_0$ (true value $1.0$, dashed) for four chains under each proposal. The independent chains barely move from their initialisation; the random-walk chains explore but show visible autocorrelation; the MALA chains decorrelate fastest, producing the tightest band around the posterior mean."
-fig, axes = plt.subplots(1, 3, figsize=(11, 3.2), sharey=True)
-for ax, (name, prop) in zip(axes, proposals):
-    trajs, _ = run_chains(random.PRNGKey(0), target, prop,
-                          n_trace_steps, n_trace_chains, init_scale=0.3)
-    for i in range(n_trace_chains):
-        ax.plot(np.array(trajs[i, :, 0]), lw=0.6, alpha=0.8)
-    ax.axhline(float(true_beta[0]), color="k", ls="--", lw=0.8)
-    ax.set_title(name)
-    ax.set_xlabel("step")
-axes[0].set_ylabel(r"$\beta_0$")
-plt.tight_layout()
-plt.show()
+#| label: proposal-independent
+#| code-fold: false
+def propose_independent(scale):
+    """q(theta' | theta) = N(0, scale^2 I): independent of the current state."""
+
+    def propose(key, theta, log_p):
+        theta_new = scale * random.normal(key, theta.shape)
+        # Asymmetric proposal: q does not depend on the from-state, but the
+        # ratio q(theta | theta') / q(theta' | theta) is still nontrivial.
+        log_q_fwd = jnp.sum(stats.norm.logpdf(theta_new, 0.0, scale))
+        log_q_rev = jnp.sum(stats.norm.logpdf(theta,     0.0, scale))
+        return theta_new, log_q_rev - log_q_fwd
+
+    return propose
 ```
 
-Two practical takeaways for the rest of this chapter:
+```{python}
+#| label: eval-independent
+#| code-fold: false
+evaluate("independent(σ=1)", propose_independent(1.0), random.PRNGKey(1))
+```
 
-1. **Geometry of the proposal vs. geometry of the target.** The independent proposal is the cautionary tale: a fixed $q$ that ignores the current state cannot adapt to a target whose support occupies a tiny corner of $q$'s mass. Local proposals (random-walk, MALA) sidestep this by *only* asking how the target changes nearby.
-2. **Step-size tuning is unavoidable.** Each of the three proposals has a free scale $\sigma$ that interacts with the target's curvature; mistuning it costs either acceptance (too large) or movement (too small). The rule-of-thumb optimum is around $25\%$ for random-walk and $57\%$ for MALA. In practice one tunes $\sigma$ during a warm-up phase — and one usually preconditions the proposal to handle parameters of very different scales (here $\beta$ and $\log\sigma$ have similar curvature, but in general they would not). This is exactly what tools like NumPyro's NUTS sampler do automatically.
+The posterior occupies a tiny corner of the proposal's support, so almost every move is rejected. The acceptance rate is near zero, the trace shows chains stuck at their starting points, the rank plot is far from uniform, and $\hat R \gg 1$ — a textbook example of a chain that has not converged.
+
+### Random-walk proposal
+
+The independent proposal ignores the current state entirely, so it cannot exploit progress that the chain has already made. A **random walk** proposal fixes this by adding Gaussian noise *to the current state*: once the chain finds a high-probability region it will tend to stay nearby. The proposal is symmetric, so $\log q$-ratio $= 0$ and the chain remains aperiodic and Harris recurrent.
+
+```{python}
+#| label: proposal-random-walk
+#| code-fold: false
+def propose_random_walk(scale):
+    """q(theta' | theta) = N(theta, scale^2 I): symmetric, so log_q_ratio = 0."""
+    def propose(key, theta, log_p):
+        theta_new = theta + scale * random.normal(key, theta.shape)
+        return theta_new, 0.0
+    return propose
+```
+
+```{python}
+#| label: eval-random-walk
+#| code-fold: false
+evaluate("random-walk(σ=0.1)", propose_random_walk(0.1), random.PRNGKey(2))
+```
+
+The chains now converge: after a short burn-in they fluctuate around the same level, the rank plot is much closer to uniform, and ESS and $\hat R$ are reasonable. The trace plots still show visible autocorrelation, however — random-walk steps are blind to the geometry of the target, so the chain wanders inefficiently.
+
+### MALA proposal
+
+The random walk takes uninformed steps. The **Metropolis-adjusted Langevin algorithm (MALA)** uses the gradient of the log target to nudge proposals toward higher-probability regions:
+$$
+\theta' = \theta + \frac{\text{scale}^2}{2} \nabla \log p(\theta) + \text{scale} \cdot \varepsilon, \qquad \varepsilon \sim \mathcal{N}(0, I).
+$$
+This allows larger steps while keeping the acceptance rate high. The proposal is asymmetric — the drift is different at $\theta$ and at $\theta'$ — so we must compute a non-trivial $\log q$-ratio. JAX gives us $\nabla \log p$ for free via `jax.grad`.
+
+```{python}
+#| label: proposal-mala
+#| code-fold: false
+def propose_mala(scale):
+    """Langevin proposal: theta' = theta + (scale^2 / 2) ∇log p(theta) + scale ε."""
+
+    def propose(key, theta, log_p):
+        grad_log_p = jax.grad(log_p)
+        mean_fwd = theta + 0.5 * scale**2 * grad_log_p(theta)
+        theta_new = mean_fwd + scale * random.normal(key, theta.shape)
+
+        mean_rev = theta_new + 0.5 * scale**2 * grad_log_p(theta_new)
+        log_q_fwd = jnp.sum(stats.norm.logpdf(theta_new, mean_fwd, scale))
+        log_q_rev = jnp.sum(stats.norm.logpdf(theta, mean_rev, scale))
+        log_q_ratio = log_q_rev - log_q_fwd
+        return theta_new, log_q_ratio
+
+    return propose
+```
+
+```{python}
+#| label: eval-mala
+#| code-fold: false
+evaluate("MALA(σ=0.03)", propose_mala(0.03), random.PRNGKey(3))
+```
+
+The trace plot is visibly less autocorrelated than for the random walk, and ESS climbs accordingly. Each step now requires one gradient evaluation in addition to the usual log-density evaluation.
+
+### HMC proposal
+
+While MALA moves in the direction of high probability, it is unable to move well between different high-probability regions. **Hamiltonian Monte Carlo (HMC)** generates long, gradient-guided proposals by simulating the physics of a frictionless skater rolling on the landscape of the negative log target (see @BetancourtHMC2018). The key trick is to *augment* the state with an auxiliary **momentum** $p \in \mathbb{R}^d$, giving a joint distribution
+$$
+p(\theta, p) \;\propto\; \exp\bigl(-H(\theta, p)\bigr), \qquad H(\theta, p) \;=\; \underbrace{-\log p(\theta)}_{\text{potential } V(\theta)} \;+\; \underbrace{\tfrac{1}{2}\|p\|^2}_{\text{kinetic } T(p)}.
+$$
+Because $p$ is independent of $\theta$ in the joint, the $\theta$-marginal is unchanged. If at each step we draw a fresh $p \sim \mathcal{N}(0, I)$ and then move along a curve of constant $H$ (i.e. exactly conserving energy), the resulting move leaves the joint invariant and we can simply discard $p$ at the end.
+
+Such an energy-preserving curve is the solution of **Hamilton's equations** $\dot\theta = \partial H/\partial p = p$ and $\dot p = -\partial H/\partial \theta = \nabla \log p(\theta)$. We approximate them with the **leapfrog integrator**, which alternates a half-kick of momentum, a full drift of position, and another half-kick:
+$$
+p_{t+1/2} = p_t + \tfrac{\varepsilon}{2}\nabla\log p(\theta_t), \qquad
+\theta_{t+1} = \theta_t + \varepsilon\, p_{t+1/2}, \qquad
+p_{t+1} = p_{t+1/2} + \tfrac{\varepsilon}{2}\nabla\log p(\theta_{t+1}).
+$$
+Leapfrog is **symplectic** and **time-reversible**, which is what allows a clean MH correction for the small discretisation error in $H$. Because the proposal is deterministic given $p$ and reversible, the Hastings ratio reduces to the change in joint density,
+$$
+\log\alpha
+  \;=\; H(\theta, p) - H(\theta', p')
+  \;=\; \underbrace{\log p(\theta') - \log p(\theta)}_{\texttt{log\_p\_prop} - \texttt{log\_p\_theta}}
+  \;+\; \underbrace{\tfrac{1}{2}\bigl(\|p\|^2 - \|p'\|^2\bigr)}_{\texttt{log\_q\_ratio}}.
+$$
+
+The price of these long trajectories is that leapfrog is only stable when the step size $\varepsilon$ is small compared to the local curvature of $V$. Heuristically, on a quadratic well with curvature $\lambda$ the integrator behaves like a discrete harmonic oscillator and is stable only for $\varepsilon < 2/\sqrt{\lambda_{\max}}$, where $\lambda_{\max}$ is the largest eigenvalue of $\nabla^2 V$ in the region being explored. Above that bound the simulated $H$ explodes ("divergent transitions" in Stan), every proposal is rejected, and the chain freezes — a failure mode that masquerades as a bug. Tuning HMC therefore requires picking $\varepsilon$ small enough for stability and $L$ large enough to traverse the typical set without retracing steps; the NUTS sampler in tools like Stan and NumPyro automates both.
+
+```{python}
+#| label: proposal-hmc
+#| code-fold: false
+def propose_hmc(step_size, n_leapfrog):
+    """HMC: L leapfrog steps at step size ε.
+    log_q_ratio = 0.5*(||p0||² - ||p'||²) corrects for discretisation error."""
+
+    def propose(key, theta, log_p):
+        grad_log_p = jax.grad(log_p)
+        p0 = random.normal(key, theta.shape)  # fresh momentum, ~ N(0, I)
+
+        # One leapfrog step: half-kick momentum, full drift, half-kick momentum.
+        def leapfrog_step(carry, _):
+            theta_t, p_t = carry
+            p_half     = p_t    + 0.5 * step_size * grad_log_p(theta_t)
+            theta_next = theta_t + step_size * p_half
+            p_next     = p_half + 0.5 * step_size * grad_log_p(theta_next)
+            return (theta_next, p_next), None
+
+        (theta_new, p_new), _ = lax.scan(
+            leapfrog_step, (theta, p0), None, length=n_leapfrog
+        )
+        log_q_ratio = 0.5 * (jnp.sum(p0**2) - jnp.sum(p_new**2))
+        return theta_new, log_q_ratio
+
+    return propose
+```
+
+```{python}
+#| label: eval-hmc
+#| code-fold: false
+evaluate("HMC(ε=0.03, L=10)", propose_hmc(0.03, 10), random.PRNGKey(4))
+```
+
+HMC achieves the highest ESS of all four proposals: the trace plots look essentially uncorrelated and the rank plots are visibly closer to uniform. The cost is $L = 10$ gradient evaluations per proposed move rather than one.
+
+### Summary
+
+The progression illustrates a single principle: *the more the proposal exploits the geometry of the target, the higher the ESS per chain*. This comes at the cost of more gradient work per step. The independent proposal ignores the state entirely and fails. The random walk uses only the current position. MALA adds the gradient. HMC adds the gradient at $L$ intermediate points along a Hamiltonian trajectory. Each of these proposals also has free parameters whose tuning matters: the rule-of-thumb acceptance targets are roughly $25\%$ for random-walk, $57\%$ for MALA, and $65\%$ for HMC. In practice these are adjusted during a warm-up phase, which is exactly what NumPyro's NUTS sampler does automatically.
+
 
 ## Diagnosing convergence
 
-<!--
-For each, plot trajectories, acceptance rates, Gelman-Rubin Rhat, and effective sample sizes, and discuss how the proposal shape interacts with the geometry of the target. -->
+The diagnostics in this section follow the treatment in Chapter 11 of @GelmanBDA2013. The basic problem of MCMC inference is that we never observe the stationary distribution directly. Instead we only see a finite collection of correlated draws from a few chains. Two failure modes can spoil our inferences. First, the chains may not have **mixed**: different chains can settle in different regions of parameter space and look stationary on their own while disagreeing with each other. Second, even if the chains agree, each individual chain may not have reached **stationarity**: an early-iteration drift can persist into the post-warmup samples. Both must be ruled out before we trust averages over the draws.
+
+To detect both problems with a single number, we follow Gelman et al. and **split each chain in half** after discarding the warm-up. If we run $M$ chains of post-warmup length $2n$, splitting gives us $m = 2M$ half-chains of length $n$. Mixing failures show up as disagreement between chains; stationarity failures show up as disagreement between the first and second half of the same chain. Hence both look like between-chain disagreement once the splits are pooled. The diagnostics below all operate on these $m$ split-chains.
+
+Fix a scalar quantity of interest $\psi$ (a parameter, a derived quantity, or $\log p(\theta \mid y)$). Write $\psi_{ij}$ for draw $i$ of split-chain $j$, with chain mean $\bar\psi_{\cdot j}$ and grand mean $\bar\psi_{\cdot\cdot}$. The **between-chain** and **within-chain** variances are
+$$
+B \;=\; \frac{n}{m-1}\sum_{j=1}^{m}\bigl(\bar\psi_{\cdot j} - \bar\psi_{\cdot\cdot}\bigr)^{2},
+\qquad
+W \;=\; \frac{1}{m}\sum_{j=1}^{m} s_{j}^{2},
+\qquad
+s_{j}^{2} = \frac{1}{n-1}\sum_{i=1}^{n}\bigl(\psi_{ij} - \bar\psi_{\cdot j}\bigr)^{2}.
+$$
+The factor $n$ in $B$ rescales the variance of the chain *means* into a variance on the same footing as $W$. Intuitively, $W$ measures how much each chain wiggles around its own mean, and $B$ measures how much the chain means disagree with each other.
+
+If the chains had truly converged we would have $B \approx W$: each chain would explore the full posterior, so its sample variance would equal the marginal posterior variance, and the chain means would all sit near the true posterior mean. As long as the starting distribution is overdispersed relative to the target, $W$ *underestimates* the posterior variance (chains have not had time to explore the tails) while a weighted combination
+$$
+\widehat{\mathrm{var}}^{+}(\psi \mid y) \;=\; \frac{n-1}{n}\, W \;+\; \frac{1}{n}\, B
+$$
+*overestimates* it. The **potential scale reduction factor** $\hat R$ compares these two estimates:
+$$
+\hat R \;=\; \sqrt{\frac{\widehat{\mathrm{var}}^{+}(\psi \mid y)}{W}}.
+$$
+$\hat R$ measures by what factor the posterior scale could shrink if we ran the chains forever. As $n \to \infty$ both estimates converge to the true variance and $\hat R \to 1$. A common practical threshold is $\hat R < 1.01$; values noticeably above $1$ signal that some chains are still exploring distinct regions or that individual chains have not yet stabilised.
+
+Convergence is necessary but not sufficient: even well-mixed chains produce *correlated* draws, so $mn$ samples are worth fewer than $mn$ independent draws. The **effective sample size** quantifies this loss. The asymptotic variance of the chain average $\bar\psi_{\cdot\cdot}$ as an estimator of $\mathbb{E}[\psi \mid y]$ is
+$$
+\lim_{n\to\infty}\, mn \cdot \mathrm{var}(\bar\psi_{\cdot\cdot}) \;=\; \Bigl(1 + 2\sum_{t=1}^{\infty}\rho_{t}\Bigr)\,\mathrm{var}(\psi \mid y),
+$$
+where $\rho_t$ is the lag-$t$ autocorrelation of $\psi$ along a chain. If the draws were independent, this variance would just be $\mathrm{var}(\psi \mid y)$, so the inflation factor in parentheses is the price of correlation. Defining
+$$
+n_{\mathrm{eff}} \;=\; \frac{mn}{1 + 2\sum_{t=1}^{\infty}\rho_{t}}
+$$
+gives the number of independent draws that would carry the same information as the $mn$ correlated ones. A chain that proposes tiny steps has $\rho_t$ close to $1$ for many lags and a small $n_{\mathrm{eff}}$; a well-tuned HMC sampler has rapidly decaying $\rho_t$ and $n_{\mathrm{eff}}$ approaching $mn$.
+
+In practice we cannot sum infinitely many lags from a finite chain. The estimator computes empirical autocorrelations $\hat\rho_t$ from the variogram and the pooled variance estimate $\widehat{\mathrm{var}}^{+}$, then truncates the sum at the first lag $T$ where consecutive pairs $\hat\rho_{2t} + \hat\rho_{2t+1}$ turn negative. This serves as a noise floor beyond which lag estimates are unreliable. @GelmanBDA2013 recommends running until $\hat n_{\mathrm{eff}} \gtrsim 5m$, i.e. roughly ten effective draws per split-chain, in addition to $\hat R$ being near $1$.
+
+A few caveats. Both $\hat R$ and $\hat n_{\mathrm{eff}}$ are computed *per scalar quantity*: a chain may converge cleanly for one parameter and badly for another, so all quantities of interest must be checked. Both diagnostics rely on means and variances and so behave best for approximately Gaussian marginals; for heavy-tailed or constrained quantities one transforms first (logs, logits, or ranks). Morever, neither diagnostic can detect modes that the chains never visited. Convergence checks only confirm that the chains agree with each other, not that they have found everything.
 
 
-## Finite Markov chains: a formal treatment {#sec-finite-mc}
+<!-- ## Finite Markov chains: a formal treatment {#sec-finite-mc}
 
 This section gives a rigorous version of the conceptual story above for the case of a **finite** state space. The finite setting is enough to justify everything from first principles, and even chains for continuous distributions are ultimately implemented as discrete approximations on a computer. The general theory extends to continuous state spaces using measure-theoretic machinery, but the conceptual content is the same.
 
@@ -956,7 +1088,6 @@ $$k^t := \underbrace{k \then \cdots \then k}_{t\text{-times}}.$$
 
 If we know the exact state of a particle at time $s$, then the future trajectory from $s$ onward behaves like a fresh trajectory starting from that state. This holds even if $s$ is a random time determined by the history of the trajectory up to $s$.
 
-<!-- Include Markov chain string diagram from `discrete-graphical-models.qmd` -->
 
 ::: {#lem-trajectory}
 Let $x_0, x_1, \dots$ be a trajectory generated by $k$. Then:
@@ -1167,6 +1298,11 @@ $$
 $$
 
 **The ergodic case.** When $k$ is ergodic, @prp-mean-return-times states that $p_\infty(z) = 1/\mu_z$. The limit becomes $\sum_{z} f(z) \, p_\infty(z) = \mathbb{E}_{x \sim p_\infty}[f(x)]$.
-:::
+::: 
 
-<!-- Illustration: simulate an ergodic chain and plot the running time average of f(x_t) converging to E[f]. Overlay several independent runs to show the almost-sure convergence. -->
+-->
+
+
+## Bibliographic notes
+
+The standard reference for general Markov chains is the classic text by Meyn and Tweedie (@MeynTweedie2009) which covers the relevant limit theorems in detail. Comprehensive coverage of Monte Carlo methods including MCMC is given by the monograph by Robert and Casella (@RobertCasella2004). I find the presentation in @Tierney much easier to follow. Hamiltonian Monte Carlo is reviewed in detail by @BetancourtHMC2018. 
