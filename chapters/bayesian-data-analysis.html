@@ -85,7 +85,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../exercises/1-classic-puzzles.html" rel="next">
+<link href="../chapters/mcmc.html" rel="next">
 <link href="../chapters/hybrid-models.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -240,6 +240,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -630,8 +636,8 @@ y_t &amp;\sim \text{Poisson}(\lambda_t), \quad t = 1, \ldots, T.
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    tau <span class="op">=</span> numpyro.sample(<span class="st">"tau"</span>, dist.Categorical(probs<span class="op">=</span>jnp.ones(n_years) <span class="op">/</span> n_years))</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Construct the piecewise-constant rate vector</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> jnp.arange(n_years)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    lambda_t <span class="op">=</span> jnp.where(idx <span class="op">&lt;</span> tau, rho_1, rho_2)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    ts <span class="op">=</span> jnp.arange(n_years)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    lambda_t <span class="op">=</span> jnp.where(ts <span class="op">&lt;</span> tau, rho_1, rho_2)</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    numpyro.deterministic(<span class="st">"rate"</span>, lambda_t)</span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Likelihood / generative sampling vectorized over all years</span></span>
@@ -640,7 +646,7 @@ y_t &amp;\sim \text{Poisson}(\lambda_t), \quad t = 1, \ldots, T.
 <p>Let us walk through the function line by line:</p>
 <ol type="1">
 <li><strong>Priors.</strong> The first three <code>numpyro.sample</code> calls draw the unknown quantities <span class="math inline">\(\rho_1\)</span>, <span class="math inline">\(\rho_2\)</span>, and <span class="math inline">\(\tau\)</span> from their prior distributions. Each call returns a JAX scalar that we can use in subsequent computation.</li>
-<li><strong>Rate vector.</strong> The call <code>jnp.where(idx &lt; tau, rho_1, rho_2)</code> builds the piecewise-constant rate <span class="math inline">\(\lambda_t\)</span> as a length-<span class="math inline">\(T\)</span> array. This is the JAX equivalent of <code>torch.where</code> — a vectorized conditional that avoids Python <code>if/else</code> on array values. We record it with <code>numpyro.deterministic</code> so that we can plot the inferred rate trajectory later.</li>
+<li><strong>Rate vector.</strong> The call <code>jnp.where(ts &lt; tau, rho_1, rho_2)</code> builds the piecewise-constant rate <span class="math inline">\(\lambda_t\)</span> as a length-<span class="math inline">\(T\)</span> array. This is the JAX equivalent of <code>torch.where</code> — a vectorized conditional that avoids Python <code>if/else</code> on array values. We record it with <code>numpyro.deterministic</code> so that we can plot the inferred rate trajectory later.</li>
 <li><strong>Observation.</strong> The final <code>numpyro.sample</code> with <code>obs=counts</code> handles both modes: when <code>counts=None</code> it generates a synthetic dataset of <span class="math inline">\(T\)</span> Poisson draws, and when <code>counts</code> is provided it scores the observations by a Poisson log-probability at each observed count.</li>
 </ol>
 </section>
@@ -764,8 +770,8 @@ Figure&nbsp;5.3: Prior predictive check: a selection of simulated count trajecto
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate a synthetic dataset at the true parameters</span></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>rng_key_sim <span class="op">=</span> random.PRNGKey(<span class="dv">42</span>)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> jnp.arange(n_years)</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>true_lambda <span class="op">=</span> jnp.where(idx <span class="op">&lt;</span> true_tau, true_rho_1, true_rho_2)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> jnp.arange(n_years)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>true_lambda <span class="op">=</span> jnp.where(ts <span class="op">&lt;</span> true_tau, true_rho_1, true_rho_2)</span>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>fake_counts <span class="op">=</span> dist.Poisson(true_lambda).sample(rng_key_sim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We choose an early rate of 3.5, a late rate of 0.8, and a switchpoint at year 40 (i.e.&nbsp;1891). These are deliberately in the ballpark of what we expect from the real data. There is no point testing parameter recovery on values that the model would never encounter in practice. <a href="#fig-fake-data" class="quarto-xref">Figure&nbsp;<span>5.4</span></a> shows the result: the synthetic data has the same qualitative structure as the observed data, confirming that our chosen values produce a plausible dataset.</p>
@@ -1528,8 +1534,8 @@ Figure&nbsp;5.14: Rootogram: observed vs.&nbsp;posterior predictive count freque
 <span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    tau <span class="op">=</span> numpyro.sample(<span class="st">"tau"</span>, dist.Uniform(<span class="dv">0</span>, n_years))</span>
 <span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> numpyro.sample(<span class="st">"s"</span>, dist.HalfNormal(<span class="fl">10.0</span>))</span>
 <span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> jnp.arange(n_years, dtype<span class="op">=</span>jnp.float32)</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    weight <span class="op">=</span> jax.nn.sigmoid(<span class="op">-</span>(idx <span class="op">-</span> tau) <span class="op">/</span> s)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    ts <span class="op">=</span> jnp.arange(n_years, dtype<span class="op">=</span>jnp.float32)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    weight <span class="op">=</span> jax.nn.sigmoid(<span class="op">-</span>(ts <span class="op">-</span> tau) <span class="op">/</span> s)</span>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    lambda_t <span class="op">=</span> rho_2 <span class="op">+</span> (rho_1 <span class="op">-</span> rho_2) <span class="op">*</span> weight</span>
 <span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    numpyro.deterministic(<span class="st">"rate"</span>, lambda_t)</span>
 <span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    numpyro.sample(<span class="st">"obs"</span>, dist.Poisson(lambda_t), obs<span class="op">=</span>counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2254,8 +2260,8 @@ Martin, Osvaldo A., Oriol Abril-Pla, Jordan Deklerk, and ArviZ-devs. 2025. <span
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../exercises/1-classic-puzzles.html" class="pagination-link" aria-label="Exercise 1: Classic puzzles">
-        <span class="nav-page-text">Exercise 1: Classic puzzles</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../chapters/mcmc.html" class="pagination-link" aria-label="Mechanics of MCMC">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
