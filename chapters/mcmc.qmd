@@ -122,7 +122,7 @@ Run the dynamics long enough and something striking happens. Although every indi
 
 ```{python}
 #| label: fig-stationary-convergence
-#| fig-cap: "400 insects under the same Langevin dynamics. The dashed circles mark the 1σ and 2σ contours of the stationary $\\mathcal{N}(0, I)$. Starting from a uniform scatter, the cloud progressively contracts inward, settling into the stationary Gaussian."
+#| fig-cap: "400 insects under the same Langevin dynamics. The dashed circles mark the 1σ and 2σ contours of a $\\mathcal{N}(0, I)$. Starting from a uniform scatter, the cloud progressively contracts inward, settling into stationarity."
 #| echo: false
 _T2 = [0, 10, 40, 100, 250, 400]
 _LIM2 = _BOX * 0.88
@@ -655,6 +655,20 @@ $$
 The case $x = x'$ is trivial since the flow from $x$ to itself is just the probability of rejecting a move, which is automatically balanced.
 :::
 
+### The MH algorithm
+
+Putting the above pieces together, the Metropolis-Hastings algorithm is as follows:
+
+::: {.callout-note title="Metropolis-Hastings algorithm"}
+Start at an arbitrary state $x_0$. For $t = 1, \ldots, n$:
+
+1. Sample a proposed move $x' \sim q(- \mid x_{t-1})$.
+2. Compute the acceptance probability $\alpha(x' \mid x_{t-1}) := \min\left(1, \, \frac{p_\infty(x') \, q(x_{t-1} \mid x')}{p_\infty(x_{t-1}) \, q(x' \mid x_{t-1})}\right)$.
+3. With probability $\alpha(x' \mid x_{t-1})$, accept the move and set $x_t := x'$. Otherwise, reject the move and set $x_t := x_{t-1}$.
+:::
+
+Samples from the trajectory $x_{0:n}$ are not independent, but can be used to estimate expectations under $p_\infty$ by the ergodic theorem: $\frac{1}{n} \sum_{t=0}^{n} f(x_t) \to \mathbb{E}_{p_\infty(x)}[f(x)]$ as $n \to \infty$.
+
 ### Using MH in Bayesian inference
 
 An important feature of the formula is that $p_\infty$ enters only through the ratio $p_\infty(x') / p_\infty(x)$. Hence the algorithm only needs to evaluate $p_\infty$ up to an unknown normalizing constant. In the Bayesian setting, the target distribution is the posterior 
@@ -1135,7 +1149,13 @@ n_{\mathrm{eff}} \;=\; \frac{mn}{1 + 2\sum_{t=1}^{\infty}\rho_{t}}
 $$
 gives the number of independent draws that would carry the same information as the $mn$ correlated ones. A chain that proposes tiny steps has $\rho_t$ close to $1$ for many lags and a small $n_{\mathrm{eff}}$; a well-tuned HMC sampler has rapidly decaying $\rho_t$ and $n_{\mathrm{eff}}$ approaching $mn$.
 
-In practice we cannot sum infinitely many lags from a finite chain. The estimator computes empirical autocorrelations $\hat\rho_t$ from the variogram and the pooled variance estimate $\widehat{\mathrm{var}}^{+}$, then truncates the sum at the first lag $T$ where consecutive pairs $\hat\rho_{2t} + \hat\rho_{2t+1}$ turn negative. This serves as a noise floor beyond which lag estimates are unreliable. @GelmanBDA2013 recommends running until $\hat n_{\mathrm{eff}} \gtrsim 5m$, i.e. roughly ten effective draws per split-chain, in addition to $\hat R$ being near $1$.
+The estimator computes empirical autocorrelations according to 
+$$
+\hat\rho_t := 1 - \frac{V_t}{2 \widehat{\mathrm{var}}^{+}(\psi \mid y)}, \qquad
+V_t := \frac{1}{m(n-t)}\sum_{j=1}^m \sum_{i=t+1}^n (\psi_{ij}-\psi_{i-t,j})^2.
+$$ 
+This formula is motivated by solving the identity $\mathbb{E}(\psi_i - \psi_{i-t})^2 = 2 \mathrm{var}(\psi \mid y) (1 - \rho_t)$ for $\rho_t$ and plugging in the variance estimator.
+Since these estimates get noisy as $t$ increases, the sum is then truncated at the first lag $T$ where consecutive pairs $\hat\rho_{2t} + \hat\rho_{2t+1}$ turn negative. @GelmanBDA2013 recommends running until $\hat n_{\mathrm{eff}} \gtrsim 5m$ ( ten effective draws per split-chain) in addition to $\hat R$ being near $1$.
 
 A few caveats. Both $\hat R$ and $\hat n_{\mathrm{eff}}$ are computed *per scalar quantity*: a chain may converge cleanly for one parameter and badly for another, so all quantities of interest must be checked. Both diagnostics rely on means and variances and so behave best for approximately Gaussian marginals; for heavy-tailed or constrained quantities one transforms first (logs, logits, or ranks). Morever, neither diagnostic can detect modes that the chains never visited. Convergence checks only confirm that the chains agree with each other, not that they have found everything.
 
