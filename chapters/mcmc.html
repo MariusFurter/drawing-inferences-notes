@@ -299,6 +299,12 @@ window.Quarto = {
  <span class="menu-text">Exercise 7: Robust linear regression</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/8-multilevel-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 8: Multilevel regression</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -353,12 +359,13 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#detailed-balance" id="toc-detailed-balance" class="nav-link" data-scroll-target="#detailed-balance"><span class="header-section-number">6.4.1</span> Detailed balance</a></li>
   <li><a href="#the-mh-kernel" id="toc-the-mh-kernel" class="nav-link" data-scroll-target="#the-mh-kernel"><span class="header-section-number">6.4.2</span> The MH kernel</a></li>
-  <li><a href="#using-mh-in-bayesian-inference" id="toc-using-mh-in-bayesian-inference" class="nav-link" data-scroll-target="#using-mh-in-bayesian-inference"><span class="header-section-number">6.4.3</span> Using MH in Bayesian inference</a></li>
-  <li><a href="#optimality-of-the-acceptance-ratio" id="toc-optimality-of-the-acceptance-ratio" class="nav-link" data-scroll-target="#optimality-of-the-acceptance-ratio"><span class="header-section-number">6.4.4</span> Optimality of the acceptance ratio</a></li>
-  <li><a href="#choosing-the-proposal" id="toc-choosing-the-proposal" class="nav-link" data-scroll-target="#choosing-the-proposal"><span class="header-section-number">6.4.5</span> Choosing the proposal</a></li>
-  <li><a href="#harris-recurrence-and-aperiodicity-of-mh" id="toc-harris-recurrence-and-aperiodicity-of-mh" class="nav-link" data-scroll-target="#harris-recurrence-and-aperiodicity-of-mh"><span class="header-section-number">6.4.6</span> Harris recurrence and aperiodicity of MH</a></li>
-  <li><a href="#composing-mh-steps" id="toc-composing-mh-steps" class="nav-link" data-scroll-target="#composing-mh-steps"><span class="header-section-number">6.4.7</span> Composing MH steps</a></li>
-  <li><a href="#the-gibbs-sampler" id="toc-the-gibbs-sampler" class="nav-link" data-scroll-target="#the-gibbs-sampler"><span class="header-section-number">6.4.8</span> The Gibbs sampler</a></li>
+  <li><a href="#the-mh-algorithm" id="toc-the-mh-algorithm" class="nav-link" data-scroll-target="#the-mh-algorithm"><span class="header-section-number">6.4.3</span> The MH algorithm</a></li>
+  <li><a href="#using-mh-in-bayesian-inference" id="toc-using-mh-in-bayesian-inference" class="nav-link" data-scroll-target="#using-mh-in-bayesian-inference"><span class="header-section-number">6.4.4</span> Using MH in Bayesian inference</a></li>
+  <li><a href="#optimality-of-the-acceptance-ratio" id="toc-optimality-of-the-acceptance-ratio" class="nav-link" data-scroll-target="#optimality-of-the-acceptance-ratio"><span class="header-section-number">6.4.5</span> Optimality of the acceptance ratio</a></li>
+  <li><a href="#choosing-the-proposal" id="toc-choosing-the-proposal" class="nav-link" data-scroll-target="#choosing-the-proposal"><span class="header-section-number">6.4.6</span> Choosing the proposal</a></li>
+  <li><a href="#harris-recurrence-and-aperiodicity-of-mh" id="toc-harris-recurrence-and-aperiodicity-of-mh" class="nav-link" data-scroll-target="#harris-recurrence-and-aperiodicity-of-mh"><span class="header-section-number">6.4.7</span> Harris recurrence and aperiodicity of MH</a></li>
+  <li><a href="#composing-mh-steps" id="toc-composing-mh-steps" class="nav-link" data-scroll-target="#composing-mh-steps"><span class="header-section-number">6.4.8</span> Composing MH steps</a></li>
+  <li><a href="#the-gibbs-sampler" id="toc-the-gibbs-sampler" class="nav-link" data-scroll-target="#the-gibbs-sampler"><span class="header-section-number">6.4.9</span> The Gibbs sampler</a></li>
   </ul></li>
   <li><a href="#coding-mh-samplers" id="toc-coding-mh-samplers" class="nav-link" data-scroll-target="#coding-mh-samplers"><span class="header-section-number">6.5</span> Coding MH samplers</a>
   <ul class="collapse">
@@ -443,7 +450,7 @@ p_{t+1} = p_t \then k.
 <img src="mcmc_files/figure-html/fig-stationary-convergence-output-1.png" width="619" height="357" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stationary-convergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6.2: 400 insects under the same Langevin dynamics. The dashed circles mark the 1σ and 2σ contours of the stationary <span class="math inline">\(\mathcal{N}(0, I)\)</span>. Starting from a uniform scatter, the cloud progressively contracts inward, settling into the stationary Gaussian.
+Figure&nbsp;6.2: 400 insects under the same Langevin dynamics. The dashed circles mark the 1σ and 2σ contours of a <span class="math inline">\(\mathcal{N}(0, I)\)</span>. Starting from a uniform scatter, the cloud progressively contracts inward, settling into stationarity.
 </figcaption>
 </figure>
 </div>
@@ -583,19 +590,42 @@ p_\infty(x) \, k(x' \mid x)
 <p>The case <span class="math inline">\(x = x'\)</span> is trivial since the flow from <span class="math inline">\(x\)</span> to itself is just the probability of rejecting a move, which is automatically balanced.</p>
 </div>
 </section>
-<section id="using-mh-in-bayesian-inference" class="level3" data-number="6.4.3">
-<h3 data-number="6.4.3" class="anchored" data-anchor-id="using-mh-in-bayesian-inference"><span class="header-section-number">6.4.3</span> Using MH in Bayesian inference</h3>
+<section id="the-mh-algorithm" class="level3" data-number="6.4.3">
+<h3 data-number="6.4.3" class="anchored" data-anchor-id="the-mh-algorithm"><span class="header-section-number">6.4.3</span> The MH algorithm</h3>
+<p>Putting the above pieces together, the Metropolis-Hastings algorithm is as follows:</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Metropolis-Hastings algorithm">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Metropolis-Hastings algorithm
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Start at an arbitrary state <span class="math inline">\(x_0\)</span>. For <span class="math inline">\(t = 1, \ldots, n\)</span>:</p>
+<ol type="1">
+<li>Sample a proposed move <span class="math inline">\(x' \sim q(- \mid x_{t-1})\)</span>.</li>
+<li>Compute the acceptance probability <span class="math inline">\(\alpha(x' \mid x_{t-1}) := \min\left(1, \, \frac{p_\infty(x') \, q(x_{t-1} \mid x')}{p_\infty(x_{t-1}) \, q(x' \mid x_{t-1})}\right)\)</span>.</li>
+<li>With probability <span class="math inline">\(\alpha(x' \mid x_{t-1})\)</span>, accept the move and set <span class="math inline">\(x_t := x'\)</span>. Otherwise, reject the move and set <span class="math inline">\(x_t := x_{t-1}\)</span>.</li>
+</ol>
+</div>
+</div>
+<p>Samples from the trajectory <span class="math inline">\(x_{0:n}\)</span> are not independent, but can be used to estimate expectations under <span class="math inline">\(p_\infty\)</span> by the ergodic theorem: <span class="math inline">\(\frac{1}{n} \sum_{t=0}^{n} f(x_t) \to \mathbb{E}_{p_\infty(x)}[f(x)]\)</span> as <span class="math inline">\(n \to \infty\)</span>.</p>
+</section>
+<section id="using-mh-in-bayesian-inference" class="level3" data-number="6.4.4">
+<h3 data-number="6.4.4" class="anchored" data-anchor-id="using-mh-in-bayesian-inference"><span class="header-section-number">6.4.4</span> Using MH in Bayesian inference</h3>
 <p>An important feature of the formula is that <span class="math inline">\(p_\infty\)</span> enters only through the ratio <span class="math inline">\(p_\infty(x') / p_\infty(x)\)</span>. Hence the algorithm only needs to evaluate <span class="math inline">\(p_\infty\)</span> up to an unknown normalizing constant. In the Bayesian setting, the target distribution is the posterior <span class="math display">\[p_\infty(\theta) = p(\theta \mid y) = \frac{p(y ,\theta)}{p(y)}.\]</span></p>
 <p>Since the normalizing constant <span class="math inline">\(p(y)\)</span> cancels in the ratio <span class="math inline">\(p_\infty(\theta') / p_\infty(\theta)\)</span>, we can compute the acceptance probability using only the joint distribution <span class="math inline">\(p(y ,\theta)\)</span> over the parameters and data.</p>
 <p>In a generative model composed of several kernels, the joint distribution accross all variables factorizes into a product of kernels by copy-composition. Hence, computing this quantity is straightforward: we just multiply the densities of all kernels in the model evaluated at the current state. In practice, we work with log-densities to avoid numerical underflow and to turn products into sums.</p>
 </section>
-<section id="optimality-of-the-acceptance-ratio" class="level3" data-number="6.4.4">
-<h3 data-number="6.4.4" class="anchored" data-anchor-id="optimality-of-the-acceptance-ratio"><span class="header-section-number">6.4.4</span> Optimality of the acceptance ratio</h3>
+<section id="optimality-of-the-acceptance-ratio" class="level3" data-number="6.4.5">
+<h3 data-number="6.4.5" class="anchored" data-anchor-id="optimality-of-the-acceptance-ratio"><span class="header-section-number">6.4.5</span> Optimality of the acceptance ratio</h3>
 <p>There are many ways to define <span class="math inline">\(\alpha\)</span> that balance the flows, for example, by scaling both directions down by an arbitrary common factor. The Metropolis-Hastings choice is the one that <em>maximizes</em> the acceptance probability in each direction. The following heuristic argument explains why this is the right choice.</p>
 <p>Whenever the chain rejects a proposal, the trajectory records a duplicate of the current state. Lower acceptance rates produce more duplicate samples, increasing the <strong>autocorrelation</strong> of the trajectory. Because the Monte Carlo estimator averages over the trajectory, correlated samples carry less independent information than uncorrelated ones, slowing the convergence in the ergodic theorem. By accepting as often as possible while preserving detailed balance, the Metropolis-Hastings ratio gives the lowest asymptotic variance among all detailed-balance corrections of <span class="math inline">\(q\)</span>.</p>
 </section>
-<section id="choosing-the-proposal" class="level3" data-number="6.4.5">
-<h3 data-number="6.4.5" class="anchored" data-anchor-id="choosing-the-proposal"><span class="header-section-number">6.4.5</span> Choosing the proposal</h3>
+<section id="choosing-the-proposal" class="level3" data-number="6.4.6">
+<h3 data-number="6.4.6" class="anchored" data-anchor-id="choosing-the-proposal"><span class="header-section-number">6.4.6</span> Choosing the proposal</h3>
 <p>Although the Metropolis-Hastings ratio is optimal <em>given</em> a proposal, the practical efficiency of the algorithm depends heavily on choosing <span class="math inline">\(q\)</span> well. There is a fundamental tradeoff:</p>
 <ul>
 <li><strong>Tiny steps.</strong> If <span class="math inline">\(q\)</span> proposes states very close to the current state, then <span class="math inline">\(p_\infty(x)\)</span> and <span class="math inline">\(p_\infty(x')\)</span> are similar and acceptance is nearly always granted. But the chain explores the space slowly: it takes many steps to traverse regions where <span class="math inline">\(p_\infty\)</span> has support.</li>
@@ -603,23 +633,23 @@ p_\infty(x) \, k(x' \mid x)
 </ul>
 <p>A good proposal balances these extremes: it takes the largest steps that still maintain a reasonably high acceptance rate.</p>
 </section>
-<section id="harris-recurrence-and-aperiodicity-of-mh" class="level3" data-number="6.4.6">
-<h3 data-number="6.4.6" class="anchored" data-anchor-id="harris-recurrence-and-aperiodicity-of-mh"><span class="header-section-number">6.4.6</span> Harris recurrence and aperiodicity of MH</h3>
+<section id="harris-recurrence-and-aperiodicity-of-mh" class="level3" data-number="6.4.7">
+<h3 data-number="6.4.7" class="anchored" data-anchor-id="harris-recurrence-and-aperiodicity-of-mh"><span class="header-section-number">6.4.7</span> Harris recurrence and aperiodicity of MH</h3>
 <p>We have constructed the MH kernel to satisfy detailed balance with respect to <span class="math inline">\(p_\infty\)</span>, so <span class="math inline">\(p_\infty\)</span> is stationary. However, for MCMC to be theoretically justified, we also need to check that the kernel is Harris recurrent and aperiodic.</p>
 <p>Aperiodicity is guaranteed as long as the proposal has some chance of being rejected. This is usually the case, with the notable exception of Gibbs samplers which always accept their proposals.</p>
 <p>Harris recurrence is guaranteed for MH kernels as long as the chain can eventually reach every region <span class="math inline">\(A\)</span> of the state space for which <span class="math inline">\(p_\infty(A) &gt; 0\)</span> from any starting point. For example, this is easily satsified if the proposal is positive everywhere.</p>
 <p>Hence, Harris recurrence and aperiodicity are not usually a concern for MH samplers. The choice of proposal is a much more important practical concern.</p>
 </section>
-<section id="composing-mh-steps" class="level3" data-number="6.4.7">
-<h3 data-number="6.4.7" class="anchored" data-anchor-id="composing-mh-steps"><span class="header-section-number">6.4.7</span> Composing MH steps</h3>
+<section id="composing-mh-steps" class="level3" data-number="6.4.8">
+<h3 data-number="6.4.8" class="anchored" data-anchor-id="composing-mh-steps"><span class="header-section-number">6.4.8</span> Composing MH steps</h3>
 <p>So far we have treated the proposal <span class="math inline">\(q\)</span> as a single distribution that updates <em>all</em> parameters at once. Nothing in the construction forces this. If <span class="math inline">\(K_1, K_2, \dots, K_m\)</span> are each MH kernels that leave the same target <span class="math inline">\(p_\infty\)</span> stationary, then any composition <span class="math inline">\(K_1 ; \cdots ; K_m\)</span> also leaves <span class="math inline">\(p_\infty\)</span> stationary. This gives us the freedom to <strong>break a single MH update into a sequence of smaller MH updates</strong>, each acting on a different <em>block</em> of parameters while holding the rest fixed.</p>
 <p>Concretely, partition <span class="math inline">\(\theta = (\theta_1, \dots, \theta_m)\)</span> into blocks. The <span class="math inline">\(i\)</span>-th sub-step proposes a new value <span class="math inline">\(\theta_i'\)</span> from a block proposal <span class="math inline">\(q_i(\theta_i' \mid \theta)\)</span> and accepts it with the usual MH ratio, treating the other blocks as constants in the target: <span class="math display">\[
 \alpha_i \;=\; \min\!\left(1,\; \frac{p_\infty(\theta_1, \dots, \theta_i', \dots, \theta_m)}{p_\infty(\theta_1, \dots, \theta_i, \dots, \theta_m)} \cdot \frac{q_i(\theta_i \mid \theta_1, \dots, \theta_i', \dots)}{q_i(\theta_i' \mid \theta)}\right).
 \]</span> Each sub-step satisfies detailed balance for <span class="math inline">\(p_\infty\)</span> on its own, so their composition is a valid MH sampler.</p>
 <p>The trade-off is the same one we saw between tiny and large steps, but along a different axis. A block update changes fewer coordinates at a time, so the proposed state is “closer” to the current one in joint log-density and is more likely to be accepted. The price is that traversing the full parameter space now takes <span class="math inline">\(m\)</span> sub-steps instead of one, and each sub-step typically requires its own evaluation of <span class="math inline">\(p_\infty\)</span>. Block updates are especially useful when different parameters have very different scales or when the posterior is strongly correlated only <em>within</em> certain groups of parameters: a single joint proposal would have to compromise on a step size that works for all of them, while block proposals can be tuned per-block.</p>
 </section>
-<section id="the-gibbs-sampler" class="level3" data-number="6.4.8">
-<h3 data-number="6.4.8" class="anchored" data-anchor-id="the-gibbs-sampler"><span class="header-section-number">6.4.8</span> The Gibbs sampler</h3>
+<section id="the-gibbs-sampler" class="level3" data-number="6.4.9">
+<h3 data-number="6.4.9" class="anchored" data-anchor-id="the-gibbs-sampler"><span class="header-section-number">6.4.9</span> The Gibbs sampler</h3>
 <p>The Gibbs sampler is the limiting case of block-MH in which each block proposal is the <em>exact</em> conditional distribution <span class="math inline">\(q_i(\theta_i' \mid \theta) = p_\infty(\theta_i' \mid \theta_{-i})\)</span>, where <span class="math inline">\(\theta_{-i}\)</span> denotes all components of <span class="math inline">\(\theta\)</span> except <span class="math inline">\(\theta_i\)</span>. Plugging this into the block MH ratio, the joint density factors as <span class="math inline">\(p_\infty(\theta) = p_\infty(\theta_i \mid \theta_{-i}) \, p_\infty(\theta_{-i})\)</span>, the marginal <span class="math inline">\(p_\infty(\theta_{-i})\)</span> cancels, and the conditional terms cancel against the proposal ratio. The result is <span class="math inline">\(\alpha_i = 1\)</span>: every Gibbs proposal is accepted by construction. A full sweep cycles through all blocks <span class="math inline">\(\theta_i\)</span>, drawing each one from its conditional given the current values of the others.</p>
 <p>The appeal of Gibbs sampling is that there are no rejected steps, no autocorrelation from duplicated samples, and no proposal parameters to tune. The catch is that we need to be able to <em>sample exactly</em> from each conditional <span class="math inline">\(p_\infty(\theta_i \mid \theta_{-i})\)</span>. This is only tractable for specific model structures. Outside that regime the conditionals have no closed form and Gibbs is no longer applicable. Even when it does apply, Gibbs can mix poorly along directions of strong posterior correlation, because each sub-step is constrained to move along a single coordinate axis. Modern gradient-based samplers like HMC sidestep both limitations by exploiting the joint geometry directly, which is why this chapter focuses on them.</p>
 </section>
@@ -855,7 +885,7 @@ r_q(\theta, \theta') := \log q(\theta \mid \theta') - \log q(\theta' \mid \theta
 </figure>
 </div>
 </div>
-<div id="eval-independent-3" class="cell-output cell-output-display" data-execution_count="412">
+<div id="eval-independent-3" class="cell-output cell-output-display" data-execution_count="16">
 <div>
 
 
@@ -973,7 +1003,7 @@ r_q(\theta, \theta') := \log q(\theta \mid \theta') - \log q(\theta' \mid \theta
 </figure>
 </div>
 </div>
-<div id="eval-random-walk-3" class="cell-output cell-output-display" data-execution_count="414">
+<div id="eval-random-walk-3" class="cell-output cell-output-display" data-execution_count="18">
 <div>
 
 
@@ -1113,7 +1143,7 @@ r_q(\theta, \theta') := \log q(\theta \mid \theta') - \log q(\theta' \mid \theta
 </figure>
 </div>
 </div>
-<div id="eval-mala-3" class="cell-output cell-output-display" data-execution_count="416">
+<div id="eval-mala-3" class="cell-output cell-output-display" data-execution_count="20">
 <div>
 
 
@@ -1255,7 +1285,7 @@ p(\theta, \rho) \;\propto\; \exp\bigl(-H(\theta, \rho)\bigr), \qquad H(\theta, \
 </figure>
 </div>
 </div>
-<div id="eval-hmc-3" class="cell-output cell-output-display" data-execution_count="418">
+<div id="eval-hmc-3" class="cell-output cell-output-display" data-execution_count="22">
 <div>
 
 
@@ -1369,7 +1399,10 @@ s_{j}^{2} = \frac{1}{n-1}\sum_{i=1}^{n}\bigl(\psi_{ij} - \bar\psi_{\cdot j}\bigr
 \]</span> where <span class="math inline">\(\rho_t\)</span> is the lag-<span class="math inline">\(t\)</span> autocorrelation of <span class="math inline">\(\psi\)</span> along a chain. If the draws were independent, this variance would just be <span class="math inline">\(\mathrm{var}(\psi \mid y)\)</span>, so the inflation factor in parentheses is the price of correlation. Defining <span class="math display">\[
 n_{\mathrm{eff}} \;=\; \frac{mn}{1 + 2\sum_{t=1}^{\infty}\rho_{t}}
 \]</span> gives the number of independent draws that would carry the same information as the <span class="math inline">\(mn\)</span> correlated ones. A chain that proposes tiny steps has <span class="math inline">\(\rho_t\)</span> close to <span class="math inline">\(1\)</span> for many lags and a small <span class="math inline">\(n_{\mathrm{eff}}\)</span>; a well-tuned HMC sampler has rapidly decaying <span class="math inline">\(\rho_t\)</span> and <span class="math inline">\(n_{\mathrm{eff}}\)</span> approaching <span class="math inline">\(mn\)</span>.</p>
-<p>In practice we cannot sum infinitely many lags from a finite chain. The estimator computes empirical autocorrelations <span class="math inline">\(\hat\rho_t\)</span> from the variogram and the pooled variance estimate <span class="math inline">\(\widehat{\mathrm{var}}^{+}\)</span>, then truncates the sum at the first lag <span class="math inline">\(T\)</span> where consecutive pairs <span class="math inline">\(\hat\rho_{2t} + \hat\rho_{2t+1}\)</span> turn negative. This serves as a noise floor beyond which lag estimates are unreliable. <span class="citation" data-cites="GelmanBDA2013">Gelman et al. (<a href="../references.html#ref-GelmanBDA2013" role="doc-biblioref">2013</a>)</span> recommends running until <span class="math inline">\(\hat n_{\mathrm{eff}} \gtrsim 5m\)</span>, i.e.&nbsp;roughly ten effective draws per split-chain, in addition to <span class="math inline">\(\hat R\)</span> being near <span class="math inline">\(1\)</span>.</p>
+<p>The estimator computes empirical autocorrelations according to <span class="math display">\[
+\hat\rho_t := 1 - \frac{V_t}{2 \widehat{\mathrm{var}}^{+}(\psi \mid y)}, \qquad
+V_t := \frac{1}{m(n-t)}\sum_{j=1}^m \sum_{i=t+1}^n (\psi_{ij}-\psi_{i-t,j})^2.
+\]</span> This formula is motivated by solving the identity <span class="math inline">\(\mathbb{E}(\psi_i - \psi_{i-t})^2 = 2 \mathrm{var}(\psi \mid y) (1 - \rho_t)\)</span> for <span class="math inline">\(\rho_t\)</span> and plugging in the variance estimator. Since these estimates get noisy as <span class="math inline">\(t\)</span> increases, the sum is then truncated at the first lag <span class="math inline">\(T\)</span> where consecutive pairs <span class="math inline">\(\hat\rho_{2t} + \hat\rho_{2t+1}\)</span> turn negative. <span class="citation" data-cites="GelmanBDA2013">Gelman et al. (<a href="../references.html#ref-GelmanBDA2013" role="doc-biblioref">2013</a>)</span> recommends running until <span class="math inline">\(\hat n_{\mathrm{eff}} \gtrsim 5m\)</span> ( ten effective draws per split-chain) in addition to <span class="math inline">\(\hat R\)</span> being near <span class="math inline">\(1\)</span>.</p>
 <p>A few caveats. Both <span class="math inline">\(\hat R\)</span> and <span class="math inline">\(\hat n_{\mathrm{eff}}\)</span> are computed <em>per scalar quantity</em>: a chain may converge cleanly for one parameter and badly for another, so all quantities of interest must be checked. Both diagnostics rely on means and variances and so behave best for approximately Gaussian marginals; for heavy-tailed or constrained quantities one transforms first (logs, logits, or ranks). Morever, neither diagnostic can detect modes that the chains never visited. Convergence checks only confirm that the chains agree with each other, not that they have found everything.</p>
 <!-- ## Finite Markov chains: a formal treatment {#sec-finite-mc}
 

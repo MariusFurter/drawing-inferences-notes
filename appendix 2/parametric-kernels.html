@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Parametric kernels reference – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../appendix/pytorch.html" rel="next">
+<link href="../exercises/7-robust-regression.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Appendix</a></li><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Parametric kernels reference</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hybrid-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hybrid models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 5: Inverse Physics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WeightedSampling.torch</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-distributional-families-appendix" id="toc-sec-distributional-families-appendix" class="nav-link active" data-scroll-target="#sec-distributional-families-appendix">Distributional families</a>
+  <ul class="collapse">
+  <li><a href="#binary-outputs" id="toc-binary-outputs" class="nav-link" data-scroll-target="#binary-outputs">Binary outputs</a></li>
+  <li><a href="#categorical-outputs" id="toc-categorical-outputs" class="nav-link" data-scroll-target="#categorical-outputs">Categorical outputs</a></li>
+  <li><a href="#count-data" id="toc-count-data" class="nav-link" data-scroll-target="#count-data">Count data</a></li>
+  <li><a href="#real-valued-outputs" id="toc-real-valued-outputs" class="nav-link" data-scroll-target="#real-valued-outputs">Real-valued outputs</a></li>
+  <li><a href="#positive-real-valued-outputs" id="toc-positive-real-valued-outputs" class="nav-link" data-scroll-target="#positive-real-valued-outputs">Positive real-valued outputs</a></li>
+  <li><a href="#unit-interval-outputs" id="toc-unit-interval-outputs" class="nav-link" data-scroll-target="#unit-interval-outputs">Unit-interval outputs</a></li>
+  <li><a href="#simplex-valued-outputs" id="toc-simplex-valued-outputs" class="nav-link" data-scroll-target="#simplex-valued-outputs">Simplex-valued outputs</a></li>
+  <li><a href="#multivariate-real-valued-outputs" id="toc-multivariate-real-valued-outputs" class="nav-link" data-scroll-target="#multivariate-real-valued-outputs">Multivariate real-valued outputs</a></li>
+  <li><a href="#circular-outputs" id="toc-circular-outputs" class="nav-link" data-scroll-target="#circular-outputs">Circular outputs</a></li>
+  </ul></li>
+  <li><a href="#sec-predictors-appendix" id="toc-sec-predictors-appendix" class="nav-link" data-scroll-target="#sec-predictors-appendix">Predictors</a></li>
+  <li><a href="#sec-response-maps-appendix" id="toc-sec-response-maps-appendix" class="nav-link" data-scroll-target="#sec-response-maps-appendix">Response maps</a></li>
+  <li><a href="#sec-output-transforms-appendix" id="toc-sec-output-transforms-appendix" class="nav-link" data-scroll-target="#sec-output-transforms-appendix">Output transformations</a></li>
+  <li><a href="#sec-input-transforms-appendix" id="toc-sec-input-transforms-appendix" class="nav-link" data-scroll-target="#sec-input-transforms-appendix">Input transformations</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Appendix</a></li><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Parametric kernels reference</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-parametric-families-appendix" class="quarto-section-identifier">Parametric kernels reference</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- Proof-read this! -->
+<p>This appendix collects the building blocks of parametric kernels:</p>
+<ul>
+<li><a href="#sec-distributional-families-appendix" class="quarto-xref"><span>Distributional families</span></a> ,</li>
+<li><a href="#sec-predictors-appendix" class="quarto-xref"><span>Predictors</span></a> ,</li>
+<li><a href="#sec-response-maps-appendix" class="quarto-xref"><span>Response maps</span></a> ,</li>
+<li><a href="#sec-output-transforms-appendix" class="quarto-xref"><span>Output transformations</span></a> ,</li>
+<li><a href="#sec-input-transforms-appendix" class="quarto-xref"><span>Input transformations</span></a> .</li>
+</ul>
+<p>Each parametric kernel is assembled by composing one choice from each category, as described in <a href="../chapters/hybrid-models.html#sec-parametric-kernels" class="quarto-xref"><span>Parametric kernels</span></a>.</p>
+<section id="sec-distributional-families-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-distributional-families-appendix">Distributional families</h2>
+<p>The entries below list the most useful distributional families available in PyTorch via <code>torch.distributions</code>, grouped by output type. Each entry gives the PyTorch class, parameter space, support, and typical use cases. For the full API, see the <a href="https://docs.pytorch.org/docs/main/distributions.html">PyTorch distributions documentation</a>.</p>
+<section id="binary-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="binary-outputs">Binary outputs</h3>
+<dl>
+<dt><strong>Bernoulli</strong> (<code>Bernoulli</code>): <span class="math inline">\(p \in (0,1) \to \{0,1\}\)</span></dt>
+<dd>
+Single binary outcome. The default for yes/no events (disease present, click occurred, coin lands heads).
+</dd>
+</dl>
+</section>
+<section id="categorical-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="categorical-outputs">Categorical outputs</h3>
+<dl>
+<dt><strong>Categorical</strong> (<code>Categorical</code>): <span class="math inline">\(\mathbf{p} \in \Delta^{K-1} \to \{0,\ldots,K{-}1\}\)</span></dt>
+<dd>
+Returns an integer class label. Standard choice for unordered multi-class outcomes (diagnosis type, colour, species).
+</dd>
+<dt><strong>One-hot categorical</strong> (<code>OneHotCategorical</code>): <span class="math inline">\(\mathbf{p} \in \Delta^{K-1} \to \{0,1\}^K\)</span> (one-hot)</dt>
+<dd>
+Same probabilities as Categorical but returns a one-hot vector. Useful when downstream computation needs a vector representation.
+</dd>
+</dl>
+<!-- Explain what one-hot means-->
+<dl>
+<dt><strong>Multinomial</strong> (<code>Multinomial</code>): <span class="math inline">\(n \in \mathbb{N},\; \mathbf{p} \in \Delta^{K-1} \to \{0,\ldots,n\}^K\)</span> with sum <span class="math inline">\(= n\)</span></dt>
+<dd>
+Counts across <span class="math inline">\(K\)</span> categories in <span class="math inline">\(n\)</span> independent trials. Models category frequencies (word counts, allele counts).
+</dd>
+</dl>
+</section>
+<section id="count-data" class="level3">
+<h3 class="anchored" data-anchor-id="count-data">Count data</h3>
+<dl>
+<dt><strong>Poisson</strong> (<code>Poisson</code>): <span class="math inline">\(\lambda &gt; 0 \to \mathbb{N}_0\)</span></dt>
+<dd>
+Counts with equal mean and variance. Default for rare-event counts (arrivals, mutations, photon hits).
+</dd>
+<dt><strong>Binomial</strong> (<code>Binomial</code>): <span class="math inline">\(n \in \mathbb{N},\; p \in (0,1) \to \{0,\ldots,n\}\)</span></dt>
+<dd>
+Number of successes in <span class="math inline">\(n\)</span> fixed trials. Used when the maximum count is known (defects out of <span class="math inline">\(n\)</span> items, correct answers out of <span class="math inline">\(n\)</span> questions).
+</dd>
+<dt><strong>Negative binomial</strong> (<code>NegativeBinomial</code>): <span class="math inline">\(r &gt; 0,\; p \in [0,1) \to \mathbb{N}_0\)</span></dt>
+<dd>
+Count of successes before <span class="math inline">\(r\)</span> failures. Handles overdispersed counts (variance <span class="math inline">\(&gt;\)</span> mean), common in genomics and ecology.
+</dd>
+<dt><strong>Geometric</strong> (<code>Geometric</code>): <span class="math inline">\(p \in (0,1] \to \mathbb{N}_0\)</span></dt>
+<dd>
+Number of failures before the first success. Models waiting times in discrete trials (number of attempts until success).
+</dd>
+</dl>
+</section>
+<section id="real-valued-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="real-valued-outputs">Real-valued outputs</h3>
+<dl>
+<dt><strong>Normal</strong> (<code>Normal</code>): <span class="math inline">\(\mu \in \mathbb{R},\; \sigma &gt; 0 \to \mathbb{R}\)</span></dt>
+<dd>
+The default for continuous real-valued quantities. Justified by the central limit theorem whenever the variable arises as a sum of many small effects.
+</dd>
+<dt><strong>Student-<span class="math inline">\(t\)</span></strong> (<code>StudentT</code>): <span class="math inline">\(\nu &gt; 0,\; \mu \in \mathbb{R},\; \sigma &gt; 0 \to \mathbb{R}\)</span></dt>
+<dd>
+Heavy-tailed alternative to the Normal. Useful when outliers are expected (financial returns, robust regression). Approaches Normal as <span class="math inline">\(\nu \to \infty\)</span>.
+</dd>
+<dt><strong>Cauchy</strong> (<code>Cauchy</code>): <span class="math inline">\(\text{loc} \in \mathbb{R},\; \text{scale} &gt; 0 \to \mathbb{R}\)</span></dt>
+<dd>
+Very heavy tails (no finite mean or variance). Special case of Student-<span class="math inline">\(t\)</span> with <span class="math inline">\(\nu = 1\)</span>. Used as a weakly informative prior.
+</dd>
+<dt><strong>Laplace</strong> (<code>Laplace</code>): <span class="math inline">\(\mu \in \mathbb{R},\; b &gt; 0 \to \mathbb{R}\)</span></dt>
+<dd>
+Peaked, with exponentially decaying tails. Connected to <span class="math inline">\(L^1\)</span> (median) regression and sparse signal recovery.
+</dd>
+<dt><strong>Gumbel</strong> (<code>Gumbel</code>): <span class="math inline">\(\text{loc} \in \mathbb{R},\; \text{scale} &gt; 0 \to \mathbb{R}\)</span></dt>
+<dd>
+Models the maximum of many samples. Appears in extreme-value theory (flood levels, maximum wind speeds) and as the noise distribution in logit models.
+</dd>
+</dl>
+</section>
+<section id="positive-real-valued-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="positive-real-valued-outputs">Positive real-valued outputs</h3>
+<dl>
+<dt><strong>Exponential</strong> (<code>Exponential</code>): <span class="math inline">\(\text{rate} &gt; 0 \to [0, \infty)\)</span></dt>
+<dd>
+Memoryless waiting time. The continuous analogue of the Geometric distribution. Used for inter-arrival times and survival analysis.
+</dd>
+<dt><strong>Gamma</strong> (<code>Gamma</code>): <span class="math inline">\(\text{concentration} &gt; 0,\; \text{rate} &gt; 0 \to [0, \infty)\)</span></dt>
+<dd>
+Flexible positive distribution. Generalises the Exponential (concentration <span class="math inline">\(= 1\)</span>). Common for waiting times, rainfall amounts, and as a prior for rate or precision parameters.
+</dd>
+<dt><strong>Log-normal</strong> (<code>LogNormal</code>): <span class="math inline">\(\mu \in \mathbb{R},\; \sigma &gt; 0 \to (0, \infty)\)</span></dt>
+<dd>
+Arises when <span class="math inline">\(\log Y \sim \text{Normal}(\mu, \sigma^2)\)</span>. Natural for quantities formed by multiplicative effects (incomes, concentrations, particle sizes).
+</dd>
+<dt><strong>Inverse gamma</strong> (<code>InverseGamma</code>): <span class="math inline">\(\text{concentration} &gt; 0,\; \text{rate} &gt; 0 \to (0, \infty)\)</span></dt>
+<dd>
+If <span class="math inline">\(X \sim \text{Gamma}\)</span> then <span class="math inline">\(1/X \sim \text{InverseGamma}\)</span>. Classical conjugate prior for the variance of a Normal distribution.
+</dd>
+<dt><strong>Half-normal</strong> (<code>HalfNormal</code>): <span class="math inline">\(\text{scale} &gt; 0 \to [0, \infty)\)</span></dt>
+<dd>
+Folded Normal. Popular weakly informative prior for scale (standard deviation) parameters.
+</dd>
+<dt><strong>Half-Cauchy</strong> (<code>HalfCauchy</code>): <span class="math inline">\(\text{scale} &gt; 0 \to [0, \infty)\)</span></dt>
+<dd>
+Folded Cauchy. Recommended default prior for scale parameters when little prior information is available.
+</dd>
+<dt><strong>Chi-squared</strong> (<code>Chi2</code>): <span class="math inline">\(\text{df} &gt; 0 \to [0, \infty)\)</span></dt>
+<dd>
+Sum of squared standard Normals. Appears in goodness-of-fit tests and as the sampling distribution of sample variances. Special case of Gamma.
+</dd>
+<dt><strong>Weibull</strong> (<code>Weibull</code>): <span class="math inline">\(\text{scale} &gt; 0,\; \text{concentration} &gt; 0 \to (0, \infty)\)</span></dt>
+<dd>
+Flexible lifetime distribution. Generalises the Exponential (concentration <span class="math inline">\(= 1\)</span>). Standard in reliability engineering and survival analysis.
+</dd>
+<dt><strong>Pareto</strong> (<code>Pareto</code>): <span class="math inline">\(\text{scale} &gt; 0,\; \alpha &gt; 0 \to [\text{scale}, \infty)\)</span></dt>
+<dd>
+Power-law tail. Models phenomena where large values are rare but extreme (city sizes, wealth, file sizes).
+</dd>
+</dl>
+</section>
+<section id="unit-interval-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="unit-interval-outputs">Unit-interval outputs</h3>
+<dl>
+<dt><strong>Beta</strong> (<code>Beta</code>): <span class="math inline">\(\alpha &gt; 0,\; \beta &gt; 0 \to (0, 1)\)</span></dt>
+<dd>
+The standard distribution on the unit interval. Used for proportions, probabilities, and as a conjugate prior for Bernoulli/Binomial.
+</dd>
+<dt><strong>Continuous Bernoulli</strong> (<code>ContinuousBernoulli</code>): <span class="math inline">\(p \in (0,1) \to [0, 1]\)</span></dt>
+<dd>
+A single-parameter continuous distribution on <span class="math inline">\([0,1]\)</span>. Designed to fix a common error in variational autoencoders when modelling pixel intensities.
+</dd>
+<dt><strong>Kumaraswamy</strong> (<code>Kumaraswamy</code>): <span class="math inline">\(a &gt; 0,\; b &gt; 0 \to (0, 1)\)</span></dt>
+<dd>
+Similar to Beta but with a closed-form CDF, making sampling and density evaluation faster. Useful as a drop-in replacement for Beta in variational inference.
+</dd>
+</dl>
+</section>
+<section id="simplex-valued-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="simplex-valued-outputs">Simplex-valued outputs</h3>
+<dl>
+<dt><strong>Dirichlet</strong> (<code>Dirichlet</code>): <span class="math inline">\(\boldsymbol{\alpha} \in \mathbb{R}_{&gt;0}^K \to \Delta^{K-1}\)</span></dt>
+<dd>
+Distribution over probability vectors. The multivariate generalisation of Beta. Used for topic proportions, mixture weights, and as a conjugate prior for Categorical/Multinomial.
+</dd>
+</dl>
+</section>
+<section id="multivariate-real-valued-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="multivariate-real-valued-outputs">Multivariate real-valued outputs</h3>
+<dl>
+<dt><strong>Multivariate Normal</strong> (<code>MultivariateNormal</code>): <span class="math inline">\(\boldsymbol{\mu} \in \mathbb{R}^d,\; \boldsymbol{\Sigma} \succ 0 \to \mathbb{R}^d\)</span></dt>
+<dd>
+The default for correlated continuous vectors. Parameterised by mean and covariance (or precision, or Cholesky factor). Ubiquitous in spatial statistics, finance, and latent-variable models.
+</dd>
+<dt><strong>Low-rank MVN</strong> (<code>LowRankMultivariateNormal</code>): <span class="math inline">\(\boldsymbol{\mu},\; \text{cov\_factor},\; \text{cov\_diag} \to \mathbb{R}^d\)</span></dt>
+<dd>
+Multivariate Normal with low-rank-plus-diagonal covariance. Efficient when <span class="math inline">\(d\)</span> is large but correlations are driven by a few latent factors.
+</dd>
+<dt><strong>Wishart</strong> (<code>Wishart</code>): <span class="math inline">\(\text{df},\; \boldsymbol{\Sigma} \succ 0 \to \mathbb{S}^d_{++}\)</span></dt>
+<dd>
+Distribution over positive-definite matrices. Conjugate prior for the precision matrix of a Multivariate Normal.
+</dd>
+<dt><strong>LKJ Cholesky</strong> (<code>LKJCholesky</code>): <span class="math inline">\(\text{dim},\; \eta &gt; 0 \to\)</span> Cholesky factors of correlation matrices</dt>
+<dd>
+Prior over correlation matrices. At <span class="math inline">\(\eta = 1\)</span> the distribution is uniform over correlations. Widely used in Bayesian hierarchical models.
+</dd>
+</dl>
+</section>
+<section id="circular-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="circular-outputs">Circular outputs</h3>
+<dl>
+<dt><strong>Von Mises</strong> (<code>VonMises</code>): <span class="math inline">\(\text{loc} \in \mathbb{R},\; \text{concentration} &gt; 0 \to (-\pi, \pi]\)</span></dt>
+<dd>
+The circular analogue of the Normal distribution. Used for angular data (wind direction, time of day, molecular torsion angles).
+</dd>
+</dl>
+</section>
+</section>
+<section id="sec-predictors-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-predictors-appendix">Predictors</h2>
+<p>A predictor is a deterministic function <span class="math inline">\(h : X_1 \otimes \cdots \otimes X_n \to H\)</span> that maps the inputs into a predictor space <span class="math inline">\(H\)</span>. A response map (<a href="#sec-response-maps-appendix" class="quarto-xref"><span>Response maps</span></a>) then converts <span class="math inline">\(H\)</span> into valid parameters for the base family. The entries below list the main classes, in order of increasing flexibility.</p>
+<dl>
+<dt><strong>Linear</strong>: <span class="math inline">\(h(\mathbf{x}) = \alpha_0 + \alpha_1 x_1 + \cdots + \alpha_n x_n\)</span></dt>
+<dd>
+<em>Interpretability:</em> high. <em>Flexibility:</em> low. Each coefficient <span class="math inline">\(\alpha_j\)</span> measures the effect of a one-unit increase in <span class="math inline">\(x_j\)</span>, all else equal. The default for scientific modelling because the parameters have a direct interpretation. Combined with a response map and exponential-family base, this gives a GLM.
+</dd>
+<dt><strong>Polynomial</strong>: <span class="math inline">\(h(\mathbf{x}) = \sum_{|\mathbf{k}| \leq d} \alpha_{\mathbf{k}} \, \mathbf{x}^{\mathbf{k}}\)</span></dt>
+<dd>
+<em>Interpretability:</em> moderate. <em>Flexibility:</em> moderate. Extends the linear predictor with powers and cross-terms up to degree <span class="math inline">\(d\)</span>. Captures curvature and interactions. Coefficients are still interpretable but grow combinatorially with <span class="math inline">\(d\)</span> and <span class="math inline">\(n\)</span>.
+</dd>
+<dt><strong>Spline basis</strong>: <span class="math inline">\(h(\mathbf{x}) = \sum_{j} \alpha_j \, B_j(\mathbf{x})\)</span></dt>
+<dd>
+<em>Interpretability:</em> moderate. <em>Flexibility:</em> moderate–high. Uses piecewise polynomial basis functions <span class="math inline">\(B_j\)</span> (B-splines, natural splines, thin-plate splines) anchored at chosen knots. Locally flexible and numerically stable. Penalised splines (P-splines) add a smoothness penalty on the coefficients to prevent overfitting. Standard in generalised additive models (GAMs).
+</dd>
+<dt><strong>Radial basis functions</strong>: <span class="math inline">\(h(\mathbf{x}) = \sum_{j} \alpha_j \, \phi(\lVert \mathbf{x} - \mathbf{c}_j \rVert)\)</span></dt>
+<dd>
+<em>Interpretability:</em> low–moderate. <em>Flexibility:</em> moderate–high. Each basis function <span class="math inline">\(\phi\)</span> depends only on the distance to a centre <span class="math inline">\(\mathbf{c}_j\)</span> (often Gaussian: <span class="math inline">\(\phi(r) = e^{-r^2/2\ell^2}\)</span>). Provides a smooth, local interpolation. Related to Gaussian process regression when the number of centres equals the number of data points.
+</dd>
+<dt><strong>Fourier features</strong>: <span class="math inline">\(h(\mathbf{x}) = \alpha_0 + \sum_{k} \bigl[\alpha_k \cos(2\pi \boldsymbol{\omega}_k^\top \mathbf{x}) + \beta_k \sin(2\pi \boldsymbol{\omega}_k^\top \mathbf{x})\bigr]\)</span></dt>
+<dd>
+<em>Interpretability:</em> low. <em>Flexibility:</em> moderate. Approximates shift-invariant kernels via random or fixed frequency vectors <span class="math inline">\(\boldsymbol{\omega}_k\)</span>. Efficient for large datasets where direct kernel methods are too costly. Natural for periodic signals.
+</dd>
+<dt><strong>Neural network</strong>: <span class="math inline">\(h(\mathbf{x}) = f_L \circ \cdots \circ f_1(\mathbf{x})\)</span>, each <span class="math inline">\(f_l(\mathbf{z}) = \sigma(W_l \mathbf{z} + \mathbf{b}_l)\)</span></dt>
+<dd>
+<em>Interpretability:</em> low. <em>Flexibility:</em> high. A composition of affine maps and element-wise non-linearities. Universal approximation guarantees for sufficiently wide or deep networks. Implemented in PyTorch via <code>torch.nn.Sequential</code>, <code>torch.nn.Linear</code>, etc. Maximally flexible but coefficients are not directly interpretable.
+</dd>
+</dl>
+<p>All predictors slot into the same compositional pattern: <span class="math inline">\(k = k_h \then k_\varphi \then k_{\text{base}} \then k_t\)</span>. Replacing one predictor with another changes only the deterministic kernel <span class="math inline">\(k_h\)</span>; the base family, response map, and output transformation are unaffected.</p>
+</section>
+<section id="sec-response-maps-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-response-maps-appendix">Response maps</h2>
+<p>A response map <span class="math inline">\(\varphi : H \to \Theta\)</span> converts the output of a predictor (in a predictor space <span class="math inline">\(H\)</span>, typically <span class="math inline">\(\mathbb{R}\)</span>) into a valid parameter for the base family. In the GLM literature, the inverse <span class="math inline">\(\varphi^{-1}\)</span> is called the <em>link function</em>.</p>
+<dl>
+<dt><strong>Identity</strong>: <span class="math inline">\(\varphi(\eta) = \eta\)</span>, <span class="math inline">\(\;\mathbb{R} \to \mathbb{R}\)</span></dt>
+<dd>
+Gaussian mean parameter. No transformation needed.
+</dd>
+<dt><strong>Sigmoid</strong> (<code>torch.sigmoid</code>): <span class="math inline">\(\varphi(\eta) = \frac{1}{1 + e^{-\eta}}\)</span>, <span class="math inline">\(\;\mathbb{R} \to (0,1)\)</span></dt>
+<dd>
+Bernoulli success probability; Beta mean. The canonical response map for binary outcomes.
+</dd>
+<dt><strong>Softmax</strong> (<code>torch.softmax</code>): <span class="math inline">\(\varphi(\boldsymbol{\eta})_k = \frac{e^{\eta_k}}{\sum_j e^{\eta_j}}\)</span>, <span class="math inline">\(\;\mathbb{R}^K \to \Delta^{K-1}\)</span></dt>
+<dd>
+Categorical / Multinomial probabilities. Multivariate generalisation of the sigmoid.
+</dd>
+<dt><strong>Exponential</strong> (<code>torch.exp</code>): <span class="math inline">\(\varphi(\eta) = e^{\eta}\)</span>, <span class="math inline">\(\;\mathbb{R} \to \mathbb{R}_{&gt;0}\)</span></dt>
+<dd>
+Poisson rate, Gamma rate, Exponential rate. Ensures positivity.
+</dd>
+<dt><strong>Softplus</strong> (<code>torch.nn.functional.softplus</code>): <span class="math inline">\(\varphi(\eta) = \log(1 + e^{\eta})\)</span>, <span class="math inline">\(\;\mathbb{R} \to \mathbb{R}_{&gt;0}\)</span></dt>
+<dd>
+Smooth approximation to <span class="math inline">\(\max(0, \eta)\)</span>. Alternative to <span class="math inline">\(\exp\)</span> that avoids overflow for large <span class="math inline">\(\eta\)</span>. Used for scale and variance parameters.
+</dd>
+<dt><strong>Squared</strong>: <span class="math inline">\(\varphi(\eta) = \eta^2\)</span>, <span class="math inline">\(\;\mathbb{R} \to \mathbb{R}_{\geq 0}\)</span></dt>
+<dd>
+Ensures non-negativity. Simple but has zero gradient at <span class="math inline">\(\eta = 0\)</span>, which can stall optimisation.
+</dd>
+<dt><strong>Tanh</strong> (<code>torch.tanh</code>): <span class="math inline">\(\varphi(\eta) = \tanh(\eta)\)</span>, <span class="math inline">\(\;\mathbb{R} \to (-1,1)\)</span></dt>
+<dd>
+Correlation coefficients or any quantity bounded between <span class="math inline">\(-1\)</span> and <span class="math inline">\(1\)</span>.
+</dd>
+<dt><strong>Scaled sigmoid</strong>: <span class="math inline">\(\varphi(\eta) = a + (b-a)\,\sigma(\eta)\)</span>, <span class="math inline">\(\;\mathbb{R} \to (a,b)\)</span></dt>
+<dd>
+Maps to an arbitrary open interval <span class="math inline">\((a,b)\)</span>. Generalises the standard sigmoid.
+</dd>
+<dt><strong>Probit</strong> (<code>torch.distributions.Normal(0,1).cdf</code>): <span class="math inline">\(\varphi(\eta) = \Phi(\eta)\)</span>, <span class="math inline">\(\;\mathbb{R} \to (0,1)\)</span></dt>
+<dd>
+Alternative to sigmoid for binary outcomes. <span class="math inline">\(\Phi\)</span> is the standard Normal CDF. Yields slightly different tail behaviour.
+</dd>
+</dl>
+</section>
+<section id="sec-output-transforms-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-output-transforms-appendix">Output transformations</h2>
+<p>An output transformation <span class="math inline">\(f : Y \to Z\)</span> is applied after sampling from the base family to redirect the output to a different target space. In PyTorch, many of these are implemented via <code>TransformedDistribution</code>.</p>
+<dl>
+<dt><strong>Exponential</strong> (<code>ExpTransform</code>): <span class="math inline">\(f(y) = e^y\)</span>, <span class="math inline">\(\;\mathbb{R} \to \mathbb{R}_{&gt;0}\)</span></dt>
+<dd>
+Postcompose with a Normal to obtain a <strong>log-normal</strong> distribution for positive quantities (costs, durations, concentrations).
+</dd>
+<dt><strong>Sigmoid</strong> (<code>SigmoidTransform</code>): <span class="math inline">\(f(y) = \frac{1}{1+e^{-y}}\)</span>, <span class="math inline">\(\;\mathbb{R} \to (0,1)\)</span></dt>
+<dd>
+Postcompose with a Normal to obtain a <strong>logit-normal</strong> distribution for proportions.
+</dd>
+<dt><strong>Affine</strong> (<code>AffineTransform</code>): <span class="math inline">\(f(y) = a + by\)</span>, <span class="math inline">\(\;\mathbb{R} \to \mathbb{R}\)</span></dt>
+<dd>
+Location-scale shift. Used to reparameterise standard distributions (<span class="math inline">\(Y = \mu + \sigma Z\)</span> where <span class="math inline">\(Z\)</span> is standard).
+</dd>
+<dt><strong>Power</strong> (<code>PowerTransform</code>): <span class="math inline">\(f(y) = y^c\)</span>, <span class="math inline">\(\;\mathbb{R}_{&gt;0} \to \mathbb{R}_{&gt;0}\)</span></dt>
+<dd>
+Box–Cox-style transformations. Includes square root (<span class="math inline">\(c = \tfrac{1}{2}\)</span>) and reciprocal (<span class="math inline">\(c = -1\)</span>).
+</dd>
+<dt><strong>Absolute value</strong> (<code>AbsTransform</code>): <span class="math inline">\(f(y) = \lvert y \rvert\)</span>, <span class="math inline">\(\;\mathbb{R} \to \mathbb{R}_{\geq 0}\)</span></dt>
+<dd>
+Folds a symmetric distribution onto the positive half-line (e.g.&nbsp;Normal <span class="math inline">\(\to\)</span> Half-Normal).
+</dd>
+<dt><strong>Softmax</strong> (<code>SoftmaxTransform</code>): <span class="math inline">\(f(\mathbf{y})_k = \frac{e^{y_k}}{\sum_j e^{y_j}}\)</span>, <span class="math inline">\(\;\mathbb{R}^K \to \Delta^{K-1}\)</span></dt>
+<dd>
+Maps unconstrained scores to the simplex.
+</dd>
+<dt><strong>Stick-breaking</strong> (<code>StickBreakingTransform</code>): <span class="math inline">\(f(\mathbf{y})\)</span> via iterated sigmoids, <span class="math inline">\(\;\mathbb{R}^{K-1} \to \Delta^{K-1}\)</span></dt>
+<dd>
+Bijective map to the simplex. Suitable for HMC and other gradient-based samplers that require invertibility.
+</dd>
+<dt><strong>Tanh</strong> (<code>TanhTransform</code>): <span class="math inline">\(f(y) = \tanh(y)\)</span>, <span class="math inline">\(\;\mathbb{R} \to (-1,1)\)</span></dt>
+<dd>
+Squashes outputs to a bounded interval. Common in reinforcement learning (bounded action spaces).
+</dd>
+<dt><strong>Lower Cholesky</strong> (<code>LowerCholeskyTransform</code>): <span class="math inline">\(f(\mathbf{y})\)</span> fills lower triangle, <span class="math inline">\(\;\mathbb{R}^{d(d+1)/2} \to \mathbb{L}^d_+\)</span></dt>
+<dd>
+Maps an unconstrained vector to a lower-triangular matrix with positive diagonal, parameterising a positive-definite covariance.
+</dd>
+<dt><strong>Cumulative distribution</strong> (<code>CumulativeDistributionTransform</code>): <span class="math inline">\(f(y) = F(y)\)</span>, <span class="math inline">\(\;\mathbb{R} \to (0,1)\)</span></dt>
+<dd>
+Probability integral transform for a chosen CDF <span class="math inline">\(F\)</span>. Used to construct copulas from multivariate distributions.
+</dd>
+<dt><strong>Thresholding</strong>: <span class="math inline">\(f(n) = \mathbb{1}[n &gt; 0]\)</span>, <span class="math inline">\(\;\mathbb{N}_0 \to \{0,1\}\)</span></dt>
+<dd>
+Collapses a count to a binary indicator (any occurrence vs.&nbsp;none). Basis of <strong>hurdle models</strong>.
+</dd>
+</dl>
+</section>
+<section id="sec-input-transforms-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-input-transforms-appendix">Input transformations</h2>
+<p>Input transformations reshape predictor variables before they enter the predictor. They expand the class of relationships that a linear model can capture.</p>
+<dl>
+<dt><strong>Polynomial features</strong>: <span class="math inline">\(x \mapsto (x, x^2, \ldots, x^d)\)</span></dt>
+<dd>
+Captures non-linear trends with a single continuous input. Degree <span class="math inline">\(d\)</span> controls flexibility.
+</dd>
+<dt><strong>Log</strong>: <span class="math inline">\(x \mapsto \log x\)</span></dt>
+<dd>
+Linearises multiplicative relationships. Standard for right-skewed positive inputs (income, population).
+</dd>
+<dt><strong>Standardisation</strong>: <span class="math inline">\(x \mapsto \frac{x - \bar{x}}{s_x}\)</span></dt>
+<dd>
+Centres and scales each input to zero mean and unit variance. Improves numerical stability and makes coefficients comparable.
+</dd>
+<dt><strong>One-hot encoding</strong>: <span class="math inline">\(x \in \{1,\ldots,K\} \mapsto \mathbf{e}_x \in \{0,1\}^K\)</span></dt>
+<dd>
+Converts a categorical variable into indicator columns, one per level. Required for categorical inputs in a linear predictor.
+</dd>
+<dt><strong>Interaction terms</strong>: <span class="math inline">\((x_i, x_j) \mapsto x_i \cdot x_j\)</span></dt>
+<dd>
+Allows the effect of one variable to depend on the level of another.
+</dd>
+<dt><strong>Basis expansion</strong>: <span class="math inline">\(x \mapsto (\phi_1(x), \ldots, \phi_m(x))\)</span></dt>
+<dd>
+General feature map using chosen basis functions (splines, radial basis functions, Fourier features). Captures complex non-linear patterns.
+</dd>
+</dl>
+
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../exercises/7-robust-regression.html" class="pagination-link" aria-label="Exercise 7: Robust linear regression">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exercise 7: Robust linear regression</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../appendix/pytorch.html" class="pagination-link" aria-label="PyTorch Tutorial">
+        <span class="nav-page-text">PyTorch Tutorial</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    var isRemark = div.classList.contains("remark");
+    // Add QED square to summary (visible when collapsed)
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>
