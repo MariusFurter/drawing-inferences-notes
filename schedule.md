@@ -62,12 +62,10 @@ May 15: Being smart about MCMC
 
 - Factorizing parameter learning
 - Exploiting conjugacies?
-- Exercise: Dose-response model (maybe fit sub-models from empirical data)
-
-May 15: How Bayesian workflow handles reality
-
 - Missing data (e.g MNAR dropouts in clinical trails)
 - Censored data
+
+- Exercise: Dose-response model (maybe fit sub-models from empirical data)
 
 May 22:
 

@@ -25,6 +25,7 @@ book:
     - chapters/hybrid-models.qmd
     - chapters/bayesian-data-analysis.qmd
     - chapters/mcmc.qmd
+    - chapters/practical.qmd
     - part: "Exercises"
       chapters:
         - exercises/1-classic-puzzles.qmd

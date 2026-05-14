@@ -67,6 +67,28 @@ A **measure** on a measurable space $(\Omega, \Sigma)$ is a function $\mu : \Sig
 A measure $\mu$ is called a **probability measure** if in addition $\mu(\Omega) = 1$.
 :::
 
+::: {#exm-counting-measure}
+Given a finite set $X$, the **counting measure** $\nu$ on $X$ assigns to each event $B \subseteq X$ the number of elements in $B$: $\nu(B) = |B|$. This is a measure because $\nu(\varnothing) = 0$, and if $B_1, B_2, \ldots$ are pairwise disjoint, then $\nu\bigl(\bigcup_n B_n\bigr) = \sum_n |B_n|$. The counting measure is a probability measure if and only if $X$ has exactly one element.
+:::
+
+::: {#exm-lebesgue-measure}
+The **Lebesgue measure** $\lambda$ on $\mathbb{R}$ assigns to each interval $[a, b]$ its length: $\lambda([a, b]) = b - a$. This measure can be extended to the Borel $\sigma$-algebra $\mathcal{B}(\mathbb{R})$ in a unique way. The Lebesgue measure is not a probability measure because $\lambda(\mathbb{R}) = \infty$.
+
+More generally, the Lebesgue measure on $\mathbb{R}^n$ assigns to each box $[a_1, b_1] \times \cdots \times [a_n, b_n]$ its volume $\prod_{i=1}^n (b_i - a_i)$, and extends to the Borel $\sigma$-algebra $\mathcal{B}(\mathbb{R}^n)$. The Lebesgue measure on $\mathbb{R}^n$ can be viewed as a product measure $\lambda \otimes \cdots \otimes \lambda$ of $n$ copies of the Lebesgue measure on $\mathbb{R}$ (see below).
+:::
+
+
+### Product $\sigma$-algebras and product measures
+
+Given measurable spaces $(X, \Sigma_X)$ and $(Y, \Sigma_Y)$, their product space $X \times Y$ carries the **product $\sigma$-algebra** $\Sigma_X \otimes \Sigma_Y$, defined as the smallest $\sigma$-algebra containing all rectangles $B_1 \times B_2$ with $B_1 \in \Sigma_X$ and $B_2 \in \Sigma_Y$. This $\sigma$-algebra contains many events beyond rectangles. For instance, discs are measurable in the product $\sigma$-algebra $\mathbb{R}^2$. 
+
+It turns out that a finite measure that is defined consistently on rectangles extends uniquely to the full product $\sigma$-algebra. This principle allows us to define **product measures** by only specifying their values on rectangles. Given measures $\nu_X$ on $X$ and $\nu_Y$ on $Y$, the product measure $\nu_X \otimes \nu_Y$ is the unique measure on the product space $X \times Y$ satisfying
+$$
+(\nu_X \otimes \nu_Y)(B_1 \times B_2) = \nu_X(B_1) \cdot \nu_Y(B_2).
+$$
+For instance, Lebesgue measure on $\mathbb{R}^2$ (area) is the product of Lebesgue measure on $\mathbb{R}$ (length) with itself.
+
+
 ### Kernels {#sec-general-kernels}
 
 In the [chapter on discrete graphical models](discrete-graphical-models.qmd) we defined a discrete kernel $f : X \kernel Y$ between finite sets by specifying a non-negative number $f(y \mid x)$ for each input $x \in X$ and output $y \in Y$. We can equivalently describe $f$ in terms of events: for any subset $B \subseteq Y$, set
@@ -265,41 +287,96 @@ The integral above is the *Lebesgue integral* from measure theory. Don't worry i
 
 <!-- Give better references to measure theory and integration. Provide intuitive description of Lebesgue integral. -->
 
-### String diagrams carry over {#sec-string-diagrams-carry-over}
+### Working with general kernels {#sec-string-diagrams-carry-over}
 
 The string-diagrammatic language from the [chapter on discrete graphical models](discrete-graphical-models.qmd) extends to general kernels with almost no changes. The main difference is that the graphical conditioning procedure relies on densities to work. This means you can work with general kernels, even if you do not know measure theory.
 
-**Deterministic functions.** A measurable function $f : X \to Y$ defines a kernel by
+#### Deterministic functions {.unnumbered}
+
+A measurable function $f : X \to Y$ defines a kernel by
 $$
 k_f(B \mid x) := \ivmark{f(x) \in B},
 $$
 which assigns full weight to the unique output $f(x)$. The structural kernels $\id$, $\swap$, $\cp$, and $\del$ are all deterministic. Hence, their formulas are literally the same as before, with the Iverson bracket $\ivmark{y = f(x)}$ replaced by $\ivmark{f(x) \in B}$.
 
-**Composition.** Sequential composition of $k : X \kernel Y$ and $k' : Y \kernel Z$ is defined by replacing the sum over $Y$ with an integral:
-$$
-(k \then k')(B \mid x) := \int_Y k'(B \mid y) \, k(dy \mid x).
-$$
-When $Y$ is a finite set, the integral reduces to the familiar sum $\sum_{y \in Y} k'(B \mid y)\, k(y \mid x)$. Parallel composition is characterized by its values on product events:
-$$
-(k_1 \otimes k_2)(B_1 \times B_2 \mid x_1, x_2) = k_1(B_1 \mid x_1) \cdot k_2(B_2 \mid x_2).
-$$
-This formula only specifies the kernel on "rectangles" $B_1 \times B_2$, but a standard extension result guarantees that these values determine the kernel on all events in the product space (see the box below for details).
+#### Composition {.unnumbered}
 
-::: {.callout-note collapse="true"}
-## Product $\sigma$-algebras and product measures
-
-When two measurable spaces $(X, \Sigma_X)$ and $(Y, \Sigma_Y)$ are combined, their product space $X \times Y$ carries the **product $\sigma$-algebra** $\Sigma_X \otimes \Sigma_Y$, defined as the smallest $\sigma$-algebra containing all rectangles $B_1 \times B_2$ with $B_1 \in \Sigma_X$ and $B_2 \in \Sigma_Y$. This $\sigma$-algebra contains many events beyond rectangles — for instance, discs in $\mathbb{R}^2$ — but a finite measure that is defined consistently on rectangles extends uniquely to the full product $\sigma$-algebra. This is why the formula for parallel composition, stated only on rectangles, determines the kernel on all product events.
-
-The same principle gives us **product measures**. Given measures $\nu_U$ on $U$ and $\nu_V$ on $V$, the product measure $\nu_U \otimes \nu_V$ is the unique measure on the product space $U \times V$ satisfying
+**Sequential composition** of $f : X \kernel Y$ and $g : Y \kernel Z$ is defined by replacing the sum over $Y$ with an integral:
 $$
-(\nu_U \otimes \nu_V)(B_1 \times B_2) = \nu_U(B_1) \cdot \nu_V(B_2).
+(f \then g)(B \mid x) := \int_Y g(B \mid y) \, f(dy \mid x).
 $$
-For instance, Lebesgue measure on $\mathbb{R}^2$ (area) is the product of Lebesgue measure on $\mathbb{R}$ (length) with itself. Product measures appear naturally when a kernel has multiple outputs: if each output has a base measure, the joint base measure is their product.
-:::
+This formula says we are integrating the measurable function $y \mapsto g(B \mid y)$ against the measure $f(\cdot \mid x)$ on $Y$, in the sense of the Lebesgue integral. When $f$ and $g$ have densities, we can express this more concretely as we will see below.
 
-**Algebraic laws.** All the algebraic laws verified in the discrete setting continue to hold for general kernels. The proofs are the same calculations, with sums replaced by integrals. In particular, any two diagrams that could be deformed into each other in the discrete setting still represent the same kernel.
+**Precomposing with deterministic kernels.** An important special case of sequential composition is when $f$ is deterministic, so that $f = k_h$ for some measurable function $h : X \to Y$. In this case, the sequential composition just applies $h$ to the input and then feeds the result into $g$:
+$$
+\begin{aligned}
+(k_h \then g)(B \mid x) &= \int_Y g(B \mid y) \, k_h(dy \mid x) \\
+&= \int_Y g(B \mid y) \, \ivmark{h(x) \in dy} \\
+&= g(B \mid h(x)).
+\end{aligned}   
+$$
 
-**Conditional independence.** The graphical test for conditional independence from the [conditioning chapter](conditioning.qmd) remains valid for general kernels.
+**Parallel composition** is characterized by its values on product events:
+$$
+(f_1 \otimes f_2)(B_1 \times B_2 \mid x_1, x_2) = f_1(B_1 \mid x_1) \cdot f_2(B_2 \mid x_2).
+$$
+This formula only specifies the kernel on "rectangles" $B_1 \times B_2$, but a standard extension result guarantees that these values determine the kernel on all events in the product space.
+
+Using the above, one can show that **copy-composition** is given on rectangles by
+$$
+(f \odot g)(B_1 \times B_2 \mid x) = \int_{B_1} g(B_2 \mid y) \, f(dy \mid x).
+$$
+
+#### Composing densities {#sec-composing-densities .unnumbered}
+
+In the case that the kernels being composed have densities, the composition formulas can be expressed in more concrete terms. Suppose $f : X \kernel Y$ has density $\ell_f(y \mid x)$ with respect to a base measure $\nu_Y$, and $g : Y \kernel Z$ has density $\ell_g(z \mid y)$ with respect to a base measure $\nu_Z$. By using the definition of density, the formula for **sequential composition** reduces to
+$$
+\begin{aligned}
+(f \then g)(C \mid x) &= \int_Y g(C \mid y) \, f(dy \mid x) \\
+&= \int_Y \left( \int_C \ell_g(z \mid y) \, \nu_Z(dz) \right) \, \ell_f(y \mid x) \, \nu_Y(dy) \\
+&= \int_C \left(\int_Y \ell_g(z \mid y)\, \ell_f(y \mid x)\, \nu_Y(dy)\right) \nu_Z(dz).
+\end{aligned}
+$$
+This shows that $f \then g$ has density $\ell_{f \then g}(z \mid x) = \int_Y \ell_g(z \mid y)\, \ell_f(y \mid x)\, \nu_Y(dy)$ with respect to the base measure $\nu_Z$.
+
+Similarly, the formula for **parallel composition** reduces to
+$$
+\begin{aligned}
+(f_1 \otimes f_2)(B_1 \times B_2 \mid x_1, x_2) 
+&= f_1(B_1 \mid x_1) \cdot f_2(B_2 \mid x_2) \\
+&= \left( \int_{B_1} \ell_{f_1}(y_1 \mid x_1) \, \nu_{Y_1}(dy_1) \right) \cdot \left( \int_{B_2} \ell_{f_2}(y_2 \mid x_2) \, \nu_{Y_2}(dy_2) \right) \\
+&= \int_{B_1 \times B_2} \ell_{f_1}(y_1 \mid x_1) \cdot \ell_{f_2}(y_2 \mid x_2) \, (\nu_{Y_1} \otimes \nu_{Y_2})(dy_1, dy_2).
+\end{aligned}
+$$
+This shows that $f_1 \otimes f_2$ has density $\ell_{f_1 \otimes f_2}(y_1, y_2 \mid x_1, x_2) = \ell_{f_1}(y_1 \mid x_1) \cdot \ell_{f_2}(y_2 \mid x_2)$ with respect to the product base measure $\nu_{Y_1} \otimes \nu_{Y_2}$.
+
+Finally, the formula for **copy-composition** reduces to
+$$
+\begin{aligned}
+(f \odot g)(B_1 \times B_2 \mid x) 
+&= \int_{B_1} g(B_2 \mid y) \, f(dy \mid x) \\
+&= \int_{B_1} \left( \int_{B_2} \ell_g(z \mid y) \, \nu_Z(dz) \right) \, \ell_f(y \mid x) \, \nu_Y(dy) \\
+&= \int_{B_1 \times B_2} \ell_f(y \mid x) \cdot \ell_g(z \mid y) \, (\nu_Y \otimes \nu_Z)(dy, dz),
+\end{aligned}
+$$
+showing that $f \odot g$ has density $\ell_{f \odot g}(y, z \mid x) = \ell_f(y \mid x) \cdot \ell_g(z \mid y)$ with respect to the product base measure $\nu_Y \otimes \nu_Z$.
+
+Notice how the formulas for densities mirror the formulas for discrete kernels, with sums replaced by integrals. Hence, provided all kernels have densities, we can compute with them using the same formulas as in the discrete case, as long as we track the base measures correctly. 
+
+In particular, the **sum-product** method for parsing string diagrams holds for general kernels with densities. The density of the kernel represented by a string diagram is given by
+$$
+\underset{\text{internal wires}}{\iint} \left( \prod_{i} \,  \ell_{f_i}(\text{outputs}_i \mid \text{inputs}_i) \right) \, \nu_{\text{internal}},
+$$
+where $\nu_{\text{internal}}$ is the product of the base measures associated with the internal wires.
+
+The most common choices of base measures are counting measure for discrete variables and Lebesgue measure for continuous variables. In the case of counting measure, the integrals above reduce to sums over all possible values, and we recover the familiar formulas from the discrete setting. In the case of Lebesgue measure, we often write $\int f(x) \, dx$ instead of $\int f(x) \, \nu(dx)$. Such integrals can be manipulated using standard techniques from calculus.
+
+#### Algebraic laws {.unnumbered}
+
+All the algebraic laws verified in the discrete setting continue to hold for general kernels. The proofs are the same calculations, with sums replaced by integrals. In particular, any two diagrams that could be deformed into each other in the discrete setting still represent the same kernel.
+
+#### Conditional independence and graphical conditioning {.unnumbered}
+The graphical test for **conditional independence** from the [conditioning chapter](conditioning.qmd) remains valid for general kernels.
 
 **Graphical conditioning.** Pre-conditioning on an *input* works exactly as before: given a kernel $g : X \otimes Y \kernel U$, fixing $X = \bar{x}$ yields $g_{\mid X = \bar{x}}(B \mid y) := g(B \mid \bar{x}, y)$. This is still a well-defined kernel.
 
@@ -310,7 +387,6 @@ $$
 This is exactly what we did in the discrete case from the [conditioning chapter](conditioning.qmd): for a discrete kernel $g : X \kernel U \otimes V$, pre-conditioning on $U = \bar{u}$ gave $g_{\mid U = \bar{u}}(v \mid x) = g(\bar{u}, v \mid x)$. Since the values of a discrete kernel are its density with respect to counting measure, this was already a special case of plugging $\bar{u}$ into the density.
 
 If $g : X \kernel U$ has density $\ell_g$ and we fix its only output $U = \bar{u}$, there are no remaining variables to integrate over. The resulting kernel $g_{\mid U = \bar u} : X \kernel I$ assigns each $x \in X$ the **likelihood weight** $\ell_g(\bar{u} \mid x)$. This is the case that arises most often in practice.
-
 
 ## Parametric kernels {#sec-parametric-kernels}
 

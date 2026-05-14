@@ -1,0 +1,36 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=medium box] (0) at (0.25, 0) {$\sum \pi_c \, \mathsf{Norm}$};
+		\node [style=small box] (2) at (-5, 2) {};
+		\node [style=small box] (3) at (-5, 0) {};
+		\node [style=small box] (4) at (-5, -1.75) {};
+		\node [style=none] (6) at (-0.25, 0.5) {};
+		\node [style=none] (7) at (-0.25, 0) {};
+		\node [style=none] (8) at (-0.25, -0.5) {};
+		\node [style=none] (9) at (3, 0.5) {$y_i$};
+		\node [style=none] (10) at (4.5, 0) {};
+		\node [style=none] (11) at (-4, 2.5) {$\pi$};
+		\node [style=none] (12) at (-4, 0.5) {$\mu$};
+		\node [style=none] (13) at (-4, -1.25) {$\sigma$};
+		\node [style=none] (14) at (-2, -1.75) {};
+		\node [style=none] (15) at (-3.25, 3.25) {};
+		\node [style=none] (16) at (-3.25, -2.5) {};
+		\node [style=none] (17) at (3.75, -2.5) {};
+		\node [style=none] (18) at (3.75, 3.25) {};
+		\node [style=none] (19) at (2.5, -3) {$i = 1:N$};
+		\node [style=none] (20) at (-2, 2) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (3) to (7.center);
+		\draw [style=edge] (10.center) to (0);
+		\draw [style=edge] (4) to (14.center);
+		\draw [style=edge, in=-180, out=0, looseness=1.25] (14.center) to (8.center);
+		\draw [style=double edge] (17.center)
+			 to (16.center)
+			 to (15.center)
+			 to (18.center)
+			 to cycle;
+		\draw [style=edge] (2) to (20.center);
+		\draw [style=edge, in=180, out=0, looseness=1.25] (20.center) to (6.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

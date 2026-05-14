@@ -1,0 +1,468 @@
+::: {.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+ \def\swap{\mathsf{swap}}
+ \def\id{\mathsf{id}}
+ \def\cp{\mathsf{copy}}
+ \def\del{\mathsf{del}}
+ \def\ivmark#1{[\![#1]\!]}
+$$
+:::
+
+# Inference in practice
+
+In this chapter, we discuss practical strategies for performing inference in complex models. This will leverage the strong conceptual foundation we have built up in the previous chapters, as well as the algebraic and graphical tools we have developed for reasoning about kernels.
+
+## Simplifying models
+The first strategy we will discuss is simplifying the model by analytically manipulating its kernels. If it is possible to simplify some parts of the model analytically, we can do so before resorting to sampling or other approximation methods. 
+
+Most often, the kernels in a model will have densities. Recall from @sec-density-functions that a kernel $f : X \kernel Y$ has a density $\ell_f(y \mid x)$ with respect to a base measure $\nu_Y$ if 
+$$f(B \mid x) = \int_B \ell_f(y \mid x) \, \nu_Y(dy)$$ 
+for all measurable $B \subseteq Y$. 
+
+The most common cas where kernels do not have densities is when they are deterministic. However, as we saw in @sec-string-diagrams-carry-over, when $f$ represents a deterministic function $h : X \to Y$, we can simply plug in the output of $h$ into $g$ to get the density of the sequential composition $f \then g$:
+$$
+(f \then g)(C \mid x) = g(C \mid h(x)) = \int_C \ell_g(z \mid h(x)) \, \nu_Z(dz).
+$$
+Hence, we can eliminate the deterministic kernel $f$ as long as its output is used later in the model.
+
+Moreover, we saw that the following composition formulas hold for kernels with densities:
+
+- **Sequential composition.** If $f : X \kernel Y$ has density $\ell_f(y \mid x)$ and $g : Y \kernel Z$ has density $\ell_g(z \mid y)$, then $f \then g$ has density
+$$\ell_{f \then g}(z \mid x) = \int_Y \ell_g(z \mid y)\, \ell_f(y \mid x)\, \nu_Y(dy).$$   
+- **Parallel composition.** If $f_1 : X_1 \kernel Y_1$ has density $\ell_{f_1}(y_1 \mid x_1)$ and $f_2 : X_2 \kernel Y_2$ has density $\ell_{f_2}(y_2 \mid x_2)$, then $f_1 \otimes f_2$ has density
+$$\ell_{f_1 \otimes f_2}(y_1, y_2 \mid x_1, x_2) = \ell_{f_1}(y_1 \mid x_1) \cdot \ell_{f_2}(y_2 \mid x_2).$$
+- **Copy-composition.** If $f : X \kernel Y$ has density $\ell_f(y \mid x)$ and $g : Y \kernel Z$ has density $\ell_g(z \mid y)$, then $f \odot g$ has density
+$$\ell_{f \odot g}(y, z \mid x) = \ell_f(y \mid x) \cdot \ell_g(z \mid y).$$
+
+Note that both parallel and copy-composition simply correspond to multiplying densities functions. This is always tractable. In contrast, sequential composition involves an integral, which may be challenging to compute. Its difficulty depends on the specific forms of the densities and the base measure. However, in some cases, the integral can be computed analytically, allowing us to simplify the model before sampling.
+
+First, when $f$ is discrete, the integral reduces to a finite sum. Second, when $f$ and $g$ are conjugate distributions, the integral can be computed using known formulas. We discuss these two final cases in more detail below.
+
+### Marginalizing discrete latents
+When $f$ is discrete, it has a density $\ell_f(y \mid x)$ with respect to counting measure that assigns every input-output combination a non-negative weight. In the chapter on discrete kernels, we simply wrote $f(y \mid x)$ for this weight.
+
+In this case, the integral in the sequential composition formula reduces to a finite sum:
+$$
+\ell_{f \then g}(z \mid x) = \sum_{y \in Y} \ell_g(z \mid y)\, \ell_f(y \mid x).
+$$
+In other words, the composed density is a weighted average of the densities $\ell_g(z \mid y)$, where the weights are given by $\ell_f(y \mid x)$.
+
+::: {#exm-gaussian-mixture}
+A **Gaussian mixture model** is a classic example where marginalizing discrete latents is useful. The idea is that each data point $y_i$ belongs to one of $K$ clusters. Given the cluster assignment $c_i$ of a data point, its distribution is Gaussian with mean $\mu_{c_i}$ and variance $\sigma_{c_i}^2$. The cluster assignment $c_i$ itself is drawn from a categorical distribution with probabilities $\pi_1, \ldots, \pi_K$. Hence, the model can be written as 
+$$
+\begin{aligned}
+c_i &\sim \mathrm{Categorical}(\pi_1, \ldots, \pi_K) \\
+y_i &\sim \mathrm{Normal}(\mu_{c_i}, \sigma_{c_i}^2).
+\end{aligned}
+$$
+
+Usually, we want to learn the parameters $\pi_c$, $\mu_c$, and $\sigma_c^2$ from data, in which case we choose suitable priors for them.
+
+The string diagram for this model with priors is shown below, using plate notation:
+
+``` {.tikz file="practical/gmm.tikz"}
+%%| label: Gaussian mixture model
+%%| fig-cap: A Gaussian mixture model.
+%%| height: 8em
+```
+
+Since the cluster assignment $c_i$ is discrete, we can marginalize it out to get a simpler model for $y_i$:
+$$
+y_i \sim \sum_{c=1}^K \pi_c \cdot \mathrm{Normal}(\mu_c, \sigma_c^2).
+$$
+
+This corresponds to sequentially composing the categorical kernel for $c_i$ with the Gaussian kernel for $y_i$ given $c_i$. In the string diagram, this involves composing the two kernels in the plate:
+
+``` {.tikz file="practical/gmm-marginalized.tikz"}
+%%| label: Gaussian mixture model with marginalized cluster assignment
+%%| fig-cap: A Gaussian mixture model with the cluster assignment marginalized out.
+%%| height: 8em
+```
+
+Numpyro conveniently provides a [`MixtureSameFamily`](https://num.pyro.ai/en/stable/distributions.html#mixturesamefamily) distribution that implements this marginalization for us, so we can directly write down the simplified model without explicitly introducing the discrete latent variable $c_i$. Also see this tutorial on [Gaussian mixture models in Numpyro](https://num.pyro.ai/en/stable/tutorials/gmm.html) for more details and code examples.
+:::
+
+### Conjugate distributions
+The second case where the integral for sequential composition can be computed analytically is when the densities $\ell_f$ and $\ell_g$ have a compatible form known as **conjugacy**. In this case, the integral can be computed using known formulas, allowing us to simplify the model before sampling.
+
+We provide two useful examples of conjugate distributions and their corresponding formulas for sequential composition. A more comprehensive list can be found on Wikipedia's page on [conjugate priors](https://en.wikipedia.org/wiki/Conjugate_prior#Table_of_conjugate_distributions). Although we won't cover it here, it is important to know that Gaussian distributions have strong conjugacy properties, which allow us to analytically marginalize out Gaussian latents in many cases.
+
+::: {#exm-beta-bernoulli}
+**(Beta-Bernoulli)**
+
+Suppose your model contains the following sequential composition of kernels:
+$$
+\begin{aligned}
+p &\sim \mathrm{Beta}(\alpha, \beta) \\
+y_i &\sim \mathrm{Bernoulli}(p), \quad i = 1, \ldots, n,
+\end{aligned}
+$$
+where the $y_i$ are conditionally independent given $p$. In other words, we are drawing $n$ iid Bernoulli trials with success probability $p$, where $p$ itself is drawn from a beta distribution.
+
+The density of the beta distribution is given by
+$$
+\ell_{\mathrm{Beta}}(p) = \frac{p^{\alpha - 1} (1 - p)^{\beta - 1}}{B(\alpha, \beta)},
+$$
+where $\alpha$ and $\beta$ are positive shape parameters, and $B(\alpha, \beta) := \int_0^1 t^{\alpha - 1} (1 - t)^{\beta - 1} \, dt$ is the beta function.
+
+The joint density of the $n$ Bernoulli observations given $p$ is
+$$
+\ell_{\mathrm{Bernoulli}}(y_1, \ldots, y_n \mid p) = \prod_{i=1}^n p^{y_i} (1 - p)^{1 - y_i} = p^s (1 - p)^{n - s},
+$$
+where $s := \sum_{i=1}^n y_i$ is the number of observed successes.
+
+Observe that viewed as a function of $p$, this likelihood has the same form as the beta density, with parameters $\alpha' = s + 1$ and $\beta' = n - s + 1$. This is called **conjugacy**. Because of this, when we sequentially compose the prior with the likelihood, the densities can be combined as follows:
+$$
+\begin{aligned}
+\ell_{f \then g}(y_1, \ldots, y_n) &= \int_0^1 \ell_{\mathrm{Bernoulli}}(y_1, \ldots, y_n \mid p) \, \ell_{\mathrm{Beta}}(p) \, dp \\
+&= \int_0^1 p^s (1 - p)^{n - s} \cdot \frac{p^{\alpha - 1} (1 - p)^{\beta - 1}}{B(\alpha, \beta)} \, dp \\
+&= \frac{1}{B(\alpha, \beta)} \int_0^1 p^{\alpha + s - 1} (1 - p)^{\beta + n - s - 1} \, dp \\
+&= \frac{B(\alpha + s, \beta + n - s)}{B(\alpha, \beta)}.
+\end{aligned}
+$$
+
+Hence we have found a closed-form expression for the marginal density of the observations, allowing us to simplify the model before sampling. In particular, we can directly write down the marginal distribution of $y_{1:n}$ without explicitly introducing the latent variable $p$.
+
+This explicit expression for the marginal density also allows us to compute the posterior distribution of $p$ given the observations in closed form using Bayes' rule:
+$$
+\begin{aligned}
+\ell(p \mid y_{1:n})
+&= \frac{\ell_{\mathrm{Bernoulli}}(y_{1:n} \mid p) \, \ell_{\mathrm{Beta}}(p)}{\ell_{f \then g}(y_{1:n})} \\
+&= \frac{p^s (1 - p)^{n - s} \cdot \frac{p^{\alpha - 1} (1 - p)^{\beta - 1}}{B(\alpha, \beta)}}{\frac{B(\alpha + s, \beta + n - s)}{B(\alpha, \beta)}} \\
+&= \frac{p^{\alpha + s - 1} (1 - p)^{\beta + n - s - 1}}{B(\alpha + s, \beta + n - s)} \\
+&= \ell_{\mathrm{Beta}}(p \mid \alpha + s, \beta + n - s).
+\end{aligned}
+$$
+
+Hence, the posterior distribution of $p$ given $y_{1:n}$ is also a beta distribution, with updated parameters $\alpha' = \alpha + s$ and $\beta' = \beta + n - s$.
+
+A quicker way to see this is to directly consider the joint density of $p$ and $y_{1:n}$, which is obtained by copy-composing the two kernels:
+$$
+\begin{aligned}
+\ell(p, y_{1:n})
+&= \ell_{\mathrm{Bernoulli}}(y_{1:n} \mid p) \cdot \ell_{\mathrm{Beta}}(p) \\
+&= p^s (1 - p)^{n - s} \cdot \frac{p^{\alpha - 1} (1 - p)^{\beta - 1}}{B(\alpha, \beta)} \\
+&= \frac{p^{\alpha + s - 1} (1 - p)^{\beta + n - s - 1}}{B(\alpha, \beta)}.
+\end{aligned}
+$$
+
+Viewing this as a function of $p$ for fixed $y_{1:n}$, we see that up to normalization it has the same form as the beta density, with parameters $\alpha' = \alpha + s$ and $\beta' = \beta + n - s$. Normalizing this function of $p$ yields the posterior beta density.
+
+Note that the update rule $\alpha' = \alpha + s$ adds the observed successes to $\alpha$ and $\beta' = \beta + n - s$ adds the observed failures to $\beta$. This allows us to interpret $\alpha$ and $\beta$ as "pseudo-counts" of successes and failures, respectively, that we observed before seeing any new data. Notice also that the posterior depends on the data only through the sufficient statistics $(s, n)$, not on the individual $y_i$.
+:::
+
+::: {#exm-dirichlet-categorical}
+**(Dirichlet-Categorical)**
+
+A similar form of conjugacy holds between the Dirichlet distribution and the categorical distribution. The Dirichlet distribution is a multivariate generalization of the beta distribution, and the categorical distribution is a multivariate generalization of the Bernoulli distribution.
+
+Suppose your model contains the following sequential composition of kernels:
+$$
+\begin{aligned}
+\pi &\sim \mathrm{Dirichlet}(\alpha_1, \ldots, \alpha_K) \\
+y_i &\sim \mathrm{Categorical}(\pi_1, \ldots, \pi_K), \quad i = 1, \ldots, n,
+\end{aligned}
+$$
+where the $y_i$ are conditionally independent given $\pi$.
+
+The density of the Dirichlet distribution is given by
+$$
+\ell_{\mathrm{Dirichlet}}(\pi) = \frac{\prod_{k=1}^K \pi_k^{\alpha_k - 1}}{B(\alpha_1, \ldots, \alpha_K)},
+$$
+where $\alpha_1, \ldots, \alpha_K$ are positive shape parameters, and $B(\alpha_1, \ldots, \alpha_K)$ is the multivariate beta function.
+
+The joint density of the $n$ categorical observations given $\pi$ is
+$$
+\ell_{\mathrm{Categorical}}(y_1, \ldots, y_n \mid \pi) = \prod_{i=1}^n \prod_{k=1}^K \pi_k^{\ivmark{y_i = k}} = \prod_{k=1}^K \pi_k^{n_k},
+$$
+where $n_k := \sum_{i=1}^n \ivmark{y_i = k}$ is the count of observations in category $k$, and $\sum_k n_k = n$.
+
+By a similar calculation as in the beta-Bernoulli case, the marginal density of the observations is
+$$
+\ell_{f \then g}(y_{1:n}) = \frac{B(\alpha_1 + n_1, \ldots, \alpha_K + n_K)}{B(\alpha_1, \ldots, \alpha_K)},
+$$
+and the posterior distribution of $\pi$ given the observations is again a Dirichlet distribution, with updated parameters $\alpha_k' = \alpha_k + n_k$ for each $k$.
+
+Hence the prior parameters $\alpha_k$ act as pseudo-counts that are simply augmented by the observed counts $n_k$. As in the beta-Bernoulli case, the posterior depends on the data only through the sufficient statistics $(n_1, \ldots, n_K)$.
+
+This example is particularly important in practice, since it allows us to fit any discrete kernel to data using a simple formula, provided we use a Dirichlet prior. Concretely, suppose we have a discrete kernel $f : X \kernel Y$ whose entries $f(y \mid x)$ are unknown. For each $x \in X$, we can treat the entries $f(y \mid x)$ as a categorical distribution over $y \in Y$, and put a Dirichlet prior on it. Then, given data of the form $(x_i, y_i)$, we can directly compute the posterior distribution of $f(y \mid x)$ for each $x$ using the Dirichlet-Categorical conjugacy. 
+
+Explicitly, if we have observed $n_{x,y}$ pairs of $(x, y)$ in the data, then the posterior distribution of $f(y \mid x)$ is a Dirichlet distribution with parameters $\alpha_{x,y}' = \alpha_{x,y} + n_{x,y}$, where $\alpha_{x,y}$ are the parameters of the prior Dirichlet distribution. Note the this corresponds to simply adding the observed counts $n_{x,y}$ to the prior pseudo-counts $\alpha_{x,y}$ for each entry of the kernel. Using pseudo-counts of 1 corresponds precisely to the Laplace smoothing technique we encountered in [Exercise 3](exercises/3-stroke-prediction).
+:::
+
+While choosing the kernels in a model to be conjugate can allow us to simplify the model before sampling, it is not always possible or desirable to do so. In particular, conjugacy forces the kernels to have a specific form, which may not be flexible enough to capture the true data-generating process.
+
+## Approximating parts of the model
+
+When a kernel in our model is too complex to handle exactly, we can replace it by a simpler approximation. The idea is to swap one box in the diagram for another that is easier to work with, while keeping the rest of the model intact. We discuss two such approximations: replacing a kernel by a deterministic kernel concentrated at its mode (MAP), and replacing it by a Gaussian centered at the mode (Laplace).
+
+### MAP estimates
+
+The most drastic simplification of a kernel is to replace it by a **deterministic kernel** that always outputs a single value. Given a kernel $f : X \kernel Y$ with density $\ell_f(y \mid x)$, the natural choice is the most likely output for each input.
+
+::: {#def-map-approximation}
+**(MAP approximation)** The **MAP approximation** of a kernel $f : X \kernel Y$ with density $\ell_f(y \mid x)$ is the deterministic kernel $\hat f : X \kernel Y$ defined by
+$$
+\hat f(y \mid x) := \ivmark{y = \hat y(x)}, \qquad \hat y(x) := \arg\max_{y \in Y} \ell_f(y \mid x).
+$$
+
+The value $\hat y(x)$ is called the **maximum a posteriori (MAP) estimate** of $y$ given $x$.
+:::
+
+We can substitute $\hat f$ for $f$ anywhere in the diagram. In principle, this works for any kernel, but it discards all uncertainty about $y$. Information that downstream computations would have extracted from the spread of $f(- \mid x)$ will be lost.
+
+**Applying MAP to a posterior.** The most common use of this idea is to approximate the posterior of an unobserved variable $\theta$ given data $y$. Recall that the joint density obtained by copy-composing the prior and the likelihood is
+$$
+\ell(\theta, y) = \ell_{\text{likelihood}}(y \mid \theta) \, \ell_{\text{prior}}(\theta),
+$$
+and the posterior is proportional to this in $\theta$:
+$$
+\ell(\theta \mid y) = \frac{\ell(\theta, y)}{\ell(y)} \propto \ell(\theta, y).
+$$
+The denominator $\ell(y)$ does not depend on $\theta$, so it has no effect on the location of the maximum. Moreover, we prefer to optimize the log-density instead since is numerically more stable and turns products into sums. This is justified since taking logarithms is order-preserving and hence does not change the location of the maximum. 
+
+The MAP estimate of $\theta$ given $y$ is therefore
+$$
+\hat\theta(y) = \arg\max_{\theta} \ell(\theta, y) = \arg\max_{\theta} \big[\, \log \ell_{\text{likelihood}}(y \mid \theta) + \log \ell_{\text{prior}}(\theta) \,\big].
+$$
+Hence, we have replaced an intractable normalization (a high-dimensional integral) by an optimization problem.
+
+**Maximum likelihood.** Notice that when the prior is constant (does not depend on $\theta$), the MAP estimate reduces to the **maximum likelihood estimate (MLE)**:
+$$
+\hat\theta_{\text{MLE}} = \arg\max_\theta \ell_{\text{likelihood}}(y \mid \theta).
+$$
+
+The maximum likelihood estimator is frequently used in non-Bayesian settings and has very nice properties. However, it can be unstable when the likelihood is flat or has multiple modes. Moreover it does not allow us to incorporate prior knowledge about $\theta$. The MAP estimator can thus be viewed as a *regularized* version of the MLE, where the type regularization is determined by the prior.
+
+**When is MAP a good approximation?** Replacing the posterior by the MAP estimate is reasonable when the posterior is concentrated around a single mode, that is, when we expect $\theta \mid y$ to be nearly deterministic. This typically happens when there is enough data to pin down $\theta$ precisely. For posteriors with broad or multimodal distributions, MAP can be badly misleading: it ignores the spread, picks an arbitrary mode, and may even land at a point of low typical mass in high dimensions.
+
+::: {#exm-ridge-regression}
+**(Ridge regression as MAP)**
+
+Consider Bayesian linear regression with Gaussian prior on the coefficients and Gaussian noise on the observations:
+$$
+\begin{aligned}
+\beta &\sim \mathrm{MvNormal}(0, \tau^2 I_d) \\
+y_i &\sim \mathrm{Normal}(x_i^\top \beta, \sigma^2), \quad i = 1, \ldots, n,
+\end{aligned}
+$$
+
+where $x_i \in \mathbb{R}^d$ are fixed covariates. 
+
+The joint log-density of $\beta$ and $y_{1:n}$ is
+$$
+\log \ell(\beta, y_{1:n}) = -\frac{1}{2\sigma^2} \sum_{i=1}^n (y_i - x_i^\top \beta)^2 - \frac{1}{2\tau^2} \|\beta\|^2 + \text{const}.
+$$
+Maximizing this over $\beta$ is equivalent to minimizing
+$$
+\sum_{i=1}^n (y_i - x_i^\top \beta)^2 + \lambda \|\beta\|^2, \qquad \lambda := \frac{\sigma^2}{\tau^2},
+$$
+which is exactly the [**ridge regression**](https://en.wikipedia.org/wiki/Ridge_regression) objective. Hence the ridge estimator is the MAP estimate of $\beta$ under a Gaussian prior, and the prior variance $\tau^2$ controls the regularization strength $\lambda$. Replacing the posterior kernel $\beta \mid y_{1:n}$ by the MAP estimate gives a deterministic plug-in for downstream prediction, at the cost of ignoring posterior uncertainty about $\beta$.
+:::
+
+### Laplace approximation
+The MAP estimate captures the most likely value of $\theta$ but throws away all information about uncertainty. The **Laplace approximation** is a refinement that keeps some of this information by replacing the target kernel with a Gaussian centered at the MAP, rather than a point mass.
+
+**Taylor expansion.** Recall that a smooth function $h : \mathbb{R}^d \to \mathbb{R}$ can be approximated near a point $\hat\theta$ by its second-order Taylor expansion:
+$$
+h(\theta) \approx h(\hat\theta) + \nabla h(\hat\theta)^\top (\theta - \hat\theta) + \tfrac{1}{2} (\theta - \hat\theta)^\top \nabla^2 h(\hat\theta) \, (\theta - \hat\theta),
+$$
+where $\nabla h$ is the gradient (matrix of first derivatives) and $\nabla^2 h$ is the Hessian (matrix of second derivatives).
+
+**Approximating the log-density.** Let $f : X \kernel Y$ be a kernel with density $\ell_f(y \mid x)$, and suppose we want to approximate $f(- \mid x)$ for some input $x$. Let $\hat y(x) := \arg\max_y \log \ell_f(y \mid x)$ be the mode. At the mode, the gradient of $\log \ell_f$ vanishes, so the Taylor expansion reduces to
+$$
+\log \ell_f(y \mid x) \approx \log \ell_f(\hat y(x) \mid x) - \tfrac{1}{2} (y - \hat y(x))^\top H(x) \, (y - \hat y(x)),
+$$
+where $H(x) := -\nabla^2_y \log \ell_f(y \mid x) \big|_{y = \hat y(x)}$ is the negative Hessian at the mode. $H$ is positive definite for a true local maximum. Exponentiating, we see that our approximation corresponds to an unnormalized Gaussian kernel with mean $\hat y(x)$ and covariance $H(x)^{-1}$:
+$$
+\ell_f(y \mid x) \approx \ell_f(\hat y(x) \mid x) \cdot \exp\!\Big( -\tfrac{1}{2} (y - \hat y(x))^\top H(x) \, (y - \hat y(x)) \Big).
+$$
+
+Normalizing in $y$ gives the Laplace approximation of $f$, which we can substitute for $f$ in the diagram.
+
+::: {#def-laplace-approximation}
+**(Laplace approximation)** Let $f : X \kernel Y$ be a kernel with density $\ell_f(y \mid x)$ that is smooth in $y$ and has a unique maximum $\hat y(x) := \arg\max_{y} \ell_f(y \mid x)$ for each $x$. The **Laplace approximation** of $f$ is the Gaussian kernel
+$$
+\hat f(- \mid x) := \mathrm{MvNormal}\big( \hat y(x), \, H(x)^{-1} \big),
+$$
+
+where $H(x) := -\nabla^2_y \log \ell_f(y \mid x) \big|_{y = \hat y(x)}$ is the negative Hessian of the log-density at the mode.
+:::
+
+**Connection to MAP.** The Laplace approximation can be seen as a refinement of the MAP estimate: both use the mode $\hat y(x)$, but Laplace additionally captures local curvature via $H(x)^{-1}$. In the limit $H(x) \to \infty$ (an arbitrarily sharp peak), the Gaussian collapses to the MAP approximation. The Laplace approximation is useful when $f(- \mid x)$ is unimodal and roughly bell-shaped, but is misleading for multimodal or heavy-tailed targets.
+
+**When is Laplace practical?** The approximation requires finding the mode $\hat y(x)$ and computing the Hessian $H(x)$ for each input $x$. If the we are approximating a distribution in this way (no inputs), then these can be computed once by optimization and differentiation. When there are many inputs, the Laplace approximation is only appealing if the mode and Hessian can be computed in closed form, or at least efficiently.
+
+### Variational approximations
+More generally, we can replace a kernel by any other kernel that is easier to work with. The MAP and Laplace approximations are just two examples of this idea. Suppose we want to approximate a kernel $f : X \kernel Y$ by a kernel $\hat f : X \kernel Y$. One way to do this is specify a parametric family of kernels $\{\hat f_\lambda : \lambda \in \Lambda\}$ and find the best approximation of $f$ within this family. This can done by minimizing some measure $D$ of similarity between $f$ and $\hat f_\lambda$ over $\lambda \in \Lambda$:
+
+$$
+\hat f = \arg\min_{\lambda \in \Lambda} D(f, \hat f_\lambda)
+$$
+
+A common choice of similarity measure is the **Kullback–Leibler (KL) divergence**. When both kernels have densities with respect to the same base measure $\nu$, the KL divergence from $\hat f_\lambda$ to $f$ is defined by
+$$
+\mathrm{KL}(f \parallel \hat f_\lambda) := \sup_x \int_Y \ell_f(y \mid x) \log \frac{\ell_f(y \mid x)}{\ell_{\hat f_\lambda}(y \mid x)} \, \nu(dy).
+$$
+The KL divergence between probability kernels is non-negative and equals zero if and only if $f$ and $\hat f_\lambda$ are the equal. However, it is not symmetric and does not satisfy the triangle inequality, so it is not a true distance metric. Minimizing KL divergence is the basis of **variational inference**, a powerful technique for approximating complex distributions by simpler ones.
+
+Another common choice is the *total variation distance*, which measures the largest difference in probabilities assigned to events by two distributions. It can also be computed in terms of densities:
+$$
+\mathrm{TV}(f, \hat f_\lambda) := \sup_x \sup_{B \subseteq Y} |f(B \mid x) - \hat f_\lambda(B \mid x)| = \sup_x \frac{1}{2} \int_Y |\ell_f(y \mid x) - \ell_{\hat f_\lambda}(y \mid x)| \, \nu(dy).
+$$
+
+
+## Exploiting model structure
+Suppose that our model consists of two non-interacting parts, that is, it can be written as a parallel composition of two sub-models. In this case, we can perform inference separately on each part and combine the results. This is often much more efficient than performing inference on the whole model at once. Often such a decomposition arises after we condition on observations which removes the wires corresponding to those variables. Even if the model does not decompose natively into two parts, there are techniques to force such a decomposition by approximating somevariables by point estimates.
+
+### Conditioning splits models
+
+Consider the following simple model:
+$$
+\begin{aligned}
+\vartheta_f &\sim p_f \\
+\vartheta_g &\sim p_g \\
+x_i &\sim f(- \mid \vartheta_f), \quad i = 1, \ldots, N \\
+y_i &\sim g(- \mid x_i, \vartheta_g), \quad i = 1, \ldots, N
+\end{aligned}
+$$
+
+In string diagrams:
+
+``` {.tikz file="practical/gmm.tikz"}
+%%| label: Gaussian mixture model
+%%| fig-cap: A Gaussian mixture model.
+%%| height: 8em
+```
+
+The model consists of $N$ independent sequential compositions of $f$ and $g$, where the parameters $\vartheta_f$ and $\vartheta_g$ are shared across all compositions. We will assume that both $f$ and $g$ have densities $\ell_f$ and $\ell_g$, respectively.
+
+Suppose that we observe $\bar x_{1:N}$ and $\bar y_{1:N}$. Then we can condition on these observations to get the posterior distribution of $\vartheta_f$ and $\vartheta_g$ given the data. Recall that conditioning on a variable removes all wire carrying that variable, and subsitutes the observed value into the remaining kernels' densities. Graphically, this produces the following string diagram,
+
+``` {.tikz file="practical/gmm.tikz"}
+%%| label: Gaussian mixture model
+%%| fig-cap: A Gaussian mixture model.
+%%| height: 8em
+```
+where $f_{\mid \bar x_i}$ has density $\ell_f(\bar x_i \mid \vartheta_f)$ and $g_{\mid \bar y_i}$ has density $\ell_g(\bar y_i \mid \bar x_i, \vartheta_g)$. Since the preconditioned kernels have trivial output space $I = \{*\}$, the densities are with respect to the probability measure on $I$ that assigns mass 1 to the single element. This means they are just weights.
+
+Notice that the resulting diagram decomposes into two parallel parts, one containing $\vartheta_f$ and the other containing $\vartheta_g$. Hence, we can perform inference separately on each part to get the marginal posteriors of $\vartheta_f$ and $\vartheta_g$ given the data. This is much more efficient than performing inference on the whole model at once. This strategy generalizes whenever we can fully observe intermediate variables.
+
+### Empirical Bayes
+Often, however, the values of the latent variables are hidden. However, if we knew their values, we could condition on them to split the model into two parts. The idea of **empirical Bayes** is to first find a point estimate of the latent variables, and then condition on this estimate to split the model.
+
+Consider the following model:
+$$
+\begin{aligned}
+\vartheta &\sim p \\
+\tau_i &\sim q \\
+\y_i &\sim f(- \mid \vartheta, \tau_i), \quad i = 1, \ldots, N
+\end{aligned}
+$$
+
+In string diagrams:
+``` {.tikz file="practical/gmm.tikz"}
+%%| label: Gaussian mixture model
+%%| fig-cap: A Gaussian mixture model.
+%%| height: 8em
+```
+
+Suppose we observe $\bar y_{1:N}$. Notice that the wire carrying $\vartheta$ is the only thing holding the slices of the plate together. Hence, if we were given the value of $\vartheta$, we could condition on it to split the model into $N$ independent parts. We could then independently infer each $\tau_i$.
+
+Although we don't know the value of $\vartheta$, we can find a point estimate $\hat\vartheta$ using maximization. Concretely, the joint density over all variables in the preconditioned model is given by
+$$
+\ell(\vartheta, \tau_{1:N}) = \ell_p(\vartheta) \cdot \prod_{i=1}^N \ell_q(\tau_i) \cdot \ell_f(\bar y_i \mid \vartheta, \tau_i).
+$$
+
+We can find the joint MAP estimate $(\hat \vartheta, \hat \tau_{1:N})$ by maximizing the log of this density over $\vartheta$ and $\tau_{1:N}$. We can then select $\hat \vartheta$ as our point estimate for $\vartheta$ and condition on it. Note that we have used the first component of the join MAP estimate, rather than the marginal MAP estimate $\hat \vartheta_{\text{marginal}} := \arg\max_\vartheta \int \ell(\vartheta, \tau_{1:N}) \, d\tau_{1:N}$. These two values are not the same. While the latter is more conceptually appealing, it is typically much harder to compute. 
+
+Using the MAP is not required. In principle any suitable point estimate of $\vartheta$ can be used to split the model. Often classical statistics provide simple estimators that can be used for this purpose.
+
+## Data realities
+
+### Censored and binned data
+
+In many applications, the variable we would like to observe is not directly accessible. Instead, we see a deterministic function of it: a survival time may be cut off at the end of a study, an age may be reported only as the interval $[a, b)$ that contains it, or a sensor may saturate above some threshold. Conceptually, this is no problem — we simply append a deterministic kernel encoding the observation mechanism to the generating process and condition on its output.
+
+However, this breaks the usual density-based workflow. The appended kernel is deterministic, hence has no density with respect to a continuous base measure on its output space. We cannot simply read off the likelihood of the observation by plugging into a density formula. Instead, we must **analytically compose** the deterministic observation kernel with the preceding latent kernel, so that the composite kernel directly outputs the observed quantity and has a tractable density (typically with respect to a mixed discrete / continuous base measure on the output space).
+
+::: {#exm-right-censoring}
+**(Right-censored survival times)**
+
+Suppose the latent quantity of interest is a survival time $T \kernel \mathbb{R}_{\ge 0}$ with density $\ell_f(t \mid \vartheta)$ and cumulative distribution $F(t \mid \vartheta)$. Each subject is followed only up to a fixed censoring time $c$. What we actually observe is the pair
+$$
+(U, \delta) := (\min(T, c), \ivmark{T \le c}),
+$$
+where $\delta = 1$ indicates that we saw the true event time ($U = T$) and $\delta = 0$ indicates that the subject was still event-free at time $c$ ($U = c$). The map $T \mapsto (U, \delta)$ is a deterministic kernel $\mathbb{R}_{\ge 0} \kernel \mathbb{R}_{\ge 0} \times \{0,1\}$ with no density on its output space.
+
+Composing the latent kernel with the censoring kernel and reading off the law of $(U, \delta)$ gives a kernel with density (with respect to Lebesgue measure on $[0, c)$ times counting measure on $\{0,1\}$):
+$$
+\ell(u, \delta \mid \vartheta) =
+\begin{cases}
+\ell_f(u \mid \vartheta), & \delta = 1, \ u < c, \\
+1 - F(c \mid \vartheta), & \delta = 0, \ u = c.
+\end{cases}
+$$
+Conditioning on each observed pair $(\bar u_i, \bar \delta_i)$ then yields the standard parametric survival likelihood
+$$
+\prod_{i=1}^n \ell_f(\bar u_i \mid \vartheta)^{\bar \delta_i} \, \big(1 - F(c \mid \vartheta)\big)^{1 - \bar \delta_i},
+$$
+which is the basis for Kaplan–Meier and parametric survival models.
+:::
+
+::: {#exm-interval-censoring}
+**(Interval-censored ages)**
+
+Suppose the latent quantity is an age $A \kernel \mathbb{R}_{\ge 0}$ with density $\ell_f(a \mid \vartheta)$ and CDF $F(a \mid \vartheta)$, but observations report only the bin $[a_k, a_{k+1})$ containing $A$, for a fixed partition $0 = a_0 < a_1 < \cdots < a_K = \infty$. The observation mechanism is the deterministic binning kernel $A \mapsto K(A) := k$ such that $A \in [a_k, a_{k+1})$. Again, this kernel has no density on its discrete output space relative to Lebesgue measure on $A$.
+
+Composing the latent kernel with the binning kernel gives a discrete kernel with density (with respect to counting measure on $\{0, \ldots, K-1\}$)
+$$
+\ell(k \mid \vartheta) = F(a_{k+1} \mid \vartheta) - F(a_k \mid \vartheta).
+$$
+Conditioning on the observed bins $\bar k_i$ yields the interval-censored likelihood
+$$
+\prod_{i=1}^n \big( F(a_{\bar k_i + 1} \mid \vartheta) - F(a_{\bar k_i} \mid \vartheta) \big),
+$$
+which depends on $\vartheta$ only through the CDF $F$, not through the density $\ell_f$ at any single point.
+:::
+
+In both examples, the key step is the analytical composition of the deterministic observation kernel with the latent kernel: it converts a kernel without a usable density into one whose density is exactly the likelihood we need.
+
+### Missing data
+
+In real datasets, some entries of an observation are often missing. The clean way to handle this in our framework is to **condition only on the variables that were actually observed**, and treat the missing entries as latent variables to be inferred (or marginalized out) along with the rest of the model's unknowns. From the string-diagram point of view, we simply do not feed any observed value into the wires corresponding to missing entries; they remain free outputs of the model.
+
+This is correct whenever the *fact* that a value is missing carries no information about the latent quantities. This situation arises, for example, when each entry is independently dropped with a probability that does not depend on its value or on any unobserved parameter (the "missing completely at random" case). In that case, conditioning on the observed entries alone gives the right posterior.
+
+**When missingness itself is informative.** Sometimes whether a value is missing depends on what the value would have been, or on a latent variable we care about. Suppose, for example, that a sensor reports a measurement $y$ only when $y$ exceeds some threshold $c$, and reports "missing" otherwise. Then the observation mechanism is the deterministic kernel
+$$
+y \;\mapsto\; (m, y^{\text{obs}}) := \big( \ivmark{y \le c}, \; y \cdot \ivmark{y > c} \big),
+$$
+where $m \in \{0, 1\}$ is the missingness indicator. Seeing $m = 1$ (missing) is *not* uninformative: it tells us that $y \le c$. If we discard those data points and condition only on the non-missing entries, we systematically bias inference about the parameters of $y$'s distribution. We have effectively conditioned on $y > c$ without telling the model.
+
+The fix is to compose the model with the deterministic missingness kernel above and condition on the observed pair $(m_i, y_i^{\text{obs}})$ for each $i$, exactly as in the censoring examples above. The likelihood contribution from a missing observation is then $\Pr(y \le c \mid \vartheta)$, not zero. More generally, whenever missingness is informative, the missingness mechanism should be made an explicit kernel in the model, with its own missingness indicator output. Inference can then correctly use the pattern of missingness to inform parameter estimates.
+
+**Handling missing data in NumPyro.** In practice we want to write down a single model that simultaneously infers the latent parameters and the missing entries. NumPyro's [Bayesian imputation tutorial](https://num.pyro.ai/en/stable/tutorials/bayesian_imputation.html) shows the standard pattern, which uses the `.mask(False)` modifier on a distribution to declare that some sampled values should not contribute to the likelihood. Given a vector `y` with some `NaN` entries, the idiom is:
+
+```python
+# indices of missing and observed entries
+nan_idx = np.nonzero(np.isnan(y))[0]
+
+# sample the missing entries as latent variables (no likelihood contribution)
+y_impute = numpyro.sample(
+    "y_impute",
+    dist.Normal(mu[nan_idx], sigma[nan_idx]).mask(False),
+)
+
+# splice imputed values into the observed array
+y_full = jnp.asarray(y).at[nan_idx].set(y_impute)
+
+# now score the full vector against the model
+numpyro.sample("y", dist.Normal(mu, sigma), obs=y_full)
+```
+
+The `.mask(False)` call tells NumPyro to draw `y_impute` from the prior but to *skip* its log-density contribution, since that contribution is already accounted for when the full vector `y_full` is scored against `dist.Normal(mu, sigma)`. The observed entries of `y` are treated as data, the missing entries are treated as additional latent variables, and MCMC samples them jointly with the other unknowns.
+
+If the missingness mechanism is itself informative, the same pattern extends naturally: in addition to imputing the missing values, one adds a `numpyro.sample` site for the missingness indicators $m_i$ with an `obs=...` argument, using a distribution that depends on the latent $y_i$ (e.g. `dist.Bernoulli(probs=p_missing(y_full))`). This is exactly the analytical composition of the latent kernel with the missingness kernel described above.
