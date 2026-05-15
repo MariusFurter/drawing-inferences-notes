@@ -190,6 +190,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
@@ -298,9 +304,10 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#sec-events" id="toc-sec-events" class="nav-link" data-scroll-target="#sec-events"><span class="header-section-number">4.1.1</span> Events</a></li>
   <li><a href="#sec-measures" id="toc-sec-measures" class="nav-link" data-scroll-target="#sec-measures"><span class="header-section-number">4.1.2</span> Measures</a></li>
-  <li><a href="#sec-general-kernels" id="toc-sec-general-kernels" class="nav-link" data-scroll-target="#sec-general-kernels"><span class="header-section-number">4.1.3</span> Kernels</a></li>
-  <li><a href="#sec-density-functions" id="toc-sec-density-functions" class="nav-link" data-scroll-target="#sec-density-functions"><span class="header-section-number">4.1.4</span> Density functions</a></li>
-  <li><a href="#sec-string-diagrams-carry-over" id="toc-sec-string-diagrams-carry-over" class="nav-link" data-scroll-target="#sec-string-diagrams-carry-over"><span class="header-section-number">4.1.5</span> String diagrams carry over</a></li>
+  <li><a href="#product-sigma-algebras-and-product-measures" id="toc-product-sigma-algebras-and-product-measures" class="nav-link" data-scroll-target="#product-sigma-algebras-and-product-measures"><span class="header-section-number">4.1.3</span> Product <span class="math inline">\(\sigma\)</span>-algebras and product measures</a></li>
+  <li><a href="#sec-general-kernels" id="toc-sec-general-kernels" class="nav-link" data-scroll-target="#sec-general-kernels"><span class="header-section-number">4.1.4</span> Kernels</a></li>
+  <li><a href="#sec-density-functions" id="toc-sec-density-functions" class="nav-link" data-scroll-target="#sec-density-functions"><span class="header-section-number">4.1.5</span> Density functions</a></li>
+  <li><a href="#sec-string-diagrams-carry-over" id="toc-sec-string-diagrams-carry-over" class="nav-link" data-scroll-target="#sec-string-diagrams-carry-over"><span class="header-section-number">4.1.6</span> Working with general kernels</a></li>
   </ul></li>
   <li><a href="#sec-parametric-kernels" id="toc-sec-parametric-kernels" class="nav-link" data-scroll-target="#sec-parametric-kernels"><span class="header-section-number">4.2</span> Parametric kernels</a>
   <ul class="collapse">
@@ -387,15 +394,29 @@ window.Quarto = {
 </ol>
 <p>A measure <span class="math inline">\(\mu\)</span> is called a <strong>probability measure</strong> if in addition <span class="math inline">\(\mu(\Omega) = 1\)</span>.</p>
 </div>
+<div id="exm-counting-measure" class="theorem example">
+<p><span class="theorem-title"><strong>Example 4.4</strong></span> Given a finite set <span class="math inline">\(X\)</span>, the <strong>counting measure</strong> <span class="math inline">\(\nu\)</span> on <span class="math inline">\(X\)</span> assigns to each event <span class="math inline">\(B \subseteq X\)</span> the number of elements in <span class="math inline">\(B\)</span>: <span class="math inline">\(\nu(B) = |B|\)</span>. This is a measure because <span class="math inline">\(\nu(\varnothing) = 0\)</span>, and if <span class="math inline">\(B_1, B_2, \ldots\)</span> are pairwise disjoint, then <span class="math inline">\(\nu\bigl(\bigcup_n B_n\bigr) = \sum_n |B_n|\)</span>. The counting measure is a probability measure if and only if <span class="math inline">\(X\)</span> has exactly one element.</p>
+</div>
+<div id="exm-lebesgue-measure" class="theorem example">
+<p><span class="theorem-title"><strong>Example 4.5</strong></span> The <strong>Lebesgue measure</strong> <span class="math inline">\(\lambda\)</span> on <span class="math inline">\(\mathbb{R}\)</span> assigns to each interval <span class="math inline">\([a, b]\)</span> its length: <span class="math inline">\(\lambda([a, b]) = b - a\)</span>. This measure can be extended to the Borel <span class="math inline">\(\sigma\)</span>-algebra <span class="math inline">\(\mathcal{B}(\mathbb{R})\)</span> in a unique way. The Lebesgue measure is not a probability measure because <span class="math inline">\(\lambda(\mathbb{R}) = \infty\)</span>.</p>
+<p>More generally, the Lebesgue measure on <span class="math inline">\(\mathbb{R}^n\)</span> assigns to each box <span class="math inline">\([a_1, b_1] \times \cdots \times [a_n, b_n]\)</span> its volume <span class="math inline">\(\prod_{i=1}^n (b_i - a_i)\)</span>, and extends to the Borel <span class="math inline">\(\sigma\)</span>-algebra <span class="math inline">\(\mathcal{B}(\mathbb{R}^n)\)</span>. The Lebesgue measure on <span class="math inline">\(\mathbb{R}^n\)</span> can be viewed as a product measure <span class="math inline">\(\lambda \otimes \cdots \otimes \lambda\)</span> of <span class="math inline">\(n\)</span> copies of the Lebesgue measure on <span class="math inline">\(\mathbb{R}\)</span> (see below).</p>
+</div>
 </section>
-<section id="sec-general-kernels" class="level3" data-number="4.1.3">
-<h3 data-number="4.1.3" class="anchored" data-anchor-id="sec-general-kernels"><span class="header-section-number">4.1.3</span> Kernels</h3>
+<section id="product-sigma-algebras-and-product-measures" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="product-sigma-algebras-and-product-measures"><span class="header-section-number">4.1.3</span> Product <span class="math inline">\(\sigma\)</span>-algebras and product measures</h3>
+<p>Given measurable spaces <span class="math inline">\((X, \Sigma_X)\)</span> and <span class="math inline">\((Y, \Sigma_Y)\)</span>, their product space <span class="math inline">\(X \times Y\)</span> carries the <strong>product <span class="math inline">\(\sigma\)</span>-algebra</strong> <span class="math inline">\(\Sigma_X \otimes \Sigma_Y\)</span>, defined as the smallest <span class="math inline">\(\sigma\)</span>-algebra containing all rectangles <span class="math inline">\(B_1 \times B_2\)</span> with <span class="math inline">\(B_1 \in \Sigma_X\)</span> and <span class="math inline">\(B_2 \in \Sigma_Y\)</span>. This <span class="math inline">\(\sigma\)</span>-algebra contains many events beyond rectangles. For instance, discs are measurable in the product <span class="math inline">\(\sigma\)</span>-algebra <span class="math inline">\(\mathbb{R}^2\)</span>.</p>
+<p>It turns out that a finite measure that is defined consistently on rectangles extends uniquely to the full product <span class="math inline">\(\sigma\)</span>-algebra. This principle allows us to define <strong>product measures</strong> by only specifying their values on rectangles. Given measures <span class="math inline">\(\nu_X\)</span> on <span class="math inline">\(X\)</span> and <span class="math inline">\(\nu_Y\)</span> on <span class="math inline">\(Y\)</span>, the product measure <span class="math inline">\(\nu_X \otimes \nu_Y\)</span> is the unique measure on the product space <span class="math inline">\(X \times Y\)</span> satisfying <span class="math display">\[
+(\nu_X \otimes \nu_Y)(B_1 \times B_2) = \nu_X(B_1) \cdot \nu_Y(B_2).
+\]</span> For instance, Lebesgue measure on <span class="math inline">\(\mathbb{R}^2\)</span> (area) is the product of Lebesgue measure on <span class="math inline">\(\mathbb{R}\)</span> (length) with itself.</p>
+</section>
+<section id="sec-general-kernels" class="level3" data-number="4.1.4">
+<h3 data-number="4.1.4" class="anchored" data-anchor-id="sec-general-kernels"><span class="header-section-number">4.1.4</span> Kernels</h3>
 <p>In the <a href="../chapters/discrete-graphical-models.html">chapter on discrete graphical models</a> we defined a discrete kernel <span class="math inline">\(f : X \kernel Y\)</span> between finite sets by specifying a non-negative number <span class="math inline">\(f(y \mid x)\)</span> for each input <span class="math inline">\(x \in X\)</span> and output <span class="math inline">\(y \in Y\)</span>. We can equivalently describe <span class="math inline">\(f\)</span> in terms of events: for any subset <span class="math inline">\(B \subseteq Y\)</span>, set <span class="math display">\[
 f(B \mid x) := \sum_{y \in B} f(y \mid x).
 \]</span> This gives us the total weight that <span class="math inline">\(f\)</span> assigns to the event <span class="math inline">\(B\)</span>, given input <span class="math inline">\(x\)</span>. The values on individual points are recovered by taking <span class="math inline">\(B = \{y\}\)</span>.</p>
 <p>The event-based formulation generalizes to infinite spaces where it is not longer possible to compute the measure of a set from individual points. Thus, a general kernel <span class="math inline">\(k : X \kernel Y\)</span> assigns a non-negative number <span class="math inline">\(k(B \mid x)\)</span> to each input <span class="math inline">\(x\)</span> and each event <span class="math inline">\(B \in \Sigma_Y\)</span>.</p>
 <div id="def-kernel" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 4.4</strong></span> A <strong>kernel</strong> <span class="math inline">\(k : X \kernel Y\)</span> between measurable spaces <span class="math inline">\((X, \Sigma_X)\)</span> and <span class="math inline">\((Y, \Sigma_Y)\)</span> assigns to each input <span class="math inline">\(x \in X\)</span> and each event <span class="math inline">\(B \in \Sigma_Y\)</span> a non-negative number <span class="math inline">\(k(B \mid x)\)</span>, such that:</p>
+<p><span class="theorem-title"><strong>Definition 4.6</strong></span> A <strong>kernel</strong> <span class="math inline">\(k : X \kernel Y\)</span> between measurable spaces <span class="math inline">\((X, \Sigma_X)\)</span> and <span class="math inline">\((Y, \Sigma_Y)\)</span> assigns to each input <span class="math inline">\(x \in X\)</span> and each event <span class="math inline">\(B \in \Sigma_Y\)</span> a non-negative number <span class="math inline">\(k(B \mid x)\)</span>, such that:</p>
 <ol type="1">
 <li>For each fixed <span class="math inline">\(x \in X\)</span>, the function <span class="math inline">\(B \mapsto k(B \mid x)\)</span> is a measure on <span class="math inline">\((Y, \Sigma_Y)\)</span>.</li>
 <li>For each fixed <span class="math inline">\(B \in \Sigma_Y\)</span>, the function <span class="math inline">\(x \mapsto k(B \mid x)\)</span> is measurable.</li>
@@ -405,8 +426,8 @@ f(B \mid x) := \sum_{y \in B} f(y \mid x).
 <p>Condition 1 is the substantive requirement: each input produces a measure on the output space. Condition 2 is a technical regularity condition ensuring that the kernel interacts well with the <span class="math inline">\(\sigma\)</span>-algebras. All kernels we construct in practice will satisfy it automatically, so we will not check it explicitly.</p>
 <!-- Remark about handling non-finite kernels -->
 </section>
-<section id="sec-density-functions" class="level3" data-number="4.1.4">
-<h3 data-number="4.1.4" class="anchored" data-anchor-id="sec-density-functions"><span class="header-section-number">4.1.4</span> Density functions</h3>
+<section id="sec-density-functions" class="level3" data-number="4.1.5">
+<h3 data-number="4.1.5" class="anchored" data-anchor-id="sec-density-functions"><span class="header-section-number">4.1.5</span> Density functions</h3>
 <p>A convenient way to specify a kernel is through a <strong>density function</strong> that describes how weight is spread across the output space.</p>
 <p><strong>Continuous outputs.</strong> Consider a kernel <span class="math inline">\(k : X \kernel \mathbb{R}\)</span> whose output is a real-valued variable. For each input <span class="math inline">\(x\)</span>, suppose we have a non-negative function <span class="math inline">\(y \mapsto \ell_k(y \mid x)\)</span> whose graph is a curve over the real line. We think of <span class="math inline">\(\ell_k(y \mid x)\)</span> as the <em>weight per unit length</em> that <span class="math inline">\(k\)</span> places near the output value <span class="math inline">\(y\)</span>. The total weight assigned to an event <span class="math inline">\(B \in \Sigma_Y\)</span> is then the area under this curve above <span class="math inline">\(B\)</span>:</p>
 <div id="cell-fig-density-area" class="cell" data-execution_count="1">
@@ -427,7 +448,7 @@ Figure&nbsp;4.1: The weight assigned to <span class="math inline">\(B = [a, b]\)
 k(B \mid x) = \int_B \ell_k(y \mid x) \, dy.
 \]</span> We call <span class="math inline">\(\ell_k\)</span> the <em>density</em> of <span class="math inline">\(k\)</span>; the precise definition will follow shortly. For a probability kernel, the total area under the curve equals 1. Note that a single point <span class="math inline">\(\{y\}\)</span> has zero width and therefore zero area: <span class="math inline">\(k(\{y\} \mid x) = 0\)</span>. For continuous variables, individual outcomes always have probability zero.</p>
 <div id="exm-gaussian-kernel" class="theorem example">
-<p><span class="theorem-title"><strong>Example 4.5</strong></span> The <strong>Gaussian</strong> (or normal) density with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span> is <span class="math display">\[
+<p><span class="theorem-title"><strong>Example 4.7</strong></span> The <strong>Gaussian</strong> (or normal) density with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span> is <span class="math display">\[
 \ell(y \mid \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\Bigl(-\frac{(y - \mu)^2}{2\sigma^2}\Bigr).
 \]</span> We write <span class="math inline">\(\mathsf{Normal}(\mu, \sigma^2)\)</span> for the probability measure with this density — its graph is the familiar bell curve, centered at <span class="math inline">\(\mu\)</span> with spread controlled by <span class="math inline">\(\sigma^2\)</span>. Since the total area is 1 for every choice of <span class="math inline">\((\mu, \sigma^2)\)</span>, varying the inputs defines a probability kernel <span class="math inline">\(k : \mathbb{R} \times \mathbb{R}_{&gt;0} \kernel \mathbb{R}\)</span>.</p>
 <div id="cell-fig-gaussian-density" class="cell" data-execution_count="2">
@@ -465,50 +486,85 @@ k(B \mid x) = \sum_{y \in B} \ell_k(y \mid x).
 \]</span> This is exactly the formula from the beginning of the previous section: the values <span class="math inline">\(f(y \mid x)\)</span> that defined a discrete kernel in the <a href="../chapters/discrete-graphical-models.html">chapter on discrete graphical models</a> are precisely its density. Since a discrete kernel is completely determined by its density and vice versa, we treated the two interchangeably in the discrete setting. In the continuous case this identification breaks down, because not all kernels have densities.</p>
 <p><strong>Base measures and densities.</strong> In both cases above, the kernel is determined by integrating a non-negative function against a fixed measure on the output space: Lebesgue measure (length / area) in the continuous case, counting measure (each point has mass 1) in the discrete case. We call this fixed measure the <strong>base measure</strong> and the function the <strong>density</strong>.</p>
 <div id="def-density" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 4.6</strong></span> Let <span class="math inline">\(\nu\)</span> be a measure on the output space <span class="math inline">\(Y\)</span>. A non-negative function <span class="math inline">\(\ell_k(y \mid x)\)</span> is a <strong>density</strong> of the kernel <span class="math inline">\(k : X \kernel Y\)</span> with respect to <span class="math inline">\(\nu\)</span> if <span class="math display">\[
+<p><span class="theorem-title"><strong>Definition 4.8</strong></span> Let <span class="math inline">\(\nu\)</span> be a measure on the output space <span class="math inline">\(Y\)</span>. A non-negative function <span class="math inline">\(\ell_k(y \mid x)\)</span> is a <strong>density</strong> of the kernel <span class="math inline">\(k : X \kernel Y\)</span> with respect to <span class="math inline">\(\nu\)</span> if <span class="math display">\[
 k(B \mid x) = \int_B \ell_k(y \mid x) \, \nu(dy)
 \]</span> for every <span class="math inline">\(x \in X\)</span> and every event <span class="math inline">\(B \in \Sigma_Y\)</span>.</p>
 </div>
 <p>The integral above is the <em>Lebesgue integral</em> from measure theory. Don’t worry if you are not familiar with it. Simply think of it as continuous version of the sum.</p>
 <!-- Give better references to measure theory and integration. Provide intuitive description of Lebesgue integral. -->
 </section>
-<section id="sec-string-diagrams-carry-over" class="level3" data-number="4.1.5">
-<h3 data-number="4.1.5" class="anchored" data-anchor-id="sec-string-diagrams-carry-over"><span class="header-section-number">4.1.5</span> String diagrams carry over</h3>
+<section id="sec-string-diagrams-carry-over" class="level3" data-number="4.1.6">
+<h3 data-number="4.1.6" class="anchored" data-anchor-id="sec-string-diagrams-carry-over"><span class="header-section-number">4.1.6</span> Working with general kernels</h3>
 <p>The string-diagrammatic language from the <a href="../chapters/discrete-graphical-models.html">chapter on discrete graphical models</a> extends to general kernels with almost no changes. The main difference is that the graphical conditioning procedure relies on densities to work. This means you can work with general kernels, even if you do not know measure theory.</p>
-<p><strong>Deterministic functions.</strong> A measurable function <span class="math inline">\(f : X \to Y\)</span> defines a kernel by <span class="math display">\[
+<section id="deterministic-functions" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="deterministic-functions">Deterministic functions</h4>
+<p>A measurable function <span class="math inline">\(f : X \to Y\)</span> defines a kernel by <span class="math display">\[
 k_f(B \mid x) := \ivmark{f(x) \in B},
 \]</span> which assigns full weight to the unique output <span class="math inline">\(f(x)\)</span>. The structural kernels <span class="math inline">\(\id\)</span>, <span class="math inline">\(\swap\)</span>, <span class="math inline">\(\cp\)</span>, and <span class="math inline">\(\del\)</span> are all deterministic. Hence, their formulas are literally the same as before, with the Iverson bracket <span class="math inline">\(\ivmark{y = f(x)}\)</span> replaced by <span class="math inline">\(\ivmark{f(x) \in B}\)</span>.</p>
-<p><strong>Composition.</strong> Sequential composition of <span class="math inline">\(k : X \kernel Y\)</span> and <span class="math inline">\(k' : Y \kernel Z\)</span> is defined by replacing the sum over <span class="math inline">\(Y\)</span> with an integral: <span class="math display">\[
-(k \then k')(B \mid x) := \int_Y k'(B \mid y) \, k(dy \mid x).
-\]</span> When <span class="math inline">\(Y\)</span> is a finite set, the integral reduces to the familiar sum <span class="math inline">\(\sum_{y \in Y} k'(B \mid y)\, k(y \mid x)\)</span>. Parallel composition is characterized by its values on product events: <span class="math display">\[
-(k_1 \otimes k_2)(B_1 \times B_2 \mid x_1, x_2) = k_1(B_1 \mid x_1) \cdot k_2(B_2 \mid x_2).
-\]</span> This formula only specifies the kernel on “rectangles” <span class="math inline">\(B_1 \times B_2\)</span>, but a standard extension result guarantees that these values determine the kernel on all events in the product space (see the box below for details).</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Product <span class="math inline">\(\sigma\)</span>-algebras and product measures
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>When two measurable spaces <span class="math inline">\((X, \Sigma_X)\)</span> and <span class="math inline">\((Y, \Sigma_Y)\)</span> are combined, their product space <span class="math inline">\(X \times Y\)</span> carries the <strong>product <span class="math inline">\(\sigma\)</span>-algebra</strong> <span class="math inline">\(\Sigma_X \otimes \Sigma_Y\)</span>, defined as the smallest <span class="math inline">\(\sigma\)</span>-algebra containing all rectangles <span class="math inline">\(B_1 \times B_2\)</span> with <span class="math inline">\(B_1 \in \Sigma_X\)</span> and <span class="math inline">\(B_2 \in \Sigma_Y\)</span>. This <span class="math inline">\(\sigma\)</span>-algebra contains many events beyond rectangles — for instance, discs in <span class="math inline">\(\mathbb{R}^2\)</span> — but a finite measure that is defined consistently on rectangles extends uniquely to the full product <span class="math inline">\(\sigma\)</span>-algebra. This is why the formula for parallel composition, stated only on rectangles, determines the kernel on all product events.</p>
-<p>The same principle gives us <strong>product measures</strong>. Given measures <span class="math inline">\(\nu_U\)</span> on <span class="math inline">\(U\)</span> and <span class="math inline">\(\nu_V\)</span> on <span class="math inline">\(V\)</span>, the product measure <span class="math inline">\(\nu_U \otimes \nu_V\)</span> is the unique measure on the product space <span class="math inline">\(U \times V\)</span> satisfying <span class="math display">\[
-(\nu_U \otimes \nu_V)(B_1 \times B_2) = \nu_U(B_1) \cdot \nu_V(B_2).
-\]</span> For instance, Lebesgue measure on <span class="math inline">\(\mathbb{R}^2\)</span> (area) is the product of Lebesgue measure on <span class="math inline">\(\mathbb{R}\)</span> (length) with itself. Product measures appear naturally when a kernel has multiple outputs: if each output has a base measure, the joint base measure is their product.</p>
-</div>
-</div>
-</div>
-<p><strong>Algebraic laws.</strong> All the algebraic laws verified in the discrete setting continue to hold for general kernels. The proofs are the same calculations, with sums replaced by integrals. In particular, any two diagrams that could be deformed into each other in the discrete setting still represent the same kernel.</p>
-<p><strong>Conditional independence.</strong> The graphical test for conditional independence from the <a href="../chapters/conditioning.html">conditioning chapter</a> remains valid for general kernels.</p>
+</section>
+<section id="composition" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="composition">Composition</h4>
+<p><strong>Sequential composition</strong> of <span class="math inline">\(f : X \kernel Y\)</span> and <span class="math inline">\(g : Y \kernel Z\)</span> is defined by replacing the sum over <span class="math inline">\(Y\)</span> with an integral: <span class="math display">\[
+(f \then g)(B \mid x) := \int_Y g(B \mid y) \, f(dy \mid x).
+\]</span> This formula says we are integrating the measurable function <span class="math inline">\(y \mapsto g(B \mid y)\)</span> against the measure <span class="math inline">\(f(\cdot \mid x)\)</span> on <span class="math inline">\(Y\)</span>, in the sense of the Lebesgue integral. When <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> have densities, we can express this more concretely as we will see below.</p>
+<p><strong>Precomposing with deterministic kernels.</strong> An important special case of sequential composition is when <span class="math inline">\(f\)</span> is deterministic, so that <span class="math inline">\(f = k_h\)</span> for some measurable function <span class="math inline">\(h : X \to Y\)</span>. In this case, the sequential composition just applies <span class="math inline">\(h\)</span> to the input and then feeds the result into <span class="math inline">\(g\)</span>: <span class="math display">\[
+\begin{aligned}
+(k_h \then g)(B \mid x) &amp;= \int_Y g(B \mid y) \, k_h(dy \mid x) \\
+&amp;= \int_Y g(B \mid y) \, \ivmark{h(x) \in dy} \\
+&amp;= g(B \mid h(x)).
+\end{aligned}   
+\]</span></p>
+<p><strong>Parallel composition</strong> is characterized by its values on product events: <span class="math display">\[
+(f_1 \otimes f_2)(B_1 \times B_2 \mid x_1, x_2) = f_1(B_1 \mid x_1) \cdot f_2(B_2 \mid x_2).
+\]</span> This formula only specifies the kernel on “rectangles” <span class="math inline">\(B_1 \times B_2\)</span>, but a standard extension result guarantees that these values determine the kernel on all events in the product space.</p>
+<p>Using the above, one can show that <strong>copy-composition</strong> is given on rectangles by <span class="math display">\[
+(f \odot g)(B_1 \times B_2 \mid x) = \int_{B_1} g(B_2 \mid y) \, f(dy \mid x).
+\]</span></p>
+</section>
+<section id="sec-composing-densities" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="sec-composing-densities">Composing densities</h4>
+<p>In the case that the kernels being composed have densities, the composition formulas can be expressed in more concrete terms. Suppose <span class="math inline">\(f : X \kernel Y\)</span> has density <span class="math inline">\(\ell_f(y \mid x)\)</span> with respect to a base measure <span class="math inline">\(\nu_Y\)</span>, and <span class="math inline">\(g : Y \kernel Z\)</span> has density <span class="math inline">\(\ell_g(z \mid y)\)</span> with respect to a base measure <span class="math inline">\(\nu_Z\)</span>. By using the definition of density, the formula for <strong>sequential composition</strong> reduces to <span class="math display">\[
+\begin{aligned}
+(f \then g)(C \mid x) &amp;= \int_Y g(C \mid y) \, f(dy \mid x) \\
+&amp;= \int_Y \left( \int_C \ell_g(z \mid y) \, \nu_Z(dz) \right) \, \ell_f(y \mid x) \, \nu_Y(dy) \\
+&amp;= \int_C \left(\int_Y \ell_g(z \mid y)\, \ell_f(y \mid x)\, \nu_Y(dy)\right) \nu_Z(dz).
+\end{aligned}
+\]</span> This shows that <span class="math inline">\(f \then g\)</span> has density <span class="math inline">\(\ell_{f \then g}(z \mid x) = \int_Y \ell_g(z \mid y)\, \ell_f(y \mid x)\, \nu_Y(dy)\)</span> with respect to the base measure <span class="math inline">\(\nu_Z\)</span>.</p>
+<p>Similarly, the formula for <strong>parallel composition</strong> reduces to <span class="math display">\[
+\begin{aligned}
+(f_1 \otimes f_2)(B_1 \times B_2 \mid x_1, x_2)
+&amp;= f_1(B_1 \mid x_1) \cdot f_2(B_2 \mid x_2) \\
+&amp;= \left( \int_{B_1} \ell_{f_1}(y_1 \mid x_1) \, \nu_{Y_1}(dy_1) \right) \cdot \left( \int_{B_2} \ell_{f_2}(y_2 \mid x_2) \, \nu_{Y_2}(dy_2) \right) \\
+&amp;= \int_{B_1 \times B_2} \ell_{f_1}(y_1 \mid x_1) \cdot \ell_{f_2}(y_2 \mid x_2) \, (\nu_{Y_1} \otimes \nu_{Y_2})(dy_1, dy_2).
+\end{aligned}
+\]</span> This shows that <span class="math inline">\(f_1 \otimes f_2\)</span> has density <span class="math inline">\(\ell_{f_1 \otimes f_2}(y_1, y_2 \mid x_1, x_2) = \ell_{f_1}(y_1 \mid x_1) \cdot \ell_{f_2}(y_2 \mid x_2)\)</span> with respect to the product base measure <span class="math inline">\(\nu_{Y_1} \otimes \nu_{Y_2}\)</span>.</p>
+<p>Finally, the formula for <strong>copy-composition</strong> reduces to <span class="math display">\[
+\begin{aligned}
+(f \odot g)(B_1 \times B_2 \mid x)
+&amp;= \int_{B_1} g(B_2 \mid y) \, f(dy \mid x) \\
+&amp;= \int_{B_1} \left( \int_{B_2} \ell_g(z \mid y) \, \nu_Z(dz) \right) \, \ell_f(y \mid x) \, \nu_Y(dy) \\
+&amp;= \int_{B_1 \times B_2} \ell_f(y \mid x) \cdot \ell_g(z \mid y) \, (\nu_Y \otimes \nu_Z)(dy, dz),
+\end{aligned}
+\]</span> showing that <span class="math inline">\(f \odot g\)</span> has density <span class="math inline">\(\ell_{f \odot g}(y, z \mid x) = \ell_f(y \mid x) \cdot \ell_g(z \mid y)\)</span> with respect to the product base measure <span class="math inline">\(\nu_Y \otimes \nu_Z\)</span>.</p>
+<p>Notice how the formulas for densities mirror the formulas for discrete kernels, with sums replaced by integrals. Hence, provided all kernels have densities, we can compute with them using the same formulas as in the discrete case, as long as we track the base measures correctly.</p>
+<p>In particular, the <strong>sum-product</strong> method for parsing string diagrams holds for general kernels with densities. The density of the kernel represented by a string diagram is given by <span class="math display">\[
+\underset{\text{internal wires}}{\iint} \left( \prod_{i} \,  \ell_{f_i}(\text{outputs}_i \mid \text{inputs}_i) \right) \, \nu_{\text{internal}},
+\]</span> where <span class="math inline">\(\nu_{\text{internal}}\)</span> is the product of the base measures associated with the internal wires.</p>
+<p>The most common choices of base measures are counting measure for discrete variables and Lebesgue measure for continuous variables. In the case of counting measure, the integrals above reduce to sums over all possible values, and we recover the familiar formulas from the discrete setting. In the case of Lebesgue measure, we often write <span class="math inline">\(\int f(x) \, dx\)</span> instead of <span class="math inline">\(\int f(x) \, \nu(dx)\)</span>. Such integrals can be manipulated using standard techniques from calculus.</p>
+</section>
+<section id="algebraic-laws" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="algebraic-laws">Algebraic laws</h4>
+<p>All the algebraic laws verified in the discrete setting continue to hold for general kernels. The proofs are the same calculations, with sums replaced by integrals. In particular, any two diagrams that could be deformed into each other in the discrete setting still represent the same kernel.</p>
+</section>
+<section id="conditional-independence-and-graphical-conditioning" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="conditional-independence-and-graphical-conditioning">Conditional independence and graphical conditioning</h4>
+<p>The graphical test for <strong>conditional independence</strong> from the <a href="../chapters/conditioning.html">conditioning chapter</a> remains valid for general kernels.</p>
 <p><strong>Graphical conditioning.</strong> Pre-conditioning on an <em>input</em> works exactly as before: given a kernel <span class="math inline">\(g : X \otimes Y \kernel U\)</span>, fixing <span class="math inline">\(X = \bar{x}\)</span> yields <span class="math inline">\(g_{\mid X = \bar{x}}(B \mid y) := g(B \mid \bar{x}, y)\)</span>. This is still a well-defined kernel.</p>
 <p>Pre-conditioning on an <em>output</em> requires the kernel to have a density; we simply plug the observed value in. Suppose <span class="math inline">\(g : X \kernel U \otimes V\)</span> has density <span class="math inline">\(\ell_g(u, v \mid x)\)</span> with respect to a product base measure <span class="math inline">\(\nu_U \otimes \nu_V\)</span>. Pre-conditioning on <span class="math inline">\(U = \bar{u}\)</span> substitutes <span class="math inline">\(\bar{u}\)</span> for <span class="math inline">\(u\)</span>, giving a kernel with density <span class="math inline">\(\ell_g(\bar{u}, v \mid x)\)</span>: <span class="math display">\[
 g_{\mid U = \bar{u}}(B \mid x) = \int_B \ell_g(\bar{u}, v \mid x) \, \nu_V(dv).
 \]</span> This is exactly what we did in the discrete case from the <a href="../chapters/conditioning.html">conditioning chapter</a>: for a discrete kernel <span class="math inline">\(g : X \kernel U \otimes V\)</span>, pre-conditioning on <span class="math inline">\(U = \bar{u}\)</span> gave <span class="math inline">\(g_{\mid U = \bar{u}}(v \mid x) = g(\bar{u}, v \mid x)\)</span>. Since the values of a discrete kernel are its density with respect to counting measure, this was already a special case of plugging <span class="math inline">\(\bar{u}\)</span> into the density.</p>
 <p>If <span class="math inline">\(g : X \kernel U\)</span> has density <span class="math inline">\(\ell_g\)</span> and we fix its only output <span class="math inline">\(U = \bar{u}\)</span>, there are no remaining variables to integrate over. The resulting kernel <span class="math inline">\(g_{\mid U = \bar u} : X \kernel I\)</span> assigns each <span class="math inline">\(x \in X\)</span> the <strong>likelihood weight</strong> <span class="math inline">\(\ell_g(\bar{u} \mid x)\)</span>. This is the case that arises most often in practice.</p>
+</section>
 </section>
 </section>
 <section id="sec-parametric-kernels" class="level2" data-number="4.2">
@@ -526,7 +582,7 @@ g_{\mid U = \bar{u}}(B \mid x) = \int_B \ell_g(\bar{u}, v \mid x) \, \nu_V(dv).
 <p>Each parametric distribution defines a <strong>base family</strong> — a kernel <span class="math inline">\(k_{\text{base}} : \Theta \kernel Y\)</span> that takes a parameter value as input and returns the corresponding distribution. We discuss the three most common ones here; <a href="../appendix/parametric-kernels.html#sec-distributional-families-appendix" class="quarto-xref"><span>Section 1</span></a> lists further families available in PyTorch.</p>
 <p><strong>Gaussian</strong> (<span class="math inline">\(Y = \mathbb{R}\)</span>). The Gaussian (normal) family is parameterised by a mean <span class="math inline">\(\mu \in \mathbb{R}\)</span> and variance <span class="math inline">\(\sigma^2 &gt; 0\)</span>, with density <span class="math display">\[
 \ell(y \mid \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\Bigl(-\frac{(y - \mu)^2}{2\sigma^2}\Bigr).
-\]</span> Its graph is the bell curve from <a href="#exm-gaussian-kernel">Example&nbsp;4.5</a>: centred at <span class="math inline">\(\mu\)</span>, with spread controlled by <span class="math inline">\(\sigma^2\)</span>. The Gaussian family is the default for real-valued outputs because the central limit theorem guarantees that any quantity arising as a sum of many small, independent effects will be approximately normally distributed.</p>
+\]</span> Its graph is the bell curve from <a href="#exm-gaussian-kernel">Example&nbsp;4.7</a>: centred at <span class="math inline">\(\mu\)</span>, with spread controlled by <span class="math inline">\(\sigma^2\)</span>. The Gaussian family is the default for real-valued outputs because the central limit theorem guarantees that any quantity arising as a sum of many small, independent effects will be approximately normally distributed.</p>
 <p><strong>Bernoulli</strong> (<span class="math inline">\(Y = \{0,1\}\)</span>). The Bernoulli family has a single parameter <span class="math inline">\(p \in (0,1)\)</span> and mass function <span class="math display">\[
 \ell(y \mid p) = p^{\,y}\,(1-p)^{1-y}.
 \]</span> It assigns probability <span class="math inline">\(p\)</span> to <span class="math inline">\(y = 1\)</span> and <span class="math inline">\(1-p\)</span> to <span class="math inline">\(y = 0\)</span>. This is the unique single-parameter distribution on <span class="math inline">\(\{0,1\}\)</span>, so it is the only option for modelling a binary outcome.</p>
@@ -636,7 +692,7 @@ Figure&nbsp;4.8: Softmax for <span class="math inline">\(K = 3\)</span> with <sp
 X \xrightarrow{\; h \;} H \xrightarrow{\;\varphi\;} \Theta \xrightarrow{\; k_{\text{base}} \;} Y \xrightarrow{\; t \;} Z,
 \]</span> where functions are interpreted as deterministic kernels. Any of the adaptor maps can be the identity when no transformation is needed. The construction is modular: changing the predictor does not affect the base family or the output transformation, and vice versa.</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -645,7 +701,7 @@ X \xrightarrow{\; h \;} H \xrightarrow{\;\varphi\;} \Theta \xrightarrow{\; k_{\t
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>When the predictor is linear and the base family belongs to the exponential family, statisticians call the resulting kernel a <strong>generalized linear model (GLM)</strong>. In that literature, <span class="math inline">\(\varphi^{-1}\)</span> is called the <em>link function</em> and <span class="math inline">\(\varphi\)</span> the <em>response function</em> or <em>inverse link</em>. Linear regression, logistic regression, and Poisson regression are the three canonical GLMs, corresponding to the Gaussian, Bernoulli, and Poisson base families with identity, sigmoid, and exponential response maps respectively.</p>
 </div>
