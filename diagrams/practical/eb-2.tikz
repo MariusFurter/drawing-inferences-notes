@@ -1,0 +1,25 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (2) at (-1.75, 1) {$q$};
+		\node [style=none] (6) at (1.25, -0.5) {};
+		\node [style=none] (11) at (0.25, 1) {$\tau_i$};
+		\node [style=none] (15) at (-2.75, 2.25) {};
+		\node [style=none] (16) at (-2.75, -1.75) {};
+		\node [style=none] (17) at (3, -1.75) {};
+		\node [style=none] (18) at (3, 2.25) {};
+		\node [style=none] (19) at (1.75, -2.25) {$i = 1:N$};
+		\node [style=none] (20) at (-1.25, 1) {};
+		\node [style=small box] (22) at (1.25, -0.5) {$f_{\mid \hat \vartheta}$};
+		\node [style=none] (23) at (4, -0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=double edge] (17.center)
+			 to (16.center)
+			 to (15.center)
+			 to (18.center)
+			 to cycle;
+		\draw [style=edge] (2) to (20.center);
+		\draw [style=edge, in=-180, out=0, looseness=1.50] (20.center) to (6.center);
+		\draw [style=edge] (22) to (23.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

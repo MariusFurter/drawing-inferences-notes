@@ -1,0 +1,40 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (2) at (-5, 2) {$p_g$};
+		\node [style=small box] (3) at (-5, 0) {$p_f$};
+		\node [style=none] (6) at (1.25, 0.5) {};
+		\node [style=none] (7) at (-1.75, 0) {};
+		\node [style=none] (9) at (2.5, 0.75) {$y_i$};
+		\node [style=none] (10) at (4, 0.25) {};
+		\node [style=none] (11) at (-3.75, 2.5) {$\vartheta_g$};
+		\node [style=none] (12) at (-3.75, 0.5) {$\vartheta_f$};
+		\node [style=none] (15) at (-2.75, 3) {};
+		\node [style=none] (16) at (-2.75, -2.5) {};
+		\node [style=none] (17) at (3.25, -2.5) {};
+		\node [style=none] (18) at (3.25, 3) {};
+		\node [style=none] (19) at (2.5, -3) {$i = 1:N$};
+		\node [style=none] (20) at (-0.5, 2) {};
+		\node [style=small box] (21) at (-1.5, 0) {$f$};
+		\node [style=small box] (22) at (1.5, 0.25) {$g$};
+		\node [style=black node] (23) at (0, 0) {};
+		\node [style=none] (24) at (1.25, -1.5) {};
+		\node [style=none] (25) at (4, -1.5) {};
+		\node [style=none] (26) at (1.25, 0) {};
+		\node [style=none] (27) at (-0.25, -1.5) {$x_i$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (3) to (7.center);
+		\draw [style=double edge] (17.center)
+			 to (16.center)
+			 to (15.center)
+			 to (18.center)
+			 to cycle;
+		\draw [style=edge] (2) to (20.center);
+		\draw [style=edge, in=180, out=0, looseness=1.25] (20.center) to (6.center);
+		\draw [style=edge] (21) to (23);
+		\draw [style=edge, in=180, out=-90] (23) to (24.center);
+		\draw [style=edge] (24.center) to (25.center);
+		\draw [style=edge] (22) to (10.center);
+		\draw [style=edge] (23) to (26.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

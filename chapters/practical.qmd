@@ -21,7 +21,7 @@ Most often, the kernels in a model will have densities. Recall from @sec-density
 $$f(B \mid x) = \int_B \ell_f(y \mid x) \, \nu_Y(dy)$$ 
 for all measurable $B \subseteq Y$. 
 
-The most common cas where kernels do not have densities is when they are deterministic. However, as we saw in @sec-string-diagrams-carry-over, when $f$ represents a deterministic function $h : X \to Y$, we can simply plug in the output of $h$ into $g$ to get the density of the sequential composition $f \then g$:
+The most common case where kernels do not have densities is when they are deterministic. However, as we saw in @sec-string-diagrams-carry-over, when $f$ represents a deterministic function $h : X \to Y$, we can simply plug in the output of $h$ into $g$ to get the density of the sequential composition $f \then g$:
 $$
 (f \then g)(C \mid x) = g(C \mid h(x)) = \int_C \ell_g(z \mid h(x)) \, \nu_Z(dz).
 $$
@@ -38,10 +38,10 @@ $$\ell_{f \odot g}(y, z \mid x) = \ell_f(y \mid x) \cdot \ell_g(z \mid y).$$
 
 Note that both parallel and copy-composition simply correspond to multiplying densities functions. This is always tractable. In contrast, sequential composition involves an integral, which may be challenging to compute. Its difficulty depends on the specific forms of the densities and the base measure. However, in some cases, the integral can be computed analytically, allowing us to simplify the model before sampling.
 
-First, when $f$ is discrete, the integral reduces to a finite sum. Second, when $f$ and $g$ are conjugate distributions, the integral can be computed using known formulas. We discuss these two final cases in more detail below.
+First, when $f$ is discrete, the integral reduces to a finite sum. Second, when $f$ and $g$ are conjugate distributions, the integral can be computed using known formulas. We discuss these two cases in more detail below.
 
 ### Marginalizing discrete latents
-When $f$ is discrete, it has a density $\ell_f(y \mid x)$ with respect to counting measure that assigns every input-output combination a non-negative weight. In the chapter on discrete kernels, we simply wrote $f(y \mid x)$ for this weight.
+When $f$ is discrete, it has a density $\ell_f(y \mid x)$ (with respect to counting measure) that assigns every input-output combination a non-negative weight. In the chapter on discrete kernels, we simply wrote $f(y \mid x)$ for this weight.
 
 In this case, the integral in the sequential composition formula reduces to a finite sum:
 $$
@@ -189,7 +189,7 @@ Hence the prior parameters $\alpha_k$ act as pseudo-counts that are simply augme
 
 This example is particularly important in practice, since it allows us to fit any discrete kernel to data using a simple formula, provided we use a Dirichlet prior. Concretely, suppose we have a discrete kernel $f : X \kernel Y$ whose entries $f(y \mid x)$ are unknown. For each $x \in X$, we can treat the entries $f(y \mid x)$ as a categorical distribution over $y \in Y$, and put a Dirichlet prior on it. Then, given data of the form $(x_i, y_i)$, we can directly compute the posterior distribution of $f(y \mid x)$ for each $x$ using the Dirichlet-Categorical conjugacy. 
 
-Explicitly, if we have observed $n_{x,y}$ pairs of $(x, y)$ in the data, then the posterior distribution of $f(y \mid x)$ is a Dirichlet distribution with parameters $\alpha_{x,y}' = \alpha_{x,y} + n_{x,y}$, where $\alpha_{x,y}$ are the parameters of the prior Dirichlet distribution. Note the this corresponds to simply adding the observed counts $n_{x,y}$ to the prior pseudo-counts $\alpha_{x,y}$ for each entry of the kernel. Using pseudo-counts of 1 corresponds precisely to the Laplace smoothing technique we encountered in [Exercise 3](exercises/3-stroke-prediction).
+Explicitly, if we have observed $n_{x,y}$ pairs of $(x, y)$ in the data, then the posterior distribution of $f(y \mid x)$ is a Dirichlet distribution with parameters $\alpha_{x,y}' = \alpha_{x,y} + n_{x,y}$, where $\alpha_{x,y}$ are the parameters of the prior Dirichlet distribution. Note that this corresponds to simply adding the observed counts $n_{x,y}$ to the prior pseudo-counts $\alpha_{x,y}$ for each entry of the kernel. Using pseudo-counts of 1 corresponds precisely to the Laplace smoothing technique we encountered in [Exercise 3](exercises/3-stroke-prediction).
 :::
 
 While choosing the kernels in a model to be conjugate can allow us to simplify the model before sampling, it is not always possible or desirable to do so. In particular, conjugacy forces the kernels to have a specific form, which may not be flexible enough to capture the true data-generating process.
@@ -221,7 +221,7 @@ and the posterior is proportional to this in $\theta$:
 $$
 \ell(\theta \mid y) = \frac{\ell(\theta, y)}{\ell(y)} \propto \ell(\theta, y).
 $$
-The denominator $\ell(y)$ does not depend on $\theta$, so it has no effect on the location of the maximum. Moreover, we prefer to optimize the log-density instead since is numerically more stable and turns products into sums. This is justified since taking logarithms is order-preserving and hence does not change the location of the maximum. 
+The denominator $\ell(y)$ does not depend on $\theta$, so it has no effect on the location of the maximum. Moreover, we prefer to optimize the log-density instead since it is numerically more stable and turns products into sums. This is justified since taking logarithms is order-preserving and hence does not change the location of the maximum. 
 
 The MAP estimate of $\theta$ given $y$ is therefore
 $$
@@ -234,7 +234,7 @@ $$
 \hat\theta_{\text{MLE}} = \arg\max_\theta \ell_{\text{likelihood}}(y \mid \theta).
 $$
 
-The maximum likelihood estimator is frequently used in non-Bayesian settings and has very nice properties. However, it can be unstable when the likelihood is flat or has multiple modes. Moreover it does not allow us to incorporate prior knowledge about $\theta$. The MAP estimator can thus be viewed as a *regularized* version of the MLE, where the type regularization is determined by the prior.
+The maximum likelihood estimator is frequently used in non-Bayesian settings and has very nice properties. However, it can be unstable when the likelihood is flat or has multiple modes. Moreover it does not allow us to incorporate prior knowledge about $\theta$. The MAP estimator can thus be viewed as a *regularized* version of the MLE, where the type of regularization is determined by the prior.
 
 **When is MAP a good approximation?** Replacing the posterior by the MAP estimate is reasonable when the posterior is concentrated around a single mode, that is, when we expect $\theta \mid y$ to be nearly deterministic. This typically happens when there is enough data to pin down $\theta$ precisely. For posteriors with broad or multimodal distributions, MAP can be badly misleading: it ignores the spread, picks an arbitrary mode, and may even land at a point of low typical mass in high dimensions.
 
@@ -269,13 +269,85 @@ The MAP estimate captures the most likely value of $\theta$ but throws away all 
 $$
 h(\theta) \approx h(\hat\theta) + \nabla h(\hat\theta)^\top (\theta - \hat\theta) + \tfrac{1}{2} (\theta - \hat\theta)^\top \nabla^2 h(\hat\theta) \, (\theta - \hat\theta),
 $$
-where $\nabla h$ is the gradient (matrix of first derivatives) and $\nabla^2 h$ is the Hessian (matrix of second derivatives).
+where $\nabla h$ is the gradient (matrix of first derivatives) and $\nabla^2 h$ is the Hessian (matrix of second derivatives). When $\hat \theta$ is a local maximum, the gradient vanishes, so applying the Taylor expansion there yields a quadratic approximation of the form
+$$
+h(\theta) \approx h(\hat\theta) - \tfrac{1}{2} (\theta - \hat\theta)^\top \nabla^2 h(\hat\theta) \, (\theta - \hat\theta).
+$$
 
-**Approximating the log-density.** Let $f : X \kernel Y$ be a kernel with density $\ell_f(y \mid x)$, and suppose we want to approximate $f(- \mid x)$ for some input $x$. Let $\hat y(x) := \arg\max_y \log \ell_f(y \mid x)$ be the mode. At the mode, the gradient of $\log \ell_f$ vanishes, so the Taylor expansion reduces to
-$$
-\log \ell_f(y \mid x) \approx \log \ell_f(\hat y(x) \mid x) - \tfrac{1}{2} (y - \hat y(x))^\top H(x) \, (y - \hat y(x)),
-$$
-where $H(x) := -\nabla^2_y \log \ell_f(y \mid x) \big|_{y = \hat y(x)}$ is the negative Hessian at the mode. $H$ is positive definite for a true local maximum. Exponentiating, we see that our approximation corresponds to an unnormalized Gaussian kernel with mean $\hat y(x)$ and covariance $H(x)^{-1}$:
+```{python}
+#| label: fig-taylor-quadratic
+#| fig-cap: "Two second-order Taylor expansions (dashed) of a bimodal function $h$ (solid) at a local mode and a non-extremal point."
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def h(t):
+    return -0.05 * t**4 + 0.6 * t**2 - 0.4 * t
+
+
+def hp(t):
+    return -0.2 * t**3 + 1.2 * t - 0.4
+
+
+def hpp(t):
+    return -0.6 * t**2 + 1.2
+
+
+# Find the left local maximum by Newton's method.
+def newton(t0):
+    t = t0
+    for _ in range(50):
+        t = t - hp(t) / hpp(t)
+    return t
+
+
+t_mode = newton(-3.0)
+t_other = 1.0  # non-extremal point (on the ascent toward the right mode)
+
+ts = np.linspace(-4.2, 4.2, 400)
+
+
+def quad(t, t0):
+    return h(t0) + hp(t0) * (t - t0) + 0.5 * hpp(t0) * (t - t0) ** 2
+
+
+fig, ax = plt.subplots(figsize=(6, 3.2))
+fig.patch.set_alpha(0)
+ax.set_facecolor("none")
+
+ax.plot(ts, h(ts), color="black", lw=1.8, label=r"$h(\theta)$")
+ax.plot(
+    ts,
+    quad(ts, t_mode),
+    color="C0",
+    lw=1.4,
+    linestyle="--",
+    label=r"quadratic at mode $\hat\theta_1$",
+)
+ax.plot(
+    ts,
+    quad(ts, t_other),
+    color="C3",
+    lw=1.4,
+    linestyle="--",
+    label=r"quadratic at non-extremal $\theta_0$",
+)
+
+for t0, color in [(t_mode, "C0"), (t_other, "C3")]:
+    ax.plot([t0], [h(t0)], "o", color=color, ms=5, zorder=3)
+
+ax.set_ylim(h(ts).min() - 1.0, h(t_mode) + 2.0)
+ax.set_xlabel(r"$\theta$")
+ax.set_ylabel(r"$h(\theta)$")
+ax.legend(frameon=False, loc="lower left")
+for sp in ("top", "right"):
+    ax.spines[sp].set_visible(False)
+fig.tight_layout()
+plt.show()
+```
+
+**Approximating the log-density.** We apply this to the log-density of a kernel $f : X \kernel Y$. Let $\hat y(x) := \arg\max_y \log \ell_f(y \mid x)$ be the mode and write $H(x) := -\nabla^2_y \log \ell_f(y \mid x) \big|_{y = \hat y(x)}$ for the negative Hessian at the mode, which is positive definite for a true local maximum. Exponentiating the quadratic expansion of $\log \ell_f$ at $\hat y(x)$ gives an unnormalized Gaussian in $y$ with mean $\hat y(x)$ and covariance $H(x)^{-1}$:
 $$
 \ell_f(y \mid x) \approx \ell_f(\hat y(x) \mid x) \cdot \exp\!\Big( -\tfrac{1}{2} (y - \hat y(x))^\top H(x) \, (y - \hat y(x)) \Big).
 $$
@@ -293,7 +365,7 @@ where $H(x) := -\nabla^2_y \log \ell_f(y \mid x) \big|_{y = \hat y(x)}$ is the n
 
 **Connection to MAP.** The Laplace approximation can be seen as a refinement of the MAP estimate: both use the mode $\hat y(x)$, but Laplace additionally captures local curvature via $H(x)^{-1}$. In the limit $H(x) \to \infty$ (an arbitrarily sharp peak), the Gaussian collapses to the MAP approximation. The Laplace approximation is useful when $f(- \mid x)$ is unimodal and roughly bell-shaped, but is misleading for multimodal or heavy-tailed targets.
 
-**When is Laplace practical?** The approximation requires finding the mode $\hat y(x)$ and computing the Hessian $H(x)$ for each input $x$. If the we are approximating a distribution in this way (no inputs), then these can be computed once by optimization and differentiation. When there are many inputs, the Laplace approximation is only appealing if the mode and Hessian can be computed in closed form, or at least efficiently.
+**When is Laplace practical?** The approximation requires finding the mode $\hat y(x)$ and computing the Hessian $H(x)$ for each input $x$. If we are approximating a distribution in this way (no inputs), then these can be computed once by optimization and differentiation. When there are many inputs, the Laplace approximation is only appealing if the mode and Hessian can be computed in closed form, or at least efficiently.
 
 ### Variational approximations
 More generally, we can replace a kernel by any other kernel that is easier to work with. The MAP and Laplace approximations are just two examples of this idea. Suppose we want to approximate a kernel $f : X \kernel Y$ by a kernel $\hat f : X \kernel Y$. One way to do this is specify a parametric family of kernels $\{\hat f_\lambda : \lambda \in \Lambda\}$ and find the best approximation of $f$ within this family. This can done by minimizing some measure $D$ of similarity between $f$ and $\hat f_\lambda$ over $\lambda \in \Lambda$:
@@ -302,20 +374,20 @@ $$
 \hat f = \arg\min_{\lambda \in \Lambda} D(f, \hat f_\lambda)
 $$
 
-A common choice of similarity measure is the **Kullback–Leibler (KL) divergence**. When both kernels have densities with respect to the same base measure $\nu$, the KL divergence from $\hat f_\lambda$ to $f$ is defined by
+A common choice of similarity measure is the **Kullback–Leibler (KL) divergence**. When both kernels have densities with respect to the same base measure $\nu$, the KL divergence from $f$ to $g$ is defined by
 $$
-\mathrm{KL}(f \parallel \hat f_\lambda) := \sup_x \int_Y \ell_f(y \mid x) \log \frac{\ell_f(y \mid x)}{\ell_{\hat f_\lambda}(y \mid x)} \, \nu(dy).
+\mathrm{KL}(f \parallel g) := \sup_x \int_Y \ell_f(y \mid x) \log \frac{\ell_f(y \mid x)}{\ell_g(y \mid x)} \, \nu(dy).
 $$
-The KL divergence between probability kernels is non-negative and equals zero if and only if $f$ and $\hat f_\lambda$ are the equal. However, it is not symmetric and does not satisfy the triangle inequality, so it is not a true distance metric. Minimizing KL divergence is the basis of **variational inference**, a powerful technique for approximating complex distributions by simpler ones.
+The KL divergence between probability kernels is non-negative and equals zero if and only if $f$ and $g$ are equal. However, it is not symmetric and does not satisfy the triangle inequality, so it is not a true distance metric. Minimizing KL divergence is the basis of **variational inference**, a powerful technique for approximating complex distributions by simpler ones.
 
 Another common choice is the *total variation distance*, which measures the largest difference in probabilities assigned to events by two distributions. It can also be computed in terms of densities:
 $$
-\mathrm{TV}(f, \hat f_\lambda) := \sup_x \sup_{B \subseteq Y} |f(B \mid x) - \hat f_\lambda(B \mid x)| = \sup_x \frac{1}{2} \int_Y |\ell_f(y \mid x) - \ell_{\hat f_\lambda}(y \mid x)| \, \nu(dy).
+\mathrm{TV}(f, g) := \sup_x \sup_{B \in \Sigma_Y} |f(B \mid x) - g(B \mid x)| = \sup_x \frac{1}{2} \int_Y |\ell_f(y \mid x) - \ell_g(y \mid x)| \, \nu(dy).
 $$
 
 
 ## Exploiting model structure
-Suppose that our model consists of two non-interacting parts, that is, it can be written as a parallel composition of two sub-models. In this case, we can perform inference separately on each part and combine the results. This is often much more efficient than performing inference on the whole model at once. Often such a decomposition arises after we condition on observations which removes the wires corresponding to those variables. Even if the model does not decompose natively into two parts, there are techniques to force such a decomposition by approximating somevariables by point estimates.
+Suppose that our model consists of two non-interacting parts, that is, it can be written as a parallel composition of two sub-models. In this case, we can perform inference separately on each part and combine the results. This is often much more efficient than performing inference on the whole model at once. Often, such a decomposition arises after we condition on observations which removes the wires corresponding to those variables. Even if the model does not decompose natively into two parts, there are techniques to force such a decomposition by approximating some variables by point estimates.
 
 ### Conditioning splits models
 
@@ -331,22 +403,22 @@ $$
 
 In string diagrams:
 
-``` {.tikz file="practical/gmm.tikz"}
-%%| label: Gaussian mixture model
-%%| fig-cap: A Gaussian mixture model.
-%%| height: 8em
+``` {.tikz file="practical/split-1.tikz"}
+%%| label: Plated sequential composition of kernels
+%%| fig-cap: A plated sequential composition of kernels $f$ and $g$ with shared parameters.
+%%| height: 10em
 ```
 
 The model consists of $N$ independent sequential compositions of $f$ and $g$, where the parameters $\vartheta_f$ and $\vartheta_g$ are shared across all compositions. We will assume that both $f$ and $g$ have densities $\ell_f$ and $\ell_g$, respectively.
 
-Suppose that we observe $\bar x_{1:N}$ and $\bar y_{1:N}$. Then we can condition on these observations to get the posterior distribution of $\vartheta_f$ and $\vartheta_g$ given the data. Recall that conditioning on a variable removes all wire carrying that variable, and subsitutes the observed value into the remaining kernels' densities. Graphically, this produces the following string diagram,
+Suppose that we observe $\bar x_{1:N}$ and $\bar y_{1:N}$. Then we can condition on these observations to get the posterior distribution of $\vartheta_f$ and $\vartheta_g$ given the data. Recall that conditioning on a variable removes all wires carrying that variable, and substitutes the observed value into the densities of all affected kernels. Graphically, this produces the following string diagram,
 
-``` {.tikz file="practical/gmm.tikz"}
-%%| label: Gaussian mixture model
-%%| fig-cap: A Gaussian mixture model.
-%%| height: 8em
+``` {.tikz file="practical/split-2.tikz"}
+%%| label: Plated sequential composition of kernels (conditioned)
+%%| fig-cap: Conditioning on the observed data splits the model into two parallel parts.
+%%| height: 10em
 ```
-where $f_{\mid \bar x_i}$ has density $\ell_f(\bar x_i \mid \vartheta_f)$ and $g_{\mid \bar y_i}$ has density $\ell_g(\bar y_i \mid \bar x_i, \vartheta_g)$. Since the preconditioned kernels have trivial output space $I = \{*\}$, the densities are with respect to the probability measure on $I$ that assigns mass 1 to the single element. This means they are just weights.
+where $f_{\mid \bar x_i}$ has density $\ell_f(\bar x_i \mid \vartheta_f)$ and $g_{\mid \bar y_i}$ has density $\ell_g(\bar y_i \mid \bar x_i, \vartheta_g)$. Since the preconditioned kernels have trivial output space $I = \{*\}$, the densities are with respect to the probability measure on $I$ that assigns mass 1 to the single element. In other words, they are just weights.
 
 Notice that the resulting diagram decomposes into two parallel parts, one containing $\vartheta_f$ and the other containing $\vartheta_g$. Hence, we can perform inference separately on each part to get the marginal posteriors of $\vartheta_f$ and $\vartheta_g$ given the data. This is much more efficient than performing inference on the whole model at once. This strategy generalizes whenever we can fully observe intermediate variables.
 
@@ -358,25 +430,31 @@ $$
 \begin{aligned}
 \vartheta &\sim p \\
 \tau_i &\sim q \\
-\y_i &\sim f(- \mid \vartheta, \tau_i), \quad i = 1, \ldots, N
+y_i &\sim f(- \mid \vartheta, \tau_i), \quad i = 1, \ldots, N
 \end{aligned}
 $$
 
 In string diagrams:
-``` {.tikz file="practical/gmm.tikz"}
-%%| label: Gaussian mixture model
-%%| fig-cap: A Gaussian mixture model.
+``` {.tikz file="practical/eb-1.tikz"}
+%%| label: Plate with shared parameter
+%%| fig-cap: A plate bound together by a shared parameter $\vartheta$.
 %%| height: 8em
 ```
 
 Suppose we observe $\bar y_{1:N}$. Notice that the wire carrying $\vartheta$ is the only thing holding the slices of the plate together. Hence, if we were given the value of $\vartheta$, we could condition on it to split the model into $N$ independent parts. We could then independently infer each $\tau_i$.
+
+``` {.tikz file="practical/eb-2.tikz"}
+%%| label: Plate with shared parameter (conditioned)
+%%| fig-cap: The plate separates into $N$ independent parts after conditioning on $\vartheta$.
+%%| height: 8em
+```
 
 Although we don't know the value of $\vartheta$, we can find a point estimate $\hat\vartheta$ using maximization. Concretely, the joint density over all variables in the preconditioned model is given by
 $$
 \ell(\vartheta, \tau_{1:N}) = \ell_p(\vartheta) \cdot \prod_{i=1}^N \ell_q(\tau_i) \cdot \ell_f(\bar y_i \mid \vartheta, \tau_i).
 $$
 
-We can find the joint MAP estimate $(\hat \vartheta, \hat \tau_{1:N})$ by maximizing the log of this density over $\vartheta$ and $\tau_{1:N}$. We can then select $\hat \vartheta$ as our point estimate for $\vartheta$ and condition on it. Note that we have used the first component of the join MAP estimate, rather than the marginal MAP estimate $\hat \vartheta_{\text{marginal}} := \arg\max_\vartheta \int \ell(\vartheta, \tau_{1:N}) \, d\tau_{1:N}$. These two values are not the same. While the latter is more conceptually appealing, it is typically much harder to compute. 
+We can find the joint MAP estimate $(\hat \vartheta, \hat \tau_{1:N})$ by maximizing the log of this density over $\vartheta$ and $\tau_{1:N}$. We can then select $\hat \vartheta$ as our point estimate for $\vartheta$ and condition on it. Note that we have used the first component of the joint MAP estimate, rather than the marginal MAP estimate $\hat \vartheta_{\text{marginal}} := \arg\max_\vartheta \int \ell(\vartheta, \tau_{1:N}) \, d\tau_{1:N}$. These two values are not the same. While the latter is more conceptually appealing, it is typically much harder to compute. 
 
 Using the MAP is not required. In principle any suitable point estimate of $\vartheta$ can be used to split the model. Often classical statistics provide simple estimators that can be used for this purpose.
 
@@ -384,85 +462,257 @@ Using the MAP is not required. In principle any suitable point estimate of $\var
 
 ### Censored and binned data
 
-In many applications, the variable we would like to observe is not directly accessible. Instead, we see a deterministic function of it: a survival time may be cut off at the end of a study, an age may be reported only as the interval $[a, b)$ that contains it, or a sensor may saturate above some threshold. Conceptually, this is no problem — we simply append a deterministic kernel encoding the observation mechanism to the generating process and condition on its output.
-
-However, this breaks the usual density-based workflow. The appended kernel is deterministic, hence has no density with respect to a continuous base measure on its output space. We cannot simply read off the likelihood of the observation by plugging into a density formula. Instead, we must **analytically compose** the deterministic observation kernel with the preceding latent kernel, so that the composite kernel directly outputs the observed quantity and has a tractable density (typically with respect to a mixed discrete / continuous base measure on the output space).
-
-::: {#exm-right-censoring}
-**(Right-censored survival times)**
-
-Suppose the latent quantity of interest is a survival time $T \kernel \mathbb{R}_{\ge 0}$ with density $\ell_f(t \mid \vartheta)$ and cumulative distribution $F(t \mid \vartheta)$. Each subject is followed only up to a fixed censoring time $c$. What we actually observe is the pair
-$$
-(U, \delta) := (\min(T, c), \ivmark{T \le c}),
-$$
-where $\delta = 1$ indicates that we saw the true event time ($U = T$) and $\delta = 0$ indicates that the subject was still event-free at time $c$ ($U = c$). The map $T \mapsto (U, \delta)$ is a deterministic kernel $\mathbb{R}_{\ge 0} \kernel \mathbb{R}_{\ge 0} \times \{0,1\}$ with no density on its output space.
-
-Composing the latent kernel with the censoring kernel and reading off the law of $(U, \delta)$ gives a kernel with density (with respect to Lebesgue measure on $[0, c)$ times counting measure on $\{0,1\}$):
-$$
-\ell(u, \delta \mid \vartheta) =
-\begin{cases}
-\ell_f(u \mid \vartheta), & \delta = 1, \ u < c, \\
-1 - F(c \mid \vartheta), & \delta = 0, \ u = c.
-\end{cases}
-$$
-Conditioning on each observed pair $(\bar u_i, \bar \delta_i)$ then yields the standard parametric survival likelihood
-$$
-\prod_{i=1}^n \ell_f(\bar u_i \mid \vartheta)^{\bar \delta_i} \, \big(1 - F(c \mid \vartheta)\big)^{1 - \bar \delta_i},
-$$
-which is the basis for Kaplan–Meier and parametric survival models.
-:::
+In many applications, the variable we would like to observe is not directly accessible. Instead, we see a deterministic function of it: a survival time may be cut off at the end of a study, an age may be reported only as the interval $[a, b)$ that contains it, or a sensor may saturate above some threshold. Conceptually, this is no problem. We simply append a deterministic kernel encoding the observation mechanism to the generating process and condition on its output.
 
 ::: {#exm-interval-censoring}
 **(Interval-censored ages)**
 
-Suppose the latent quantity is an age $A \kernel \mathbb{R}_{\ge 0}$ with density $\ell_f(a \mid \vartheta)$ and CDF $F(a \mid \vartheta)$, but observations report only the bin $[a_k, a_{k+1})$ containing $A$, for a fixed partition $0 = a_0 < a_1 < \cdots < a_K = \infty$. The observation mechanism is the deterministic binning kernel $A \mapsto K(A) := k$ such that $A \in [a_k, a_{k+1})$. Again, this kernel has no density on its discrete output space relative to Lebesgue measure on $A$.
+Suppose that we have a model $m : \Theta \kernel \mathbb{R}_{\ge 0}$ for age with density $\ell_m(a \mid \vartheta)$ with respect to a Lebesgue measure. However, our data report only the age bracket $[a_k, a_{k+1})$, for a fixed partition $0 = a_0 < a_1 < \cdots < a_K = \infty$. The observation mechanism is the deterministic binning kernel $b : \mathbb{R}_{\ge 0} \to \{0, \ldots, K-1\}$ that sends an age $a$ to the age bracket containing it. Its output space is discrete, so it has density $\ell_b(k \mid a) = \ivmark{a \in [a_k, a_{k+1})}$. Hence, we can simply work with the composed model $m \then b$ and condition on the observed bins $\bar k_{1:N}$ to get the posterior of $\vartheta$ given the data.
 
-Composing the latent kernel with the binning kernel gives a discrete kernel with density (with respect to counting measure on $\{0, \ldots, K-1\}$)
+Alternatively, it is possible to directly compute the density of the composed kernel $m \then b$:
 $$
-\ell(k \mid \vartheta) = F(a_{k+1} \mid \vartheta) - F(a_k \mid \vartheta).
+\ell_{m \then b}(k \mid \vartheta) = \int_0^\infty \ivmark{a \in [a_k, a_{k+1})} \, \ell_m(a \mid \vartheta) \, da = \Pr(A \in [a_k, a_{k+1}) \mid \vartheta).
 $$
-Conditioning on the observed bins $\bar k_i$ yields the interval-censored likelihood
+
+For the special case of intervals this can be computed as the difference of CDF values:
 $$
-\prod_{i=1}^n \big( F(a_{\bar k_i + 1} \mid \vartheta) - F(a_{\bar k_i} \mid \vartheta) \big),
+\ell_{m \then b}(k \mid \vartheta) = F(a_{k+1} \mid \vartheta) - F(a_k \mid \vartheta),
 $$
-which depends on $\vartheta$ only through the CDF $F$, not through the density $\ell_f$ at any single point.
+where $F(a \mid \vartheta) := \int_0^a \ell_m(t \mid \vartheta) \, dt$ is the CDF of $m$. 
+
+Conditioning on the observed bins $\bar k_{1:N}$ yields the **interval-censored likelihood**:
+$$
+\prod_{i=1}^N \big( F(a_{\bar k_i + 1} \mid \vartheta) - F(a_{\bar k_i} \mid \vartheta) \big),
+$$
+which depends on $\vartheta$ only through the CDF $F$.
 :::
 
-In both examples, the key step is the analytical composition of the deterministic observation kernel with the latent kernel: it converts a kernel without a usable density into one whose density is exactly the likelihood we need.
+In many cases, however, censoring can break the usual density-based workflow. Since the appended kernel is deterministic, it generally does not have a density when the output space is infinite. Hence, we cannot simply read off the likelihood of the observation by plugging into a density formula. In such a case, we must compute the composite with the deterministic kernel before conditioning on the observed data.
+<!-- 
+::: {#exm-right-censoring}
+**(Right-censored survival times)**
+Suppose we model the survival times of patients undergoing treatment using a kernel $m : \Theta \kernel \mathbb{R}_{\ge 0}$ with density $\ell_m(t \mid \vartheta)$ with respect to Lebesgue measure. Since studies generally have a fixed duration $c$, we don't know the exact survival times of patients who live beyond $c$. Hence, what we actually observe is the pair
+$$
+(\min(T, c), \ivmark{T \le c}),
+$$
+where $\delta = 1$ indicates that we observed the patient die and $\delta = 0$ indicates that the patient was still alive at time $c$. This is encoded by the deterministic censoring kernel $b : \mathbb{R}_{\ge 0} \to \mathbb{R}_{\ge 0} \times \{0, 1\}$ given by $t \mapsto (\min(t, c), \ivmark{t \le c})$.
+
+...
+
+yields the standard **parametric survival likelihood**
+$$
+\prod_{i=1}^n \ell_m(\bar u_i \mid \vartheta)^{\bar \delta_i} \, \big(1 - F(c \mid \vartheta)\big)^{1 - \bar \delta_i},
+$$
+which is the basis for Kaplan–Meier and parametric survival models.
+::: -->
 
 ### Missing data
 
-In real datasets, some entries of an observation are often missing. The clean way to handle this in our framework is to **condition only on the variables that were actually observed**, and treat the missing entries as latent variables to be inferred (or marginalized out) along with the rest of the model's unknowns. From the string-diagram point of view, we simply do not feed any observed value into the wires corresponding to missing entries; they remain free outputs of the model.
+In real datasets, some entries of an observation are often missing. The clean way to handle this in our framework is to **condition only on the variables that were actually observed**, and treat the missing entries as latent variables along with the rest of the model's unknowns. From the string-diagram point of view, we simply do not feed any observed value into the wires corresponding to missing entries; they remain free outputs of the model.
 
-This is correct whenever the *fact* that a value is missing carries no information about the latent quantities. This situation arises, for example, when each entry is independently dropped with a probability that does not depend on its value or on any unobserved parameter (the "missing completely at random" case). In that case, conditioning on the observed entries alone gives the right posterior.
+**Non-informative missingness.** This is correct whenever the *fact* that a value is missing carries no information about the latent quantities, for instance when each entry is independently dropped with a probability that does not depend on its value or on any unobserved parameter. In that case, conditioning on the observed entries alone gives the right posterior.
 
-**When missingness itself is informative.** Sometimes whether a value is missing depends on what the value would have been, or on a latent variable we care about. Suppose, for example, that a sensor reports a measurement $y$ only when $y$ exceeds some threshold $c$, and reports "missing" otherwise. Then the observation mechanism is the deterministic kernel
+**Informative missingness.** Sometimes whether a value is missing depends on what the value would have been, or on a latent variable we care about. Suppose, for example, that a sensor reports a measurement $y$ only when $y$ does not exceed some threshold $c$. Then the observation mechanism is the deterministic kernel
 $$
-y \;\mapsto\; (m, y^{\text{obs}}) := \big( \ivmark{y \le c}, \; y \cdot \ivmark{y > c} \big),
+y \;\mapsto\; (m, y^{\text{obs}}) := \big( \ivmark{y > c}, \; y \cdot \ivmark{y \le c} \big),
 $$
-where $m \in \{0, 1\}$ is the missingness indicator. Seeing $m = 1$ (missing) is *not* uninformative: it tells us that $y \le c$. If we discard those data points and condition only on the non-missing entries, we systematically bias inference about the parameters of $y$'s distribution. We have effectively conditioned on $y > c$ without telling the model.
+where $m \in \{0, 1\}$ is the missingness indicator. Seeing $m = 1$ (missing) is informative: it tells us that $y > c$. Discarding those data points and conditioning only on the non-missing entries effectively conditions on $y \le c$ without telling the model, biasing inference about the parameters of $y$'s distribution.
 
-The fix is to compose the model with the deterministic missingness kernel above and condition on the observed pair $(m_i, y_i^{\text{obs}})$ for each $i$, exactly as in the censoring examples above. The likelihood contribution from a missing observation is then $\Pr(y \le c \mid \vartheta)$, not zero. More generally, whenever missingness is informative, the missingness mechanism should be made an explicit kernel in the model, with its own missingness indicator output. Inference can then correctly use the pattern of missingness to inform parameter estimates.
+The fix is to compose the model with the missingness kernel above and condition on the observed pair $(m_i, y_i^{\text{obs}})$ for each $i$, exactly as in the censoring examples. The likelihood contribution from a missing observation is then $\Pr(y > c \mid \vartheta)$, not zero, so the pattern of missingness actively informs the parameter estimates.
 
-**Handling missing data in NumPyro.** In practice we want to write down a single model that simultaneously infers the latent parameters and the missing entries. NumPyro's [Bayesian imputation tutorial](https://num.pyro.ai/en/stable/tutorials/bayesian_imputation.html) shows the standard pattern, which uses the `.mask(False)` modifier on a distribution to declare that some sampled values should not contribute to the likelihood. Given a vector `y` with some `NaN` entries, the idiom is:
+**Imputation.** In either case, since we treat missing values as unknown latent variables, they are automatically imputed when we sample from the posterior. Like any other posterior quantity, the imputed values have a distribution that reflects our uncertainty about them. Such imputed values are often useful for downstream tasks.
 
-```python
-# indices of missing and observed entries
-nan_idx = np.nonzero(np.isnan(y))[0]
+::: {#exm-missing-regression}
+**(Imputing missing covariates in linear regression)**
+We illustrate imputation in a simple linear regression. The data-generating process is
+$$
+\begin{aligned}
+x_i &\sim \mathrm{Normal}(\mu_x, \sigma_x^2), \\
+y_i &\sim \mathrm{Normal}(a + b\, x_i, \sigma^2), \quad i = 1, \ldots, n,
+\end{aligned}
+$$
+and we observe all $y_i$, but a random subset of the covariates $x_i$ is missing completely at random. The missingness is non-informative, but throwing away those rows is wasteful: even when $x_i$ is unknown, the corresponding $y_i$ still carries information about the regression coefficients through the marginal distribution of $y$.
 
-# sample the missing entries as latent variables (no likelihood contribution)
-y_impute = numpyro.sample(
-    "y_impute",
-    dist.Normal(mu[nan_idx], sigma[nan_idx]).mask(False),
-)
+We start by simulating the data and randomly dropping some of the covariates. The observed dataset `x_obs` contains the true value of $x_i$ when it is observed and `NaN` when it is missing.
+```{python}
+#| label: imputation-setup
+#| code-fold: false
+import jax.numpy as jnp
+from jax import random
+import numpyro
+import numpyro.distributions as dist
+from numpyro.infer import MCMC, NUTS
 
-# splice imputed values into the observed array
-y_full = jnp.asarray(y).at[nan_idx].set(y_impute)
+a_true, b_true, sigma = 1.0, 2.0, 0.5
+mu_x_true, sigma_x_true = 0.0, 1.0
+n, p_missing = 200, 0.3
 
-# now score the full vector against the model
-numpyro.sample("y", dist.Normal(mu, sigma), obs=y_full)
+key_x, key_y, key_m, key_mcmc = random.split(random.PRNGKey(0), 4)
+x_full = mu_x_true + sigma_x_true * random.normal(key_x, (n,))
+y = a_true + b_true * x_full + sigma * random.normal(key_y, (n,))
+missing = random.uniform(key_m, (n,)) < p_missing
+x_obs = jnp.where(missing, jnp.nan, x_full)
+n_miss = int(missing.sum())
+
+print(f"observed covariates: {n - n_miss},  missing: {n_miss}")
 ```
 
-The `.mask(False)` call tells NumPyro to draw `y_impute` from the prior but to *skip* its log-density contribution, since that contribution is already accounted for when the full vector `y_full` is scored against `dist.Normal(mu, sigma)`. The observed entries of `y` are treated as data, the missing entries are treated as additional latent variables, and MCMC samples them jointly with the other unknowns.
+Our model is based on the usual regression likelihood, `y ~ Normal(a + b*x, sigma)`.
+Since some of the $x_i$ are missing, we need a generative model `x ~ Normal(mu_x, sigma_x)` over all covariates so that we can sample the missing values. For this we put priors on `mu_x` and `sigma_x`. As a consequence, the model now explicitly infers the covariate distribution from the observed $x_i$ and $y_i$.
 
-If the missingness mechanism is itself informative, the same pattern extends naturally: in addition to imputing the missing values, one adds a `numpyro.sample` site for the missingness indicators $m_i$ with an `obs=...` argument, using a distribution that depends on the latent $y_i$ (e.g. `dist.Bernoulli(probs=p_missing(y_full))`). This is exactly the analytical composition of the latent kernel with the missingness kernel described above.
+If an $x_i$ is missing we want to generate it from the prior using a sampling statement; if it is observed, we want to condition on its value. To avoid the case distinction, we sample a full-length latent vector `x_imp` from the prior using `.mask(False)`, which removes its contribution to the joint log-density. We then build the covariate vector `x` by picking the imputed value at the missing positions and the observed value elsewhere, and treat that vector as a normal observation. The `mask(False)` ensures the imputed values are scored only once, through the `x_obs` likelihood site.
+
+```{python}
+#| label: imputation-model
+#| code-fold: false
+def model(x_obs, missing, y):
+    # Regression coefficients.
+    a = numpyro.sample("a", dist.Normal(0.0, 10.0))
+    b = numpyro.sample("b", dist.Normal(0.0, 10.0))
+    # Covariate distribution.
+    mu_x = numpyro.sample("mu_x", dist.Normal(0.0, 10.0))
+    sigma_x = numpyro.sample("sigma_x", dist.HalfNormal(5.0))
+
+    # Latent values for every entry; mask(False) drops their prior log-prob
+    # from the joint, since x_obs below scores the full vector x.
+    x_imp = numpyro.sample(
+        "x_imp",
+        dist.Normal(mu_x, sigma_x).expand([n]).mask(False),
+    )
+    # Fill in imputed values where x is missing, observed values otherwise.
+    x = jnp.where(missing, x_imp, x_obs)
+
+    # Marginal model for the covariates and regression likelihood for the responses.
+    numpyro.sample("x_obs", dist.Normal(mu_x, sigma_x), obs=x)
+    numpyro.sample("y_obs", dist.Normal(a + b * x, sigma), obs=y)
+
+
+mcmc = MCMC(NUTS(model), num_warmup=500, num_samples=1000, progress_bar=False)
+mcmc.run(key_mcmc, x_obs=x_obs, missing=missing, y=y)
+posterior = mcmc.get_samples()
+```
+
+Because each `x_imp[i]` at a missing position is a latent variable inside the regression, its posterior is informed by both the marginal $x$-model and the corresponding $y_i$. The posterior mean of `x_imp` should therefore be close to the true (hidden) covariates, and the regression coefficients should match `a_true`, `b_true`.
+
+```{python}
+#| label: imputation-coefficients
+#| code-fold: false
+print(f"posterior mean a: {posterior['a'].mean():.3f}  (true: {a_true})")
+print(f"posterior mean b: {posterior['b'].mean():.3f}  (true: {b_true})")
+```
+
+To visualize the imputed covariates, we restrict `x_imp` to the missing positions and make a forest plot of the posterior intervals with the hidden true values overlaid.
+
+```{python}
+#| label: fig-imputation-forest
+#| fig-cap: "Posterior 90% credible intervals (lines) and means (dots) for each imputed covariate, ordered by the true hidden value (crosses)."
+#| code-fold: true
+import matplotlib.pyplot as plt
+
+x_imp_missing = posterior["x_imp"][:, missing]
+x_true_missing = x_full[missing]
+
+order = jnp.argsort(x_true_missing)
+lo, hi = jnp.percentile(x_imp_missing[:, order], jnp.array([5.0, 95.0]), axis=0)
+mean = x_imp_missing[:, order].mean(axis=0)
+truth = x_true_missing[order]
+rows = jnp.arange(n_miss)
+
+fig, ax = plt.subplots(figsize=(5, max(3.0, 0.15 * n_miss)))
+ax.hlines(rows, lo, hi, color="C0", lw=1.2, alpha=0.7)
+ax.plot(mean, rows, "o", color="C0", ms=3, label="posterior mean")
+ax.plot(truth, rows, "x", color="k", ms=5, label="true value")
+ax.set_xlabel(r"$x_i$")
+ax.set_ylabel("missing entry (sorted by true value)")
+ax.legend(frameon=False, loc="lower right")
+fig.tight_layout()
+plt.show()
+```
+
+The imputed covariates track the hidden truth well. Note that this is vastly superior to simply imputing the missing entries by the empirical mean of the observed ones or some other method that is only informed by the marginal distribution of $x$ and ignores the regression structure.
+:::
+
+::: {#exm-missing-gaussian}
+**(Missingness in a Gaussian measurement model)**
+
+To illustrate how to handle missing data that is informative about the value, consider a textbook measurement model: we want to infer the mean $\mu$ of a Gaussian from $n$ noisy measurements $y_i \sim \mathrm{Normal}(\mu, \sigma^2)$ with $\sigma$ known. The sensor saturates: any measurement above a known threshold $c$ comes back as `NaN`. We compare two models: a naive one that drops the missing entries, and a censored likelihood that accounts for the missingness mechanism.
+
+We first simulate data with $\mu_\star = 0$, $\sigma = 1$, $c = 0.5$, and $n = 200$. About a third of the measurements get censored to `NaN`, and the empirical mean of the observed entries sits well below $\mu_\star$.
+
+```{python}
+#| label: missing-data-setup
+#| code-fold: false
+import jax.numpy as jnp
+from jax import random
+import numpyro
+import numpyro.distributions as dist
+from numpyro.infer import MCMC, NUTS
+
+mu_true, sigma, c, n = 0.0, 1.0, 0.5, 200
+
+key_data, key_naive, key_cens = random.split(random.PRNGKey(0), 3)
+y_true = mu_true + sigma * random.normal(key_data, (n,))
+missing = y_true > c
+y_obs = y_true[~missing]
+n_missing = int(missing.sum())
+
+print(f"observed: {n - n_missing},  missing: {n_missing}")
+print(f"empirical mean of observed entries: {y_obs.mean():.3f}")
+```
+
+The naive model fits a Gaussian likelihood to the observed entries only and ignores the existence of the missing ones.
+
+```{python}
+#| label: missing-data-naive
+#| code-fold: false
+def model_naive(y):
+    mu = numpyro.sample("mu", dist.Normal(0.0, 10.0))
+    numpyro.sample("y", dist.Normal(mu, sigma), obs=y)
+
+mcmc_naive = MCMC(NUTS(model_naive), num_warmup=500, num_samples=1000, progress_bar=False)
+mcmc_naive.run(key_naive, y=y_obs)
+mu_naive = mcmc_naive.get_samples()["mu"]
+```
+
+The censored model adds a likelihood contribution $\Pr(y > c \mid \mu) = 1 - \Phi((c - \mu)/\sigma)$ for each missing entry, on top of the Gaussian likelihood for the observed ones. In NumPyro, such custom log-likelihood contributions can be added using `numpyro.factor`, which adds an arbitrary term to the joint log-density.
+
+```{python}
+#| label: missing-data-censored
+#| code-fold: false
+import jax.scipy.stats as jstats
+
+def model_censored(y, n_missing):
+    mu = numpyro.sample("mu", dist.Normal(0.0, 10.0))
+    numpyro.sample("y", dist.Normal(mu, sigma), obs=y)
+    log_surv = jstats.norm.logsf(c, loc=mu, scale=sigma)
+    numpyro.factor("missing", n_missing * log_surv)
+
+mcmc_cens = MCMC(NUTS(model_censored), num_warmup=500, num_samples=1000, progress_bar=False)
+mcmc_cens.run(key_cens, y=y_obs, n_missing=n_missing)
+mu_cens = mcmc_cens.get_samples()["mu"]
+```
+
+Plotting the two posteriors side by side makes the bias and its correction visible.
+
+```{python}
+#| label: fig-missing-data-posteriors
+#| fig-cap: "Posterior densities for $\\mu$ under the two models. The naive posterior is biased away from $\\mu_\\star = 0$; modeling the missingness mechanism recovers the truth."
+#| code-fold: true
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(6, 3.2))
+bins = jnp.linspace(-0.6, 0.3, 60)
+ax.hist(mu_naive, bins=bins, density=True, alpha=0.5, label="drop missing")
+ax.hist(mu_cens,  bins=bins, density=True, alpha=0.5, label="censored likelihood")
+ax.axvline(mu_true, color="k", linestyle="--", linewidth=1, label=r"$\mu_\star$")
+ax.set_xlabel(r"$\mu$")
+ax.set_ylabel("posterior density")
+ax.legend(frameon=False)
+fig.tight_layout()
+plt.show()
+```
+
+The naive posterior is concentrated below $\mu_\star = 0$, while the censored posterior recovers the truth: the missingness pattern now actively informs the inference.
+
+
+:::
