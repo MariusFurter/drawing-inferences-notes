@@ -1,0 +1,632 @@
+::: {.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+ \def\swap{\mathsf{swap}}
+ \def\id{\mathsf{id}}
+ \def\cp{\mathsf{copy}}
+ \def\del{\mathsf{del}}
+ \def\ivmark#1{[\![#1]\!]}
+$$
+:::
+
+# Exercise 9: Stroke prediction 2.0 {.unnumbered}
+
+<!--
+================================================================================
+SCAFFOLDING NOTES (for future implementation)
+================================================================================
+This exercise revisits the stroke dataset from Exercise 3 as a hybrid model.
+It illustrates the key concepts of `chapters/practical.qmd`:
+
+  * Conditioning on full data splits a model into independent parts.
+  * Dirichlet-Categorical conjugate update for a discrete kernel (with optional
+    derivation, mirroring exm-dirichlet-categorical in practical.qmd).
+  * NumPyro fits for a Gaussian-regression kernel (and optionally a logistic
+    regression kernel).
+  * Missing data: MCAR (model still works, requires joint imputation) vs.
+    informative threshold censoring (need to add the missingness mechanism,
+    mirroring exm-missing-gaussian).
+
+MODEL: a hybrid sub-model with 3 boxes (+ 1 optional logistic-regression box):
+
+  age            : I            ~> Age            (categorical, 3 bins)
+  hyp            : Age          ~> {0, 1}         (discrete kernel)
+  log_glu        : Age x Hyp    ~> R              (Gaussian regression)
+  heart_disease  : Age x Hyp x R ~> {0, 1}        (logistic regression, OPT)
+
+Variables come from data/exercise-3/healthcare-dataset-stroke-data.csv via
+data/exercise-9/prepare_data.py (which: bins age into the same 3 bins as
+Exercise 3, keeps hypertension and heart_disease, log-transforms
+avg_glucose_level, drops other columns, and writes prepared train/test CSVs).
+
+DATA FILES:
+  data/exercise-9/stroke_train_prepared.csv  (4088 patients)
+  data/exercise-9/stroke_test_prepared.csv   (1022 patients)
+  Columns: age (0,1,2), hyp (0,1), log_glucose (float), heart_disease (0,1)
+================================================================================
+-->
+
+## Introduction
+
+<!--
+TODO (intro paragraph):
+  - Recall Exercise 3: discrete-only causal model for stroke prediction with
+    kernels estimated by Laplace-smoothed counts.
+  - Now we extend the model with a CONTINUOUS variable (log-glucose) and use
+    proper Bayesian inference: Dirichlet-Categorical analytically for one
+    discrete kernel, and NumPyro for the regression kernels.
+  - Three pedagogical themes (pointers to practical.qmd):
+      1. Conditioning on all variables splits the model into independent boxes,
+         so each kernel can be fit on its own.
+      2. The Dirichlet-Categorical update gives a closed-form posterior for
+         discrete kernels (this is the Bayesian justification of Ex. 3's
+         Laplace smoothing).
+      3. Missing data breaks the split; we must reason about the missingness
+         mechanism to avoid bias.
+-->
+
+::: {.callout-note collapse="true" title="Prerequisites: Python libraries"}
+This exercise uses:
+
+- [**pandas**](https://pandas.pydata.org/) — tabular data.
+- [**numpyro**](https://num.pyro.ai/) and [**jax**](https://jax.readthedocs.io/) — Bayesian inference via MCMC.
+- [**matplotlib**](https://matplotlib.org/) — plotting.
+
+Install with `pip install pandas numpyro jax matplotlib` if needed.
+:::
+
+### The dataset
+
+<!--
+TODO (describe the prepared dataset):
+  - Same patients as Exercise 3, but a different subset of columns and
+    different processing of glucose.
+  - age (0=young<35, 1=middle 35-65, 2=senior>=65) — same bins as Ex. 3.
+  - hyp (0=no, 1=yes)
+  - log_glucose (continuous; natural log of avg_glucose_level in mg/dL)
+  - heart_disease (0=no, 1=yes)
+  - Motivate log-transforming glucose: the raw distribution is right-skewed
+    (clinical values cluster near 70-100 with a long high tail). Log-
+    transforming gives a roughly Gaussian distribution, making a Normal
+    likelihood reasonable.
+  - Link to the prepared CSVs and to data/exercise-9/prepare_data.py.
+
+Stub a code cell that loads the train CSV, prints head() and summary stats,
+and shows a histogram of log_glucose (with the raw glucose histogram for
+comparison) to motivate the Normal likelihood.
+-->
+
+- [stroke_train_prepared.csv](../data/exercise-9/stroke_train_prepared.csv) — training data (4088 patients)
+- [stroke_test_prepared.csv](../data/exercise-9/stroke_test_prepared.csv) — test data (1022 patients)
+
+| Variable | Values | Encoding |
+|----------|--------|----------|
+| `age` | young (<35), middle (35–65), senior (≥65) | 0, 1, 2 |
+| `hyp` | no, yes | 0, 1 |
+| `log_glucose` | $\log(\text{avg\_glucose\_level})$, in $\log$ mg/dL | continuous |
+| `heart_disease` | no, yes | 0, 1 |
+
+
+## Task 1. A hybrid causal model
+
+<!--
+TODO (Task 1 narrative):
+
+Causal story (justify each arrow briefly):
+  - age is exogenous;
+  - hyp | age: arterial stiffening with age raises hypertension risk;
+  - log_glucose | age, hyp: insulin resistance and metabolic syndrome cluster
+    with both age and hypertension, shifting glucose upward;
+  - heart_disease | age, hyp, log_glucose: classical cardiovascular risk
+    factors (OPTIONAL box).
+
+Generators / kernels:
+  age   : I                       ~> Age
+  hyp   : Age                     ~> Hyp
+  glu   : Age x Hyp               ~> R          (continuous: log_glucose)
+  heart : Age x Hyp x R           ~> Heart      (OPTIONAL)
+-->
+
+**Task 1a.** Draw the string diagram for the hybrid model (with the optional
+heart-disease box, or without if Task 4 is skipped).
+
+<!--
+TODO (Task 1a):
+  Create tikz file: diagrams/exercises/stroke-2.0-model.tikz
+  (mirror diagrams/stroke-prediction/stroke-causal.tikz). Include the
+  continuous-output box (log_glucose) and the optional discrete-output
+  heart_disease box.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 1a)"}
+<!-- TODO: tikz string diagram of the full hybrid model. -->
+:::
+
+**Task 1b.** Suppose we observe a fully complete dataset
+$(\bar a_i, \bar h_i, \bar g_i, \bar d_i)_{i=1}^N$. Add a separate parameter
+prior to each box and condition on the data. Argue that the resulting model
+**factors** into independent parallel parts, one per kernel.
+
+<!--
+TODO (Task 1b):
+  Each kernel carries its own latent parameter:
+    - age generator parameterized by theta_age ~ Dirichlet(1,1,1)
+    - hyp | age parameterized by theta_hyp (one Dirichlet per row of age)
+    - glu | age, hyp parameterized by (mu_{a,h}, sigma)
+    - heart | age, hyp, glu parameterized by logistic-regression coefficients
+  Conditioning on every variable removes all wires between the kernels in
+  the diagram. The diagram falls apart into parallel pieces, one per box.
+
+Diagrams: create two tikz files mirroring practical.qmd split-1 / split-2:
+    diagrams/exercises/stroke-2.0-split-1.tikz   (model with shared wires)
+    diagrams/exercises/stroke-2.0-split-2.tikz   (model after conditioning,
+                                                  showing the split)
+
+Solution callout: write out the joint density factoring:
+    p(theta_age, theta_hyp, theta_glu, theta_heart | data)
+      ∝ p(theta_age) * prod_i p(a_i | theta_age)
+        * p(theta_hyp) * prod_i p(h_i | a_i, theta_hyp)
+        * p(theta_glu) * prod_i p(g_i | a_i, h_i, theta_glu)
+        * p(theta_heart) * prod_i p(d_i | a_i, h_i, g_i, theta_heart)
+  Each line depends on disjoint parameters, so the posterior factors as a
+  product. Hence we can fit each box independently.
+
+Pedagogical payoff: inference for the whole model reduces to N small
+inference problems. This is precisely the strategy of practical.qmd's
+section "Conditioning splits models", applied here to a hybrid model.
+
+End with a note: this depends on having FULLY OBSERVED data. Section 5 will
+revisit what happens when some entries are missing.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 1b)"}
+<!-- TODO: split-1 / split-2 tikz diagrams + factoring of the posterior. -->
+:::
+
+## Task 2. Fit the discrete boxes analytically
+
+<!--
+TODO (Task 2 narrative):
+  Both the age generator and hyp | age are discrete kernels. Put a Dirichlet
+  prior on each (independently per row for hyp | age) and use the
+  Dirichlet-Categorical conjugate update from practical.qmd
+  (exm-dirichlet-categorical).
+-->
+
+**Task 2a.** Fit the **age generator** using a Dirichlet–Categorical update.
+Use a uniform $\mathrm{Dirichlet}(1, 1, 1)$ prior. Report the posterior mean
+and a 90% credible interval for each $p_a := P(\text{age} = a)$.
+
+<!--
+TODO (Task 2a):
+  Prior: Dirichlet(1, 1, 1).
+  Posterior: Dirichlet(1 + n_0, 1 + n_1, 1 + n_2), n_k = count of age=k.
+  Posterior mean = alpha_post / alpha_post.sum().
+  Credible intervals: use scipy.stats.dirichlet or, since the marginals of
+  a Dirichlet are Beta, use scipy.stats.beta.ppf(q, alpha_k, alpha_total - alpha_k).
+
+  Code stub:
+      import torch, pandas as pd
+      from scipy.stats import beta as beta_dist
+      df = pd.read_csv("../data/exercise-9/stroke_train_prepared.csv")
+      n_age = torch.tensor([(df["age"]==k).sum().item() for k in range(3)],
+                            dtype=torch.float)
+      alpha_post = 1.0 + n_age
+      mean = alpha_post / alpha_post.sum()
+      # 90% CI per marginal Beta(alpha_k, alpha_tot - alpha_k)
+      a_tot = alpha_post.sum().item()
+      ci = [(beta_dist.ppf(0.05, a, a_tot - a),
+             beta_dist.ppf(0.95, a, a_tot - a)) for a in alpha_post.tolist()]
+      # Tabulate.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 2a)"}
+<!-- TODO: Dirichlet posterior code + summary table. -->
+:::
+
+**Task 2b.** Fit `hyp | age` **row by row** using independent
+Dirichlet–Categorical updates. Use a $\mathrm{Dirichlet}(1, 1)$ prior on each
+row. Report the posterior mean kernel and 90% credible intervals for
+$P(\text{hyp}=1 \mid \text{age}=a)$ for each $a$.
+
+<!--
+TODO (Task 2b):
+  For each age category a in {0, 1, 2}:
+    Prior: Dirichlet(1, 1) over (P(hyp=0|a), P(hyp=1|a)).
+            Equivalently Beta(1, 1) on p_a := P(hyp=1|a).
+    Update: alpha'_{a,h} = 1 + n_{a,h}.
+    Posterior on p_a is Beta(alpha'_{a,1}, alpha'_{a,0}).
+  Tabulate: rows = age categories, columns = posterior mean, 5%, 95%.
+
+  Mention in passing that this is exactly the Bayesian justification of
+  Ex. 3's Laplace smoothing (the posterior MEAN with Dirichlet(1,1) prior
+  equals Laplace-smoothed frequency).
+
+  Code stub:
+      n_ah = torch.zeros(3, 2)
+      for _, row in df.iterrows():
+          n_ah[int(row["age"]), int(row["hyp"])] += 1
+      alpha_post = 1.0 + n_ah               # shape (3, 2)
+      kernel_mean = alpha_post / alpha_post.sum(dim=-1, keepdim=True)
+      # CI for p_a = P(hyp=1|a):
+      from scipy.stats import beta as beta_dist
+      for a in range(3):
+          a1 = alpha_post[a, 1].item()
+          a0 = alpha_post[a, 0].item()
+          lo = beta_dist.ppf(0.05, a1, a0)
+          hi = beta_dist.ppf(0.95, a1, a0)
+          ...
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 2b)"}
+<!-- TODO: per-row Dirichlet update for hyp | age, posterior table. -->
+:::
+
+**Task 2c (Optional — derivation).** Starting from a $\mathrm{Beta}(1, 1)$
+prior on $p_a := P(\text{hyp} = 1 \mid \text{age} = a)$ and the Bernoulli
+likelihood for the $n_a$ observations of `hyp` in age category $a$, derive
+the posterior in closed form. Conclude with the Dirichlet–Categorical
+generalization for kernels with more than two output categories.
+
+<!--
+TODO (Task 2c):
+  Mirror exm-dirichlet-categorical in practical.qmd, specialized to a single
+  row of hyp | age. Steps:
+    1. Write the likelihood for row a:
+         L(p_a | y_1,...,y_{n_a}) = p_a^{n_{a,1}} (1 - p_a)^{n_{a,0}}.
+    2. Write the prior Beta(alpha=1, beta=1).
+    3. Multiply (copy-composition): joint up to normalization is
+         p_a^{n_{a,1}} (1 - p_a)^{n_{a,0}}
+         (which is unnormalized Beta(1 + n_{a,1}, 1 + n_{a,0})).
+    4. Normalize: posterior = Beta(1 + n_{a,1}, 1 + n_{a,0}).
+    5. Mention that rows are independent given the data (the diagram for
+       hyp | age splits row-wise once age is observed for every datum),
+       so the joint posterior over the full kernel factors as a product of
+       row-wise Beta posteriors.
+    6. State the multivariate generalization (Dirichlet-Categorical) for
+       kernels with K > 2 output categories: alpha'_{a,k} = alpha_{a,k} +
+       n_{a,k}.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 2c, optional)"}
+<!-- TODO: derive the Beta-Bernoulli / Dirichlet-Categorical update for a row
+of hyp | age, mirroring exm-dirichlet-categorical in practical.qmd. -->
+:::
+
+## Task 3. Fit `log_glucose | age, hyp` with NumPyro
+
+<!--
+TODO (Task 3 narrative):
+  This is the continuous-output box. Use NumPyro with NUTS.
+
+  Cell-mean parameterization (cleaner than additive for 3x2 = 6 cells):
+    mu_{a,h} ~ Normal(4.5, 1.0)          # centered near empirical log-mean ~4.6
+    sigma     ~ HalfNormal(1.0)
+    log_glu_i ~ Normal(mu_{a_i, h_i}, sigma)
+
+  Emphasize again: because the model split (Task 1b), we treat (a_i, h_i)
+  as KNOWN inputs and only put priors on parameters of THIS kernel.
+-->
+
+**Task 3a.** Implement the cell-mean Normal model in NumPyro and run MCMC.
+Report the posterior summary (`mcmc.print_summary()`).
+
+<!--
+TODO (Task 3a code stub):
+    import jax.numpy as jnp
+    from jax import random
+    import numpyro
+    import numpyro.distributions as dist
+    from numpyro.infer import MCMC, NUTS
+
+    age_idx = jnp.array(df["age"].to_numpy())
+    hyp_idx = jnp.array(df["hyp"].to_numpy())
+    log_glu = jnp.array(df["log_glucose"].to_numpy())
+
+    def glu_model(age_idx, hyp_idx, log_glu=None):
+        with numpyro.plate("age_plate", 3):
+            with numpyro.plate("hyp_plate", 2):
+                mu = numpyro.sample("mu", dist.Normal(4.5, 1.0))   # shape (2, 3)
+        sigma = numpyro.sample("sigma", dist.HalfNormal(1.0))
+        cell_mu = mu[hyp_idx, age_idx]
+        numpyro.sample("obs", dist.Normal(cell_mu, sigma), obs=log_glu)
+
+    mcmc = MCMC(NUTS(glu_model), num_warmup=500, num_samples=1000,
+                progress_bar=False)
+    mcmc.run(random.PRNGKey(0), age_idx, hyp_idx, log_glu)
+    mcmc.print_summary()
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 3a)"}
+<!-- TODO: NumPyro code + mcmc.print_summary() output. -->
+:::
+
+**Task 3b.** Plot posterior means and 90% credible intervals for each cell
+$\mu_{a,h}$ alongside the **empirical cell means** as a sanity check.
+
+<!--
+TODO (Task 3b):
+  Compute empirical mean per (age, hyp) cell from the training data.
+  Overlay forest plot of posterior CI per cell with empirical mean as a
+  black cross. Six points total.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 3b)"}
+<!-- TODO: forest plot of mu_{a,h} posteriors vs. empirical means. -->
+:::
+
+**Task 3c.** Which factor — age or hypertension — has a larger effect on
+mean log-glucose? Quantify using the posterior of the differences.
+
+<!--
+TODO (Task 3c):
+  Compute posterior of mu[1, 2] - mu[0, 0] (hyp effect at senior age) etc.
+  Empirically, both shift log_glu upward; expect hypertension to give a
+  larger jump than age does within a hyp stratum.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 3c)"}
+<!-- TODO: compute and discuss differences in posterior. -->
+:::
+
+## Task 4 (Optional). Fit `heart_disease | age, hyp, log_glucose`
+
+<!--
+TODO (Task 4 narrative):
+  Optional logistic-regression box.
+
+  Model:
+    logit P(heart=1 | age, hyp, log_glu)
+      = b0
+      + b_age[age]                  # 3 levels; use Normal(0, 1) on all 3
+      + b_hyp * hyp
+      + b_glu * (log_glu - 4.5)     # center for numerical stability
+  Priors: Normal(0, 1) on all coefficients except b0 ~ Normal(-3, 2)
+  (heart disease prevalence is ~5%, so log-odds around -3).
+
+  Reminder: this box can also be fit INDEPENDENTLY of all the others because
+  conditioning on (age, hyp, log_glu, heart) splits the diagram.
+-->
+
+**Task 4a.** Fit the logistic-regression model in NumPyro. Report posterior
+means and 90% credible intervals for all coefficients.
+
+<!--
+TODO (Task 4a code stub):
+    def heart_model(age_idx, hyp_idx, log_glu, heart=None):
+        b0    = numpyro.sample("b0",    dist.Normal(-3.0, 2.0))
+        b_age = numpyro.sample("b_age", dist.Normal(jnp.zeros(3), 1.0).to_event(1))
+        b_hyp = numpyro.sample("b_hyp", dist.Normal(0.0, 1.0))
+        b_glu = numpyro.sample("b_glu", dist.Normal(0.0, 1.0))
+        logits = b0 + b_age[age_idx] + b_hyp * hyp_idx + b_glu * (log_glu - 4.5)
+        numpyro.sample("heart", dist.Bernoulli(logits=logits), obs=heart)
+
+  Note: b_age has a redundancy with b0; can either constrain b_age[0] = 0
+  (reference encoding) or just accept the soft non-identifiability since the
+  prior regularizes. Mention this in passing.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 4a)"}
+<!-- TODO: NumPyro logistic regression fit + posterior summary. -->
+:::
+
+**Task 4b.** Interpret the signs of the coefficients. Do age, hypertension,
+and elevated glucose all contribute positively to heart-disease log-odds?
+
+::: {.callout-tip collapse="true" title="Solution (Task 4b)"}
+<!-- TODO: discussion. Expect all coefficients positive. -->
+:::
+
+## Task 5. Missing data, completely at random (MCAR)
+
+<!--
+TODO (Task 5 narrative):
+  Construct a sub-dataset where ~30% of `log_glucose` values are dropped
+  uniformly at random (independent of any variable). Use a fixed seed.
+
+  KEY POINT: if we want to fit only `log_glu | age, hyp` (Task 3), MCAR rows
+  with missing log_glu contribute no information and can simply be dropped —
+  the model still factors. The interesting case is when we want to predict
+  HEART_DISEASE from log_glu: a row with missing log_glu still contributes
+  via the marginal of log_glu AND via heart | ..., log_glu. The model no
+  longer factors cleanly and we MUST IMPUTE log_glu for the missing rows.
+
+  So Task 5 *requires* the optional Task 4. Students who skipped Task 4 can
+  still read through it; or you can use a simplified version where the
+  "downstream consumer" is just hyp -> log_glu and we fit it jointly. The
+  cleanest pedagogical presentation uses the full 4-box model.
+-->
+
+**Task 5a.** Randomly drop ~30% of `log_glucose` values from the training
+data (use `jax.random.PRNGKey(42)` for reproducibility). Confirm the
+fraction missing.
+
+<!--
+TODO (Task 5a code stub):
+    import jax
+    p_missing = 0.30
+    rng = jax.random.PRNGKey(42)
+    N = len(df)
+    missing_mask = jax.random.uniform(rng, (N,)) < p_missing
+    log_glu_true = jnp.array(df["log_glucose"].to_numpy())
+    log_glu_obs  = jnp.where(missing_mask, jnp.nan, log_glu_true)
+    print(f"missing: {int(missing_mask.sum())} / {N}")
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 5a)"}
+<!-- TODO: code + count of missing values. -->
+:::
+
+**Task 5b.** Build a **joint** NumPyro model containing both the
+`log_glu | age, hyp` box and the `heart | age, hyp, log_glu` box. For rows
+where `log_glu` is missing, introduce a latent imputed value `x_imp` via
+`.mask(False)` (see `practical.qmd`, `exm-missing-regression`). Fit by MCMC.
+
+<!--
+TODO (Task 5b code stub):
+    def joint_model(age_idx, hyp_idx, log_glu_obs, missing_mask, heart):
+        # log_glu | age, hyp (Task 3 priors)
+        with numpyro.plate("age_plate", 3):
+            with numpyro.plate("hyp_plate", 2):
+                mu = numpyro.sample("mu", dist.Normal(4.5, 1.0))   # (2, 3)
+        sigma = numpyro.sample("sigma", dist.HalfNormal(1.0))
+        cell_mu = mu[hyp_idx, age_idx]
+
+        # Impute missing log_glu using mask(False) trick.
+        x_imp = numpyro.sample(
+            "x_imp",
+            dist.Normal(cell_mu, sigma).mask(False),
+        )
+        x = jnp.where(missing_mask, x_imp, log_glu_obs)
+        numpyro.sample("log_glu_obs", dist.Normal(cell_mu, sigma), obs=x)
+
+        # heart | age, hyp, log_glu (Task 4 priors)
+        b0    = numpyro.sample("b0",    dist.Normal(-3.0, 2.0))
+        b_age = numpyro.sample("b_age", dist.Normal(jnp.zeros(3), 1.0).to_event(1))
+        b_hyp = numpyro.sample("b_hyp", dist.Normal(0.0, 1.0))
+        b_glu = numpyro.sample("b_glu", dist.Normal(0.0, 1.0))
+        logits = b0 + b_age[age_idx] + b_hyp * hyp_idx + b_glu * (x - 4.5)
+        numpyro.sample("heart", dist.Bernoulli(logits=logits), obs=heart)
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 5b)"}
+<!-- TODO: joint model code + run MCMC. -->
+:::
+
+**Task 5c.** Compare the posterior coefficients of the heart model (Task 4)
+with those obtained from the joint MCAR fit. Are they consistent?
+
+<!--
+TODO (Task 5c):
+  Expect posterior means to roughly agree. CIs may be slightly wider in the
+  MCAR fit because we lost ~30% of the direct log_glu information.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 5c)"}
+<!-- TODO: comparison table / forest plot of coefficients. -->
+:::
+
+**Task 5d.** Make a forest plot of the posterior 90% credible intervals for
+the imputed `log_glu` values at the missing positions, with the true (hidden)
+values overlaid. Mirrors `fig-imputation-forest` in `practical.qmd`.
+
+<!--
+TODO (Task 5d):
+  Code pattern from exm-missing-regression: extract posterior['x_imp'] at
+  the missing indices, plot mean + 5/95 percentile bars, overlay true
+  hidden value as a black cross, sort rows by true value.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 5d)"}
+<!-- TODO: forest plot of imputed log_glu vs. truth. -->
+:::
+
+## Task 6. Informative missingness: threshold censoring
+
+<!--
+TODO (Task 6 narrative):
+  Story: the lab only reports a glucose measurement when log_glucose <= c.
+  Values with log_glucose > c are reported as NaN. Missingness is
+  INFORMATIVE: a missing value tells us the truth was above c.
+
+  Choose c = 5.0 (i.e. glucose > ~148 mg/dL), which censors roughly the
+  upper 20% of log_glucose. (Verify after running prepare_data.py.)
+
+  Mirrors exm-missing-gaussian in practical.qmd, specialized to a cell-mean
+  Normal model.
+-->
+
+**Task 6a.** Construct the censored dataset by replacing `log_glucose` with
+`NaN` for all rows where `log_glucose > c` (use $c = 5.0$). Report the
+fraction censored overall and **per cell** $(a, h)$.
+
+<!--
+TODO (Task 6a code stub):
+    c = 5.0
+    censored_mask = log_glu_true > c
+    log_glu_cens  = jnp.where(censored_mask, jnp.nan, log_glu_true)
+    print(f"censored: {int(censored_mask.sum())} / {N}"
+          f" ({float(censored_mask.mean()):.1%})")
+
+  Also report a 3x2 table of censoring rates by (age, hyp). Expect higher
+  censoring in (senior, hypertensive) cell.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 6a)"}
+<!-- TODO: build censored dataset, per-cell censoring rates. -->
+:::
+
+**Task 6b (Naive).** Refit the Task 3 cell-mean Normal model **dropping**
+the censored rows. Show that the posterior cell means $\mu_{a,h}$ are biased
+**downward**, especially in heavily-censored cells (senior, hypertensive).
+
+<!--
+TODO (Task 6b):
+  Same model as Task 3a, but pass only the non-censored rows. Compare
+  posterior of mu[1, 2] (senior hypertensive) with the Task 3 ground truth
+  fit on the full data.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 6b)"}
+<!-- TODO: naive fit + bias demonstration. -->
+:::
+
+**Task 6c (Censored likelihood).** Add a `numpyro.factor` term for each
+censored row equal to $\log P(\text{log\_glu} > c \mid \mu_{a,h}, \sigma)
+= \log(1 - \Phi((c - \mu_{a,h})/\sigma))$. Refit and show the posterior
+recovers unbiased estimates. Plot the posterior of $\mu_{2,1}$ for the naive
+vs. censored vs. full-data models on one axis.
+
+<!--
+TODO (Task 6c code stub):
+    import jax.scipy.stats as jstats
+
+    def censored_model(age_obs, hyp_obs, log_glu_obs,
+                       age_miss, hyp_miss, c):
+        with numpyro.plate("age_plate", 3):
+            with numpyro.plate("hyp_plate", 2):
+                mu = numpyro.sample("mu", dist.Normal(4.5, 1.0))
+        sigma = numpyro.sample("sigma", dist.HalfNormal(1.0))
+
+        # Observed rows: standard Gaussian likelihood.
+        cell_mu_obs = mu[hyp_obs, age_obs]
+        numpyro.sample("obs", dist.Normal(cell_mu_obs, sigma), obs=log_glu_obs)
+
+        # Censored rows: add log survival function.
+        cell_mu_miss = mu[hyp_miss, age_miss]
+        log_surv = jstats.norm.logsf(c, loc=cell_mu_miss, scale=sigma)
+        numpyro.factor("censored", log_surv.sum())
+
+  Plot: three posterior densities for mu[1, 2] (senior hypertensive) ---
+  naive (drop), censored likelihood, and Task 3 ground truth. Mirrors
+  fig-missing-data-posteriors in practical.qmd.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 6c)"}
+<!-- TODO: censored-likelihood model + side-by-side posterior plot. -->
+:::
+
+**Task 6d.** Contrast Tasks 5 (MCAR) and 6 (threshold censoring): under
+which mechanism does naive deletion work, and under which does it fail?
+Explain in terms of the string diagram.
+
+<!--
+TODO (Task 6d):
+  Discussion points:
+    - MCAR: missing rows give zero information; dropping is wasteful but
+      unbiased. In the string diagram, the missingness mechanism is a kernel
+      that is INDEPENDENT of all latents, so it factors out and conditioning
+      on the observed data alone is correct.
+    - Threshold censoring: the missingness indicator is a DETERMINISTIC
+      function of the value (m_i = [log_glu_i > c]). Seeing m_i = 1
+      tells us log_glu_i > c. Dropping these rows effectively conditions
+      on log_glu <= c without telling the model, biasing mu downward.
+    - The fix is to compose the model with the threshold kernel (a
+      deterministic kernel R -> {0,1}) and condition on (m_i, log_glu_obs_i)
+      jointly. This is what the numpyro.factor term encodes.
+-->
+
+::: {.callout-tip collapse="true" title="Solution (Task 6d)"}
+<!-- TODO: short discussion contrasting MCAR vs. threshold censoring. -->
+:::

@@ -40,6 +40,8 @@ Note that both parallel and copy-composition simply correspond to multiplying de
 
 First, when $f$ is discrete, the integral reduces to a finite sum. Second, when $f$ and $g$ are conjugate distributions, the integral can be computed using known formulas. We discuss these two cases in more detail below.
 
+<!-- Also when g is discrete we get a discrete kernel with f(g^{-1}(k) \mid x) -->
+
 ### Marginalizing discrete latents
 When $f$ is discrete, it has a density $\ell_f(y \mid x)$ (with respect to counting measure) that assigns every input-output combination a non-negative weight. In the chapter on discrete kernels, we simply wrote $f(y \mid x)$ for this weight.
 

@@ -9,6 +9,10 @@ Welcome to **Drawing Inferences** − a course on model-based reasoning! This co
 
 In jargon, we will build *(causal) probabilistic graphical models* and solve them using *probabilistic programming*.
 
+:::{.callout-caution}
+This course is a work in progress. The content is not yet complete. If you have comments or find any mistakes, please let me know at `[firstname].[lastname]@math.uzh.com`.
+:::
+
 ## Introduction
 
 Life confronts us with fundamental questions on a daily basis:
