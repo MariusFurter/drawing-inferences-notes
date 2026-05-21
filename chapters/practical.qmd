@@ -15,6 +15,9 @@ $$
 In this chapter, we discuss practical strategies for performing inference in complex models. This will leverage the strong conceptual foundation we have built up in the previous chapters, as well as the algebraic and graphical tools we have developed for reasoning about kernels.
 
 ## Simplifying models
+
+<!-- Also discuss marginalizing using string diagram manipulations. -->
+
 The first strategy we will discuss is simplifying the model by analytically manipulating its kernels. If it is possible to simplify some parts of the model analytically, we can do so before resorting to sampling or other approximation methods. 
 
 Most often, the kernels in a model will have densities. Recall from @sec-density-functions that a kernel $f : X \kernel Y$ has a density $\ell_f(y \mid x)$ with respect to a base measure $\nu_Y$ if 

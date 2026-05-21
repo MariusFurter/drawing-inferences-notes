@@ -22,3 +22,10 @@ _hidden/
 
 # local data
 data/swiss-health/
+
+chapters/data/
+
+# VI chapter cached datasets / trained weights (regenerate with
+# `python data/vi/download_mnist.py` and by rendering the chapter).
+data/vi/*
+!data/vi/download_mnist.py

@@ -26,6 +26,8 @@ book:
     - chapters/bayesian-data-analysis.qmd
     - chapters/mcmc.qmd
     - chapters/practical.qmd
+    - chapters/smc.qmd
+    - chapters/vi.qmd
     - part: "Exercises"
       chapters:
         - exercises/1-classic-puzzles.qmd

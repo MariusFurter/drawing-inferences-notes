@@ -1,0 +1,523 @@
+::: {.hidden}
+$$
+ \def\then{\mathbin{;}}
+ \def\kernel{\rightsquigarrow}
+ \def\swap{\mathsf{swap}}
+ \def\id{\mathsf{id}}
+ \def\cp{\mathsf{copy}}
+ \def\del{\mathsf{del}}
+ \def\ivmark#1{[\![#1]\!]}
+$$
+:::
+
+# Variational inference {#sec-vi}
+
+MCMC approximates a posterior by *sampling*: build a chain whose long-run distribution is the target, run it long enough, and treat its trajectory as a sample. **Variational inference (VI)** takes a different route. Instead of sampling, it turns inference into an *optimization problem*: pick a tractable family of distributions and find the member of that family that is closest to the posterior. The result is not a cloud of samples but an explicit, parameterized distribution that we can sample from, evaluate, and differentiate cheaply.
+
+In this chapter we introduce VI at a high level, work through a small Bayesian linear regression in [Pyro](https://pyro.ai/), and then scale up to a Bayesian neural network classifier on MNIST. The central question we want to answer with the BNN example is: **does treating a neural network's weights as random variables let us tell when an input is unfamiliar?** A classical network is forced to assign every digit-shaped input to one of ten classes; a Bayesian one can, in effect, say *I don't know*.
+
+## Inference as optimization {#sec-inference-as-optimization}
+
+### The setup
+
+- We have a model with latent variables $z$ and observed data $x$, defining a joint $p(x, z) = p(z)\,p(x \mid z)$.
+- We want the posterior
+$$
+p(z \mid x) \;=\; \frac{p(x, z)}{p(x)}, \qquad p(x) \;=\; \int p(x, z)\,\mathrm{d}z.
+$$
+- The marginal $p(x)$ — the **evidence** — is typically intractable, so we cannot evaluate $p(z \mid x)$ directly.
+
+### Picking an approximation
+
+- Choose a parametric family of densities $\mathcal{Q} = \{ q_\phi(z) : \phi \in \Phi \}$ — the **variational family** or **guide**.
+- Find the member closest to the posterior in KL divergence:
+$$
+q^\star_\phi(z) \;=\; \arg\min_{\phi} \; \mathrm{KL}\!\big(\,q_\phi(z) \,\big\|\, p(z \mid x)\,\big).
+$$
+- The shape of $q_\phi$ controls the trade-off between **expressiveness** (how well it can match the true posterior) and **tractability** (how cheaply we can optimize over it).
+
+### The ELBO
+
+- We cannot compute $\mathrm{KL}(q_\phi \| p(\cdot \mid x))$ directly because it contains $\log p(x)$. But a short calculation shows
+$$
+\log p(x) \;=\; \underbrace{\mathbb{E}_{q_\phi(z)}\!\left[\log p(x, z) - \log q_\phi(z)\right]}_{\text{ELBO}(\phi)} \;+\; \mathrm{KL}\!\big(q_\phi(z)\,\big\|\,p(z\mid x)\big).
+$$
+- Since KL is non-negative, the **Evidence Lower Bound** (ELBO) satisfies $\mathrm{ELBO}(\phi) \le \log p(x)$, with equality iff $q_\phi$ matches the posterior.
+- $\log p(x)$ does not depend on $\phi$, so **maximizing the ELBO is the same as minimizing the KL** to the posterior. The optimization is over $\phi$ only.
+
+### Why this is practical
+
+- The ELBO is an expectation under $q_\phi$, which we can sample from by construction. So we can form a Monte Carlo estimate, take its gradient with respect to $\phi$ via the **reparameterization trick**, and run any gradient-based optimizer (Adam, SGD, …).
+- This is **stochastic variational inference (SVI)**: noisy gradient ascent on the ELBO.
+- Compared to MCMC: VI is typically *faster* and scales better to large datasets and high-dimensional latents, but it returns an *approximation* whose quality is bounded by the chosen family. MCMC is asymptotically exact but slow.
+
+### Reverse vs. forward KL, and the cost of mean-field
+
+- Minimizing $\mathrm{KL}(q \| p)$ (what VI does) is **mode-seeking**: $q$ tends to lock onto a single mode and *underestimate* the posterior's spread.
+- Minimizing $\mathrm{KL}(p \| q)$ would be **mode-covering**, but it requires expectations under the unknown posterior, so it is usually intractable.
+- A **mean-field** family assumes the latent dimensions are independent under $q$. It is cheap and easy to optimize, but it cannot capture posterior correlations and tends to be over-confident.
+- We will use mean-field Gaussian approximations throughout, and discuss richer families at the end.
+
+## Variational inference in Pyro {#sec-pyro-svi}
+
+Students have already met [NumPyro](https://num.pyro.ai/). [Pyro](https://pyro.ai/) is its older sibling: same modeling primitives, same `sample` / `plate` syntax, but built on PyTorch rather than JAX. We use Pyro here because its support for variational inference is more mature than NumPyro's which is primarily focused on MCMC.
+
+- A **model** is a Python function with `pyro.sample("name", dist)` and `pyro.plate(...)` statements — exactly as in NumPyro, with `pyro` in place of `numpyro`.
+- A **guide** is a second function with the *same signature* and the *same `sample` site names*, defining $q_\phi(z)$. Variational parameters $\phi$ are declared with `pyro.param`.
+- The `SVI` class glues model + guide + optimizer + ELBO together, and `svi.step(...)` does one gradient update.
+- We rarely write guides by hand. Pyro's **autoguides** construct one mechanically from the model:
+    - `AutoNormal` — independent Gaussian per latent (mean-field). Our default.
+    - `AutoMultivariateNormal` — full-covariance Gaussian, captures correlations.
+    - `AutoLowRankMultivariateNormal` — middle ground, scales better in high dimensions.
+    - `AutoNormalizingFlow`, `AutoIAFNormal` — flexible non-Gaussian families.
+    - `AutoDelta` — point estimate (recovers MAP).
+
+We illustrate the workflow on a small problem before scaling up.
+
+## Example: Bayesian linear regression {#sec-bayes-lin-reg}
+
+```{python}
+#| label: vi-setup
+#| code-fold: false
+import torch
+import matplotlib.pyplot as plt
+
+import pyro
+import pyro.distributions as dist
+from pyro.infer import SVI, Trace_ELBO, Predictive
+from pyro.infer.autoguide import AutoNormal
+from pyro.optim import Adam
+
+pyro.set_rng_seed(0)
+```
+
+### Simulated data
+
+```{python}
+#| label: vi-data
+#| code-fold: false
+N = 50
+D = 2
+true_b = torch.tensor([1.5, -2.0])
+true_a = 0.5
+true_sigma = 0.7
+
+x = torch.randn(N, D)
+y = x @ true_b + true_a + true_sigma * torch.randn(N)
+```
+
+```{python}
+#| label: fig-vi-data
+#| fig-cap: "Simulated data, projected onto each feature."
+#| code-fold: true
+fig, axes = plt.subplots(1, D, figsize=(7, 3), sharey=True)
+for d, ax in enumerate(axes):
+    ax.scatter(x[:, d], y, s=15, alpha=0.7)
+    ax.set_xlabel(f"x[{d}]")
+axes[0].set_ylabel("y")
+plt.tight_layout()
+plt.show()
+```
+
+### Model
+
+```{python}
+#| label: vi-model
+#| code-fold: false
+def model(x, y=None):
+    N = x.shape[0]
+    D = x.shape[1]
+
+    with pyro.plate("features", D):
+        b = pyro.sample("b", dist.Normal(0.0, 1.0))
+    a = pyro.sample("a", dist.Normal(0.0, 10.0))
+    sigma = pyro.sample("sigma", dist.HalfNormal(1.0))
+
+    mean = x @ b + a
+    with pyro.plate("data", N):
+        return pyro.sample("y", dist.Normal(mean, sigma), obs=y)
+```
+
+### Guide and SVI setup
+
+```{python}
+#| label: vi-guide
+#| code-fold: false
+pyro.clear_param_store()
+
+guide = AutoNormal(model)
+svi = SVI(model, guide, Adam({"lr": 0.01}), loss=Trace_ELBO())
+```
+
+### Training loop
+
+```{python}
+#| label: vi-train
+#| code-fold: false
+n_steps = 3000
+losses = torch.empty(n_steps)
+for step in range(n_steps):
+    losses[step] = svi.step(x, y)
+```
+
+```{python}
+#| label: fig-vi-elbo
+#| fig-cap: "ELBO loss (negative ELBO) during SVI optimization."
+#| code-fold: true
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.plot(losses)
+ax.set_xlabel("step")
+ax.set_ylabel("-ELBO")
+ax.set_yscale("log")
+plt.tight_layout()
+plt.show()
+```
+
+### Posterior summaries
+
+```{python}
+#| label: vi-quantiles
+#| code-fold: false
+quantiles = guide.quantiles([0.05, 0.5, 0.95])
+for name, qs in quantiles.items():
+    lo, med, hi = qs
+    print(f"{name:>6}: median={med.numpy().round(3)}, "
+          f"90% CI=[{lo.numpy().round(3)}, {hi.numpy().round(3)}]")
+```
+
+### Posterior predictive
+
+```{python}
+#| label: vi-predictive
+#| code-fold: false
+predictive = Predictive(
+    model, guide=guide, num_samples=500,
+    return_sites=("b", "a", "sigma", "y"),
+)
+
+x_grid = torch.linspace(-3, 3, 100)
+x_star = torch.zeros(100, D)
+x_star[:, 0] = x_grid  # vary feature 0, hold feature 1 at zero
+samples = predictive(x_star)
+```
+
+```{python}
+#| label: fig-vi-predictive
+#| fig-cap: "Posterior mean and 90% credible band for the regression line (feature 0 only, feature 1 fixed at 0), together with the 90% posterior-predictive band including observation noise."
+#| code-fold: true
+b = samples["b"].reshape(-1, D)        # (S, D)
+a = samples["a"].reshape(-1)           # (S,)
+y_samples = samples["y"].reshape(-1, x_star.shape[0])  # (S, 100)
+mean_line = torch.einsum("nd,sd->sn", x_star, b) + a[:, None]  # (S, 100)
+
+mean_q = torch.quantile(mean_line, torch.tensor([0.05, 0.5, 0.95]), dim=0)
+pred_q = torch.quantile(y_samples, torch.tensor([0.05, 0.5, 0.95]), dim=0)
+
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.scatter(x[:, 0], y, s=15, alpha=0.5, color="black", label="data")
+ax.fill_between(x_grid, pred_q[0], pred_q[2], alpha=0.2,
+                color="C0", label="90% predictive")
+ax.fill_between(x_grid, mean_q[0], mean_q[2], alpha=0.4,
+                color="C0", label="90% mean")
+ax.plot(x_grid, mean_q[1], color="C0", label="posterior median")
+ax.set_xlabel("x[0]")
+ax.set_ylabel("y")
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+### Sanity check against NUTS
+
+```{python}
+#| label: vi-nuts
+#| code-fold: false
+from pyro.infer import MCMC, NUTS
+
+nuts_kernel = NUTS(model)
+mcmc = MCMC(nuts_kernel, num_samples=500, warmup_steps=500, disable_progbar=True)
+mcmc.run(x, y)
+mcmc_samples = mcmc.get_samples()
+```
+
+```{python}
+#| label: vi-vi-samples
+#| code-fold: false
+vi_samples = Predictive(model, guide=guide, num_samples=500,
+                        return_sites=("b", "a", "sigma"))(x)
+```
+
+```{python}
+#| label: fig-vi-vs-nuts
+#| fig-cap: "Marginal posteriors from mean-field VI (orange) and NUTS (black). VI locations match well, but the VI posteriors are visibly narrower."
+#| code-fold: true
+vi_b = vi_samples["b"].reshape(-1, D)
+vi_a = vi_samples["a"].reshape(-1)
+vi_sigma = vi_samples["sigma"].reshape(-1)
+
+sites = [("b[0]", vi_b[:, 0], mcmc_samples["b"][:, 0]),
+         ("b[1]", vi_b[:, 1], mcmc_samples["b"][:, 1]),
+         ("a",    vi_a,        mcmc_samples["a"]),
+         ("sigma", vi_sigma,   mcmc_samples["sigma"])]
+
+fig, axes = plt.subplots(1, 4, figsize=(11, 3))
+for ax, (name, vi_s, mc_s) in zip(axes, sites):
+    ax.hist(mc_s.numpy(), bins=30, density=True, alpha=0.5,
+            color="black", label="NUTS")
+    ax.hist(vi_s.numpy(), bins=30, density=True, alpha=0.5,
+            color="C1", label="VI")
+    ax.set_title(name)
+axes[0].legend()
+plt.tight_layout()
+plt.show()
+```
+
+## Example: Bayesian neural network for MNIST {#sec-bnn-mnist}
+
+The point of this example is not to beat a vanilla CNN on MNIST accuracy — it won't. The point is that placing a posterior over the weights gives us a principled notion of **predictive uncertainty**, and that uncertainty is what lets the model abstain on inputs it has never seen.
+
+### Setup and data
+
+```{python}
+#| label: bnn-setup
+#| code-fold: false
+import os
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+import pyro
+import pyro.distributions as dist
+import pyro.poutine as poutine
+from pyro.infer import SVI, Trace_ELBO, Predictive
+from pyro.infer.autoguide import AutoNormal
+from pyro.optim import Adam
+
+CACHE_DIR = "../data/vi"
+DATA_PATH = "../data/vi/mnist.pt"
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+torch.manual_seed(0)
+pyro.set_rng_seed(0)
+```
+
+```{python}
+#| label: bnn-data
+#| code-fold: false
+# The MNIST / Fashion-MNIST tensors are produced once by
+# `data/vi/download_mnist.py` (run outside the Quarto render) and cached on
+# disk. Re-running that script is the only step that touches the network.
+if not os.path.exists(DATA_PATH):
+    raise FileNotFoundError(
+        f"{DATA_PATH} not found. Run `python data/vi/download_mnist.py` once."
+    )
+
+_data = torch.load(DATA_PATH)
+x_train, y_train = _data["x_train"], _data["y_train"]
+x_test,  y_test  = _data["x_test"],  _data["y_test"]
+x_ood            = _data["x_ood"]
+
+N_TRAIN, IN_DIM = x_train.shape
+HIDDEN, OUT_DIM = 200, 10
+```
+
+### Vanilla MLP
+
+```{python}
+#| label: bnn-mlp-def
+#| code-fold: false
+class MLP(nn.Module):
+    def __init__(self, in_dim=IN_DIM, hidden=HIDDEN, out_dim=OUT_DIM):
+        super().__init__()
+        self.fc1 = nn.Linear(in_dim, hidden)
+        self.fc2 = nn.Linear(hidden, out_dim)
+
+    def forward(self, x):
+        return self.fc2(F.relu(self.fc1(x)))
+```
+
+```{python}
+#| label: bnn-mlp-train
+#| code-fold: false
+def train_mlp(net, x, y, epochs=3, batch_size=128, lr=1e-3):
+    opt = torch.optim.Adam(net.parameters(), lr=lr)
+    N = x.shape[0]
+    for _ in range(epochs):
+        perm = torch.randperm(N)
+        for i in range(0, N, batch_size):
+            idx = perm[i:i + batch_size]
+            loss = F.cross_entropy(net(x[idx]), y[idx])
+            opt.zero_grad(); loss.backward(); opt.step()
+
+mlp = MLP()
+mlp_path = f"{CACHE_DIR}/mlp.pt"
+if os.path.exists(mlp_path):
+    mlp.load_state_dict(torch.load(mlp_path))
+else:
+    train_mlp(mlp, x_train, y_train)
+    torch.save(mlp.state_dict(), mlp_path)
+```
+
+### Bayesian MLP
+
+```{python}
+#| label: bnn-model
+#| code-fold: false
+def bnn_model(x, y=None, scale=1.0):
+    W1 = pyro.sample("W1", dist.Normal(0., 1.).expand([IN_DIM, HIDDEN]).to_event(2))
+    b1 = pyro.sample("b1", dist.Normal(0., 1.).expand([HIDDEN]).to_event(1))
+    W2 = pyro.sample("W2", dist.Normal(0., 1.).expand([HIDDEN, OUT_DIM]).to_event(2))
+    b2 = pyro.sample("b2", dist.Normal(0., 1.).expand([OUT_DIM]).to_event(1))
+
+    logits = F.relu(x @ W1 + b1) @ W2 + b2
+
+    with poutine.scale(scale=scale):
+        with pyro.plate("data", x.shape[0]):
+            pyro.sample("y", dist.Categorical(logits=logits), obs=y)
+    return logits
+```
+
+```{python}
+#| label: bnn-guide
+#| code-fold: false
+pyro.clear_param_store()
+bnn_guide = AutoNormal(bnn_model)
+```
+
+```{python}
+#| label: bnn-train
+#| code-fold: false
+def train_bnn(model, guide, x, y, epochs=5, batch_size=128, lr=1e-3):
+    svi = SVI(model, guide, Adam({"lr": lr}), loss=Trace_ELBO())
+    N = x.shape[0]
+    scale = N / batch_size
+    for _ in range(epochs):
+        perm = torch.randperm(N)
+        for i in range(0, N, batch_size):
+            idx = perm[i:i + batch_size]
+            svi.step(x[idx], y[idx], scale=scale)
+
+svi_path = f"{CACHE_DIR}/bnn_svi.pt"
+# Run the guide once so it registers its variational parameters.
+bnn_guide(x_train[:1], y_train[:1])
+if os.path.exists(svi_path):
+    # Pyro's param store pickles constraint objects; allow-list them so
+    # torch>=2.6's weights_only loader accepts the file.
+    from torch.distributions import constraints
+    with torch.serialization.safe_globals(
+        [constraints._Real, constraints._GreaterThan, constraints._Positive,
+         constraints._Interval, constraints._Dependent, constraints._Simplex]
+    ):
+        pyro.get_param_store().load(svi_path)
+else:
+    train_bnn(bnn_model, bnn_guide, x_train, y_train)
+    pyro.get_param_store().save(svi_path)
+```
+
+### Predictive uncertainty
+
+```{python}
+#| label: bnn-predict
+#| code-fold: false
+@torch.no_grad()
+def mlp_probs(net, x, batch_size=1000):
+    net.eval()
+    out = [F.softmax(net(x[i:i + batch_size]), dim=-1)
+           for i in range(0, x.shape[0], batch_size)]
+    return torch.cat(out)
+
+@torch.no_grad()
+def bnn_probs(model, guide, x, num_samples=50, batch_size=1000):
+    predictive = Predictive(model, guide=guide, num_samples=num_samples,
+                            return_sites=("_RETURN",))
+    out = []
+    for i in range(0, x.shape[0], batch_size):
+        logits = predictive(x[i:i + batch_size])["_RETURN"]  # (S, B, 10)
+        out.append(F.softmax(logits, dim=-1).mean(0))
+    return torch.cat(out)
+
+def entropy(p):
+    return -(p * p.clamp_min(1e-12).log()).sum(-1)
+```
+
+```{python}
+#| label: bnn-eval
+#| code-fold: false
+mlp_in  = mlp_probs(mlp, x_test)
+mlp_out = mlp_probs(mlp, x_ood)
+bnn_in  = bnn_probs(bnn_model, bnn_guide, x_test)
+bnn_out = bnn_probs(bnn_model, bnn_guide, x_ood)
+
+print(f"MLP test accuracy: {(mlp_in.argmax(-1) == y_test).float().mean():.3f}")
+print(f"BNN test accuracy: {(bnn_in.argmax(-1) == y_test).float().mean():.3f}")
+```
+
+```{python}
+#| label: fig-bnn-entropy
+#| fig-cap: "Predictive entropy on MNIST (in-distribution) and Fashion-MNIST (OOD). The vanilla MLP is over-confident on OOD inputs; the Bayesian MLP assigns them noticeably higher entropy."
+#| code-fold: true
+fig, axes = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
+for ax, (name, p_in, p_out) in zip(
+    axes, [("MLP", mlp_in, mlp_out), ("BNN", bnn_in, bnn_out)]
+):
+    ax.hist(entropy(p_in).numpy(),  bins=40, alpha=0.5,
+            density=True, label="MNIST")
+    ax.hist(entropy(p_out).numpy(), bins=40, alpha=0.5,
+            density=True, label="Fashion-MNIST")
+    ax.set_title(name)
+    ax.set_xlabel("predictive entropy")
+axes[0].legend()
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+#| label: fig-bnn-preds
+#| fig-cap: "Per-image class probabilities for four MNIST test digits (left) and four Fashion-MNIST images (right). On MNIST both models concentrate on the correct class. On Fashion-MNIST the MLP still picks a single digit confidently; the BNN spreads its mass across several classes."
+#| code-fold: true
+torch.manual_seed(1)
+n_show = 4
+idx_in  = torch.randperm(x_test.shape[0])[:n_show]
+idx_ood = torch.randperm(x_ood.shape[0])[:n_show]
+
+fig, axes = plt.subplots(n_show, 6, figsize=(11, 1.8 * n_show),
+                         gridspec_kw={"width_ratios": [1, 2, 2, 1, 2, 2]})
+classes = list(range(10))
+
+for row in range(n_show):
+    for col, (x_src, probs_mlp, probs_bnn, idx) in enumerate([
+        (x_test, mlp_in,  bnn_in,  idx_in[row].item()),
+        (x_ood,  mlp_out, bnn_out, idx_ood[row].item()),
+    ]):
+        base = col * 3
+        axes[row, base + 0].imshow(x_src[idx].reshape(28, 28).numpy(), cmap="gray")
+        axes[row, base + 0].set_xticks([]); axes[row, base + 0].set_yticks([])
+        axes[row, base + 1].bar(classes, probs_mlp[idx].numpy(), color="C0")
+        axes[row, base + 2].bar(classes, probs_bnn[idx].numpy(), color="C1")
+        for c in (base + 1, base + 2):
+            axes[row, c].set_ylim(0, 1)
+            axes[row, c].set_xticks(classes)
+            axes[row, c].tick_params(labelsize=7)
+        if row > 0:
+            for c in (base + 1, base + 2):
+                axes[row, c].set_xticklabels([])
+
+for c, title in [(0, "MNIST"), (1, "MLP"), (2, "BNN"),
+                 (3, "Fashion"), (4, "MLP"), (5, "BNN")]:
+    axes[0, c].set_title(title)
+
+plt.tight_layout()
+plt.show()
+```
+
+## Beyond mean-field Gaussian guides {#sec-beyond-meanfield}
+
+The `AutoNormal` guide is a sensible default but it has known limitations.
+
+- **It misses correlations.** Posteriors over neural network weights are highly correlated; mean-field treats every weight as independent. The fix is a richer autoguide, e.g. `AutoMultivariateNormal` for low-dimensional models or `AutoLowRankMultivariateNormal` for high-dimensional ones.
+- **It is unimodal and Gaussian.** Multimodal or heavy-tailed posteriors are out of reach. Use a normalizing-flow guide (`AutoNormalizingFlow`, `AutoIAFNormal`) or hand-write a guide as a sequence of `pyro.sample` and `pyro.param` statements.
+- **It is over-confident.** This is the structural cost of reverse-KL minimization with a too-restrictive family. Diagnostics: compare against MCMC on a small problem, or use **importance-weighted ELBO** (`RenyiELBO`, IWAE-style bounds) which tightens the bound at the cost of more samples per step.
+- **Custom guides.** Pyro lets us write guides as ordinary Python functions, exactly as we wrote models. This is how we encode problem-specific structure — for example, sharing variational parameters across a plate, or using a different family for different latent variables. Tools like `EasyGuide` and `pyro.contrib.autoguide.AutoGuideList` help compose autoguides for parts of the model with hand-written guides for the rest.
+
+VI is rarely the *most accurate* way to do Bayesian inference, but for models where MCMC is too slow — Bayesian neural networks being the canonical case — it is often the only practical option. The takeaway is that the choice of guide is a modeling decision in its own right, and the right one depends on what you are willing to trade between speed, expressiveness, and calibration.
+
