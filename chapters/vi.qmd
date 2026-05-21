@@ -14,7 +14,7 @@ $$
 
 MCMC approximates a posterior by *sampling*: build a chain whose long-run distribution is the target, run it long enough, and treat its trajectory as a sample. **Variational inference (VI)** takes a different route. Instead of sampling, it turns inference into an *optimization problem*: pick a tractable family of distributions and find the member of that family that is closest to the posterior. The result is not a cloud of samples but an explicit, parameterized distribution that we can sample from, evaluate, and differentiate cheaply.
 
-In this chapter we introduce VI at a high level, work through a small Bayesian linear regression in [Pyro](https://pyro.ai/), and then scale up to a Bayesian neural network classifier on MNIST. The central question we want to answer with the BNN example is: **does treating a neural network's weights as random variables let us tell when an input is unfamiliar?** A classical network is forced to assign every digit-shaped input to one of ten classes; a Bayesian one can, in effect, say *I don't know*.
+In this chapter we introduce VI at a high level, work through a small Bayesian linear regression in [Pyro](https://pyro.ai/), and then apply it to **Latent Dirichlet Allocation** on a small corpus of classic English-language poetry — a model with thousands of latent variables where MCMC is awkward and SVI is the standard tool.
 
 ## Inference as optimization {#sec-inference-as-optimization}
 
@@ -272,243 +272,172 @@ plt.tight_layout()
 plt.show()
 ```
 
-## Example: Bayesian neural network for MNIST {#sec-bnn-mnist}
+## Example: Topic models on classic English poetry {#sec-lda}
 
-The point of this example is not to beat a vanilla CNN on MNIST accuracy — it won't. The point is that placing a posterior over the weights gives us a principled notion of **predictive uncertainty**, and that uncertainty is what lets the model abstain on inputs it has never seen.
+Linear regression has too few latent variables to be a real test of variational inference: NUTS works fine on it, and the posterior is unimodal and roughly Gaussian. **Latent Dirichlet Allocation** (LDA, @blei2003lda) is a more honest example. It has thousands of latent variables, posterior correlations between topic-word and document-topic distributions, and a discrete latent (the per-word topic assignment) that — once we marginalize it — leaves a non-conjugate likelihood. MCMC on LDA is awkward; SVI is the standard tool.
 
-### Setup and data
+We assemble a small corpus from five canonical English-language poets — Shakespeare, Keats, Wordsworth, Whitman, and Dickinson — and ask the model to find $K$ latent topics shared across the corpus. Because their idioms differ sharply (Elizabethan sonnet vs. Romantic ode vs. American free verse vs. Dickinson's compressed lyric), we expect the topics to track *style and author* at least as much as content. That gives us a way to sanity-check the model: if the inferred $\theta_d$ for chunks from the same poet cluster on the same topic, LDA is doing what it should.
+
+### The model
+
+LDA is a generative model with $K$ topics, a vocabulary of $V$ words, and $D$ documents:
+$$
+\begin{aligned}
+\beta_k &\sim \mathrm{Dir}(\eta\,\mathbf{1}_V) && k = 1,\dots,K \\
+\theta_d &\sim \mathrm{Dir}(\alpha\,\mathbf{1}_K) && d = 1,\dots,D \\
+z_{d,n} &\sim \mathrm{Cat}(\theta_d) && n = 1,\dots,N_d \\
+w_{d,n} &\sim \mathrm{Cat}(\beta_{z_{d,n}}).
+\end{aligned}
+$$
+Each $\beta_k$ is a distribution over the vocabulary — a "topic" — and each $\theta_d$ is the document's mixture over topics. Marginalizing the per-word topic indicator $z_{d,n}$ gives the bag-of-words likelihood
+$$
+p(\mathbf{c}_d \mid \theta_d, \beta) \;\propto\; \prod_{v=1}^V \!\Bigl(\sum_{k=1}^K \theta_{d,k}\,\beta_{k,v}\Bigr)^{c_{d,v}},
+$$
+where $c_{d,v}$ is the number of times word $v$ appears in document $d$. We use this collapsed form: it lets us treat each document as a single observed count vector, and the latent space $(\theta, \beta)$ stays continuous.
+
+### Data
+
+The bag-of-words counts are produced once by `data/vi/download_poems.py`, which fetches each poet's collected works from Project Gutenberg, splits the text into fixed-size token chunks (200 tokens after stopword removal) so that documents are roughly equal in length, and keeps words that appear in at least five chunks. Author names and a few words from editorial apparatus (page, note, contents, …) are added to the stopword list so the model does not pick up bibliographic structure.
 
 ```{python}
-#| label: bnn-setup
+#| label: lda-setup
 #| code-fold: false
-import os
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
 import pyro
 import pyro.distributions as dist
-import pyro.poutine as poutine
-from pyro.infer import SVI, Trace_ELBO, Predictive
+from pyro.infer import SVI, Trace_ELBO
 from pyro.infer.autoguide import AutoNormal
 from pyro.optim import Adam
 
-CACHE_DIR = "../data/vi"
-DATA_PATH = "../data/vi/mnist.pt"
-os.makedirs(CACHE_DIR, exist_ok=True)
+# A 1000+ dim simplex routinely trips Pyro's sample validator on tiny float
+# rounding errors; the math is fine, just turn off the runtime check.
+pyro.distributions.enable_validation(False)
 
-torch.manual_seed(0)
+DATA_PATH = "../data/vi/poems.pt"
+
+data = torch.load(DATA_PATH)
+counts = data["counts"]  # (D, V) long tensor
+vocab = data["vocab"]
+authors = data["authors"]  # length D, one author per chunk
+
+D, V = counts.shape
+K = 5
+print(f"D={D} chunks, V={V} vocabulary, total tokens={int(counts.sum())}")
+```
+
+### Model and guide
+
+```{python}
+#| label: lda-model
+#| code-fold: false
+def lda_model(counts, K, alpha=0.5, eta=0.5):
+    D, V = counts.shape
+    with pyro.plate("topics", K):
+        beta = pyro.sample("beta", dist.Dirichlet(eta * torch.ones(V)))   # (K, V)
+
+    with pyro.plate("docs", D):
+        theta = pyro.sample("theta", dist.Dirichlet(alpha * torch.ones(K)))  # (D, K)
+        word_probs = (theta @ beta).clamp_min(1e-30)                          # (D, V)
+        # Multinomial log-likelihood, dropped multinomial coefficient
+        # (constant in theta, beta).
+        pyro.factor("words", (counts * word_probs.log()).sum(-1))
+```
+
+```{python}
+#| label: lda-guide
+#| code-fold: false
 pyro.set_rng_seed(0)
-```
-
-```{python}
-#| label: bnn-data
-#| code-fold: false
-# The MNIST / Fashion-MNIST tensors are produced once by
-# `data/vi/download_mnist.py` (run outside the Quarto render) and cached on
-# disk. Re-running that script is the only step that touches the network.
-if not os.path.exists(DATA_PATH):
-    raise FileNotFoundError(
-        f"{DATA_PATH} not found. Run `python data/vi/download_mnist.py` once."
-    )
-
-_data = torch.load(DATA_PATH)
-x_train, y_train = _data["x_train"], _data["y_train"]
-x_test,  y_test  = _data["x_test"],  _data["y_test"]
-x_ood            = _data["x_ood"]
-
-N_TRAIN, IN_DIM = x_train.shape
-HIDDEN, OUT_DIM = 200, 10
-```
-
-### Vanilla MLP
-
-```{python}
-#| label: bnn-mlp-def
-#| code-fold: false
-class MLP(nn.Module):
-    def __init__(self, in_dim=IN_DIM, hidden=HIDDEN, out_dim=OUT_DIM):
-        super().__init__()
-        self.fc1 = nn.Linear(in_dim, hidden)
-        self.fc2 = nn.Linear(hidden, out_dim)
-
-    def forward(self, x):
-        return self.fc2(F.relu(self.fc1(x)))
-```
-
-```{python}
-#| label: bnn-mlp-train
-#| code-fold: false
-def train_mlp(net, x, y, epochs=3, batch_size=128, lr=1e-3):
-    opt = torch.optim.Adam(net.parameters(), lr=lr)
-    N = x.shape[0]
-    for _ in range(epochs):
-        perm = torch.randperm(N)
-        for i in range(0, N, batch_size):
-            idx = perm[i:i + batch_size]
-            loss = F.cross_entropy(net(x[idx]), y[idx])
-            opt.zero_grad(); loss.backward(); opt.step()
-
-mlp = MLP()
-mlp_path = f"{CACHE_DIR}/mlp.pt"
-if os.path.exists(mlp_path):
-    mlp.load_state_dict(torch.load(mlp_path))
-else:
-    train_mlp(mlp, x_train, y_train)
-    torch.save(mlp.state_dict(), mlp_path)
-```
-
-### Bayesian MLP
-
-```{python}
-#| label: bnn-model
-#| code-fold: false
-def bnn_model(x, y=None, scale=1.0):
-    W1 = pyro.sample("W1", dist.Normal(0., 1.).expand([IN_DIM, HIDDEN]).to_event(2))
-    b1 = pyro.sample("b1", dist.Normal(0., 1.).expand([HIDDEN]).to_event(1))
-    W2 = pyro.sample("W2", dist.Normal(0., 1.).expand([HIDDEN, OUT_DIM]).to_event(2))
-    b2 = pyro.sample("b2", dist.Normal(0., 1.).expand([OUT_DIM]).to_event(1))
-
-    logits = F.relu(x @ W1 + b1) @ W2 + b2
-
-    with poutine.scale(scale=scale):
-        with pyro.plate("data", x.shape[0]):
-            pyro.sample("y", dist.Categorical(logits=logits), obs=y)
-    return logits
-```
-
-```{python}
-#| label: bnn-guide
-#| code-fold: false
 pyro.clear_param_store()
-bnn_guide = AutoNormal(bnn_model)
+lda_guide = AutoNormal(lda_model)
 ```
 
+`AutoNormal` builds an independent Gaussian over the *unconstrained* representation of each Dirichlet (via Pyro's stick-breaking transform), giving a logistic-normal approximation to each $\theta_d$ and each $\beta_k$.
+
+### Training
+
 ```{python}
-#| label: bnn-train
+#| label: lda-train
 #| code-fold: false
-def train_bnn(model, guide, x, y, epochs=5, batch_size=128, lr=1e-3):
-    svi = SVI(model, guide, Adam({"lr": lr}), loss=Trace_ELBO())
-    N = x.shape[0]
-    scale = N / batch_size
-    for _ in range(epochs):
-        perm = torch.randperm(N)
-        for i in range(0, N, batch_size):
-            idx = perm[i:i + batch_size]
-            svi.step(x[idx], y[idx], scale=scale)
+svi = SVI(lda_model, lda_guide, Adam({"lr": 0.05}), Trace_ELBO())
+lda_guide(counts, K)  # prime variational parameters
 
-svi_path = f"{CACHE_DIR}/bnn_svi.pt"
-# Run the guide once so it registers its variational parameters.
-bnn_guide(x_train[:1], y_train[:1])
-if os.path.exists(svi_path):
-    # Pyro's param store pickles constraint objects; allow-list them so
-    # torch>=2.6's weights_only loader accepts the file.
-    from torch.distributions import constraints
-    with torch.serialization.safe_globals(
-        [constraints._Real, constraints._GreaterThan, constraints._Positive,
-         constraints._Interval, constraints._Dependent, constraints._Simplex]
-    ):
-        pyro.get_param_store().load(svi_path)
-else:
-    train_bnn(bnn_model, bnn_guide, x_train, y_train)
-    pyro.get_param_store().save(svi_path)
-```
-
-### Predictive uncertainty
-
-```{python}
-#| label: bnn-predict
-#| code-fold: false
-@torch.no_grad()
-def mlp_probs(net, x, batch_size=1000):
-    net.eval()
-    out = [F.softmax(net(x[i:i + batch_size]), dim=-1)
-           for i in range(0, x.shape[0], batch_size)]
-    return torch.cat(out)
-
-@torch.no_grad()
-def bnn_probs(model, guide, x, num_samples=50, batch_size=1000):
-    predictive = Predictive(model, guide=guide, num_samples=num_samples,
-                            return_sites=("_RETURN",))
-    out = []
-    for i in range(0, x.shape[0], batch_size):
-        logits = predictive(x[i:i + batch_size])["_RETURN"]  # (S, B, 10)
-        out.append(F.softmax(logits, dim=-1).mean(0))
-    return torch.cat(out)
-
-def entropy(p):
-    return -(p * p.clamp_min(1e-12).log()).sum(-1)
+n_steps = 3000
+losses = torch.empty(n_steps)
+for step in range(n_steps):
+    losses[step] = svi.step(counts, K)
 ```
 
 ```{python}
-#| label: bnn-eval
-#| code-fold: false
-mlp_in  = mlp_probs(mlp, x_test)
-mlp_out = mlp_probs(mlp, x_ood)
-bnn_in  = bnn_probs(bnn_model, bnn_guide, x_test)
-bnn_out = bnn_probs(bnn_model, bnn_guide, x_ood)
-
-print(f"MLP test accuracy: {(mlp_in.argmax(-1) == y_test).float().mean():.3f}")
-print(f"BNN test accuracy: {(bnn_in.argmax(-1) == y_test).float().mean():.3f}")
-```
-
-```{python}
-#| label: fig-bnn-entropy
-#| fig-cap: "Predictive entropy on MNIST (in-distribution) and Fashion-MNIST (OOD). The vanilla MLP is over-confident on OOD inputs; the Bayesian MLP assigns them noticeably higher entropy."
+#| label: fig-lda-elbo
+#| fig-cap: "Negative ELBO during SVI training of LDA on the poetry corpus."
 #| code-fold: true
-fig, axes = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
-for ax, (name, p_in, p_out) in zip(
-    axes, [("MLP", mlp_in, mlp_out), ("BNN", bnn_in, bnn_out)]
-):
-    ax.hist(entropy(p_in).numpy(),  bins=40, alpha=0.5,
-            density=True, label="MNIST")
-    ax.hist(entropy(p_out).numpy(), bins=40, alpha=0.5,
-            density=True, label="Fashion-MNIST")
-    ax.set_title(name)
-    ax.set_xlabel("predictive entropy")
-axes[0].legend()
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.plot(losses)
+ax.set_xlabel("step"); ax.set_ylabel("-ELBO"); ax.set_yscale("log")
+plt.tight_layout(); plt.show()
+```
+
+### Inspecting the topics
+
+```{python}
+#| label: lda-medians
+#| code-fold: false
+medians = lda_guide.median()
+beta_hat = medians["beta"]    # (K, V)
+theta_hat = medians["theta"]  # (D, K)
+
+top_n = 10
+for k in range(K):
+    top = beta_hat[k].topk(top_n).indices.tolist()
+    words = [vocab[i] for i in top]
+    print(f"Topic {k}: {' '.join(words)}")
+```
+
+### Per-author topic mixtures
+
+If LDA has done something useful, chunks from the same poet should have similar topic mixtures. We average $\theta_d$ within each author and plot the result.
+
+```{python}
+#| label: fig-lda-theta
+#| fig-cap: "Average posterior topic mixture per author. Each row sums to one. If LDA is finding stylistic structure, the rows should look very different from one another."
+#| code-fold: true
+import numpy as np
+
+author_list = sorted(set(authors))
+author_theta = torch.zeros(len(author_list), K)
+for d, a in enumerate(authors):
+    author_theta[author_list.index(a)] += theta_hat[d]
+author_theta = author_theta / author_theta.sum(dim=1, keepdim=True)
+
+fig, ax = plt.subplots(figsize=(6, 0.5 * len(author_list) + 1))
+im = ax.imshow(author_theta.numpy(), aspect="auto",
+               vmin=0, vmax=1, cmap="viridis")
+ax.set_xticks(range(K)); ax.set_xticklabels([f"T{k}" for k in range(K)])
+ax.set_yticks(range(len(author_list))); ax.set_yticklabels(author_list)
+fig.colorbar(im, ax=ax, label=r"mean $\theta_{d,k}$")
 plt.tight_layout()
 plt.show()
 ```
 
+### Posterior uncertainty
+
+The objects above — `beta_hat`, `theta_hat` — are point estimates (variational medians). The whole point of doing VI rather than MAP is that we have a *distribution* over them. We can read off marginal credible intervals directly from the guide:
+
 ```{python}
-#| label: fig-bnn-preds
-#| fig-cap: "Per-image class probabilities for four MNIST test digits (left) and four Fashion-MNIST images (right). On MNIST both models concentrate on the correct class. On Fashion-MNIST the MLP still picks a single digit confidently; the BNN spreads its mass across several classes."
-#| code-fold: true
-torch.manual_seed(1)
-n_show = 4
-idx_in  = torch.randperm(x_test.shape[0])[:n_show]
-idx_ood = torch.randperm(x_ood.shape[0])[:n_show]
+#| label: lda-quantiles
+#| code-fold: false
+quantiles = lda_guide.quantiles([0.05, 0.5, 0.95])
+beta_lo, beta_med, beta_hi = quantiles["beta"]   # each (K, V)
 
-fig, axes = plt.subplots(n_show, 6, figsize=(11, 1.8 * n_show),
-                         gridspec_kw={"width_ratios": [1, 2, 2, 1, 2, 2]})
-classes = list(range(10))
-
-for row in range(n_show):
-    for col, (x_src, probs_mlp, probs_bnn, idx) in enumerate([
-        (x_test, mlp_in,  bnn_in,  idx_in[row].item()),
-        (x_ood,  mlp_out, bnn_out, idx_ood[row].item()),
-    ]):
-        base = col * 3
-        axes[row, base + 0].imshow(x_src[idx].reshape(28, 28).numpy(), cmap="gray")
-        axes[row, base + 0].set_xticks([]); axes[row, base + 0].set_yticks([])
-        axes[row, base + 1].bar(classes, probs_mlp[idx].numpy(), color="C0")
-        axes[row, base + 2].bar(classes, probs_bnn[idx].numpy(), color="C1")
-        for c in (base + 1, base + 2):
-            axes[row, c].set_ylim(0, 1)
-            axes[row, c].set_xticks(classes)
-            axes[row, c].tick_params(labelsize=7)
-        if row > 0:
-            for c in (base + 1, base + 2):
-                axes[row, c].set_xticklabels([])
-
-for c, title in [(0, "MNIST"), (1, "MLP"), (2, "BNN"),
-                 (3, "Fashion"), (4, "MLP"), (5, "BNN")]:
-    axes[0, c].set_title(title)
-
-plt.tight_layout()
-plt.show()
+# 90% interval for the top word in each topic.
+for k in range(K):
+    v = beta_med[k].argmax().item()
+    lo, med, hi = beta_lo[k, v], beta_med[k, v], beta_hi[k, v]
+    print(f"Topic {k}: '{vocab[v]}' "
+          f"beta = {med:.3f}  90% CI = [{lo:.3f}, {hi:.3f}]")
 ```
+
+The intervals are narrow — a known artefact of mean-field VI on LDA, which underestimates posterior variance because it forces the topic-word and document-topic distributions to be *independent* under $q$. NUTS would give wider intervals; richer guides (`AutoLowRankMultivariateNormal`, normalizing flows) close some of the gap.
 
 ## Beyond mean-field Gaussian guides {#sec-beyond-meanfield}
 
@@ -519,5 +448,6 @@ The `AutoNormal` guide is a sensible default but it has known limitations.
 - **It is over-confident.** This is the structural cost of reverse-KL minimization with a too-restrictive family. Diagnostics: compare against MCMC on a small problem, or use **importance-weighted ELBO** (`RenyiELBO`, IWAE-style bounds) which tightens the bound at the cost of more samples per step.
 - **Custom guides.** Pyro lets us write guides as ordinary Python functions, exactly as we wrote models. This is how we encode problem-specific structure — for example, sharing variational parameters across a plate, or using a different family for different latent variables. Tools like `EasyGuide` and `pyro.contrib.autoguide.AutoGuideList` help compose autoguides for parts of the model with hand-written guides for the rest.
 
-VI is rarely the *most accurate* way to do Bayesian inference, but for models where MCMC is too slow — Bayesian neural networks being the canonical case — it is often the only practical option. The takeaway is that the choice of guide is a modeling decision in its own right, and the right one depends on what you are willing to trade between speed, expressiveness, and calibration.
+VI is rarely the *most accurate* way to do Bayesian inference, but for models where MCMC is too slow — large topic models, Bayesian neural networks, deep generative models — it is often the only practical option. The takeaway is that the choice of guide is a modeling decision in its own right, and the right one depends on what you are willing to trade between speed, expressiveness, and calibration.
+
 

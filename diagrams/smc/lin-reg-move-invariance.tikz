@@ -1,0 +1,23 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=black node] (26) at (-6, 0.5) {};
+		\node [style=small box] (27) at (-2.5, 0.5) {$m_i$};
+		\node [style=small box] (28) at (-4.5, -0.75) {$w_i$};
+		\node [style=small box] (30) at (-7.5, 0.5) {$b_i$};
+		\node [style=none] (31) at (-1.25, 0.5) {};
+		\node [style=black node] (32) at (3.25, 0.5) {};
+		\node [style=small box] (34) at (4.75, -0.75) {$w_i$};
+		\node [style=small box] (35) at (1.75, 0.5) {$b_i$};
+		\node [style=none] (36) at (6.75, 0.5) {};
+		\node [style=none] (37) at (0, 0) {$=$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (26) to (27);
+		\draw [style=edge, in=-180, out=-90, looseness=1.50] (26) to (28);
+		\draw [style=edge] (30) to (26);
+		\draw [style=edge] (27) to (31.center);
+		\draw [style=edge, in=-180, out=-90, looseness=1.50] (32) to (34);
+		\draw [style=edge] (35) to (32);
+		\draw [style=edge] (32) to (36.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

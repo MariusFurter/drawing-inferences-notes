@@ -25,7 +25,7 @@ data/swiss-health/
 
 chapters/data/
 
-# VI chapter cached datasets / trained weights (regenerate with
-# `python data/vi/download_mnist.py` and by rendering the chapter).
+# VI chapter cached datasets (regenerate with
+# `python data/vi/download_poems.py`).
 data/vi/*
-!data/vi/download_mnist.py
+!data/vi/download_poems.py

@@ -1,0 +1,22 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (22) at (-5.5, 0.5) {$p$};
+		\node [style=black node] (23) at (-4, 0.5) {};
+		\node [style=small box] (25) at (-2.5, -0.75) {$w_1$};
+		\node [style=black node] (26) at (1, 0.5) {};
+		\node [style=small box] (27) at (4.5, 0.5) {$m_2$};
+		\node [style=small box] (28) at (2.5, -0.75) {$w_2$};
+		\node [style=none] (29) at (6.75, 0.5) {$\ldots$};
+		\node [style=small box] (30) at (-0.5, 0.5) {$m_1$};
+		\node [style=none] (31) at (5.75, 0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=edge] (22) to (23);
+		\draw [style=edge, in=-180, out=-90, looseness=1.50] (23) to (25);
+		\draw [style=edge] (26) to (27);
+		\draw [style=edge, in=-180, out=-90, looseness=1.50] (26) to (28);
+		\draw [style=edge] (23) to (30);
+		\draw [style=edge] (30) to (26);
+		\draw [style=edge] (27) to (31.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
