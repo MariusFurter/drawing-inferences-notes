@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>9&nbsp; Variational inference – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../exercises/1-classic-puzzles.html" rel="next">
+<link href="../chapters/smc.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/vi.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Variational inference</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hybrid-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hybrid models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/smc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sequential Monte Carlo</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/vi.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Variational inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 5: Inverse Physics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/8-multilevel-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 8: Multilevel regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WeightedSampling.torch</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-inference-as-optimization" id="toc-sec-inference-as-optimization" class="nav-link active" data-scroll-target="#sec-inference-as-optimization"><span class="header-section-number">9.1</span> Inference as optimization</a>
+  <ul class="collapse">
+  <li><a href="#the-posterior-we-want" id="toc-the-posterior-we-want" class="nav-link" data-scroll-target="#the-posterior-we-want"><span class="header-section-number">9.1.1</span> The posterior we want</a></li>
+  <li><a href="#a-different-idea-approximate-dont-sample" id="toc-a-different-idea-approximate-dont-sample" class="nav-link" data-scroll-target="#a-different-idea-approximate-dont-sample"><span class="header-section-number">9.1.2</span> A different idea: approximate, don’t sample</a></li>
+  <li><a href="#kl-divergence" id="toc-kl-divergence" class="nav-link" data-scroll-target="#kl-divergence"><span class="header-section-number">9.1.3</span> KL divergence</a></li>
+  <li><a href="#the-elbo" id="toc-the-elbo" class="nav-link" data-scroll-target="#the-elbo"><span class="header-section-number">9.1.4</span> The ELBO</a></li>
+  <li><a href="#maximizing-the-elbo" id="toc-maximizing-the-elbo" class="nav-link" data-scroll-target="#maximizing-the-elbo"><span class="header-section-number">9.1.5</span> Maximizing the ELBO</a></li>
+  <li><a href="#typical-variational-families" id="toc-typical-variational-families" class="nav-link" data-scroll-target="#typical-variational-families"><span class="header-section-number">9.1.6</span> Typical variational families</a></li>
+  </ul></li>
+  <li><a href="#sec-pyro-svi" id="toc-sec-pyro-svi" class="nav-link" data-scroll-target="#sec-pyro-svi"><span class="header-section-number">9.2</span> Variational inference in Pyro</a></li>
+  <li><a href="#sec-bayes-lin-reg" id="toc-sec-bayes-lin-reg" class="nav-link" data-scroll-target="#sec-bayes-lin-reg"><span class="header-section-number">9.3</span> Example: Bayesian linear regression</a>
+  <ul class="collapse">
+  <li><a href="#simulated-data" id="toc-simulated-data" class="nav-link" data-scroll-target="#simulated-data"><span class="header-section-number">9.3.1</span> Simulated data</a></li>
+  <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model"><span class="header-section-number">9.3.2</span> Model</a></li>
+  <li><a href="#guide-and-svi-setup" id="toc-guide-and-svi-setup" class="nav-link" data-scroll-target="#guide-and-svi-setup"><span class="header-section-number">9.3.3</span> Guide and SVI setup</a></li>
+  <li><a href="#training-loop" id="toc-training-loop" class="nav-link" data-scroll-target="#training-loop"><span class="header-section-number">9.3.4</span> Training loop</a></li>
+  <li><a href="#posterior-summaries" id="toc-posterior-summaries" class="nav-link" data-scroll-target="#posterior-summaries"><span class="header-section-number">9.3.5</span> Posterior summaries</a></li>
+  <li><a href="#posterior-predictive" id="toc-posterior-predictive" class="nav-link" data-scroll-target="#posterior-predictive"><span class="header-section-number">9.3.6</span> Posterior predictive</a></li>
+  <li><a href="#comparison-against-nuts" id="toc-comparison-against-nuts" class="nav-link" data-scroll-target="#comparison-against-nuts"><span class="header-section-number">9.3.7</span> Comparison against NUTS</a></li>
+  </ul></li>
+  <li><a href="#sec-lda" id="toc-sec-lda" class="nav-link" data-scroll-target="#sec-lda"><span class="header-section-number">9.4</span> Example: Topic models on classic English poetry</a>
+  <ul class="collapse">
+  <li><a href="#the-model" id="toc-the-model" class="nav-link" data-scroll-target="#the-model"><span class="header-section-number">9.4.1</span> The model</a></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data"><span class="header-section-number">9.4.2</span> Data</a></li>
+  <li><a href="#model-and-guide" id="toc-model-and-guide" class="nav-link" data-scroll-target="#model-and-guide"><span class="header-section-number">9.4.3</span> Model and guide</a></li>
+  <li><a href="#training" id="toc-training" class="nav-link" data-scroll-target="#training"><span class="header-section-number">9.4.4</span> Training</a></li>
+  <li><a href="#inspecting-the-topics" id="toc-inspecting-the-topics" class="nav-link" data-scroll-target="#inspecting-the-topics"><span class="header-section-number">9.4.5</span> Inspecting the topics</a></li>
+  <li><a href="#per-author-topic-mixtures" id="toc-per-author-topic-mixtures" class="nav-link" data-scroll-target="#per-author-topic-mixtures"><span class="header-section-number">9.4.6</span> Per-author topic mixtures</a></li>
+  <li><a href="#posterior-uncertainty" id="toc-posterior-uncertainty" class="nav-link" data-scroll-target="#posterior-uncertainty"><span class="header-section-number">9.4.7</span> Posterior uncertainty</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-vi" class="quarto-section-identifier"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Variational inference</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="hidden">
+<p><span class="math display">\[
+\def\then{\mathbin{;}}
+\def\kernel{\rightsquigarrow}
+\def\swap{\mathsf{swap}}
+\def\id{\mathsf{id}}
+\def\cp{\mathsf{copy}}
+\def\del{\mathsf{del}}
+\def\ivmark#1{[\![#1]\!]}
+\]</span></p>
+</div>
+<p>MCMC approximates a posterior by <em>sampling</em>: build a chain whose long-run distribution is the target, run it long enough, and treat its trajectory as a sample. <strong>Variational inference (VI)</strong> takes a different route. Instead of sampling, it turns inference into an <em>optimization problem</em>: pick a tractable family of distributions and find the member of that family that is closest to the posterior. The result is not a cloud of samples but an explicit, parameterized distribution that we can sample from, evaluate, and differentiate cheaply.</p>
+<p>First, we develop VI from scratch: we define what “closest to the posterior” means via the Kullback–Leibler divergence, derive the <strong>Evidence Lower Bound (ELBO)</strong> that we actually optimize, and explain the reparameterization trick that makes stochastic gradients possible. Second, we meet <a href="https://pyro.ai/">Pyro</a>, the PyTorch-based probabilistic programming framework we will use, and fit a small <strong>Bayesian linear regression</strong> with stochastic variational inference (SVI). Third, we scale up to <strong>Latent Dirichlet Allocation</strong> on a corpus of classic English-language poetry.</p>
+<section id="sec-inference-as-optimization" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="sec-inference-as-optimization"><span class="header-section-number">9.1</span> Inference as optimization</h2>
+<section id="the-posterior-we-want" class="level3" data-number="9.1.1">
+<h3 data-number="9.1.1" class="anchored" data-anchor-id="the-posterior-we-want"><span class="header-section-number">9.1.1</span> The posterior we want</h3>
+<p>Consider a generative model with latent variables <span class="math inline">\(z\)</span> and observed data <span class="math inline">\(x\)</span>, specified by a joint density <span class="math inline">\(p(x, z)\)</span>. Given an observation <span class="math inline">\(\bar x\)</span>, Bayesian inference is the calculation of the posterior <span class="math display">\[
+p(z \mid \bar x) \;=\; \frac{p(\bar x, z)}{p(\bar x)}, \qquad p(\bar x) \;=\; \int p(\bar x, z)\,\mathrm{d}z.
+\]</span> The joint <span class="math inline">\(p(\bar x, z)\)</span> is usually easy to compute since it is specified by the model. The <strong>evidence</strong> <span class="math inline">\(p(\bar x)\)</span>, however, is an integral over the entire latent space. For all but the simplest models it has no closed form and is too expensive to evaluate numerically. So we generally know <span class="math inline">\(p(z \mid \bar x)\)</span> up to some intractable normalizing constant.</p>
+</section>
+<section id="a-different-idea-approximate-dont-sample" class="level3" data-number="9.1.2">
+<h3 data-number="9.1.2" class="anchored" data-anchor-id="a-different-idea-approximate-dont-sample"><span class="header-section-number">9.1.2</span> A different idea: approximate, don’t sample</h3>
+<p>Sampling methods like MCMC sidestep the intractable <span class="math inline">\(p(\bar x)\)</span> by drawing samples proportional to <span class="math inline">\(p(\bar x, z)\)</span>. <strong>Variational inference</strong> sidesteps it by approximating <span class="math inline">\(p(z \mid \bar x)\)</span> by a known, tractable distribution. To do this, we pick a tractable parametric family of densities</p>
+<p><span class="math display">\[
+\mathcal{Q} \;=\; \{\, q_\phi(z) : \phi \in \Phi \,\},
+\]</span></p>
+<p>called the <strong>variational family</strong> or <strong>guide</strong>. We then search inside <span class="math inline">\(\mathcal{Q}\)</span> for the member closest to the posterior. Hence, inference becomes optimization over <span class="math inline">\(\phi\)</span>. The shape of <span class="math inline">\(q_\phi\)</span> trades <strong>expressiveness</strong> (how well it can match the true posterior) against <strong>tractability</strong> (how cheaply we can optimize over it).</p>
+<p>Compared to MCMC, VI is typically <em>faster</em> and scales better to large datasets and high-dimensional latents. However, it returns an <em>approximation</em> whose quality is bounded by the chosen family <span class="math inline">\(\mathcal{Q}\)</span>.</p>
+</section>
+<section id="kl-divergence" class="level3" data-number="9.1.3">
+<h3 data-number="9.1.3" class="anchored" data-anchor-id="kl-divergence"><span class="header-section-number">9.1.3</span> KL divergence</h3>
+<p>To make “closest” precise we need a discrepancy between two densities. In VI, we measure discrepancy with the <strong>Kullback–Leibler divergence</strong>. For two densities <span class="math inline">\(q\)</span> and <span class="math inline">\(p\)</span> on the same space, <span class="math display">\[
+\mathrm{KL}(q \,\|\, p) \;:=\; \int \log \frac{q(z)}{p(z)}\, q(z) \,\mathrm{d}z \;=\; \mathbb{E}_{q(z)}\!\left[\log \frac{q(z)}{p(z)}\right].
+\]</span></p>
+<p>KL is non-negative, equals zero iff <span class="math inline">\(q = p\)</span>, but is not symmetric.</p>
+<p>VI minimizes the <strong>reverse</strong> KL, with <span class="math inline">\(q\)</span> in the first slot: <span class="math display">\[
+q^\star_\phi \;=\; \arg\min_{\phi}\; \mathrm{KL}\!\big(\,q_\phi(z)\,\big\|\,p(z \mid x)\,\big).
+\]</span></p>
+<p>The reason is purely practical: this expectation is under <span class="math inline">\(q_\phi\)</span>, which we chose precisely because we can sample from it. The forward KL <span class="math inline">\(\mathrm{KL}(p(\cdot \mid x)\,\|\,q_\phi)\)</span> would require expectations under the very posterior we are trying to compute.</p>
+</section>
+<section id="the-elbo" class="level3" data-number="9.1.4">
+<h3 data-number="9.1.4" class="anchored" data-anchor-id="the-elbo"><span class="header-section-number">9.1.4</span> The ELBO</h3>
+<p>If we expand the reverse KL using <span class="math inline">\(p(z \mid \bar x) = p(\bar x, z) / p(\bar x)\)</span>, the intractable evidence appears as a constant additive term: <span class="math display">\[
+\begin{aligned}
+\mathrm{KL}(q_\phi \,\|\, p(\cdot \mid \bar x))
+&amp;\;=\; \mathbb{E}_{q_\phi(z)}\!\left[\log \frac{q_\phi(z)}{p(z \mid \bar x)}\right] \\
+&amp;\;=\; \mathbb{E}_{q_\phi(z)}\!\left[\log q_\phi(z) - \log p(z \mid \bar x)\right] \\
+&amp;\;=\; \mathbb{E}_{q_\phi(z)}\!\left[\log q_\phi(z) - \log p(\bar x, z) + \log p(\bar x)\right] \\
+&amp;\;=\; \mathbb{E}_{q_\phi(z)}\!\left[\log q_\phi(z) - \log p(\bar x, z)\right] \;+\; \log p(\bar x),
+\end{aligned}
+\]</span> where in the last step we pulled <span class="math inline">\(\log p(\bar x)\)</span> out of the expectation because it does not depend on <span class="math inline">\(z\)</span>.</p>
+<p>Since <span class="math inline">\(\log p(\bar x)\)</span> does not depend on <span class="math inline">\(\phi\)</span>, minimizing the KL is equivalent to minimizing the first term. Traditionally, the negative of this term is called the <strong>Evidence Lower Bound</strong> (ELBO): <span class="math display">\[
+    \mathrm{ELBO}(\phi) \;:=\; \mathbb{E}_{q_\phi(z)}\!\left[\log p(\bar x, z) - \log q_\phi(z)\right].
+\]</span></p>
+<p>Hence, to minimize the KL is to maximize the ELBO.</p>
+</section>
+<section id="maximizing-the-elbo" class="level3" data-number="9.1.5">
+<h3 data-number="9.1.5" class="anchored" data-anchor-id="maximizing-the-elbo"><span class="header-section-number">9.1.5</span> Maximizing the ELBO</h3>
+<p>Inspecting the ELBO, both quantities inside the expectation are things we can evaluate: <span class="math inline">\(\log p(\bar x, z)\)</span> is the model’s joint log-density, and <span class="math inline">\(\log q_\phi(z)\)</span> is the guide’s log-density. The expectation itself is under <span class="math inline">\(q_\phi\)</span>, which we can sample from.</p>
+<p>Thus, we can use the LLN to estimate the ELBO with Monte Carlo: <span class="math display">\[
+\widehat{\mathrm{ELBO}}(\phi) \;=\; \frac{1}{S}\sum_{s=1}^{S}\!\left[\log p(\bar x, z^{(s)}) - \log q_\phi(z^{(s)})\right], \qquad z^{(s)} \sim q_\phi,
+\]</span></p>
+<p>To optimize, we need the gradient <span class="math inline">\(\nabla_\phi \mathrm{ELBO}(\phi)\)</span>. Again, we want to construct a Monte Carlo estimator for it. Trying to differentiate the ELBO directly runs into trouble. Concretely, if we write the ELBO as <span class="math display">\[
+\mathrm{ELBO}(\phi) \;=\; \int q_\phi(z)\,f_\phi(z)\,\mathrm{d}z, \qquad f_\phi(z) := \log p(\bar x, z) - \log q_\phi(z),
+\]</span></p>
+<p>then differentiating under the integral and applying the product rule gives two terms, <span class="math display">\[
+\nabla_\phi \mathrm{ELBO}(\phi) \;=\; \int (\nabla_\phi q_\phi(z))\, f_\phi(z)\,\mathrm{d}z \;+\; \int q_\phi(z)\,\nabla_\phi f_\phi(z)\,\mathrm{d}z.
+\]</span></p>
+<p>The first term is <em>not</em> an expectation under <span class="math inline">\(q_\phi\)</span>, so it cannot be estimated by simply averaging over samples from <span class="math inline">\(q_\phi\)</span>.</p>
+<p>The <strong>reparameterization trick</strong> fixes this. The idea is to push the randomness out of <span class="math inline">\(q_\phi\)</span> into a fixed, <span class="math inline">\(\phi\)</span>-free noise distribution and obtain <span class="math inline">\(z\)</span> as a deterministic function of this noise. Explicitly, suppose we can write</p>
+<p><span class="math display">\[
+z \;=\; g_\phi(\epsilon), \qquad \epsilon \sim p(\epsilon),
+\]</span></p>
+<p>where <span class="math inline">\(p(\epsilon)\)</span> does not depend on <span class="math inline">\(\phi\)</span> and <span class="math inline">\(g_\phi\)</span> is a differentiable, deterministic map such that <span class="math inline">\(z \sim q_\phi\)</span>. For example, if <span class="math inline">\(q_\phi = \mathcal{N}(\mu, \sigma^2)\)</span> with <span class="math inline">\(\phi = (\mu, \sigma)\)</span>, we can take <span class="math inline">\(\epsilon \sim \mathcal{N}(0, 1)\)</span> and <span class="math inline">\(g_\phi(\epsilon) = \mu + \sigma \epsilon\)</span>. Under this change of variables, we can write the ELBO as an expectation under <span class="math inline">\(p(\epsilon)\)</span>: <span class="math display">\[
+\mathrm{ELBO}(\phi) \;=\; \mathbb{E}_{p(\epsilon)}\!\left[\log p(\bar x,\, g_\phi(\epsilon)) - \log q_\phi(g_\phi(\epsilon))\right].
+\]</span></p>
+<p>Since <span class="math inline">\(\phi\)</span> now appears <em>only</em> in the integrand, the gradient passes through the expectation (no product rule involved):</p>
+<p><span class="math display">\[
+\nabla_\phi \mathrm{ELBO}(\phi) \;=\; \mathbb{E}_{p(\epsilon)}\!\left[\nabla_\phi\!\left(\log p(\bar x,\, g_\phi(\epsilon)) - \log q_\phi(g_\phi(\epsilon))\right)\right].
+\]</span></p>
+<p>We can thus estimate the gradient using Monte Carlo by drawing <span class="math inline">\(\epsilon^{(1)},\dots,\epsilon^{(S)}\)</span>, computing <span class="math inline">\(z^{(s)} = g_\phi(\epsilon^{(s)})\)</span>, and averaging the per-sample gradients. The per-sample gradients can be computed by automatic differentiation.</p>
+<p>Plugging this gradient estimator into any stochastic optimizer (Adam, SGD, …) gives <strong>stochastic variational inference (SVI)</strong>: at each step, sample a small minibatch of <span class="math inline">\(\epsilon\)</span>’s, compute a noisy gradient of the ELBO, and take a step in <span class="math inline">\(\phi\)</span>.</p>
+</section>
+<section id="typical-variational-families" class="level3" data-number="9.1.6">
+<h3 data-number="9.1.6" class="anchored" data-anchor-id="typical-variational-families"><span class="header-section-number">9.1.6</span> Typical variational families</h3>
+<p>In practice a small number of Gaussian-based families dominate, since they are cheap, easy to reparameterize, and easy to fit.</p>
+<p><strong>Mean-field Gaussian.</strong> Give each of the <span class="math inline">\(d\)</span> latent coordinates its own independent Gaussian:</p>
+<p><span class="math display">\[
+z_i \;\sim\; \mathcal{N}(\,\cdot \mid \mu_i, \sigma_i), \qquad i = 1, \dots, d.
+\]</span></p>
+<p>The number of variational parameters scales linearly in <span class="math inline">\(d\)</span>, and the log-density is a sum of one-dimensional terms. The price is that mean-field assumes the coordinates of <span class="math inline">\(z\)</span> are <strong>independent under the posterior</strong>, which they almost never are (think slope and intercept in a regression). The best mean-field fit is an axis-aligned ellipsoid inside the true posterior’s tilted one: correctly <em>centered</em> but systematically <em>too narrow</em>. Credible intervals are over-confident, and any downstream quantity that depends on posterior correlations is biased.</p>
+<p><strong>Full-rank Gaussian.</strong> Replace independence with a full covariance,</p>
+<p><span class="math display">\[
+z \;\sim\; \mathcal{N}(\,\cdot \mid \mu, \Sigma),
+\]</span></p>
+<p>parameterized e.g.&nbsp;by a Cholesky factor <span class="math inline">\(\Sigma = L L^\top\)</span>. This captures arbitrary linear correlations between latents, but costs <span class="math inline">\(O(d^2)\)</span> parameters and work per gradient step. This is prohibitive once <span class="math inline">\(d\)</span> is in the thousands.</p>
+<p><strong>Low-rank Gaussian.</strong> Compromise by writing <span class="math inline">\(\Sigma = D + W W^\top\)</span> with <span class="math inline">\(W \in \mathbb{R}^{d \times r}\)</span> and <span class="math inline">\(D\)</span> diagonal. This captures the <span class="math inline">\(r\)</span> leading directions of posterior correlation at cost <span class="math inline">\(O(d r)\)</span> per step.</p>
+<p>All three families are <em>unimodal</em> and <em>Gaussian-shaped</em>. Heavy-tailed, skewed, or multimodal posteriors are out of reach no matter how carefully we tune <span class="math inline">\(\phi\)</span>. For those, one reaches for richer families like normalizing flows.</p>
+</section>
+</section>
+<section id="sec-pyro-svi" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="sec-pyro-svi"><span class="header-section-number">9.2</span> Variational inference in Pyro</h2>
+<p>We have already met <a href="https://num.pyro.ai/">NumPyro</a> in the chapter on MCMC. <a href="https://pyro.ai/">Pyro</a> is its older sibling. It has the same modeling primitives, but is built on PyTorch rather than JAX. We use Pyro here because its support for variational inference is more mature than NumPyro’s, which is primarily focused on MCMC.</p>
+<p>The user-facing workflow is very similar to MCMC in NumPyro, but with three new ingredients.</p>
+<p><strong>1. A guide alongside the model.</strong> In MCMC, the model is the only object we write: the algorithm samples directly from the (unnormalized) posterior it defines. In SVI we additionally need a <strong>guide</strong>, which is just a Python function defining the variational family <span class="math inline">\(q_\phi(z)\)</span>. The guide has the <em>same signature</em> and the <em>same <code>sample</code> site names</em> as the model. The free variational parameters <span class="math inline">\(\phi\)</span> are declared with <code>pyro.param</code>, which adds them to a global parameter store that Pyro tracks and differentiates.</p>
+<p>In practice we almost never write the guide by hand. Pyro’s <strong>autoguides</strong> build one mechanically from the model. The ones we will use:</p>
+<ul>
+<li><code>AutoNormal</code> — independent Gaussian per latent (mean-field). Our default.</li>
+<li><code>AutoMultivariateNormal</code> — full-covariance Gaussian, captures correlations.</li>
+<li><code>AutoLowRankMultivariateNormal</code> — middle ground, scales better in high dimensions.</li>
+<li><code>AutoNormalizingFlow</code>, <code>AutoIAFNormal</code> — flexible non-Gaussian families.</li>
+<li><code>AutoDelta</code> — point estimate (recovers MAP).</li>
+</ul>
+<p>Each autoguide automatically transforms constrained variables into an unconstrained space. Hence, the Gaussian variational families above remain valid even when the model uses constrained distributions like <code>HalfNormal</code> or <code>Dirichlet</code>.</p>
+<p><strong>2. An optimizer and a loss.</strong> SVI is an optimization problem, so we pick a gradient-based optimizer (<code>Adam</code> is the default) and a stochastic estimate of the (negative) ELBO as the loss. The class <code>pyro.infer.SVI</code> bundles model, guide, optimizer, and loss together. We use Pyro’s <code>Trace_ELBO</code>, which constructs the gradient estimator described in the previous section by tracing the model and guide and applying the reparameterization trick automatically.</p>
+<p><strong>3. An explicit training loop.</strong> With NUTS we call <code>mcmc.run(...)</code> once and wait. With SVI we are in charge of the loop: each call to <code>svi.step(...)</code> draws a fresh batch of <span class="math inline">\(\epsilon\)</span>’s, evaluates the ELBO and its gradient, and takes one optimizer step. We typically run thousands of steps and watch the (negative) ELBO go down to check convergence.</p>
+<p><strong>4. Model output</strong> The output of training is <em>not</em> a cloud of posterior samples but the fitted variational parameters <span class="math inline">\(\phi\)</span> sitting in the parameter store. From those we obtain samples or summaries on demand using <code>guide.quantiles(...)</code>, <code>guide.median()</code>, or the <code>Predictive</code> class (the same one we used in NumPyro).</p>
+</section>
+<section id="sec-bayes-lin-reg" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="sec-bayes-lin-reg"><span class="header-section-number">9.3</span> Example: Bayesian linear regression</h2>
+<p>As a first example we fit a Bayesian linear regression with SVI and compare it against NUTS on the same model. In practice, SVI is not the best choice for a model this small, but it is a good way to illustrate the workflow and the quality of the approximation.</p>
+<div id="vi-setup" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pyro</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pyro.distributions <span class="im">as</span> dist</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyro.infer <span class="im">import</span> SVI, Trace_ELBO, Predictive</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyro.infer.autoguide <span class="im">import</span> AutoNormal</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyro.optim <span class="im">import</span> Adam</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>pyro.set_rng_seed(<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="simulated-data" class="level3" data-number="9.3.1">
+<h3 data-number="9.3.1" class="anchored" data-anchor-id="simulated-data"><span class="header-section-number">9.3.1</span> Simulated data</h3>
+<p>We generate <span class="math inline">\(N = 50\)</span> points from <span class="math inline">\(y = b\,x + a + \sigma\,\varepsilon\)</span> with a single feature and known true parameters. We deliberately place the <span class="math inline">\(x\)</span>-values far from zero: this makes the intercept <span class="math inline">\(a\)</span> strongly anti-correlated with the slope <span class="math inline">\(b\)</span>. This will allow us to show how the mean-field guide fails to capture this correlation. This problem can be fixed by reparameterizing the model.</p>
+<div id="vi-data" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>D <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>true_b <span class="op">=</span> torch.tensor([<span class="op">-</span><span class="fl">1.5</span>])</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>true_a <span class="op">=</span> <span class="fl">4.0</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>true_sigma <span class="op">=</span> <span class="fl">0.7</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(N, D) <span class="op">+</span> <span class="fl">5.0</span>          <span class="co"># x-values centred around 5, not 0</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> x <span class="op">@</span> true_b <span class="op">+</span> true_a <span class="op">+</span> true_sigma <span class="op">*</span> torch.randn(N)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-fig-vi-data" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="dv">3</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ax.scatter(x[:, <span class="dv">0</span>], y, s<span class="op">=</span><span class="dv">15</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"x"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"y"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-vi-data" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vi-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vi_files/figure-html/fig-vi-data-output-1.png" width="470" height="278" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vi-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9.1: Simulated data. The <span class="math inline">\(x\)</span>-values are centred around 5, so the intercept at <span class="math inline">\(x = 0\)</span> is a long extrapolation from the cloud.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="model" class="level3" data-number="9.3.2">
+<h3 data-number="9.3.2" class="anchored" data-anchor-id="model"><span class="header-section-number">9.3.2</span> Model</h3>
+<p>The model follows the (Num)Pyro syntax we are familiar with.</p>
+<div id="vi-model" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> model(x, y<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    N, D <span class="op">=</span> x.shape</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Priors</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> pyro.plate(<span class="st">"features"</span>, D):</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        b <span class="op">=</span> pyro.sample(<span class="st">"b"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> pyro.sample(<span class="st">"a"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">10.0</span>))</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    sigma <span class="op">=</span> pyro.sample(<span class="st">"sigma"</span>, dist.HalfNormal(<span class="fl">1.0</span>))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Likelihood</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    mean <span class="op">=</span> x <span class="op">@</span> b <span class="op">+</span> a</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> pyro.plate(<span class="st">"data"</span>, N):</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pyro.sample(<span class="st">"y"</span>, dist.Normal(mean, sigma), obs<span class="op">=</span>y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="guide-and-svi-setup" class="level3" data-number="9.3.3">
+<h3 data-number="9.3.3" class="anchored" data-anchor-id="guide-and-svi-setup"><span class="header-section-number">9.3.3</span> Guide and SVI setup</h3>
+<p>We build a mean-field guide for the model using <code>AutoNormal(model)</code>. The <code>HalfNormal</code> prior on <span class="math inline">\(\sigma\)</span> is handled automatically by transforming to the unconstrained space via <span class="math inline">\(\log \sigma\)</span>.</p>
+<p>We bundle model, guide, optimizer, and loss into a single <code>SVI</code> object. <code>pyro.clear_param_store()</code> wipes any leftover variational parameters from previous runs. <code>Adam</code> is the optimizer with a learning rate of 0.01, and <code>Trace_ELBO()</code> constructs the Monte Carlo estimator for the negative ELBO.</p>
+<div id="vi-guide" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pyro.clear_param_store()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>guide <span class="op">=</span> AutoNormal(model)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>svi <span class="op">=</span> SVI(model, guide, Adam({<span class="st">"lr"</span>: <span class="fl">0.01</span>}), loss<span class="op">=</span>Trace_ELBO())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="training-loop" class="level3" data-number="9.3.4">
+<h3 data-number="9.3.4" class="anchored" data-anchor-id="training-loop"><span class="header-section-number">9.3.4</span> Training loop</h3>
+<p>Each <code>svi.step(x, y)</code> samples one batch of <span class="math inline">\(\epsilon\)</span>’s, computes a stochastic gradient of the negative ELBO via the reparameterization trick, and takes one Adam step. We just iterate and record the loss.</p>
+<div id="vi-train" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>n_steps <span class="op">=</span> <span class="dv">3000</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>losses <span class="op">=</span> torch.empty(n_steps)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(n_steps):</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    losses[step] <span class="op">=</span> svi.step(x, y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The loss curve is our convergence diagnostic. A flat tail means <span class="math inline">\(\phi\)</span> has stopped moving; persistent decrease means we should train longer or raise the learning rate.</p>
+<div id="cell-fig-vi-elbo" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ax.plot(losses)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"step"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"-ELBO"</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>ax.set_yscale(<span class="st">"log"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-vi-elbo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vi-elbo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vi_files/figure-html/fig-vi-elbo-output-1.png" width="565" height="278" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vi-elbo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9.2: Negative ELBO during SVI optimization. Log-scale on the y-axis.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="posterior-summaries" class="level3" data-number="9.3.5">
+<h3 data-number="9.3.5" class="anchored" data-anchor-id="posterior-summaries"><span class="header-section-number">9.3.5</span> Posterior summaries</h3>
+<p>The fitted guide <em>is</em> the posterior approximation. Marginal quantiles can be computed straight from <span class="math inline">\(q_\phi\)</span>. No sampling required:</p>
+<div id="vi-quantiles" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>quantiles <span class="op">=</span> guide.quantiles([<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>])</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, (lo, med, hi) <span class="kw">in</span> quantiles.items():</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">:&gt;6}</span><span class="ss">: median=</span><span class="sc">{</span>med<span class="sc">.</span>numpy()<span class="sc">.</span><span class="bu">round</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="ss">, "</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"90% CI=[</span><span class="sc">{</span>lo<span class="sc">.</span>numpy()<span class="sc">.</span><span class="bu">round</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>hi<span class="sc">.</span>numpy()<span class="sc">.</span><span class="bu">round</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="ss">]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     b: median=[-1.539], 90% CI=[[-1.57], [-1.507]]
+     a: median=4.205999851226807, 90% CI=[4.046000003814697, 4.366000175476074]
+ sigma: median=0.6930000185966492, 90% CI=[0.5889999866485596, 0.8149999976158142]</code></pre>
+</div>
+</div>
+<p>The medians sit near the true values <span class="math inline">\((b, a, \sigma) = (-1.5, 4.0, 0.7)\)</span>.</p>
+</section>
+<section id="posterior-predictive" class="level3" data-number="9.3.6">
+<h3 data-number="9.3.6" class="anchored" data-anchor-id="posterior-predictive"><span class="header-section-number">9.3.6</span> Posterior predictive</h3>
+<p>For predictions on new inputs we sample the latent parameters from <span class="math inline">\(q_\phi\)</span>, feed those samples through the model, and collect the resulting <code>y</code>-distributions. The <code>Predictive</code> class does this in one call:</p>
+<div id="vi-predictive" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>predictive <span class="op">=</span> Predictive(model, guide<span class="op">=</span>guide, num_samples<span class="op">=</span><span class="dv">500</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                        return_sites<span class="op">=</span>(<span class="st">"b"</span>, <span class="st">"a"</span>, <span class="st">"sigma"</span>, <span class="st">"y"</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>x_grid <span class="op">=</span> torch.linspace(<span class="dv">2</span>, <span class="dv">8</span>, <span class="dv">100</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>x_star <span class="op">=</span> x_grid.unsqueeze(<span class="op">-</span><span class="dv">1</span>)              <span class="co"># shape (100, 1)</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> predictive(x_star)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We turn those samples into two bands: the <em>credible band</em> for the regression mean <span class="math inline">\(x^\top b + a\)</span> (uncertainty about the line) and the <em>predictive band</em> for <span class="math inline">\(y\)</span> itself (which also includes observation noise <span class="math inline">\(\sigma\)</span>).</p>
+<div id="cell-fig-vi-predictive" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> samples[<span class="st">"b"</span>].reshape(<span class="op">-</span><span class="dv">1</span>, D)                         <span class="co"># (S, D)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> samples[<span class="st">"a"</span>].reshape(<span class="op">-</span><span class="dv">1</span>)                            <span class="co"># (S,)</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>y_samples <span class="op">=</span> samples[<span class="st">"y"</span>].reshape(<span class="op">-</span><span class="dv">1</span>, x_star.shape[<span class="dv">0</span>])   <span class="co"># (S, 100)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>mean_line <span class="op">=</span> x_star <span class="op">@</span> b.T <span class="op">+</span> a                            <span class="co"># (100, S)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>mean_line <span class="op">=</span> mean_line.T                                 <span class="co"># (S, 100)</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>mean_q <span class="op">=</span> torch.quantile(mean_line, torch.tensor([<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>]), dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>pred_q <span class="op">=</span> torch.quantile(y_samples, torch.tensor([<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>]), dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>ax.scatter(x[:, <span class="dv">0</span>], y, s<span class="op">=</span><span class="dv">15</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">"black"</span>, label<span class="op">=</span><span class="st">"data"</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>ax.fill_between(x_grid, pred_q[<span class="dv">0</span>], pred_q[<span class="dv">2</span>], alpha<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"C0"</span>, label<span class="op">=</span><span class="st">"90% predictive"</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>ax.fill_between(x_grid, mean_q[<span class="dv">0</span>], mean_q[<span class="dv">2</span>], alpha<span class="op">=</span><span class="fl">0.4</span>,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"C0"</span>, label<span class="op">=</span><span class="st">"90% mean"</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>ax.plot(x_grid, mean_q[<span class="dv">1</span>], color<span class="op">=</span><span class="st">"C0"</span>, label<span class="op">=</span><span class="st">"posterior median"</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"x"</span>)</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"y"</span>)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-vi-predictive" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vi-predictive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vi_files/figure-html/fig-vi-predictive-output-1.png" width="566" height="374" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vi-predictive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9.3: Posterior median (line) and 90% credible band for the regression mean, plus the wider 90% posterior-predictive band that includes observation noise.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="comparison-against-nuts" class="level3" data-number="9.3.7">
+<h3 data-number="9.3.7" class="anchored" data-anchor-id="comparison-against-nuts"><span class="header-section-number">9.3.7</span> Comparison against NUTS</h3>
+<p>Since this model is small, we can also run NUTS on the same <code>model</code> and overlay the two posteriors. We draw samples from both: NUTS produces samples by construction, and the fitted guide is a distribution we can sample from cheaply. The <code>Predictive</code> class with <code>guide=guide</code> does this for us. It draws latent values from <span class="math inline">\(q_\phi\)</span> in the unconstrained space and pushes them back through the model’s transforms to the natural space, giving samples directly comparable to NUTS’s.</p>
+<div id="vi-nuts" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyro.infer <span class="im">import</span> MCMC, NUTS</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>mcmc <span class="op">=</span> MCMC(NUTS(model), num_samples<span class="op">=</span><span class="dv">500</span>, warmup_steps<span class="op">=</span><span class="dv">500</span>, disable_progbar<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>mcmc.run(x, y)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>mcmc_samples <span class="op">=</span> mcmc.get_samples()</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>vi_samples <span class="op">=</span> Predictive(model, guide<span class="op">=</span>guide, num_samples<span class="op">=</span><span class="dv">500</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                        return_sites<span class="op">=</span>(<span class="st">"b"</span>, <span class="st">"a"</span>, <span class="st">"sigma"</span>))(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-fig-vi-vs-nuts" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>vi_b <span class="op">=</span> vi_samples[<span class="st">"b"</span>].reshape(<span class="op">-</span><span class="dv">1</span>, D)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>vi_a <span class="op">=</span> vi_samples[<span class="st">"a"</span>].reshape(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>vi_sigma <span class="op">=</span> vi_samples[<span class="st">"sigma"</span>].reshape(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>sites <span class="op">=</span> [(<span class="st">"b"</span>,     vi_b[:, <span class="dv">0</span>], mcmc_samples[<span class="st">"b"</span>][:, <span class="dv">0</span>]),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>         (<span class="st">"a"</span>,     vi_a,        mcmc_samples[<span class="st">"a"</span>]),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>         (<span class="st">"sigma"</span>, vi_sigma,    mcmc_samples[<span class="st">"sigma"</span>])]</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">2.5</span>))</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (name, vi_s, mc_s) <span class="kw">in</span> <span class="bu">zip</span>(axes, sites):</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    ax.hist(mc_s.numpy(), bins<span class="op">=</span><span class="dv">30</span>, density<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"black"</span>, label<span class="op">=</span><span class="st">"NUTS"</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    ax.hist(vi_s.numpy(), bins<span class="op">=</span><span class="dv">30</span>, density<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"C1"</span>, label<span class="op">=</span><span class="st">"VI"</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    ax.set_title(name)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-vi-vs-nuts" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vi-vs-nuts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vi_files/figure-html/fig-vi-vs-nuts-output-1.png" width="661" height="230" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vi-vs-nuts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9.4: Marginal posteriors from mean-field VI (orange) and NUTS (black).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>VI gets the posterior <em>centred</em> in the right place, but its marginals are much tighter than NUTS’s. To see why, we look at the joint posteriors instead of the marginals. The mean-field guide assumes the latents are independent, so its samples should look like an axis-aligned cloud. NUTS, on the other hand, is free to find any correlations the true posterior has.</p>
+<div id="cell-fig-vi-vs-nuts-pairs" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>names <span class="op">=</span> [<span class="st">"b"</span>, <span class="st">"a"</span>, <span class="st">"sigma"</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>vi_arr <span class="op">=</span> torch.stack([vi_b[:, <span class="dv">0</span>], vi_a, vi_sigma], dim<span class="op">=</span><span class="dv">1</span>).numpy()</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mc_arr <span class="op">=</span> torch.stack([mcmc_samples[<span class="st">"b"</span>][:, <span class="dv">0</span>],</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                      mcmc_samples[<span class="st">"a"</span>], mcmc_samples[<span class="st">"sigma"</span>]], dim<span class="op">=</span><span class="dv">1</span>).numpy()</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(names)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(n <span class="op">-</span> <span class="dv">1</span>, n <span class="op">-</span> <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="dv">5</span>))</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, n):</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        ax <span class="op">=</span> axes[i <span class="op">-</span> <span class="dv">1</span>, j]</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> j <span class="op">&lt;</span> i:</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>            ax.scatter(mc_arr[:, j], mc_arr[:, i], s<span class="op">=</span><span class="dv">6</span>, alpha<span class="op">=</span><span class="fl">0.4</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>            ax.scatter(vi_arr[:, j], vi_arr[:, i], s<span class="op">=</span><span class="dv">6</span>, alpha<span class="op">=</span><span class="fl">0.4</span>, color<span class="op">=</span><span class="st">"C1"</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> j <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>                ax.set_ylabel(names[i])</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">==</span> n <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>                ax.set_xlabel(names[j])</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>            ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-vi-vs-nuts-pairs" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vi-vs-nuts-pairs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vi_files/figure-html/fig-vi-vs-nuts-pairs-output-1.png" width="470" height="470" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vi-vs-nuts-pairs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9.5: Joint posteriors from VI (orange) and NUTS (black).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The NUTS cloud for <span class="math inline">\((b, a)\)</span> is strongly tilted: choosing a larger slope can be almost perfectly compensated by shifting the intercept down. The corresponding VI cloud is round because the mean-field guide cannot capture this correlation. Hence, either VI can fit a huge round cloud that only covers a small part of the true posterior, or it can fit a tight cloud that misses much of the true posterior. In this case, it does the latter.</p>
+</section>
+</section>
+<section id="sec-lda" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="sec-lda"><span class="header-section-number">9.4</span> Example: Topic models on classic English poetry</h2>
+<p>When we read a poem we recognize themes like love, death, nature, the sea, the passage of time. We would like to extract such themes from a corpus automatically, without anyone hand-labelling poems with topics. This is an <strong>unsupervised</strong> task: the input is raw text, and we ask the model to discover thematic structure on its own. The classic Bayesian approach is <strong>Latent Dirichlet Allocation</strong> (LDA, <span class="citation" data-cites="blei2003lda">Blei, Ng, and Jordan (<a href="../references.html#ref-blei2003lda" role="doc-biblioref">2003</a>)</span>).</p>
+<p>We assemble a small corpus from five canonical English-language poets: Shakespeare, Keats, Wordsworth, Whitman, and Dickinson. We then write a model that finds <span class="math inline">\(K\)</span> latent topics shared across the corpus. We expect the topics to track <em>style and author</em> at least as much as content. That gives us a way to check the model: if the inferred topic mixture for chunks from the same poet ends up similar, LDA is doing what it should.</p>
+<section id="the-model" class="level3" data-number="9.4.1">
+<h3 data-number="9.4.1" class="anchored" data-anchor-id="the-model"><span class="header-section-number">9.4.1</span> The model</h3>
+<p>LDA tells the following generative story. There are <span class="math inline">\(K\)</span> latent <strong>topics</strong> in the world, each a distribution over a vocabulary of <span class="math inline">\(V\)</span> words. For example, a “death” topic might place high probability on <em>grave</em>, <em>dust</em>, <em>sleep</em>, <em>eternity</em>; a “sea” topic on <em>wave</em>, <em>shore</em>, <em>salt</em>, <em>ship</em>. Each document is then written by mixing these topics in some proportions and drawing every word independently from the resulting mixture.</p>
+<p>Concretely, for <span class="math inline">\(K\)</span> topics, vocabulary of size <span class="math inline">\(V\)</span>, and <span class="math inline">\(D\)</span> documents:</p>
+<ol type="1">
+<li>For each topic <span class="math inline">\(k\)</span>, draw a distribution over words <span class="math inline">\(\beta_k \sim \mathrm{Dir}(\eta, \dots, \eta)\)</span>, with <span class="math inline">\(V\)</span> identical concentration parameters <span class="math inline">\(\eta\)</span>.</li>
+<li>For each document <span class="math inline">\(d\)</span>, draw a mixture over topics <span class="math inline">\(\theta_d \sim \mathrm{Dir}(\alpha, \dots, \alpha)\)</span>, with <span class="math inline">\(K\)</span> identical concentration parameters <span class="math inline">\(\alpha\)</span>.</li>
+<li>For each of the <span class="math inline">\(N_d\)</span> word slots in document <span class="math inline">\(d\)</span>, pick a topic <span class="math inline">\(z_{d,n} \sim \mathrm{Cat}(\theta_d)\)</span></li>
+<li>Then draw a word <span class="math inline">\(w_{d,n} \sim \mathrm{Cat}(\beta_{z_{d,n}})\)</span>.</li>
+</ol>
+<p>This kind of Dirichlet with equal concentrations on every coordinate is called a <strong>symmetric Dirichlet</strong>, and we write it as <span class="math inline">\(\mathrm{Dir}_V(\eta)\)</span> and <span class="math inline">\(\mathrm{Dir}_K(\alpha)\)</span> for short.</p>
+<p>The Dirichlet priors with small concentration (<span class="math inline">\(\eta, \alpha &lt; 1\)</span>) push both topics and document mixtures to be <em>sparse</em>: a topic concentrates on a handful of words, and each document is a mixture of just a few topics.</p>
+<p>Since the <span class="math inline">\(z_{d,n}\)</span> are discrete, we can marginalize them analytically as discussed in the <a href="../chapters/practical.html#simplifying-models">section on simplifying models</a>. Under the generative story above, every word in document <span class="math inline">\(d\)</span> is drawn independently from the same mixture <span class="math display">\[
+p(w \mid \theta_d, \beta) \;=\; \sum_{k=1}^K \theta_{d,k}\,\beta_{k,w}.
+\]</span></p>
+<p>Since word order does not enter the likelihood, we can summarise each document by its <strong>count vector</strong> <span class="math inline">\(\mathbf{c}_d = (c_{d,1}, \dots, c_{d,V})\)</span>, where <span class="math inline">\(c_{d,v}\)</span> is the number of times word <span class="math inline">\(v\)</span> appears. Replacing <span class="math inline">\(N_d\)</span> independent draws with their counts turns the per-word Categorical into a single Multinomial over the document: <span class="math display">\[
+\mathbf{c}_d \mid \theta_d, \beta \;\sim\; \mathrm{Multinomial}\!\Bigl(N_d,\; \sum_{k=1}^K \theta_{d,k}\,\beta_{k,\cdot}\Bigr).
+\]</span></p>
+<p>This collapsed form is what we will use: each document is a single observed count vector, and the only remaining latents are the continuous <span class="math inline">\(\theta_d\)</span> and <span class="math inline">\(\beta_k\)</span>. The final model is thus: <span class="math display">\[
+\begin{aligned}
+\beta_k &amp;\;\sim\; \mathrm{Dir}_V(\eta), &amp; k &amp;= 1, \dots, K, \\
+\theta_d &amp;\;\sim\; \mathrm{Dir}_K(\alpha), &amp; d &amp;= 1, \dots, D, \\
+\mathbf{c}_d \mid \theta_d, \beta &amp;\;\sim\; \mathrm{Multinomial}\!\Bigl(N_d,\; \sum_{k=1}^K \theta_{d,k}\,\beta_{k,\cdot}\Bigr), &amp; d &amp;= 1, \dots, D.
+\end{aligned}
+\]</span></p>
+</section>
+<section id="data" class="level3" data-number="9.4.2">
+<h3 data-number="9.4.2" class="anchored" data-anchor-id="data"><span class="header-section-number">9.4.2</span> Data</h3>
+<p>The bag-of-words counts are produced by fetching each poet’s collected works from Project Gutenberg, removing common stop-words and editorial words (like <em>page</em>, <em>note</em>, <em>contents</em>), and splitting the remaining text into fixed-size chunks of 200 tokens that we treat as documents.</p>
+<div id="lda-setup" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pyro</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pyro.distributions <span class="im">as</span> dist</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyro.infer <span class="im">import</span> SVI, Trace_ELBO</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyro.infer.autoguide <span class="im">import</span> AutoNormal</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyro.optim <span class="im">import</span> Adam</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>pyro.distributions.enable_validation(<span class="va">False</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> torch.load(<span class="st">"../data/vi/poems.pt"</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> data[<span class="st">"counts"</span>]  <span class="co"># (D, V) long tensor</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>vocab <span class="op">=</span> data[<span class="st">"vocab"</span>]</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>authors <span class="op">=</span> data[<span class="st">"authors"</span>]  <span class="co"># length D, one author per chunk</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>D, V <span class="op">=</span> counts.shape</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">6</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="model-and-guide" class="level3" data-number="9.4.3">
+<h3 data-number="9.4.3" class="anchored" data-anchor-id="model-and-guide"><span class="header-section-number">9.4.3</span> Model and guide</h3>
+<p>The model is a direct translation of the math. The <code>topics</code> plate draws the <span class="math inline">\(K\)</span> word distributions <span class="math inline">\(\beta_k\)</span>; the <code>docs</code> plate draws each document’s topic mixture <span class="math inline">\(\theta_d\)</span>. We then form the per-document word probabilities <span class="math inline">\(\sum_k \theta_{d,k}\,\beta_{k,\cdot}\)</span> by a single matrix product <code>theta @ beta</code>. Since the multinomial coefficient does not depend on the latents, we can drop it from the likelihood and add the remaining log-probability <span class="math inline">\(\sum_v c_{d,v}\,\log(\theta_d^\top \beta_{:,v})\)</span> with <code>pyro.factor</code> instead of using a <code>pyro.sample</code> on a <code>Multinomial</code>.</p>
+<div id="lda-model" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lda_model(counts, K, alpha<span class="op">=</span><span class="fl">0.5</span>, eta<span class="op">=</span><span class="fl">0.5</span>):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    D, V <span class="op">=</span> counts.shape</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> pyro.plate(<span class="st">"topics"</span>, K):</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        beta <span class="op">=</span> pyro.sample(<span class="st">"beta"</span>, dist.Dirichlet(eta <span class="op">*</span> torch.ones(V)))      <span class="co"># (K, V)</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> pyro.plate(<span class="st">"docs"</span>, D):</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        theta <span class="op">=</span> pyro.sample(<span class="st">"theta"</span>, dist.Dirichlet(alpha <span class="op">*</span> torch.ones(K)))  <span class="co"># (D, K)</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        word_probs <span class="op">=</span> (theta <span class="op">@</span> beta).clamp_min(<span class="fl">1e-30</span>)                         <span class="co"># (D, V), clamp for log</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        log_lik <span class="op">=</span> (counts <span class="op">*</span> word_probs.log()).<span class="bu">sum</span>(<span class="op">-</span><span class="dv">1</span>)                        <span class="co"># (D,)</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        pyro.factor(<span class="st">"words"</span>, log_lik)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>As in the regression example, we let Pyro build the guide for us with <code>AutoNormal</code>.</p>
+<div id="lda-guide" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pyro.set_rng_seed(<span class="dv">0</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>pyro.clear_param_store()</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>lda_guide <span class="op">=</span> AutoNormal(lda_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>AutoNormal</code> builds an independent Gaussian over the <em>unconstrained</em> representation of each Dirichlet (via a stick-breaking transform), giving a logistic-normal approximation to each <span class="math inline">\(\theta_d\)</span> and each <span class="math inline">\(\beta_k\)</span>. The number of variational parameters scales as <span class="math inline">\(O(D K + K V)\)</span>.</p>
+</section>
+<section id="training" class="level3" data-number="9.4.4">
+<h3 data-number="9.4.4" class="anchored" data-anchor-id="training"><span class="header-section-number">9.4.4</span> Training</h3>
+<p>Training is the same loop as before. We bundle model, guide, optimizer, and loss into an <code>SVI</code> object and iterate:</p>
+<div id="lda-train" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>svi <span class="op">=</span> SVI(lda_model, lda_guide, Adam({<span class="st">"lr"</span>: <span class="fl">0.05</span>}), loss<span class="op">=</span>Trace_ELBO())</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>n_steps <span class="op">=</span> <span class="dv">3000</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>losses <span class="op">=</span> torch.empty(n_steps)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(n_steps):</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    losses[step] <span class="op">=</span> svi.step(counts, K)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-fig-lda-elbo" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>ax.plot(losses)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"step"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"-ELBO"</span>)<span class="op">;</span> ax.set_yscale(<span class="st">"log"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-lda-elbo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lda-elbo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vi_files/figure-html/fig-lda-elbo-output-1.png" width="565" height="278" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lda-elbo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9.6: Negative ELBO during SVI training of LDA on the poetry corpus.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="inspecting-the-topics" class="level3" data-number="9.4.5">
+<h3 data-number="9.4.5" class="anchored" data-anchor-id="inspecting-the-topics"><span class="header-section-number">9.4.5</span> Inspecting the topics</h3>
+<p>To see what the model has learned, we take the variational median of each topic <span class="math inline">\(\beta_k\)</span> and look at the words it puts the most mass on. We visualise each topic as a word cloud where font size is proportional to <span class="math inline">\(\beta_{k,v}\)</span>, so the most characteristic words for the topic appear largest.</p>
+<div id="lda-medians" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>medians <span class="op">=</span> lda_guide.median()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>beta_hat <span class="op">=</span> medians[<span class="st">"beta"</span>]    <span class="co"># (K, V)</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="op">=</span> medians[<span class="st">"theta"</span>]  <span class="co"># (D, K)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-fig-lda-wordclouds" class="cell" data-execution_count="20">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> wordcloud <span class="im">import</span> WordCloud</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>top_n <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, ax <span class="kw">in</span> <span class="bu">enumerate</span>(axes.flatten()):</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    top <span class="op">=</span> beta_hat[k].topk(top_n).indices.tolist()</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    freqs <span class="op">=</span> {vocab[v]: <span class="bu">float</span>(beta_hat[k, v]) <span class="cf">for</span> v <span class="kw">in</span> top}</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    wc <span class="op">=</span> WordCloud(</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        width<span class="op">=</span><span class="dv">400</span>, height<span class="op">=</span><span class="dv">400</span>, background_color<span class="op">=</span><span class="st">"white"</span>, prefer_horizontal<span class="op">=</span><span class="fl">1.0</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    ).generate_from_frequencies(freqs)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    ax.imshow(wc, interpolation<span class="op">=</span><span class="st">"bilinear"</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    ax.set_axis_off()</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"Topic </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-lda-wordclouds" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lda-wordclouds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vi_files/figure-html/fig-lda-wordclouds-output-1.png" width="491" height="662" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lda-wordclouds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9.7: Top words for each inferred topic. Font size is proportional to the variational median of <span class="math inline">\(\beta_{k,v}\)</span>, restricted to the top 30 words per topic.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="per-author-topic-mixtures" class="level3" data-number="9.4.6">
+<h3 data-number="9.4.6" class="anchored" data-anchor-id="per-author-topic-mixtures"><span class="header-section-number">9.4.6</span> Per-author topic mixtures</h3>
+<p>If LDA has done something useful, chunks from the same poet should have similar topic mixtures. We average <span class="math inline">\(\theta_d\)</span> within each author and plot the result as a heatmap with one row per poet.</p>
+<div id="cell-fig-lda-theta" class="cell" data-execution_count="21">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>author_list <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">set</span>(authors))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>author_theta <span class="op">=</span> torch.zeros(<span class="bu">len</span>(author_list), K)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> d, a <span class="kw">in</span> <span class="bu">enumerate</span>(authors):</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    author_theta[author_list.index(a)] <span class="op">+=</span> theta_hat[d]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>author_theta <span class="op">=</span> author_theta <span class="op">/</span> author_theta.<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="fl">0.5</span> <span class="op">*</span> <span class="bu">len</span>(author_list) <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>im <span class="op">=</span> ax.imshow(author_theta, aspect<span class="op">=</span><span class="st">"auto"</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>               vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span>, cmap<span class="op">=</span><span class="st">"viridis"</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(<span class="bu">range</span>(K))<span class="op">;</span> ax.set_xticklabels([<span class="ss">f"T</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>ax.set_yticks(<span class="bu">range</span>(<span class="bu">len</span>(author_list)))<span class="op">;</span> ax.set_yticklabels(author_list)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>fig.colorbar(im, ax<span class="op">=</span>ax, label<span class="op">=</span><span class="vs">r"mean </span><span class="dv">$</span><span class="ch">\t</span><span class="vs">heta_{d,k}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-lda-theta" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lda-theta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vi_files/figure-html/fig-lda-theta-output-1.png" width="563" height="326" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lda-theta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9.8: Average posterior topic mixture per author.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="posterior-uncertainty" class="level3" data-number="9.4.7">
+<h3 data-number="9.4.7" class="anchored" data-anchor-id="posterior-uncertainty"><span class="header-section-number">9.4.7</span> Posterior uncertainty</h3>
+<p>We can read off marginal credible intervals straight from the guide. Here we look at the top word of each topic and report its 90% interval under <span class="math inline">\(q_\phi\)</span>:</p>
+<div id="lda-quantiles" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>quantiles <span class="op">=</span> lda_guide.quantiles([<span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="fl">0.95</span>])</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>beta_lo, beta_med, beta_hi <span class="op">=</span> quantiles[<span class="st">"beta"</span>]   <span class="co"># each (K, V)</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 90% interval for the top word in each topic.</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K):</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> beta_med[k].argmax().item()</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    lo, med, hi <span class="op">=</span> beta_lo[k, v], beta_med[k, v], beta_hi[k, v]</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Topic </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">: '</span><span class="sc">{</span>vocab[v]<span class="sc">}</span><span class="ss">' "</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"beta = </span><span class="sc">{</span>med<span class="sc">:.3f}</span><span class="ss">  90% CI = [</span><span class="sc">{</span>lo<span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>hi<span class="sc">:.3f}</span><span class="ss">]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Topic 0: 'man' beta = 0.016  90% CI = [0.018, 0.007]
+Topic 1: 'years' beta = 0.010  90% CI = [0.055, 0.000]
+Topic 2: 'little' beta = 0.012  90% CI = [0.013, 0.007]
+Topic 3: 'still' beta = 0.009  90% CI = [0.014, 0.002]
+Topic 4: 'see' beta = 0.012  90% CI = [0.017, 0.003]
+Topic 5: 'love' beta = 0.033  90% CI = [0.038, 0.018]</code></pre>
+</div>
+</div>
+
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-blei2003lda" class="csl-entry" role="listitem">
+Blei, David M., Andrew Y. Ng, and Michael I. Jordan. 2003. <span>“Latent <span>Dirichlet</span> Allocation.”</span> <em>Journal of Machine Learning Research</em> 3: 993–1022.
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/smc.html" class="pagination-link" aria-label="Sequential Monte Carlo">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sequential Monte Carlo</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../exercises/1-classic-puzzles.html" class="pagination-link" aria-label="Exercise 1: Classic puzzles">
+        <span class="nav-page-text">Exercise 1: Classic puzzles</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    var isRemark = div.classList.contains("remark");
+    // Add QED square to summary (visible when collapsed)
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>

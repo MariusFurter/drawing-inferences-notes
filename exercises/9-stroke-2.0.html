@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Exercise 9: Stroke prediction 2.0 – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../appendix/parametric-kernels.html" rel="next">
+<link href="../exercises/8-multilevel-regression.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/9-stroke-2.0.html">Exercise 9: Stroke prediction 2.0</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hybrid-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hybrid models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 5: Inverse Physics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/8-multilevel-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 8: Multilevel regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/9-stroke-2.0.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Exercise 9: Stroke prediction 2.0</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WeightedSampling.torch</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#the-dataset" id="toc-the-dataset" class="nav-link" data-scroll-target="#the-dataset">The dataset</a></li>
+  </ul></li>
+  <li><a href="#task-1.-a-hybrid-causal-model" id="toc-task-1.-a-hybrid-causal-model" class="nav-link" data-scroll-target="#task-1.-a-hybrid-causal-model">Task 1. A hybrid causal model</a></li>
+  <li><a href="#task-2.-fit-the-discrete-boxes-analytically" id="toc-task-2.-fit-the-discrete-boxes-analytically" class="nav-link" data-scroll-target="#task-2.-fit-the-discrete-boxes-analytically">Task 2. Fit the discrete boxes analytically</a></li>
+  <li><a href="#task-3.-fit-log_glucose-age-hyp-with-numpyro" id="toc-task-3.-fit-log_glucose-age-hyp-with-numpyro" class="nav-link" data-scroll-target="#task-3.-fit-log_glucose-age-hyp-with-numpyro">Task 3. Fit <code>log_glucose | age, hyp</code> with NumPyro</a></li>
+  <li><a href="#task-4-optional.-fit-heart_disease-age-hyp-log_glucose" id="toc-task-4-optional.-fit-heart_disease-age-hyp-log_glucose" class="nav-link" data-scroll-target="#task-4-optional.-fit-heart_disease-age-hyp-log_glucose">Task 4 (Optional). Fit <code>heart_disease | age, hyp, log_glucose</code></a></li>
+  <li><a href="#task-5.-missing-data-completely-at-random-mcar" id="toc-task-5.-missing-data-completely-at-random-mcar" class="nav-link" data-scroll-target="#task-5.-missing-data-completely-at-random-mcar">Task 5. Missing data, completely at random (MCAR)</a></li>
+  <li><a href="#task-6.-informative-missingness-threshold-censoring" id="toc-task-6.-informative-missingness-threshold-censoring" class="nav-link" data-scroll-target="#task-6.-informative-missingness-threshold-censoring">Task 6. Informative missingness: threshold censoring</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/9-stroke-2.0.html">Exercise 9: Stroke prediction 2.0</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Exercise 9: Stroke prediction 2.0</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="hidden">
+<p><span class="math display">\[
+\def\then{\mathbin{;}}
+\def\kernel{\rightsquigarrow}
+\def\swap{\mathsf{swap}}
+\def\id{\mathsf{id}}
+\def\cp{\mathsf{copy}}
+\def\del{\mathsf{del}}
+\def\ivmark#1{[\![#1]\!]}
+\]</span></p>
+</div>
+<!--
+================================================================================
+SCAFFOLDING NOTES (for future implementation)
+================================================================================
+This exercise revisits the stroke dataset from Exercise 3 as a hybrid model.
+It illustrates the key concepts of `chapters/practical.qmd`:
+
+  * Conditioning on full data splits a model into independent parts.
+  * Dirichlet-Categorical conjugate update for a discrete kernel (with optional
+    derivation, mirroring exm-dirichlet-categorical in practical.qmd).
+  * NumPyro fits for a Gaussian-regression kernel (and optionally a logistic
+    regression kernel).
+  * Missing data: MCAR (model still works, requires joint imputation) vs.
+    informative threshold censoring (need to add the missingness mechanism,
+    mirroring exm-missing-gaussian).
+
+MODEL: a hybrid sub-model with 3 boxes (+ 1 optional logistic-regression box):
+
+  age            : I            ~> Age            (categorical, 3 bins)
+  hyp            : Age          ~> {0, 1}         (discrete kernel)
+  log_glu        : Age x Hyp    ~> R              (Gaussian regression)
+  heart_disease  : Age x Hyp x R ~> {0, 1}        (logistic regression, OPT)
+
+Variables come from data/exercise-3/healthcare-dataset-stroke-data.csv via
+data/exercise-9/prepare_data.py (which: bins age into the same 3 bins as
+Exercise 3, keeps hypertension and heart_disease, log-transforms
+avg_glucose_level, drops other columns, and writes prepared train/test CSVs).
+
+DATA FILES:
+  data/exercise-9/stroke_train_prepared.csv  (4088 patients)
+  data/exercise-9/stroke_test_prepared.csv   (1022 patients)
+  Columns: age (0,1,2), hyp (0,1), log_glucose (float), heart_disease (0,1)
+================================================================================
+-->
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<!--
+TODO (intro paragraph):
+  - Recall Exercise 3: discrete-only causal model for stroke prediction with
+    kernels estimated by Laplace-smoothed counts.
+  - Now we extend the model with a CONTINUOUS variable (log-glucose) and use
+    proper Bayesian inference: Dirichlet-Categorical analytically for one
+    discrete kernel, and NumPyro for the regression kernels.
+  - Three pedagogical themes (pointers to practical.qmd):
+      1. Conditioning on all variables splits the model into independent boxes,
+         so each kernel can be fit on its own.
+      2. The Dirichlet-Categorical update gives a closed-form posterior for
+         discrete kernels (this is the Bayesian justification of Ex. 3's
+         Laplace smoothing).
+      3. Missing data breaks the split; we must reason about the missingness
+         mechanism to avoid bias.
+-->
+<div class="callout callout-style-default callout-note callout-titled" title="Prerequisites: Python libraries">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Prerequisites: Python libraries
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>This exercise uses:</p>
+<ul>
+<li><a href="https://pandas.pydata.org/"><strong>pandas</strong></a> — tabular data.</li>
+<li><a href="https://num.pyro.ai/"><strong>numpyro</strong></a> and <a href="https://jax.readthedocs.io/"><strong>jax</strong></a> — Bayesian inference via MCMC.</li>
+<li><a href="https://matplotlib.org/"><strong>matplotlib</strong></a> — plotting.</li>
+</ul>
+<p>Install with <code>pip install pandas numpyro jax matplotlib</code> if needed.</p>
+</div>
+</div>
+</div>
+<section id="the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="the-dataset">The dataset</h3>
+<!--
+TODO (describe the prepared dataset):
+  - Same patients as Exercise 3, but a different subset of columns and
+    different processing of glucose.
+  - age (0=young<35, 1=middle 35-65, 2=senior>=65) — same bins as Ex. 3.
+  - hyp (0=no, 1=yes)
+  - log_glucose (continuous; natural log of avg_glucose_level in mg/dL)
+  - heart_disease (0=no, 1=yes)
+  - Motivate log-transforming glucose: the raw distribution is right-skewed
+    (clinical values cluster near 70-100 with a long high tail). Log-
+    transforming gives a roughly Gaussian distribution, making a Normal
+    likelihood reasonable.
+  - Link to the prepared CSVs and to data/exercise-9/prepare_data.py.
+
+Stub a code cell that loads the train CSV, prints head() and summary stats,
+and shows a histogram of log_glucose (with the raw glucose histogram for
+comparison) to motivate the Normal likelihood.
+-->
+<ul>
+<li><a href="../data/exercise-9/stroke_train_prepared.csv">stroke_train_prepared.csv</a> — training data (4088 patients)</li>
+<li><a href="../data/exercise-9/stroke_test_prepared.csv">stroke_test_prepared.csv</a> — test data (1022 patients)</li>
+</ul>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 35%">
+<col style="width: 28%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Values</th>
+<th>Encoding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>age</code></td>
+<td>young (&lt;35), middle (35–65), senior (≥65)</td>
+<td>0, 1, 2</td>
+</tr>
+<tr class="even">
+<td><code>hyp</code></td>
+<td>no, yes</td>
+<td>0, 1</td>
+</tr>
+<tr class="odd">
+<td><code>log_glucose</code></td>
+<td><span class="math inline">\(\log(\text{avg\_glucose\_level})\)</span>, in <span class="math inline">\(\log\)</span> mg/dL</td>
+<td>continuous</td>
+</tr>
+<tr class="even">
+<td><code>heart_disease</code></td>
+<td>no, yes</td>
+<td>0, 1</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="task-1.-a-hybrid-causal-model" class="level2">
+<h2 class="anchored" data-anchor-id="task-1.-a-hybrid-causal-model">Task 1. A hybrid causal model</h2>
+<!--
+TODO (Task 1 narrative):
+
+Causal story (justify each arrow briefly):
+  - age is exogenous;
+  - hyp | age: arterial stiffening with age raises hypertension risk;
+  - log_glucose | age, hyp: insulin resistance and metabolic syndrome cluster
+    with both age and hypertension, shifting glucose upward;
+  - heart_disease | age, hyp, log_glucose: classical cardiovascular risk
+    factors (OPTIONAL box).
+
+Generators / kernels:
+  age   : I                       ~> Age
+  hyp   : Age                     ~> Hyp
+  glu   : Age x Hyp               ~> R          (continuous: log_glucose)
+  heart : Age x Hyp x R           ~> Heart      (OPTIONAL)
+-->
+<p><strong>Task 1a.</strong> Draw the string diagram for the hybrid model (with the optional heart-disease box, or without if Task 4 is skipped).</p>
+<!--
+TODO (Task 1a):
+  Create tikz file: diagrams/exercises/stroke-2.0-model.tikz
+  (mirror diagrams/stroke-prediction/stroke-causal.tikz). Include the
+  continuous-output box (log_glucose) and the optional discrete-output
+  heart_disease box.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 1a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 1a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: tikz string diagram of the full hybrid model. -->
+</div>
+</div>
+</div>
+<p><strong>Task 1b.</strong> Suppose we observe a fully complete dataset <span class="math inline">\((\bar a_i, \bar h_i, \bar g_i, \bar d_i)_{i=1}^N\)</span>. Add a separate parameter prior to each box and condition on the data. Argue that the resulting model <strong>factors</strong> into independent parallel parts, one per kernel.</p>
+<!--
+TODO (Task 1b):
+  Each kernel carries its own latent parameter:
+    - age generator parameterized by theta_age ~ Dirichlet(1,1,1)
+    - hyp | age parameterized by theta_hyp (one Dirichlet per row of age)
+    - glu | age, hyp parameterized by (mu_{a,h}, sigma)
+    - heart | age, hyp, glu parameterized by logistic-regression coefficients
+  Conditioning on every variable removes all wires between the kernels in
+  the diagram. The diagram falls apart into parallel pieces, one per box.
+
+Diagrams: create two tikz files mirroring practical.qmd split-1 / split-2:
+    diagrams/exercises/stroke-2.0-split-1.tikz   (model with shared wires)
+    diagrams/exercises/stroke-2.0-split-2.tikz   (model after conditioning,
+                                                  showing the split)
+
+Solution callout: write out the joint density factoring:
+    p(theta_age, theta_hyp, theta_glu, theta_heart | data)
+      ∝ p(theta_age) * prod_i p(a_i | theta_age)
+        * p(theta_hyp) * prod_i p(h_i | a_i, theta_hyp)
+        * p(theta_glu) * prod_i p(g_i | a_i, h_i, theta_glu)
+        * p(theta_heart) * prod_i p(d_i | a_i, h_i, g_i, theta_heart)
+  Each line depends on disjoint parameters, so the posterior factors as a
+  product. Hence we can fit each box independently.
+
+Pedagogical payoff: inference for the whole model reduces to N small
+inference problems. This is precisely the strategy of practical.qmd's
+section "Conditioning splits models", applied here to a hybrid model.
+
+End with a note: this depends on having FULLY OBSERVED data. Section 5 will
+revisit what happens when some entries are missing.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 1b)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 1b)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: split-1 / split-2 tikz diagrams + factoring of the posterior. -->
+</div>
+</div>
+</div>
+</section>
+<section id="task-2.-fit-the-discrete-boxes-analytically" class="level2">
+<h2 class="anchored" data-anchor-id="task-2.-fit-the-discrete-boxes-analytically">Task 2. Fit the discrete boxes analytically</h2>
+<!--
+TODO (Task 2 narrative):
+  Both the age generator and hyp | age are discrete kernels. Put a Dirichlet
+  prior on each (independently per row for hyp | age) and use the
+  Dirichlet-Categorical conjugate update from practical.qmd
+  (exm-dirichlet-categorical).
+-->
+<p><strong>Task 2a.</strong> Fit the <strong>age generator</strong> using a Dirichlet–Categorical update. Use a uniform <span class="math inline">\(\mathrm{Dirichlet}(1, 1, 1)\)</span> prior. Report the posterior mean and a 90% credible interval for each <span class="math inline">\(p_a := P(\text{age} = a)\)</span>.</p>
+<!--
+TODO (Task 2a):
+  Prior: Dirichlet(1, 1, 1).
+  Posterior: Dirichlet(1 + n_0, 1 + n_1, 1 + n_2), n_k = count of age=k.
+  Posterior mean = alpha_post / alpha_post.sum().
+  Credible intervals: use scipy.stats.dirichlet or, since the marginals of
+  a Dirichlet are Beta, use scipy.stats.beta.ppf(q, alpha_k, alpha_total - alpha_k).
+
+  Code stub:
+      import torch, pandas as pd
+      from scipy.stats import beta as beta_dist
+      df = pd.read_csv("../data/exercise-9/stroke_train_prepared.csv")
+      n_age = torch.tensor([(df["age"]==k).sum().item() for k in range(3)],
+                            dtype=torch.float)
+      alpha_post = 1.0 + n_age
+      mean = alpha_post / alpha_post.sum()
+      # 90% CI per marginal Beta(alpha_k, alpha_tot - alpha_k)
+      a_tot = alpha_post.sum().item()
+      ci = [(beta_dist.ppf(0.05, a, a_tot - a),
+             beta_dist.ppf(0.95, a, a_tot - a)) for a in alpha_post.tolist()]
+      # Tabulate.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 2a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 2a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: Dirichlet posterior code + summary table. -->
+</div>
+</div>
+</div>
+<p><strong>Task 2b.</strong> Fit <code>hyp | age</code> <strong>row by row</strong> using independent Dirichlet–Categorical updates. Use a <span class="math inline">\(\mathrm{Dirichlet}(1, 1)\)</span> prior on each row. Report the posterior mean kernel and 90% credible intervals for <span class="math inline">\(P(\text{hyp}=1 \mid \text{age}=a)\)</span> for each <span class="math inline">\(a\)</span>.</p>
+<!--
+TODO (Task 2b):
+  For each age category a in {0, 1, 2}:
+    Prior: Dirichlet(1, 1) over (P(hyp=0|a), P(hyp=1|a)).
+            Equivalently Beta(1, 1) on p_a := P(hyp=1|a).
+    Update: alpha'_{a,h} = 1 + n_{a,h}.
+    Posterior on p_a is Beta(alpha'_{a,1}, alpha'_{a,0}).
+  Tabulate: rows = age categories, columns = posterior mean, 5%, 95%.
+
+  Mention in passing that this is exactly the Bayesian justification of
+  Ex. 3's Laplace smoothing (the posterior MEAN with Dirichlet(1,1) prior
+  equals Laplace-smoothed frequency).
+
+  Code stub:
+      n_ah = torch.zeros(3, 2)
+      for _, row in df.iterrows():
+          n_ah[int(row["age"]), int(row["hyp"])] += 1
+      alpha_post = 1.0 + n_ah               # shape (3, 2)
+      kernel_mean = alpha_post / alpha_post.sum(dim=-1, keepdim=True)
+      # CI for p_a = P(hyp=1|a):
+      from scipy.stats import beta as beta_dist
+      for a in range(3):
+          a1 = alpha_post[a, 1].item()
+          a0 = alpha_post[a, 0].item()
+          lo = beta_dist.ppf(0.05, a1, a0)
+          hi = beta_dist.ppf(0.95, a1, a0)
+          ...
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 2b)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 2b)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: per-row Dirichlet update for hyp | age, posterior table. -->
+</div>
+</div>
+</div>
+<p><strong>Task 2c (Optional — derivation).</strong> Starting from a <span class="math inline">\(\mathrm{Beta}(1, 1)\)</span> prior on <span class="math inline">\(p_a := P(\text{hyp} = 1 \mid \text{age} = a)\)</span> and the Bernoulli likelihood for the <span class="math inline">\(n_a\)</span> observations of <code>hyp</code> in age category <span class="math inline">\(a\)</span>, derive the posterior in closed form. Conclude with the Dirichlet–Categorical generalization for kernels with more than two output categories.</p>
+<!--
+TODO (Task 2c):
+  Mirror exm-dirichlet-categorical in practical.qmd, specialized to a single
+  row of hyp | age. Steps:
+    1. Write the likelihood for row a:
+         L(p_a | y_1,...,y_{n_a}) = p_a^{n_{a,1}} (1 - p_a)^{n_{a,0}}.
+    2. Write the prior Beta(alpha=1, beta=1).
+    3. Multiply (copy-composition): joint up to normalization is
+         p_a^{n_{a,1}} (1 - p_a)^{n_{a,0}}
+         (which is unnormalized Beta(1 + n_{a,1}, 1 + n_{a,0})).
+    4. Normalize: posterior = Beta(1 + n_{a,1}, 1 + n_{a,0}).
+    5. Mention that rows are independent given the data (the diagram for
+       hyp | age splits row-wise once age is observed for every datum),
+       so the joint posterior over the full kernel factors as a product of
+       row-wise Beta posteriors.
+    6. State the multivariate generalization (Dirichlet-Categorical) for
+       kernels with K > 2 output categories: alpha'_{a,k} = alpha_{a,k} +
+       n_{a,k}.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 2c, optional)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 2c, optional)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: derive the Beta-Bernoulli / Dirichlet-Categorical update for a row
+of hyp | age, mirroring exm-dirichlet-categorical in practical.qmd. -->
+</div>
+</div>
+</div>
+</section>
+<section id="task-3.-fit-log_glucose-age-hyp-with-numpyro" class="level2">
+<h2 class="anchored" data-anchor-id="task-3.-fit-log_glucose-age-hyp-with-numpyro">Task 3. Fit <code>log_glucose | age, hyp</code> with NumPyro</h2>
+<!--
+TODO (Task 3 narrative):
+  This is the continuous-output box. Use NumPyro with NUTS.
+
+  Cell-mean parameterization (cleaner than additive for 3x2 = 6 cells):
+    mu_{a,h} ~ Normal(4.5, 1.0)          # centered near empirical log-mean ~4.6
+    sigma     ~ HalfNormal(1.0)
+    log_glu_i ~ Normal(mu_{a_i, h_i}, sigma)
+
+  Emphasize again: because the model split (Task 1b), we treat (a_i, h_i)
+  as KNOWN inputs and only put priors on parameters of THIS kernel.
+-->
+<p><strong>Task 3a.</strong> Implement the cell-mean Normal model in NumPyro and run MCMC. Report the posterior summary (<code>mcmc.print_summary()</code>).</p>
+<!--
+TODO (Task 3a code stub):
+    import jax.numpy as jnp
+    from jax import random
+    import numpyro
+    import numpyro.distributions as dist
+    from numpyro.infer import MCMC, NUTS
+
+    age_idx = jnp.array(df["age"].to_numpy())
+    hyp_idx = jnp.array(df["hyp"].to_numpy())
+    log_glu = jnp.array(df["log_glucose"].to_numpy())
+
+    def glu_model(age_idx, hyp_idx, log_glu=None):
+        with numpyro.plate("age_plate", 3):
+            with numpyro.plate("hyp_plate", 2):
+                mu = numpyro.sample("mu", dist.Normal(4.5, 1.0))   # shape (2, 3)
+        sigma = numpyro.sample("sigma", dist.HalfNormal(1.0))
+        cell_mu = mu[hyp_idx, age_idx]
+        numpyro.sample("obs", dist.Normal(cell_mu, sigma), obs=log_glu)
+
+    mcmc = MCMC(NUTS(glu_model), num_warmup=500, num_samples=1000,
+                progress_bar=False)
+    mcmc.run(random.PRNGKey(0), age_idx, hyp_idx, log_glu)
+    mcmc.print_summary()
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 3a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 3a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: NumPyro code + mcmc.print_summary() output. -->
+</div>
+</div>
+</div>
+<p><strong>Task 3b.</strong> Plot posterior means and 90% credible intervals for each cell <span class="math inline">\(\mu_{a,h}\)</span> alongside the <strong>empirical cell means</strong> as a sanity check.</p>
+<!--
+TODO (Task 3b):
+  Compute empirical mean per (age, hyp) cell from the training data.
+  Overlay forest plot of posterior CI per cell with empirical mean as a
+  black cross. Six points total.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 3b)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 3b)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: forest plot of mu_{a,h} posteriors vs. empirical means. -->
+</div>
+</div>
+</div>
+<p><strong>Task 3c.</strong> Which factor — age or hypertension — has a larger effect on mean log-glucose? Quantify using the posterior of the differences.</p>
+<!--
+TODO (Task 3c):
+  Compute posterior of mu[1, 2] - mu[0, 0] (hyp effect at senior age) etc.
+  Empirically, both shift log_glu upward; expect hypertension to give a
+  larger jump than age does within a hyp stratum.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 3c)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 3c)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: compute and discuss differences in posterior. -->
+</div>
+</div>
+</div>
+</section>
+<section id="task-4-optional.-fit-heart_disease-age-hyp-log_glucose" class="level2">
+<h2 class="anchored" data-anchor-id="task-4-optional.-fit-heart_disease-age-hyp-log_glucose">Task 4 (Optional). Fit <code>heart_disease | age, hyp, log_glucose</code></h2>
+<!--
+TODO (Task 4 narrative):
+  Optional logistic-regression box.
+
+  Model:
+    logit P(heart=1 | age, hyp, log_glu)
+      = b0
+      + b_age[age]                  # 3 levels; use Normal(0, 1) on all 3
+      + b_hyp * hyp
+      + b_glu * (log_glu - 4.5)     # center for numerical stability
+  Priors: Normal(0, 1) on all coefficients except b0 ~ Normal(-3, 2)
+  (heart disease prevalence is ~5%, so log-odds around -3).
+
+  Reminder: this box can also be fit INDEPENDENTLY of all the others because
+  conditioning on (age, hyp, log_glu, heart) splits the diagram.
+-->
+<p><strong>Task 4a.</strong> Fit the logistic-regression model in NumPyro. Report posterior means and 90% credible intervals for all coefficients.</p>
+<!--
+TODO (Task 4a code stub):
+    def heart_model(age_idx, hyp_idx, log_glu, heart=None):
+        b0    = numpyro.sample("b0",    dist.Normal(-3.0, 2.0))
+        b_age = numpyro.sample("b_age", dist.Normal(jnp.zeros(3), 1.0).to_event(1))
+        b_hyp = numpyro.sample("b_hyp", dist.Normal(0.0, 1.0))
+        b_glu = numpyro.sample("b_glu", dist.Normal(0.0, 1.0))
+        logits = b0 + b_age[age_idx] + b_hyp * hyp_idx + b_glu * (log_glu - 4.5)
+        numpyro.sample("heart", dist.Bernoulli(logits=logits), obs=heart)
+
+  Note: b_age has a redundancy with b0; can either constrain b_age[0] = 0
+  (reference encoding) or just accept the soft non-identifiability since the
+  prior regularizes. Mention this in passing.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 4a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: NumPyro logistic regression fit + posterior summary. -->
+</div>
+</div>
+</div>
+<p><strong>Task 4b.</strong> Interpret the signs of the coefficients. Do age, hypertension, and elevated glucose all contribute positively to heart-disease log-odds?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4b)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 4b)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: discussion. Expect all coefficients positive. -->
+</div>
+</div>
+</div>
+</section>
+<section id="task-5.-missing-data-completely-at-random-mcar" class="level2">
+<h2 class="anchored" data-anchor-id="task-5.-missing-data-completely-at-random-mcar">Task 5. Missing data, completely at random (MCAR)</h2>
+<!--
+TODO (Task 5 narrative):
+  Construct a sub-dataset where ~30% of `log_glucose` values are dropped
+  uniformly at random (independent of any variable). Use a fixed seed.
+
+  KEY POINT: if we want to fit only `log_glu | age, hyp` (Task 3), MCAR rows
+  with missing log_glu contribute no information and can simply be dropped —
+  the model still factors. The interesting case is when we want to predict
+  HEART_DISEASE from log_glu: a row with missing log_glu still contributes
+  via the marginal of log_glu AND via heart | ..., log_glu. The model no
+  longer factors cleanly and we MUST IMPUTE log_glu for the missing rows.
+
+  So Task 5 *requires* the optional Task 4. Students who skipped Task 4 can
+  still read through it; or you can use a simplified version where the
+  "downstream consumer" is just hyp -> log_glu and we fit it jointly. The
+  cleanest pedagogical presentation uses the full 4-box model.
+-->
+<p><strong>Task 5a.</strong> Randomly drop ~30% of <code>log_glucose</code> values from the training data (use <code>jax.random.PRNGKey(42)</code> for reproducibility). Confirm the fraction missing.</p>
+<!--
+TODO (Task 5a code stub):
+    import jax
+    p_missing = 0.30
+    rng = jax.random.PRNGKey(42)
+    N = len(df)
+    missing_mask = jax.random.uniform(rng, (N,)) < p_missing
+    log_glu_true = jnp.array(df["log_glucose"].to_numpy())
+    log_glu_obs  = jnp.where(missing_mask, jnp.nan, log_glu_true)
+    print(f"missing: {int(missing_mask.sum())} / {N}")
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 5a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 5a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: code + count of missing values. -->
+</div>
+</div>
+</div>
+<p><strong>Task 5b.</strong> Build a <strong>joint</strong> NumPyro model containing both the <code>log_glu | age, hyp</code> box and the <code>heart | age, hyp, log_glu</code> box. For rows where <code>log_glu</code> is missing, introduce a latent imputed value <code>x_imp</code> via <code>.mask(False)</code> (see <code>practical.qmd</code>, <code>exm-missing-regression</code>). Fit by MCMC.</p>
+<!--
+TODO (Task 5b code stub):
+    def joint_model(age_idx, hyp_idx, log_glu_obs, missing_mask, heart):
+        # log_glu | age, hyp (Task 3 priors)
+        with numpyro.plate("age_plate", 3):
+            with numpyro.plate("hyp_plate", 2):
+                mu = numpyro.sample("mu", dist.Normal(4.5, 1.0))   # (2, 3)
+        sigma = numpyro.sample("sigma", dist.HalfNormal(1.0))
+        cell_mu = mu[hyp_idx, age_idx]
+
+        # Impute missing log_glu using mask(False) trick.
+        x_imp = numpyro.sample(
+            "x_imp",
+            dist.Normal(cell_mu, sigma).mask(False),
+        )
+        x = jnp.where(missing_mask, x_imp, log_glu_obs)
+        numpyro.sample("log_glu_obs", dist.Normal(cell_mu, sigma), obs=x)
+
+        # heart | age, hyp, log_glu (Task 4 priors)
+        b0    = numpyro.sample("b0",    dist.Normal(-3.0, 2.0))
+        b_age = numpyro.sample("b_age", dist.Normal(jnp.zeros(3), 1.0).to_event(1))
+        b_hyp = numpyro.sample("b_hyp", dist.Normal(0.0, 1.0))
+        b_glu = numpyro.sample("b_glu", dist.Normal(0.0, 1.0))
+        logits = b0 + b_age[age_idx] + b_hyp * hyp_idx + b_glu * (x - 4.5)
+        numpyro.sample("heart", dist.Bernoulli(logits=logits), obs=heart)
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 5b)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 5b)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: joint model code + run MCMC. -->
+</div>
+</div>
+</div>
+<p><strong>Task 5c.</strong> Compare the posterior coefficients of the heart model (Task 4) with those obtained from the joint MCAR fit. Are they consistent?</p>
+<!--
+TODO (Task 5c):
+  Expect posterior means to roughly agree. CIs may be slightly wider in the
+  MCAR fit because we lost ~30% of the direct log_glu information.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 5c)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 5c)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: comparison table / forest plot of coefficients. -->
+</div>
+</div>
+</div>
+<p><strong>Task 5d.</strong> Make a forest plot of the posterior 90% credible intervals for the imputed <code>log_glu</code> values at the missing positions, with the true (hidden) values overlaid. Mirrors <code>fig-imputation-forest</code> in <code>practical.qmd</code>.</p>
+<!--
+TODO (Task 5d):
+  Code pattern from exm-missing-regression: extract posterior['x_imp'] at
+  the missing indices, plot mean + 5/95 percentile bars, overlay true
+  hidden value as a black cross, sort rows by true value.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 5d)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 5d)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: forest plot of imputed log_glu vs. truth. -->
+</div>
+</div>
+</div>
+</section>
+<section id="task-6.-informative-missingness-threshold-censoring" class="level2">
+<h2 class="anchored" data-anchor-id="task-6.-informative-missingness-threshold-censoring">Task 6. Informative missingness: threshold censoring</h2>
+<!--
+TODO (Task 6 narrative):
+  Story: the lab only reports a glucose measurement when log_glucose <= c.
+  Values with log_glucose > c are reported as NaN. Missingness is
+  INFORMATIVE: a missing value tells us the truth was above c.
+
+  Choose c = 5.0 (i.e. glucose > ~148 mg/dL), which censors roughly the
+  upper 20% of log_glucose. (Verify after running prepare_data.py.)
+
+  Mirrors exm-missing-gaussian in practical.qmd, specialized to a cell-mean
+  Normal model.
+-->
+<p><strong>Task 6a.</strong> Construct the censored dataset by replacing <code>log_glucose</code> with <code>NaN</code> for all rows where <code>log_glucose &gt; c</code> (use <span class="math inline">\(c = 5.0\)</span>). Report the fraction censored overall and <strong>per cell</strong> <span class="math inline">\((a, h)\)</span>.</p>
+<!--
+TODO (Task 6a code stub):
+    c = 5.0
+    censored_mask = log_glu_true > c
+    log_glu_cens  = jnp.where(censored_mask, jnp.nan, log_glu_true)
+    print(f"censored: {int(censored_mask.sum())} / {N}"
+          f" ({float(censored_mask.mean()):.1%})")
+
+  Also report a 3x2 table of censoring rates by (age, hyp). Expect higher
+  censoring in (senior, hypertensive) cell.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 6a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 6a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: build censored dataset, per-cell censoring rates. -->
+</div>
+</div>
+</div>
+<p><strong>Task 6b (Naive).</strong> Refit the Task 3 cell-mean Normal model <strong>dropping</strong> the censored rows. Show that the posterior cell means <span class="math inline">\(\mu_{a,h}\)</span> are biased <strong>downward</strong>, especially in heavily-censored cells (senior, hypertensive).</p>
+<!--
+TODO (Task 6b):
+  Same model as Task 3a, but pass only the non-censored rows. Compare
+  posterior of mu[1, 2] (senior hypertensive) with the Task 3 ground truth
+  fit on the full data.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 6b)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 6b)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: naive fit + bias demonstration. -->
+</div>
+</div>
+</div>
+<p><strong>Task 6c (Censored likelihood).</strong> Add a <code>numpyro.factor</code> term for each censored row equal to <span class="math inline">\(\log P(\text{log\_glu} &gt; c \mid \mu_{a,h}, \sigma)
+= \log(1 - \Phi((c - \mu_{a,h})/\sigma))\)</span>. Refit and show the posterior recovers unbiased estimates. Plot the posterior of <span class="math inline">\(\mu_{2,1}\)</span> for the naive vs.&nbsp;censored vs.&nbsp;full-data models on one axis.</p>
+<!--
+TODO (Task 6c code stub):
+    import jax.scipy.stats as jstats
+
+    def censored_model(age_obs, hyp_obs, log_glu_obs,
+                       age_miss, hyp_miss, c):
+        with numpyro.plate("age_plate", 3):
+            with numpyro.plate("hyp_plate", 2):
+                mu = numpyro.sample("mu", dist.Normal(4.5, 1.0))
+        sigma = numpyro.sample("sigma", dist.HalfNormal(1.0))
+
+        # Observed rows: standard Gaussian likelihood.
+        cell_mu_obs = mu[hyp_obs, age_obs]
+        numpyro.sample("obs", dist.Normal(cell_mu_obs, sigma), obs=log_glu_obs)
+
+        # Censored rows: add log survival function.
+        cell_mu_miss = mu[hyp_miss, age_miss]
+        log_surv = jstats.norm.logsf(c, loc=cell_mu_miss, scale=sigma)
+        numpyro.factor("censored", log_surv.sum())
+
+  Plot: three posterior densities for mu[1, 2] (senior hypertensive) ---
+  naive (drop), censored likelihood, and Task 3 ground truth. Mirrors
+  fig-missing-data-posteriors in practical.qmd.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 6c)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 6c)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: censored-likelihood model + side-by-side posterior plot. -->
+</div>
+</div>
+</div>
+<p><strong>Task 6d.</strong> Contrast Tasks 5 (MCAR) and 6 (threshold censoring): under which mechanism does naive deletion work, and under which does it fail? Explain in terms of the string diagram.</p>
+<!--
+TODO (Task 6d):
+  Discussion points:
+    - MCAR: missing rows give zero information; dropping is wasteful but
+      unbiased. In the string diagram, the missingness mechanism is a kernel
+      that is INDEPENDENT of all latents, so it factors out and conditioning
+      on the observed data alone is correct.
+    - Threshold censoring: the missingness indicator is a DETERMINISTIC
+      function of the value (m_i = [log_glu_i > c]). Seeing m_i = 1
+      tells us log_glu_i > c. Dropping these rows effectively conditions
+      on log_glu <= c without telling the model, biasing mu downward.
+    - The fix is to compose the model with the threshold kernel (a
+      deterministic kernel R -> {0,1}) and condition on (m_i, log_glu_obs_i)
+      jointly. This is what the numpyro.factor term encodes.
+-->
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 6d)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 6d)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- TODO: short discussion contrasting MCAR vs. threshold censoring. -->
+</div>
+</div>
+</div>
+
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../exercises/8-multilevel-regression.html" class="pagination-link" aria-label="Exercise 8: Multilevel regression">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exercise 8: Multilevel regression</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../appendix/parametric-kernels.html" class="pagination-link" aria-label="Parametric kernels reference">
+        <span class="nav-page-text">Parametric kernels reference</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    var isRemark = div.classList.contains("remark");
+    // Add QED square to summary (visible when collapsed)
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>

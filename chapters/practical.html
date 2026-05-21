@@ -65,7 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../exercises/1-classic-puzzles.html" rel="next">
+<link href="../chapters/smc.html" rel="next">
 <link href="../chapters/mcmc.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -229,6 +229,18 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/smc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sequential Monte Carlo</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/vi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Variational inference</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -395,6 +407,7 @@ window.Quarto = {
 <p>In this chapter, we discuss practical strategies for performing inference in complex models. This will leverage the strong conceptual foundation we have built up in the previous chapters, as well as the algebraic and graphical tools we have developed for reasoning about kernels.</p>
 <section id="simplifying-models" class="level2" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="simplifying-models"><span class="header-section-number">7.1</span> Simplifying models</h2>
+<!-- Also discuss marginalizing using string diagram manipulations. -->
 <p>The first strategy we will discuss is simplifying the model by analytically manipulating its kernels. If it is possible to simplify some parts of the model analytically, we can do so before resorting to sampling or other approximation methods.</p>
 <p>Most often, the kernels in a model will have densities. Recall from <a href="hybrid-models.html#sec-density-functions" class="quarto-xref"><span>Section 4.1.5</span></a> that a kernel <span class="math inline">\(f : X \kernel Y\)</span> has a density <span class="math inline">\(\ell_f(y \mid x)\)</span> with respect to a base measure <span class="math inline">\(\nu_Y\)</span> if <span class="math display">\[f(B \mid x) = \int_B \ell_f(y \mid x) \, \nu_Y(dy)\]</span> for all measurable <span class="math inline">\(B \subseteq Y\)</span>.</p>
 <p>The most common case where kernels do not have densities is when they are deterministic. However, as we saw in <a href="hybrid-models.html#sec-string-diagrams-carry-over" class="quarto-xref"><span>Section 4.1.6</span></a>, when <span class="math inline">\(f\)</span> represents a deterministic function <span class="math inline">\(h : X \to Y\)</span>, we can simply plug in the output of <span class="math inline">\(h\)</span> into <span class="math inline">\(g\)</span> to get the density of the sequential composition <span class="math inline">\(f \then g\)</span>: <span class="math display">\[
@@ -409,6 +422,7 @@ window.Quarto = {
 </ul>
 <p>Note that both parallel and copy-composition simply correspond to multiplying densities functions. This is always tractable. In contrast, sequential composition involves an integral, which may be challenging to compute. Its difficulty depends on the specific forms of the densities and the base measure. However, in some cases, the integral can be computed analytically, allowing us to simplify the model before sampling.</p>
 <p>First, when <span class="math inline">\(f\)</span> is discrete, the integral reduces to a finite sum. Second, when <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> are conjugate distributions, the integral can be computed using known formulas. We discuss these two cases in more detail below.</p>
+<!-- Also when g is discrete we get a discrete kernel with f(g^{-1}(k) \mid x) -->
 <section id="marginalizing-discrete-latents" class="level3" data-number="7.1.1">
 <h3 data-number="7.1.1" class="anchored" data-anchor-id="marginalizing-discrete-latents"><span class="header-section-number">7.1.1</span> Marginalizing discrete latents</h3>
 <p>When <span class="math inline">\(f\)</span> is discrete, it has a density <span class="math inline">\(\ell_f(y \mid x)\)</span> (with respect to counting measure) that assigns every input-output combination a non-negative weight. In the chapter on discrete kernels, we simply wrote <span class="math inline">\(f(y \mid x)\)</span> for this weight.</p>
@@ -859,7 +873,7 @@ empirical mean of observed entries: -0.655</code></pre>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>mcmc_naive.run(key_naive, y<span class="op">=</span>y_obs)</span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>mu_naive <span class="op">=</span> mcmc_naive.get_samples()[<span class="st">"mu"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The censored model adds a likelihood contribution <span class="math inline">\(\Pr(y &gt; c \mid \mu) = 1 - \Phi((c - \mu)/\sigma)\)</span> for each missing entry, on top of the Gaussian likelihood for the observed ones.</p>
+<p>The censored model adds a likelihood contribution <span class="math inline">\(\Pr(y &gt; c \mid \mu) = 1 - \Phi((c - \mu)/\sigma)\)</span> for each missing entry, on top of the Gaussian likelihood for the observed ones. In NumPyro, such custom log-likelihood contributions can be added using <code>numpyro.factor</code>, which adds an arbitrary term to the joint log-density.</p>
 <div id="missing-data-censored" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.scipy.stats <span class="im">as</span> jstats</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1319,8 +1333,8 @@ Figure&nbsp;7.3: Posterior densities for <span class="math inline">\(\mu\)</span
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../exercises/1-classic-puzzles.html" class="pagination-link" aria-label="Exercise 1: Classic puzzles">
-        <span class="nav-page-text">Exercise 1: Classic puzzles</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../chapters/smc.html" class="pagination-link" aria-label="Sequential Monte Carlo">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sequential Monte Carlo</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
