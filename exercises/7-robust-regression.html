@@ -219,7 +219,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian data analysis</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -303,6 +303,12 @@ window.Quarto = {
  <span class="menu-text">Exercise 8: Multilevel regression</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/9-fit-hybrid.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 9: Fitting hybrid models</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -384,7 +390,7 @@ window.Quarto = {
 </header>
 
 
-<p>In this exercise we put the Bayesian workflow from <a href="../chapters/bayesian-data-analysis.html" class="quarto-xref"><span>5&nbsp; Bayesian Data Analysis</span></a> into practice: we specify a model, check its priors, run MCMC inference with NumPyro, diagnose convergence, and explore the posterior. The twist is that our data contain <strong>outliers</strong> — observations that deviate wildly from the overall trend. A standard linear regression with Gaussian errors is severely distorted by such points. By switching to a <strong>Student-t likelihood</strong>, whose heavier tails treat extreme values as rare but plausible, we obtain a model that is <em>robust</em> to outliers and recovers the true trend.</p>
+<p>In this exercise we put the Bayesian workflow from <a href="../chapters/bayesian-data-analysis.html" class="quarto-xref"><span>5&nbsp; Bayesian data analysis</span></a> into practice: we specify a model, check its priors, run MCMC inference with NumPyro, diagnose convergence, and explore the posterior. The twist is that our data contain <strong>outliers</strong> — observations that deviate wildly from the overall trend. A standard linear regression with Gaussian errors is severely distorted by such points. By switching to a <strong>Student-t likelihood</strong>, whose heavier tails treat extreme values as rare but plausible, we obtain a model that is <em>robust</em> to outliers and recovers the true trend.</p>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Prerequisites: Python libraries">

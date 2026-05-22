@@ -1,0 +1,2385 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Exercise 3: Stroke prediction – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../exercises/4-hidden-markov-models.html" rel="next">
+<link href="../exercises/2-credit-card.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/3-stroke-prediction.html">Exercise 3: Stroke prediction</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hybrid-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hybrid models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 5: Inverse Physics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/8-multilevel-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 8: Multilevel regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/9-stroke-2.0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 9: Stroke prediction 2.0</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WeightedSampling.torch</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#the-dataset" id="toc-the-dataset" class="nav-link" data-scroll-target="#the-dataset">The dataset</a></li>
+  </ul></li>
+  <li><a href="#tasks" id="toc-tasks" class="nav-link" data-scroll-target="#tasks">Tasks</a>
+  <ul class="collapse">
+  <li><a href="#task-1.-design-a-graphical-model" id="toc-task-1.-design-a-graphical-model" class="nav-link" data-scroll-target="#task-1.-design-a-graphical-model">Task 1. Design a graphical model</a></li>
+  <li><a href="#task-2.-estimate-the-kernels" id="toc-task-2.-estimate-the-kernels" class="nav-link" data-scroll-target="#task-2.-estimate-the-kernels">Task 2. Estimate the kernels</a></li>
+  <li><a href="#task-3.-sample-and-predict" id="toc-task-3.-sample-and-predict" class="nav-link" data-scroll-target="#task-3.-sample-and-predict">Task 3. Sample and predict</a></li>
+  <li><a href="#task-4.-evaluate-on-the-test-set" id="toc-task-4.-evaluate-on-the-test-set" class="nav-link" data-scroll-target="#task-4.-evaluate-on-the-test-set">Task 4. Evaluate on the test set</a></li>
+  </ul></li>
+  <li><a href="#optional-data-preparation" id="toc-optional-data-preparation" class="nav-link" data-scroll-target="#optional-data-preparation">Optional: Data preparation</a>
+  <ul class="collapse">
+  <li><a href="#step-1.-load-and-inspect-the-raw-data" id="toc-step-1.-load-and-inspect-the-raw-data" class="nav-link" data-scroll-target="#step-1.-load-and-inspect-the-raw-data">Step 1. Load and inspect the raw data</a></li>
+  <li><a href="#step-2.-discretize-age" id="toc-step-2.-discretize-age" class="nav-link" data-scroll-target="#step-2.-discretize-age">Step 2. Discretize age</a></li>
+  <li><a href="#step-3.-simplify-smoking-status" id="toc-step-3.-simplify-smoking-status" class="nav-link" data-scroll-target="#step-3.-simplify-smoking-status">Step 3. Simplify smoking status</a></li>
+  <li><a href="#step-4.-assemble-the-prepared-dataset" id="toc-step-4.-assemble-the-prepared-dataset" class="nav-link" data-scroll-target="#step-4.-assemble-the-prepared-dataset">Step 4. Assemble the prepared dataset</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/3-stroke-prediction.html">Exercise 3: Stroke prediction</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Exercise 3: Stroke prediction</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="hidden">
+<p><span class="math display">\[
+\def\then{\mathbin{;}}
+\def\kernel{\rightsquigarrow}
+\def\swap{\mathsf{swap}}
+\def\id{\mathsf{id}}
+\def\cp{\mathsf{copy}}
+\def\del{\mathsf{del}}
+\def\ivmark#1{[\![#1]\!]}
+\]</span></p>
+</div>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Prerequisites: Python libraries">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Prerequisites: Python libraries
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>This exercise uses the following Python libraries:</p>
+<ul>
+<li><a href="https://pytorch.org/"><strong>torch</strong></a> — for tensor operations (used throughout the course).</li>
+<li><a href="https://pandas.pydata.org/"><strong>pandas</strong></a> — for loading tabular data.</li>
+<li><a href="https://matplotlib.org/"><strong>matplotlib</strong></a> — for plotting (used in the optional appendix).</li>
+</ul>
+<p>If any of these are not installed, run <code>pip install torch pandas matplotlib</code> in your terminal.</p>
+</div>
+</div>
+</div>
+<p>So far in the course, we built generative models by specifying the probabilities by hand, using physical laws (heredity) or domain intuition (fraud). In practice, we rarely know the right probabilities. Instead, we <strong>learn them from data</strong>.</p>
+<p>This exercise bridges the gap. We will:</p>
+<ol type="1">
+<li><strong>Design</strong> two competing graphical models for stroke prediction: a <strong>causal model</strong> and a <strong>naive Bayes model</strong>.</li>
+<li><strong>Estimate</strong> their kernels from a real medical dataset.</li>
+<li><strong>Sample and predict</strong>: sample from the joint distribution and use rejection sampling to compute predictions from the causal model, and compare with the naive Bayes model’s exact posterior.</li>
+<li><strong>Evaluate</strong> both models on held-out test data.</li>
+</ol>
+<p>The key insight is that <strong>model structure matters</strong>: even with the same data, different graphical models can give dramatically different predictions, and understanding <em>why</em> teaches us about the trade-offs between model complexity and data requirements.</p>
+<section id="the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="the-dataset">The dataset</h3>
+<p>We use the <a href="https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset">Stroke Prediction Dataset</a>, which contains medical records for 5110 patients. We have split the data into a <strong>training set</strong> (4088 patients) and a <strong>test set</strong> (1022 patients).</p>
+<p>The original dataset has been pre-processed into five discrete variables:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Values</th>
+<th>Encoding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>age</code></td>
+<td>young (&lt;35), middle (35-65), senior (&gt;65)</td>
+<td>0, 1, 2</td>
+</tr>
+<tr class="even">
+<td><code>smoking</code></td>
+<td>non-smoker, smoker, unknown</td>
+<td>0, 1, 2</td>
+</tr>
+<tr class="odd">
+<td><code>hypertension</code></td>
+<td>no, yes</td>
+<td>0, 1</td>
+</tr>
+<tr class="even">
+<td><code>heart_disease</code></td>
+<td>no, yes</td>
+<td>0, 1</td>
+</tr>
+<tr class="odd">
+<td><code>stroke</code></td>
+<td>no, yes</td>
+<td>0, 1</td>
+</tr>
+</tbody>
+</table>
+<p>The prepared data files are:</p>
+<ul>
+<li><a href="../data/exercise-3/stroke_train_prepared.csv">stroke_train_prepared.csv</a> — training data (4088 patients)</li>
+<li><a href="../data/exercise-3/stroke_test_prepared.csv">stroke_test_prepared.csv</a> — test data (1022 patients)</li>
+</ul>
+<p>If you want to learn how the data was prepared from the raw dataset (including loading, exploring, binning, and encoding), see the <a href="#optional-data-preparation">optional appendix</a>.</p>
+</section>
+</section>
+<section id="tasks" class="level2">
+<h2 class="anchored" data-anchor-id="tasks">Tasks</h2>
+<section id="task-1.-design-a-graphical-model" class="level3">
+<h3 class="anchored" data-anchor-id="task-1.-design-a-graphical-model">Task 1. Design a graphical model</h3>
+<p>Before touching the data, we think about <strong>model structure</strong>: which variables should depend on which? We will compare two models:</p>
+<section id="causal-model" class="level4">
+<h4 class="anchored" data-anchor-id="causal-model">Causal model</h4>
+<p>The first model follows the causal story of how strokes arise. We place each variable downstream of the factors that <em>cause</em> it: age and lifestyle come first, they lead to chronic conditions like hypertension and heart disease, and all of these jointly influence stroke risk. This mirrors how a physician thinks about disease progression, and it lets the model capture the real dependencies between risk factors.</p>
+<ul>
+<li><strong>Generators</strong> (root variables):
+<ul>
+<li><span class="math inline">\(\mathsf{age} : I \kernel \text{Age}\)</span></li>
+<li><span class="math inline">\(\mathsf{smoking} : I \kernel \text{Smoking}\)</span></li>
+</ul></li>
+<li><strong>Kernels</strong> (conditional distributions):
+<ul>
+<li><span class="math inline">\(\mathsf{hyp} : \text{Age} \kernel \text{Hyp}\)</span></li>
+<li><span class="math inline">\(\mathsf{heart} : \text{Age} \otimes \text{Hyp} \kernel \text{Heart}\)</span></li>
+<li><span class="math inline">\(\mathsf{stroke} : \text{Age} \otimes \text{Hyp} \otimes \text{Heart} \otimes \text{Smoking} \kernel \text{Stroke}\)</span></li>
+</ul></li>
+</ul>
+<p><strong>Task 1a.</strong> Draw the <strong>string diagram</strong> for this model. Then explain briefly why each dependency might make sense from a medical perspective. Why is <code>smoking</code> a root variable rather than a child of <code>age</code>? Why does <code>stroke</code> depend on all four other variables?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We start by drawing the string diagram. For simplicity, we only output the stroke variable.</p>
+<img src="3-stroke-prediction_files/mediabag/7e0d03e47f363d8583983ab51c1e310e25b603e8.svg" style="height:10em">
+<ul>
+<li><p><strong>Age</strong> and <strong>smoking</strong> are modeled as root variables (generators) because they are largely <em>exogenous</em> (not caused by the other medical conditions in the model). While smoking rates do vary with age in the general population, this is a demographic correlation rather than a causal effect: age does not <em>cause</em> someone to smoke in the way it causes hypertension. Treating them as independent roots keeps the model simple.</p></li>
+<li><p><strong>Hypertension depends on age</strong> because blood pressure tends to rise with age due to arterial stiffening, one of the strongest and best-established risk factors.</p></li>
+<li><p><strong>Heart disease depends on age and hypertension</strong> because cardiovascular damage accumulates over time, and chronically high blood pressure is a primary driver of heart disease.</p></li>
+<li><p><strong>Stroke depends on all four variables.</strong> Age, hypertension, and heart disease are well-established direct risk factors for stroke. Smoking contributes independently: it damages blood vessels and promotes clotting regardless of whether it has already caused hypertension or heart disease.</p></li>
+</ul>
+<p>Note that smoking does <em>not</em> appear as an input to the hypertension or heart disease kernels, even though it contributes to both in reality. Including it would increase kernel sizes without much benefit given our limited data.</p>
+</div>
+</div>
+</div>
+<p>The price of this richer structure shows up at estimation time. The stroke kernel has <span class="math inline">\(3 \times 2 \times 2 \times 3 = 36\)</span> input combinations, and we need to estimate a separate conditional distribution for each one from our ~4000 training patients. The data is split across all 36 cells, so some combinations will have very few observations, leading to noisy estimates.</p>
+<p>This is a general tension with causal models: the more faithfully we represent dependencies, the more parameters we need, and the more data it takes to estimate them reliably. Later in the course, we will see ways to parametrize kernels more compactly, which will largely alleviate this problem.</p>
+</section>
+<section id="naive-bayes-model" class="level4">
+<h4 class="anchored" data-anchor-id="naive-bayes-model">Naive Bayes model</h4>
+<p>A classic simplification is the <strong>naive Bayes</strong> model, which reverses the direction: instead of features causing stroke, we treat <code>stroke</code> as the root and model each feature as depending <em>only</em> on stroke status:</p>
+<ul>
+<li>A <strong>generator</strong> <span class="math inline">\(\mathsf{prior} : I \kernel \text{Stroke}\)</span> producing the stroke variable.</li>
+<li>Four <strong>feature kernels</strong> <span class="math inline">\(g_1, \ldots, g_4\)</span>, each mapping stroke status to one feature:
+<ul>
+<li><span class="math inline">\(g_1 : \text{Stroke} \kernel \text{Age}\)</span>, <span class="math inline">\(\;g_2 : \text{Stroke} \kernel \text{Smoking}\)</span>, <span class="math inline">\(\;g_3 : \text{Stroke} \kernel \text{Hyp}\)</span>, <span class="math inline">\(\;g_4 : \text{Stroke} \kernel \text{Heart}\)</span>.</li>
+</ul></li>
+</ul>
+<p>This may look strange at first: stroke doesn’t <em>cause</em> someone to be old or to smoke. But remember that a string diagram defines a <strong>joint distribution</strong> over all its output variables via composition of kernels — it does not have to follow the causal direction. The naive Bayes decomposition is a perfectly valid generative model for the joint distribution over all five variables; it just isn’t causally faithful.</p>
+<p>The big advantage of this approach is that every kernel is tiny: each one conditions on stroke status alone (<span class="math inline">\(|\text{Stroke}| = 2\)</span>), so estimation requires only two conditional distributions regardless of how many features the model has. This sidesteps the data-fragmentation problem of the causal model entirely.</p>
+<p>The downside is the independence assumption baked into the structure. The naive Bayes model assumes that all features are <strong>conditionally independent</strong> given stroke status. This is a strong assumption and rarely satisfied in practice. For instance, age causes hypertension, which in turn causes heart disease, so these features are far from independent even if stroke status is known. We will see the effect of this in Task 3.</p>
+<p><strong>Task 1b.</strong> Draw the string diagram for the naive Bayes model.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<img src="3-stroke-prediction_files/mediabag/aef7c44716da1696a25d15d034bcdf6b050cce10.svg" style="height:11em">
+</div>
+</div>
+</div>
+<p><strong>Task 1c.</strong> Compute the <strong>joint distribution</strong> <span class="math inline">\(p(s, a, k, h, d)\)</span> represented by the naive Bayes string diagram, writing <span class="math inline">\(s\)</span> for stroke, <span class="math inline">\(a\)</span> for age, <span class="math inline">\(k\)</span> for smoking, <span class="math inline">\(h\)</span> for hypertension, and <span class="math inline">\(d\)</span> for heart disease. Evaluate the diagram using the composition rules from the course notes.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Interpret the diagram as iterated copy-composition: the generator <span class="math inline">\(\mathsf{prior}\)</span> produces a measure on <span class="math inline">\(\text{Stroke}\)</span>, which is then copy-composed with each feature kernel in turn. Equivalently, you can derive the same factorization by repeated application of the chain rule.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We evaluate this as iterated copy-composition (equivalently, by repeated application of the chain rule). Copy-composing the generator <span class="math inline">\(\mathsf{prior}\)</span> with <span class="math inline">\(g_1 : \text{Stroke} \kernel \text{Age}\)</span> gives: <span class="math display">\[
+(\mathsf{prior} \odot g_1)(s, a) = \mathsf{prior}(s) \cdot g_1(a \mid s).
+\]</span></p>
+<p>Copy-composing again with <span class="math inline">\(g_2 : \text{Stroke} \kernel \text{Smoking}\)</span>: <span class="math display">\[
+(\mathsf{prior} \odot g_1 \odot g_2)(s, a, k) = \mathsf{prior}(s) \cdot g_1(a \mid s) \cdot g_2(k \mid s).
+\]</span></p>
+<p>Repeating for all four feature kernels: <span class="math display">\[
+p(s, a, k, h, d) \;=\; \mathsf{prior}(s) \;\cdot\; g_1(a \mid s) \;\cdot\; g_2(k \mid s) \;\cdot\; g_3(h \mid s) \;\cdot\; g_4(d \mid s).
+\]</span></p>
+<p>This is the <strong>naive Bayes factorization</strong>: the joint distribution is a product of the prior <span class="math inline">\(\mathsf{prior}(s)\)</span> and four independent likelihoods, each conditioned only on stroke status.</p>
+</div>
+</div>
+</div>
+<p><strong>Task 1d.</strong> Using the joint from Task 1c, derive the <strong>posterior</strong> <span class="math inline">\(p(S = 1 \mid \bar{a}, \bar{k}, \bar{h}, \bar{d})\)</span>, the probability of stroke given observed feature values.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Starting from the joint: <span class="math display">\[
+p(s, a, k, h, d) = \mathsf{prior}(s) \cdot g_1(a \mid s) \cdot g_2(k \mid s) \cdot g_3(h \mid s) \cdot g_4(d \mid s),
+\]</span> we condition on all observed values and normalize over stroke status <span class="math inline">\(s\)</span>: <span class="math display">\[
+p(s \mid \bar{a}, \bar{k}, \bar{h}, \bar{d})
+\;=\; \frac{\mathsf{prior}(s) \cdot g_1(\bar{a} \mid s) \cdot g_2(\bar{k} \mid s) \cdot g_3(\bar{h} \mid s) \cdot g_4(\bar{d} \mid s)}{\sum_{s'} \mathsf{prior}(s') \cdot g_1(\bar{a} \mid s') \cdot g_2(\bar{k} \mid s') \cdot g_3(\bar{h} \mid s') \cdot g_4(\bar{d} \mid s')}.
+\]</span></p>
+</div>
+</div>
+</div>
+<p><strong>Task 1e.</strong> What happens to the posterior formula when some features are <strong>not observed</strong>?</p>
+<p>This situation arises naturally in a diagnostic setting: a doctor may know a patient’s age and blood pressure but not yet have their full medical history. A useful model should still be able to estimate stroke risk from whatever information is currently available.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Think about what happens in the string diagram when you <strong>delete</strong> an output wire: copying then deleting gives the identity (<span class="math inline">\(\cp \then \del = \id\)</span>), and composing a kernel with delete gives delete (<span class="math inline">\(g_j \then \del = \del\)</span>), since kernel rows sum to 1.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Marginalizing over an unobserved output <span class="math inline">\(X_j\)</span> in the string diagram corresponds to <strong>deleting</strong> that wire. But deleting the output of <span class="math inline">\(g_j\)</span> is the same as deleting its input, since <span class="math inline">\(g_j\)</span> is a probability kernel. Finally, copying then deleting does nothing, so the entire branch for an unobserved feature vanishes. This is illustrated for <span class="math inline">\(X_2\)</span> in the diagram below:</p>
+<img src="3-stroke-prediction_files/mediabag/7acec9097214fc3f15a20cc2b0109565592b0202.svg" style="height:11em">
+<p>If the observed features are <span class="math inline">\(\{j_1, \ldots, j_m\}\)</span>, the posterior simplifies to: <span class="math display">\[
+p(s \mid \bar{x}_{j_1}, \ldots, \bar{x}_{j_m})
+\;=\; \frac{\mathsf{prior}(s) \prod_{i=1}^{m} g_{j_i}(\bar{x}_{j_i} \mid s)}{\sum_{s'} \mathsf{prior}(s') \prod_{i=1}^{m} g_{j_i}(\bar{x}_{j_i} \mid s')}.
+\]</span></p>
+<p>Unobserved features simply drop out of the product. This is a key advantage of the naive Bayes model: all marginals can be computed as a simple product of the observed features. In contrast, the marginals of the causal model do not have this simple form. They require taking into account all kernels and summing over unobserved variables.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="task-2.-estimate-the-kernels" class="level3">
+<h3 class="anchored" data-anchor-id="task-2.-estimate-the-kernels">Task 2. Estimate the kernels</h3>
+<p>Each box in the string diagrams represents a kernel <span class="math inline">\(f : X_1 \otimes \cdots \otimes X_k \kernel Y\)</span>. To use the model, we estimate every kernel from training data: count how often each output value <span class="math inline">\(y\)</span> occurs for each input combination <span class="math inline">\((x_1, \ldots, x_k)\)</span>, add 1 for <strong>Laplace smoothing</strong>, and normalize: <span class="math display">\[
+\hat{f}(y \mid x_1, \ldots, x_k) \;=\; \frac{\#\{i : Y_i = y,\; X_{1,i} = x_1,\; \ldots,\; X_{k,i} = x_k\} + 1}{\#\{i : X_{1,i} = x_1,\; \ldots,\; X_{k,i} = x_k\} + |Y|}
+\]</span></p>
+<p>where <span class="math inline">\(|Y|\)</span> is the number of output categories. Laplace smoothing ensures no outcome receives probability zero. Without it, a single unseen combination would force the entire product to zero. We will see later in the course that this has a Bayesian justification: it corresponds to placing a uniform prior on the probabilities.</p>
+<p><strong>Task 2a.</strong> Load the training data from <a href="../data/exercise-3/stroke_train_prepared.csv"><code>stroke_train_prepared.csv</code></a>. How many patients are in the dataset? How many had a stroke? Are there any missing values?</p>
+<p>We use <a href="https://pandas.pydata.org/">pandas</a> to work with tabular data (see the <a href="https://pandas.pydata.org/docs/user_guide/10min.html">10-minute intro</a> if you haven’t used it before). The key operations:</p>
+<ul>
+<li><a href="https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html"><code>pd.read_csv(path)</code></a> loads a CSV into a <code>DataFrame</code>,</li>
+<li><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.head.html"><code>df.head()</code></a> shows the first rows</li>
+<li><code>len(df)</code> counts rows,</li>
+<li><code>df["col"].sum()</code> and <code>df["col"].mean()</code> give the count and fraction of 1s in a binary column.</li>
+<li><code>df.isnull().sum()</code> counts missing entries per column.</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="11bf7745" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-3/stroke_train_prepared.csv"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Patients: </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Strokes:  </span><span class="sc">{</span>df[<span class="st">'stroke'</span>]<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>df[<span class="st">'stroke'</span>]<span class="sc">.</span>mean()<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Missing values:</span><span class="ch">\n</span><span class="sc">{</span>df<span class="sc">.</span>isnull()<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">.</span>to_string()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Patients: 4088
+Strokes:  199 (4.9%)
+
+Missing values:
+age              0
+smoking          0
+hypertension     0
+heart_disease    0
+stroke           0</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="126">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th">smoking</th>
+<th data-quarto-table-cell-role="th">hypertension</th>
+<th data-quarto-table-cell-role="th">heart_disease</th>
+<th data-quarto-table-cell-role="th">stroke</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 2b (optional — challenging).</strong> Implement a function <code>estimate_kernel</code> that takes the training DataFrame and estimates a single kernel using the Laplace-smoothed formula above. <em>If you prefer, you may skip this task and use the implementation provided in the solution below.</em></p>
+<p>The arguments are:</p>
+<ul>
+<li><code>df</code> — the training DataFrame.</li>
+<li><code>input_cols</code> — a list of column names for the input (parent) variables, e.g.&nbsp;<code>["age"]</code> or <code>["age", "hypertension"]</code>. For a generator (no parents), pass an empty list <code>[]</code>.</li>
+<li><code>output_col</code> — the column name of the output variable, e.g.&nbsp;<code>"hypertension"</code>.</li>
+<li><code>input_sizes</code> — a list giving the number of categories for each input variable, e.g.&nbsp;<code>[3]</code> for age (young/middle/senior) or <code>[3, 2]</code> for age × hypertension. Empty list <code>[]</code> for a generator.</li>
+<li><code>n_output</code> — the number of output categories, e.g.&nbsp;<code>2</code> for hypertension (no/yes).</li>
+</ul>
+<p>The function should return two things:</p>
+<ul>
+<li>A <strong>kernel tensor</strong> whose entry at position <code>[x1, ..., xk, y]</code> is the estimated probability <span class="math inline">\(\hat{f}(y \mid x_1, \ldots, x_k)\)</span>. For a generator, this is just a probability vector of length <code>n_output</code>.</li>
+<li>A <strong>counts tensor</strong> recording how many training patients fell into each input combination (before smoothing). For a generator, just return the total count as an integer.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint: Step-by-step approach">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint: Step-by-step approach
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Generator case</strong> (no inputs): Count how often each output value appears (e.g., how many patients had stroke = 0 vs.&nbsp;stroke = 1). Apply Laplace smoothing and normalize to get a probability vector.</p>
+<p><strong>Kernel case</strong> (one or more inputs):</p>
+<ol type="1">
+<li><p><strong>Create a count tensor</strong> of zeros with shape <code>(*input_sizes, n_output)</code>. For example, <code>estimate_kernel(df, ["age"], "hypertension", [3], 2)</code> gives shape <code>(3, 2)</code> — one row per age category, one column per hypertension status.</p></li>
+<li><p><strong>Count occurrences.</strong> Loop over the rows of the DataFrame. For each row, read the input and output values and increment the corresponding entry. For instance, a row with <code>age=2, hypertension=1</code> increments <code>counts[2, 1]</code>.</p></li>
+<li><p><strong>Apply Laplace smoothing.</strong> Add 1 to every cell of the count tensor.</p></li>
+<li><p><strong>Normalize.</strong> Divide each row by its sum so the entries along the output dimension sum to 1. This gives the estimated conditional probabilities.</p></li>
+</ol>
+<p>The counts tensor (before smoothing) records how many data points informed each row — useful for spotting unreliable estimates.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="c7c8c715" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> estimate_kernel(df, input_cols, output_col, input_sizes, n_output):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Estimate a kernel from data with Laplace smoothing."""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generator case: no inputs, just count output values</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(input_cols) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        counts <span class="op">=</span> torch.zeros(n_output)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> y <span class="kw">in</span> <span class="bu">range</span>(n_output):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            counts[y] <span class="op">=</span> (df[output_col] <span class="op">==</span> y).<span class="bu">sum</span>()</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        total <span class="op">=</span> <span class="bu">int</span>(counts.<span class="bu">sum</span>().item())</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (counts <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> (total <span class="op">+</span> n_output), total</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Kernel case: count (input, output) combinations</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    shape <span class="op">=</span> <span class="bu">list</span>(input_sizes) <span class="op">+</span> [n_output]</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    counts <span class="op">=</span> torch.zeros(shape)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _, row <span class="kw">in</span> df.iterrows():</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> [<span class="bu">int</span>(row[c]) <span class="cf">for</span> c <span class="kw">in</span> input_cols]</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> <span class="bu">int</span>(row[output_col])</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        counts[<span class="bu">tuple</span>(inputs <span class="op">+</span> [output])] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Laplace smoothing: add 1 to every cell, then normalize</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    input_counts <span class="op">=</span> counts.<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>)  <span class="co"># has shape (*input_sizes)</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    smoothed <span class="op">=</span> counts <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># unsqueeze restores the output dim so we can divide each row by its total</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    kernel <span class="op">=</span> smoothed <span class="op">/</span> (input_counts.unsqueeze(<span class="op">-</span><span class="dv">1</span>) <span class="op">+</span> n_output)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> kernel, input_counts.<span class="bu">int</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 2c.</strong> Use <code>estimate_kernel</code> to estimate every kernel in <strong>both</strong> models (causal and naive Bayes). For each kernel, print the estimated conditional distribution and the number of training cases per input combination.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>First, define the number of categories for each variable:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>n_age, n_smoking, n_hyp, n_heart, n_stroke <span class="op">=</span> <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Call <code>estimate_kernel</code> once for every box in each string diagram. Store the results in a dictionary for each model.</p>
+<p>For the <strong>causal model</strong>, the structure from Task 1a tells you which columns are inputs to each kernel. For example, the hypertension kernel takes age as input:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>causal[<span class="st">"hyp"</span>] <span class="op">=</span> estimate_kernel(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    df, [<span class="st">"age"</span>], <span class="st">"hypertension"</span>, [n_age], n_hyp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For the <strong>naive Bayes model</strong>, every feature kernel has stroke as its only input:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>nb[<span class="st">"age"</span>] <span class="op">=</span> estimate_kernel(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    df, [<span class="st">"stroke"</span>], <span class="st">"age"</span>, [n_stroke], n_age)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Generators have no inputs — pass empty lists for <code>input_cols</code> and <code>input_sizes</code>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution: Causal model">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution: Causal model
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="388672ef" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>torch.set_printoptions(precision<span class="op">=</span><span class="dv">4</span>, sci_mode<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>n_age, n_smoking, n_hyp, n_heart, n_stroke <span class="op">=</span> <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>causal <span class="op">=</span> {}</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>causal[<span class="st">"age"</span>] <span class="op">=</span> estimate_kernel(df, [], <span class="st">"age"</span>, [], n_age)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>causal[<span class="st">"smoking"</span>] <span class="op">=</span> estimate_kernel(df, [], <span class="st">"smoking"</span>, [], n_smoking)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>causal[<span class="st">"hyp"</span>] <span class="op">=</span> estimate_kernel(</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    df, [<span class="st">"age"</span>], <span class="st">"hypertension"</span>, [n_age], n_hyp)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>causal[<span class="st">"heart"</span>] <span class="op">=</span> estimate_kernel(</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    df, [<span class="st">"age"</span>, <span class="st">"hypertension"</span>], <span class="st">"heart_disease"</span>, [n_age, n_hyp], n_heart)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>causal[<span class="st">"stroke"</span>] <span class="op">=</span> estimate_kernel(</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    df, [<span class="st">"age"</span>, <span class="st">"hypertension"</span>, <span class="st">"heart_disease"</span>, <span class="st">"smoking"</span>],</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"stroke"</span>, [n_age, n_hyp, n_heart, n_smoking], n_stroke)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A <strong>generator</strong> is just a probability vector:</p>
+<div id="f1abf90c" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>age_k, age_n <span class="op">=</span> causal[<span class="st">"age"</span>]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"age generator: </span><span class="sc">{</span>age_k<span class="sc">}</span><span class="ss">  (n=</span><span class="sc">{</span>age_n<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>smoking_k, smoking_n <span class="op">=</span> causal[<span class="st">"smoking"</span>]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"smoking generator: </span><span class="sc">{</span>smoking_k<span class="sc">}</span><span class="ss">  (n=</span><span class="sc">{</span>smoking_n<span class="sc">}</span><span class="ss">)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>age generator: tensor([0.3574, 0.4402, 0.2024])  (n=4088)
+smoking generator: tensor([0.3671, 0.3278, 0.3051])  (n=4088)</code></pre>
+</div>
+</div>
+<p>A kernel with one input is a matrix whose rows are conditional distributions:</p>
+<div id="1b1b9c15" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>hyp_k, hyp_n <span class="op">=</span> causal[<span class="st">"hyp"</span>]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"hyp | age  (shape"</span>, <span class="bu">tuple</span>(hyp_k.shape), <span class="st">"):"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(hyp_k)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"counts:"</span>, hyp_n)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>hyp | age  (shape (3, 2) ):
+tensor([[0.9877, 0.0123],
+        [0.8912, 0.1088],
+        [0.7756, 0.2244]])
+counts: tensor([1461, 1800,  827], dtype=torch.int32)</code></pre>
+</div>
+</div>
+<p>A kernel with two inputs is a higher-dimensional tensor:</p>
+<div id="24c21490" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>heart_k, heart_n <span class="op">=</span> causal[<span class="st">"heart"</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"heart | age, hyp  (shape"</span>, <span class="bu">tuple</span>(heart_k.shape), <span class="st">"):"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(heart_k)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"counts:"</span>, heart_n)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>heart | age, hyp  (shape (3, 2, 2) ):
+tensor([[[0.9986, 0.0014],
+         [0.9474, 0.0526]],
+
+        [[0.9608, 0.0392],
+         [0.9391, 0.0609]],
+
+        [[0.8261, 0.1739],
+         [0.8021, 0.1979]]])
+counts: tensor([[1444,   17],
+        [1605,  195],
+        [ 642,  185]], dtype=torch.int32)</code></pre>
+</div>
+</div>
+<p>The stroke kernel has shape <span class="math inline">\((3, 2, 2, 3, 2)\)</span> — one dimension per input variable, plus the output. Printing the full tensor would be unwieldy, so we inspect a single slice and the training counts:</p>
+<div id="e89f6794" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>stroke_k, stroke_n <span class="op">=</span> causal[<span class="st">"stroke"</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"stroke kernel shape:"</span>, <span class="bu">tuple</span>(stroke_k.shape))</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Slice for senior (age=2), hypertensive (hyp=1):"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"  heart=0:"</span>, stroke_k[<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">0</span>])</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"  heart=1:"</span>, stroke_k[<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>])</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Training counts per input combination (shape"</span>, <span class="bu">tuple</span>(stroke_n.shape), <span class="st">"):"</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(stroke_n)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">min count = </span><span class="sc">{</span>stroke_n<span class="sc">.</span><span class="bu">min</span>()<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">, max = </span><span class="sc">{</span>stroke_n<span class="sc">.</span><span class="bu">max</span>()<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>stroke kernel shape: (3, 2, 2, 3, 2)
+
+Slice for senior (age=2), hypertensive (hyp=1):
+  heart=0: tensor([[0.7733, 0.2267],
+        [0.7586, 0.2414],
+        [0.8636, 0.1364]])
+  heart=1: tensor([[0.6429, 0.3571],
+        [0.7143, 0.2857],
+        [0.8571, 0.1429]])
+
+Training counts per input combination (shape (3, 2, 2, 3) ):
+tensor([[[[449, 269, 725],
+          [  0,   1,   0]],
+
+         [[  6,   8,   3],
+          [  0,   0,   0]]],
+
+
+        [[[617, 603, 323],
+          [ 20,  32,  10]],
+
+         [[ 89,  78,  17],
+          [  5,   6,   0]]],
+
+
+        [[[195, 221, 115],
+          [ 35,  47,  29]],
+
+         [[ 73,  56,  20],
+          [ 12,  19,   5]]]], dtype=torch.int32)
+
+min count = 0, max = 725</code></pre>
+</div>
+</div>
+<p>Some input combinations have very few training cases. When there are 0 cases, the estimate defaults to a uniform distribution due to Laplace smoothing, meaning the model will make a 50/50 guess for stroke risk.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution: Naive Bayes model">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution: Naive Bayes model
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="c4fd7ba2" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>nb <span class="op">=</span> {}</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>nb[<span class="st">"prior"</span>]   <span class="op">=</span> estimate_kernel(df, [], <span class="st">"stroke"</span>, [], n_stroke)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>nb[<span class="st">"age"</span>]     <span class="op">=</span> estimate_kernel(df, [<span class="st">"stroke"</span>], <span class="st">"age"</span>, [n_stroke], n_age)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>nb[<span class="st">"smoking"</span>] <span class="op">=</span> estimate_kernel(df, [<span class="st">"stroke"</span>], <span class="st">"smoking"</span>, [n_stroke], n_smoking)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>nb[<span class="st">"hyp"</span>]     <span class="op">=</span> estimate_kernel(df, [<span class="st">"stroke"</span>], <span class="st">"hypertension"</span>, [n_stroke], n_hyp)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>nb[<span class="st">"heart"</span>]   <span class="op">=</span> estimate_kernel(df, [<span class="st">"stroke"</span>], <span class="st">"heart_disease"</span>, [n_stroke], n_heart)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Every feature kernel has shape <span class="math inline">\((2, \ldots)\)</span> — two rows, one per stroke status:</p>
+<div id="3ce40216" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>feature_names <span class="op">=</span> {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"age"</span>: [<span class="st">"young"</span>, <span class="st">"middle"</span>, <span class="st">"senior"</span>],</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"smoking"</span>: [<span class="st">"non-smoker"</span>, <span class="st">"smoker"</span>, <span class="st">"unknown"</span>],</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hyp"</span>: [<span class="st">"no"</span>, <span class="st">"yes"</span>],</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"heart"</span>: [<span class="st">"no"</span>, <span class="st">"yes"</span>],</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, labels <span class="kw">in</span> feature_names.items():</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    kernel, counts <span class="op">=</span> nb[name]</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> | stroke  (shape </span><span class="sc">{</span><span class="bu">tuple</span>(kernel.shape)<span class="sc">}</span><span class="ss">):"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  categories: </span><span class="sc">{</span>labels<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  stroke=0: </span><span class="sc">{</span>kernel[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">  (n=</span><span class="sc">{</span>counts[<span class="dv">0</span>]<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  stroke=1: </span><span class="sc">{</span>kernel[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">  (n=</span><span class="sc">{</span>counts[<span class="dv">1</span>]<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>age | stroke  (shape (2, 3)):
+  categories: ['young', 'middle', 'senior']
+  stroke=0: tensor([0.3754, 0.4437, 0.1809])  (n=3889)
+  stroke=1: tensor([0.0099, 0.3713, 0.6188])  (n=199)
+
+smoking | stroke  (shape (2, 3)):
+  categories: ['non-smoker', 'smoker', 'unknown']
+  stroke=0: tensor([0.3677, 0.3214, 0.3109])  (n=3889)
+  stroke=1: tensor([0.3564, 0.4505, 0.1931])  (n=199)
+
+hyp | stroke  (shape (2, 2)):
+  categories: ['no', 'yes']
+  stroke=0: tensor([0.9116, 0.0884])  (n=3889)
+  stroke=1: tensor([0.7264, 0.2736])  (n=199)
+
+heart | stroke  (shape (2, 2)):
+  categories: ['no', 'yes']
+  stroke=0: tensor([0.9522, 0.0478])  (n=3889)
+  stroke=1: tensor([0.8159, 0.1841])  (n=199)
+</code></pre>
+</div>
+</div>
+<p>Notice that every NB kernel is estimated from the same two groups: all ~3889 non-stroke and all ~199 stroke patients.</p>
+</div>
+</div>
+</div>
+<p><strong>Task 2d.</strong> Compare the training counts between the two models. How many data points inform each row of the causal stroke kernel versus each row of a naive Bayes feature kernel? What are the consequences for estimation reliability?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The <strong>naive Bayes</strong> model conditions every feature kernel on stroke alone (<span class="math inline">\(|S| = 2\)</span>), so each row is estimated from all ~3889 non-stroke or all ~199 stroke patients.</p>
+<p>The <strong>causal</strong> model’s stroke kernel conditions on four parent variables with <span class="math inline">\(3 \times 2 \times 2 \times 3 = 36\)</span> combinations, sharing the same ~4000 patients unevenly. Some combinations may have fewer than 20 data points, making those estimates unreliable.</p>
+<p>The trade-off: the naive Bayes model has stable estimates but assumes features are conditionally independent given stroke, which is wrong (e.g., age causes hypertension, which causes heart disease). The causal model captures these dependencies but pays a price in data requirements.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="task-3.-sample-and-predict" class="level3">
+<h3 class="anchored" data-anchor-id="task-3.-sample-and-predict">Task 3. Sample and predict</h3>
+<p>We now use the estimated models to predict stroke risk for individual patients. For the <strong>naive Bayes</strong> model, we derived a closed-form posterior in Task 1d, so we can compute exact predictions.</p>
+<p><strong>Task 3a.</strong> Implement a function <code>predict_nb</code> that computes <span class="math inline">\(p(s=1 \mid \text{evidence})\)</span> using the naive Bayes posterior from Task 1d. The function should accept a dictionary of observed features, allowing partial evidence (unobserved features are simply not listed).</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>For each stroke status <span class="math inline">\(s \in \{0, 1\}\)</span>, compute the unnormalized score <span class="math display">\[\text{score}(s) = \mathsf{prior}(s) \cdot \prod_{j \in \text{observed}} g_j(\bar{x}_j \mid s).\]</span> Then normalize: <span class="math inline">\(p(s=1 \mid \text{evidence}) = \text{score}(1) \,/\, (\text{score}(0) + \text{score}(1))\)</span>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="1f67f274" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> predict_nb(evidence):</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute P(stroke=1 | evidence) using the naive Bayes model.</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co">        evidence: dict mapping feature names to integer values,</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co">                  e.g. {"age": 2, "hyp": 1}. Unobserved features omitted.</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co">        P(stroke=1 | evidence) as a float.</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    prior, _ <span class="op">=</span> nb[<span class="st">"prior"</span>]</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    score <span class="op">=</span> prior.clone()  <span class="co"># shape (2,): one entry per stroke status</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name, value <span class="kw">in</span> evidence.items():</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>        kernel, _ <span class="op">=</span> nb[name]</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>        score <span class="op">*=</span> kernel[:, value]  <span class="co"># multiply by g_j(value | s) for each s</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (score[<span class="dv">1</span>] <span class="op">/</span> score.<span class="bu">sum</span>()).item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<p>For the <strong>causal model</strong>, exact conditioning on <em>partial</em> evidence is harder since it requires marginalizing over unobserved variables. Instead, we use a rejection sampling approach. This works for any graphical model regardless of its structure.</p>
+<p><strong>Task 3b.</strong> Implement a function <code>sample_causal</code> that draws <code>N</code> samples from the <strong>joint distribution</strong> of the causal model by sampling according to the structure of the string diagram. Sample each variable in left-to-right order, feeding parent values into child kernels. Use <a href="https://pytorch.org/docs/stable/distributions.html#categorical"><code>torch.distributions.Categorical</code></a> to sample from each kernel.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Generators</strong> (no parents) are probability vectors, so you can sample directly:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>age_k, _ <span class="op">=</span> causal[<span class="st">"age"</span>]</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>age <span class="op">=</span> Categorical(probs<span class="op">=</span>age_k).sample((N,))  <span class="co"># shape (N,)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Downstream variables</strong> have parent inputs. Index into the kernel tensor with the parent samples to select the right conditional distribution for each of the <code>N</code> samples:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>hyp_k, _ <span class="op">=</span> causal[<span class="st">"hyp"</span>]       <span class="co"># shape (3, 2): rows indexed by age</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>hyp <span class="op">=</span> Categorical(probs<span class="op">=</span>hyp_k[age]).sample()  <span class="co"># shape (N,)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Here <code>hyp_k[age]</code> gathers one row per sample (shape <code>(N, 2)</code>), and <code>Categorical</code> samples from each row. For multiple parents, use multiple indices: <code>heart_k[age, hyp]</code>.</p>
+<p>Process all five variables according to the order in the string diagram, and return a dictionary mapping variable names to tensors of shape <code>(N,)</code>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="d4c9a552" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.distributions <span class="im">import</span> Categorical</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_causal(N):</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Draw N samples from the causal model by sampling according to the string diagram.</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">        N: number of samples.</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co">        dict mapping variable names to integer tensors of shape (N,).</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    age_k, _ <span class="op">=</span> causal[<span class="st">"age"</span>]</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    smoking_k, _ <span class="op">=</span> causal[<span class="st">"smoking"</span>]</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    hyp_k, _ <span class="op">=</span> causal[<span class="st">"hyp"</span>]</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    heart_k, _ <span class="op">=</span> causal[<span class="st">"heart"</span>]</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    stroke_k, _ <span class="op">=</span> causal[<span class="st">"stroke"</span>]</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generators (no parents)</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    age <span class="op">=</span> Categorical(probs<span class="op">=</span>age_k).sample((N,))</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    smoking <span class="op">=</span> Categorical(probs<span class="op">=</span>smoking_k).sample((N,))</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Downstream variables (index into kernel with parent values)</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    hyp <span class="op">=</span> Categorical(probs<span class="op">=</span>hyp_k[age]).sample()</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    heart <span class="op">=</span> Categorical(probs<span class="op">=</span>heart_k[age, hyp]).sample()</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    stroke <span class="op">=</span> Categorical(probs<span class="op">=</span>stroke_k[age, hyp, heart, smoking]).sample()</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"age"</span>: age, <span class="st">"smoking"</span>: smoking, <span class="st">"hyp"</span>: hyp,</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>            <span class="st">"heart"</span>: heart, <span class="st">"stroke"</span>: stroke}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Each line mirrors a box in the string diagram: generators produce root variables, and each downstream kernel receives its parent values as indices. The vectorized indexing <code>hyp_k[age]</code> selects one row per sample, so no Python loop is needed.</p>
+</div>
+</div>
+</div>
+<p><strong>Task 3c.</strong> Use rejection sampling to estimate <span class="math inline">\(p(s=1 \mid \text{evidence})\)</span> from the causal model, and compare with the exact naive Bayes predictions.</p>
+<p>The following <code>rejection_sample</code> function is similar to the one from Exercise 2. The main difference is that it takes a <code>sample_fn</code> argument, making it reusable across different models.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Provided: `rejection_sample` function">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Provided: <code>rejection_sample</code> function
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-20" class="callout-20-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="254e9f3f" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rejection_sample(sample_fn, evidence, target, N):</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Estimate P(target | evidence) by rejection sampling.</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co">        sample_fn:  function that takes N and returns a dict mapping</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="co">                    variable names to tensors of shape (N,).</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co">        evidence:   dict mapping variable names to observed values,</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co">                    e.g. {"age": 2, "hyp": 1}.</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co">        target:     dict mapping variable names to target values,</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co">                    e.g. {"stroke": 1}.</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co">        N:          number of samples to draw.</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="co">        estimate:        estimated probability P(target | evidence).</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="co">        acceptance_rate: fraction of samples matching the evidence.</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    samples <span class="op">=</span> sample_fn(N)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Keep samples that match all evidence</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> torch.ones(N, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> var, val <span class="kw">in</span> evidence.items():</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">&amp;=</span> samples[var] <span class="op">==</span> val</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    n_accepted <span class="op">=</span> mask.<span class="bu">sum</span>().item()</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    acceptance_rate <span class="op">=</span> n_accepted <span class="op">/</span> N</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_accepted <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">float</span>(<span class="st">"nan"</span>), <span class="fl">0.0</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Among accepted samples, compute fraction matching target</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>    target_mask <span class="op">=</span> torch.ones(n_accepted, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> var, val <span class="kw">in</span> target.items():</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>        target_mask <span class="op">&amp;=</span> samples[var][mask] <span class="op">==</span> val</span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> target_mask.<span class="bu">float</span>().mean().item(), acceptance_rate</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<p>Compute predictions for the following patient profiles:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Scenario</th>
+<th>Age</th>
+<th>Smoking</th>
+<th>Hypertension</th>
+<th>Heart disease</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A (high-risk senior)</td>
+<td>senior (2)</td>
+<td>smoker (1)</td>
+<td>yes (1)</td>
+<td>yes (1)</td>
+</tr>
+<tr class="even">
+<td>B (young healthy)</td>
+<td>young (0)</td>
+<td>non-smoker (0)</td>
+<td>no (0)</td>
+<td>no (0)</td>
+</tr>
+<tr class="odd">
+<td>C (partial: age + smoking only)</td>
+<td>senior (2)</td>
+<td>smoker (1)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-21" class="callout-21-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="b226ff4c" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>scenarios <span class="op">=</span> {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"A (high-risk senior)"</span>: {<span class="st">"age"</span>: <span class="dv">2</span>, <span class="st">"smoking"</span>: <span class="dv">1</span>, <span class="st">"hyp"</span>: <span class="dv">1</span>, <span class="st">"heart"</span>: <span class="dv">1</span>},</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"B (young healthy)"</span>: {<span class="st">"age"</span>: <span class="dv">0</span>, <span class="st">"smoking"</span>: <span class="dv">0</span>, <span class="st">"hyp"</span>: <span class="dv">0</span>, <span class="st">"heart"</span>: <span class="dv">0</span>},</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"C (senior smoker)"</span>: {<span class="st">"age"</span>: <span class="dv">2</span>, <span class="st">"smoking"</span>: <span class="dv">1</span>},</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">1_000_000</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Scenario'</span><span class="sc">:&lt;25s}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Causal'</span><span class="sc">:&gt;10s}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'Accept%'</span><span class="sc">:&gt;9s}</span><span class="ss">  </span><span class="sc">{</span><span class="st">'NB (exact)'</span><span class="sc">:&gt;11s}</span><span class="ss">"</span>)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, evidence <span class="kw">in</span> scenarios.items():</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    p_causal, acc <span class="op">=</span> rejection_sample(sample_causal, evidence, {<span class="st">"stroke"</span>: <span class="dv">1</span>}, N)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    p_nb <span class="op">=</span> predict_nb(evidence)</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>label<span class="sc">:&lt;25s}</span><span class="ss">  </span><span class="sc">{</span>p_causal<span class="sc">:&gt;10.4f}</span><span class="ss">  </span><span class="sc">{</span>acc<span class="sc">:&gt;9.2%}</span><span class="ss">  </span><span class="sc">{</span>p_nb<span class="sc">:&gt;11.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Scenario                       Causal    Accept%   NB (exact)
+------------------------------------------------------------
+A (high-risk senior)           0.2978      0.30%       0.7461
+B (young healthy)              0.0020     12.93%       0.0009
+C (senior smoker)              0.1558      6.63%       0.1978</code></pre>
+</div>
+</div>
+<p><strong>Observations:</strong></p>
+<ul>
+<li><p><strong>Scenario B:</strong> Both models agree on near-zero stroke risk for young healthy patients.</p></li>
+<li><p><strong>Scenario C (partial evidence):</strong> Both models handle this naturally. The naive Bayes formula drops unobserved features. Rejection sampling simply filters on fewer variables, so more samples are accepted.</p></li>
+<li><p><strong>Scenario A (the key discrepancy).</strong> The causal model predicts a substantially lower probability than the naive Bayes model.</p>
+<p><strong>Why?</strong> In the <strong>causal model</strong>, the rejection-sampled estimate reflects how often strokes actually occur among synthetic patients with this exact combination of risk factors.</p>
+<p>In the <strong>naive Bayes model</strong>, each feature independently contributes a likelihood ratio favoring stroke: seniors are more likely to have strokes (age ratio), hypertensive patients are more likely (hyp ratio), patients with heart disease are more likely (heart ratio), and smokers slightly more likely (smoking ratio). These ratios <strong>multiply</strong>. But the features are correlated: age <em>causes</em> hypertension, which <em>causes</em> heart disease. The naive Bayes model counts the effect of age three times: once directly, once through its effect on hypertension, and once through its effect on heart disease. This <strong>double-counting</strong> inflates the posterior.</p>
+<p>The <strong>causal model</strong> avoids this because its structure explicitly represents these dependencies. Hypertension is modeled as a child of age, so the stroke kernel conditions on both age and hypertension <em>jointly</em> — it does not treat them as independent evidence. The model “knows” that a hypertensive senior is not doubly surprising, because hypertension is expected given old age.</p></li>
+<li><p><strong>Acceptance rates.</strong> Notice how the acceptance rate drops as we condition on more variables (Scenario A vs.&nbsp;C). For rare combinations, we may need more samples to get reliable estimates. This is a fundamental limitation of rejection sampling that we will revisit later in the course.</p></li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="task-4.-evaluate-on-the-test-set" class="level3">
+<h3 class="anchored" data-anchor-id="task-4.-evaluate-on-the-test-set">Task 4. Evaluate on the test set</h3>
+<p>We now evaluate both models on held-out test data using <strong>log-loss</strong> (also called cross-entropy loss): <span class="math display">\[
+\mathcal{L} = -\frac{1}{T} \sum_{t=1}^{T} \log p(s_t \mid a_t, k_t, h_t, d_t),
+\]</span> where <span class="math inline">\(s_t\)</span> is the true stroke status of test patient <span class="math inline">\(t\)</span> and <span class="math inline">\(p(s_t \mid \ldots)\)</span> is the probability the model assigns to the true outcome. Log-loss measures how many nats<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> of surprise the model experiences on learning the true value on average. Its main value is in <strong>comparing models</strong>: a lower log-loss means one model’s predictions are closer to reality than another’s.</p>
+<p><strong>Task 4a.</strong> Load the test data from <a href="../data/exercise-3/stroke_test_prepared.csv"><code>stroke_test_prepared.csv</code></a>. For every test patient, compute the predicted stroke probability using both models, and report the <strong>log-loss</strong> for each model.</p>
+<ul>
+<li>For the <strong>naive Bayes</strong> model, use <code>predict_nb</code> with all four features.</li>
+<li>For the <strong>causal model</strong>, we need <span class="math inline">\(p(s \mid a, k, h, d)\)</span> for each test patient. This value is given by the kernel <span class="math inline">\(\mathsf{stroke}(s \mid a, k, h, d)\)</span>, which is exactly what the estimated kernel <code>stroke_k[a, h, d, k, s]</code> provides. When we cover conditioning in graphical models later in the course, we will understand why we can ignore the rest of the diagram.</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-22" class="callout-22-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We begin by loading the test data and inspecting its size and stroke prevalence:</p>
+<div id="622cd1e5" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-3/stroke_test_prepared.csv"</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test set: </span><span class="sc">{</span><span class="bu">len</span>(test)<span class="sc">}</span><span class="ss"> patients, </span><span class="sc">{</span>test[<span class="st">'stroke'</span>]<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss"> strokes"</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f" (</span><span class="sc">{</span>test[<span class="st">'stroke'</span>]<span class="sc">.</span>mean()<span class="sc">:.1%}</span><span class="ss">)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test set: 1022 patients, 50 strokes (4.9%)</code></pre>
+</div>
+</div>
+<p>Compute log-loss for the <strong>naive Bayes</strong> model using the exact posterior:</p>
+<div id="b10f3fd2" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>nb_ll <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> test.iterrows():</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    a, k, h, d, s <span class="op">=</span> (<span class="bu">int</span>(row[c]) <span class="cf">for</span> c <span class="kw">in</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                      [<span class="st">"age"</span>, <span class="st">"smoking"</span>, <span class="st">"hypertension"</span>, <span class="st">"heart_disease"</span>, <span class="st">"stroke"</span>])</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    p_nb <span class="op">=</span> predict_nb({<span class="st">"age"</span>: a, <span class="st">"smoking"</span>: k, <span class="st">"hyp"</span>: h, <span class="st">"heart"</span>: d})</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    nb_ll <span class="op">-=</span> math.log(p_nb <span class="cf">if</span> s <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> <span class="dv">1</span> <span class="op">-</span> p_nb)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>nb_logloss <span class="op">=</span> nb_ll <span class="op">/</span> <span class="bu">len</span>(test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Compute log-loss for the <strong>causal model</strong> by looking up the stroke kernel directly:</p>
+<div id="2b50247a" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>stroke_k, _ <span class="op">=</span> causal[<span class="st">"stroke"</span>]</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>causal_ll <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> test.iterrows():</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    a, k, h, d, s <span class="op">=</span> (<span class="bu">int</span>(row[c]) <span class="cf">for</span> c <span class="kw">in</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>                      [<span class="st">"age"</span>, <span class="st">"smoking"</span>, <span class="st">"hypertension"</span>, <span class="st">"heart_disease"</span>, <span class="st">"stroke"</span>])</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    causal_ll <span class="op">-=</span> math.log(stroke_k[a, h, d, k, s].item())</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>causal_logloss <span class="op">=</span> causal_ll <span class="op">/</span> <span class="bu">len</span>(test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="37294fdc" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Log-loss (naive Bayes): </span><span class="sc">{</span>nb_logloss<span class="sc">:.4f}</span><span class="ss"> nats"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Log-loss (causal):      </span><span class="sc">{</span>causal_logloss<span class="sc">:.4f}</span><span class="ss"> nats"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Log-loss (naive Bayes): 0.1720 nats
+Log-loss (causal):      0.1633 nats</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 4b.</strong> Which model achieves lower log-loss? Can you explain why? When might you prefer one model over the other?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-23" class="callout-23-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The <strong>causal model</strong> achieves a lower log-loss, meaning its predicted probabilities are closer to the true outcomes on average. This is consistent with the Task 3c observation: the naive Bayes model’s independence assumption causes it to double-count correlated risk factors, inflating stroke probabilities for high-risk patients. Since log-loss penalizes overconfident wrong predictions harshly — assigning high stroke probability to a patient who did not have a stroke incurs a large penalty — this miscalibration hurts the naive Bayes score.</p>
+<p><strong>When to prefer each model:</strong></p>
+<ul>
+<li><strong>Naive Bayes</strong> is the better choice when data is limited, when simplicity matters, or when the goal is <em>ranking</em> patients by risk (e.g., deciding who to screen first). It’s fast, easy to implement, and its estimates are stable. It also gives exact answers via a closed-form formula and handles partial evidence naturally.</li>
+<li>The <strong>causal model</strong> is preferable when <em>calibrated probabilities</em> matter (e.g., communicating risk to a patient), when you have enough data for reliable kernel estimates, or when you want to reason about <em>interventions</em>, e.g., “what would happen to this patient’s stroke risk if we treated their hypertension?” The causal structure supports this kind of reasoning; the naive Bayes model does not.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="optional-data-preparation" class="level2">
+<h2 class="anchored" data-anchor-id="optional-data-preparation">Optional: Data preparation</h2>
+<p>The prepared data files used in this exercise were created from the raw <a href="https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset">Stroke Prediction Dataset</a>. The original dataset contains 11 columns including continuous variables (<code>age</code>, <code>avg_glucose_level</code>, <code>bmi</code>) and additional categorical variables (<code>gender</code>, <code>ever_married</code>, <code>work_type</code>, <code>Residence_type</code>). The raw data files are:</p>
+<ul>
+<li><a href="../data/exercise-3/stroke_train.csv">stroke_train.csv</a> — raw training data (4088 patients)</li>
+<li><a href="../data/exercise-3/stroke_test.csv">stroke_test.csv</a> — raw test data (1022 patients)</li>
+</ul>
+<p>The steps below show how to go from the raw data to the prepared files used in the main exercise. We focus on the five medically relevant variables and discard the rest.</p>
+<section id="step-1.-load-and-inspect-the-raw-data" class="level3">
+<h3 class="anchored" data-anchor-id="step-1.-load-and-inspect-the-raw-data">Step 1. Load and inspect the raw data</h3>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint: Working with pandas">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint: Working with pandas
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-24" class="callout-24-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><a href="https://pandas.pydata.org/">pandas</a> is a Python library for working with tabular data. If you’ve never used it before, there is a 10-minute introduction in the <a href="https://pandas.pydata.org/docs/user_guide/index.html">user guide</a>. Here are the operations you will need:</p>
+<ul>
+<li><strong>Load a CSV file:</strong> <a href="https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html"><code>pd.read_csv(path)</code></a> returns a <code>DataFrame</code>, a table with named columns.</li>
+<li><strong>Inspect the first rows:</strong> <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.head.html"><code>df.head()</code></a> shows the first 5 rows.</li>
+<li><strong>Number of rows:</strong> <code>len(df)</code> returns the number of rows.</li>
+<li><strong>Column data types:</strong> <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dtypes.html"><code>df.dtypes</code></a> lists the type of each column.</li>
+<li><strong>Missing values:</strong> <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.isnull.html"><code>df.isnull().sum()</code></a> counts missing entries per column.</li>
+<li><strong>Value counts:</strong> <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.value_counts.html"><code>df["col"].value_counts(normalize=True)</code></a> returns the fraction of each value.</li>
+<li><strong>Unique values:</strong> <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.unique.html"><code>df["col"].unique()</code></a> returns the distinct values in a column.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-25" class="callout-25-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="f7bfafdb" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>raw <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-3/stroke_train.csv"</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>raw.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="143">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">gender</th>
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th">hypertension</th>
+<th data-quarto-table-cell-role="th">heart_disease</th>
+<th data-quarto-table-cell-role="th">ever_married</th>
+<th data-quarto-table-cell-role="th">work_type</th>
+<th data-quarto-table-cell-role="th">Residence_type</th>
+<th data-quarto-table-cell-role="th">avg_glucose_level</th>
+<th data-quarto-table-cell-role="th">bmi</th>
+<th data-quarto-table-cell-role="th">smoking_status</th>
+<th data-quarto-table-cell-role="th">stroke</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>25283</td>
+<td>Female</td>
+<td>48.0</td>
+<td>0</td>
+<td>0</td>
+<td>Yes</td>
+<td>Private</td>
+<td>Urban</td>
+<td>69.21</td>
+<td>33.1</td>
+<td>never smoked</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>43734</td>
+<td>Male</td>
+<td>15.0</td>
+<td>0</td>
+<td>0</td>
+<td>No</td>
+<td>Private</td>
+<td>Rural</td>
+<td>122.25</td>
+<td>21.0</td>
+<td>never smoked</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>47113</td>
+<td>Female</td>
+<td>67.0</td>
+<td>0</td>
+<td>0</td>
+<td>Yes</td>
+<td>Self-employed</td>
+<td>Rural</td>
+<td>110.42</td>
+<td>24.9</td>
+<td>never smoked</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>56996</td>
+<td>Male</td>
+<td>44.0</td>
+<td>0</td>
+<td>0</td>
+<td>Yes</td>
+<td>Private</td>
+<td>Urban</td>
+<td>65.41</td>
+<td>24.8</td>
+<td>smokes</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>26325</td>
+<td>Male</td>
+<td>14.0</td>
+<td>0</td>
+<td>0</td>
+<td>No</td>
+<td>Govt_job</td>
+<td>Urban</td>
+<td>82.34</td>
+<td>31.6</td>
+<td>Unknown</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="f6459828" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Patients: </span><span class="sc">{</span><span class="bu">len</span>(raw)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Strokes:  </span><span class="sc">{</span>raw[<span class="st">'stroke'</span>]<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>raw[<span class="st">'stroke'</span>]<span class="sc">.</span>mean()<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>missing <span class="op">=</span> raw.isnull().<span class="bu">sum</span>()</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Missing values:</span><span class="ch">\n</span><span class="sc">{</span>missing<span class="sc">.</span>to_string()<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Patients: 4088
+Strokes:  199 (4.9%)
+
+Missing values:
+id                     0
+gender                 0
+age                    0
+hypertension           0
+heart_disease          0
+ever_married           0
+work_type              0
+Residence_type         0
+avg_glucose_level      0
+bmi                  170
+smoking_status         0
+stroke                 0</code></pre>
+</div>
+</div>
+<p>The dataset has 4088 patients, of whom 199 (~4.9%) had a stroke. The only column with missing values is <code>bmi</code> (201 missing). Since we will not use <code>bmi</code> in this exercise, this is not a concern.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="step-2.-discretize-age" class="level3">
+<h3 class="anchored" data-anchor-id="step-2.-discretize-age">Step 2. Discretize age</h3>
+<p>The <code>age</code> column is continuous. Since our graphical model framework works with finite sets, we need to <strong>bin</strong> it into categories. We first look at its distribution:</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-26" class="callout-26-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="14f9d0b4" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">2</span>))</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>ax.hist(raw[<span class="st">"age"</span>].dropna(), bins<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"age"</span>)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="3-stroke-prediction_files/figure-html/cell-21-output-1.png" width="566" height="182" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Age is roughly uniformly distributed across the range. Based on standard medical thresholds, we bin into three categories:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Category</th>
+<th>Range</th>
+<th>Encoding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>young</td>
+<td><span class="math inline">\([0, 35)\)</span></td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>middle</td>
+<td><span class="math inline">\([35, 65)\)</span></td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>senior</td>
+<td><span class="math inline">\([65, \infty)\)</span></td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>35 separates young adults from middle-aged patients. 65 is the standard threshold for “senior” in medical literature.</p>
+<p>We use <a href="https://pandas.pydata.org/docs/reference/api/pandas.cut.html"><code>pd.cut()</code></a> to assign each value to a bin:</p>
+<div id="f9789103" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>raw[<span class="st">"age_bin"</span>] <span class="op">=</span> pd.cut(</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    raw[<span class="st">"age"</span>], bins<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">35</span>, <span class="dv">65</span>, <span class="bu">float</span>(<span class="st">"inf"</span>)],</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>], right<span class="op">=</span><span class="va">False</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>).astype(<span class="bu">int</span>)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(raw[<span class="st">"age_bin"</span>].value_counts().sort_index())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>age_bin
+0    1461
+1    1800
+2     827
+Name: count, dtype: int64</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="step-3.-simplify-smoking-status" class="level3">
+<h3 class="anchored" data-anchor-id="step-3.-simplify-smoking-status">Step 3. Simplify smoking status</h3>
+<p>The raw <code>smoking_status</code> column has four levels: “never smoked”, “formerly smoked”, “smokes”, and “Unknown”. We merge “formerly smoked” and “smokes” into a single “smoker” category (the distinction between current and former smokers is less important than whether a patient has any smoking history), and keep “Unknown” as a separate level, since it represents genuinely missing information.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-27-contents" aria-controls="callout-27" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-27" class="callout-27-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="b463c2fd" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Raw smoking categories:"</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(raw[<span class="st">"smoking_status"</span>].value_counts().to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Raw smoking categories:
+smoking_status
+never smoked       1501
+Unknown            1247
+formerly smoked     714
+smokes              626</code></pre>
+</div>
+</div>
+<div id="28d46523" class="cell" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>smoking_map <span class="op">=</span> {</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"never smoked"</span>: <span class="dv">0</span>,     <span class="co"># non-smoker</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"formerly smoked"</span>: <span class="dv">1</span>,  <span class="co"># smoker</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"smokes"</span>: <span class="dv">1</span>,           <span class="co"># smoker</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Unknown"</span>: <span class="dv">2</span>,          <span class="co"># unknown</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>raw[<span class="st">"smoking"</span>] <span class="op">=</span> raw[<span class="st">"smoking_status"</span>].<span class="bu">map</span>(smoking_map).astype(<span class="bu">int</span>)</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Simplified smoking (0=non-smoker, 1=smoker, 2=unknown):"</span>)</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(raw[<span class="st">"smoking"</span>].value_counts().sort_index())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Simplified smoking (0=non-smoker, 1=smoker, 2=unknown):
+smoking
+0    1501
+1    1340
+2    1247
+Name: count, dtype: int64</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="step-4.-assemble-the-prepared-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="step-4.-assemble-the-prepared-dataset">Step 4. Assemble the prepared dataset</h3>
+<p>We select the five variables, integer-encode them, and save to CSV. The binary variables <code>hypertension</code>, <code>heart_disease</code>, and <code>stroke</code> are already integer-encoded (0/1) in the raw data.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-28-contents" aria-controls="callout-28" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-28" class="callout-28-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="f87da499" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>prepared <span class="op">=</span> raw[[<span class="st">"age_bin"</span>, <span class="st">"smoking"</span>, <span class="st">"hypertension"</span>, <span class="st">"heart_disease"</span>, <span class="st">"stroke"</span>]].copy()</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>prepared.columns <span class="op">=</span> [<span class="st">"age"</span>, <span class="st">"smoking"</span>, <span class="st">"hypertension"</span>, <span class="st">"heart_disease"</span>, <span class="st">"stroke"</span>]</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>prepared.head(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="149">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th">smoking</th>
+<th data-quarto-table-cell-role="th">hypertension</th>
+<th data-quarto-table-cell-role="th">heart_disease</th>
+<th data-quarto-table-cell-role="th">stroke</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">5</th>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">6</th>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">7</th>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">8</th>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">9</th>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="ec9443a3" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify all values are valid integers</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> prepared.columns:</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">dict</span>(prepared[col].value_counts().sort_index())<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>age: {0: 1461, 1: 1800, 2: 827}
+smoking: {0: 1501, 1: 1340, 2: 1247}
+hypertension: {0: 3691, 1: 397}
+heart_disease: {0: 3867, 1: 221}
+stroke: {0: 3889, 1: 199}</code></pre>
+</div>
+</div>
+<p>To save the prepared data (and repeat for the test set):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>prepared.to_csv(<span class="st">"../data/exercise-3/stroke_train_prepared.csv"</span>, index<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The same steps applied to <code>stroke_test.csv</code> produce <code>stroke_test_prepared.csv</code>.</p>
+</div>
+</div>
+</div>
+
+
+
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>A <strong>nat</strong> (natural unit of information) is the information-theoretic unit obtained when using the natural logarithm. One nat equals the amount of information gained by observing an event of probability <span class="math inline">\(1/e\)</span>. If we used <span class="math inline">\(\log_2\)</span> instead, the unit would be <strong>bits</strong>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../exercises/2-credit-card.html" class="pagination-link" aria-label="Exercise 2: Credit card fraud detection">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exercise 2: Credit card fraud detection</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../exercises/4-hidden-markov-models.html" class="pagination-link" aria-label="Exercise 4: Hidden Markov models">
+        <span class="nav-page-text">Exercise 4: Hidden Markov models</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    var isRemark = div.classList.contains("remark");
+    // Add QED square to summary (visible when collapsed)
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>

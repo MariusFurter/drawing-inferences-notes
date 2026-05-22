@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Exercise 5: Inverse Physics – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../exercises/6-swiss-health.html" rel="next">
+<link href="../exercises/4-hidden-markov-models.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/5-physics.html">Exercise 5: Inverse Physics</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hybrid-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hybrid models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Exercise 5: Inverse Physics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/8-multilevel-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 8: Multilevel regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WeightedSampling.torch</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#vignette-1-lunar-cargo-delivery" id="toc-vignette-1-lunar-cargo-delivery" class="nav-link" data-scroll-target="#vignette-1-lunar-cargo-delivery">Vignette 1: Lunar Cargo Delivery</a>
+  <ul class="collapse">
+  <li><a href="#task-1a-forward-simulation" id="toc-task-1a-forward-simulation" class="nav-link" data-scroll-target="#task-1a-forward-simulation">Task 1a: Forward simulation</a></li>
+  <li><a href="#task-1b-inferring-the-launch-angle" id="toc-task-1b-inferring-the-launch-angle" class="nav-link" data-scroll-target="#task-1b-inferring-the-launch-angle">Task 1b: Inferring the launch angle</a></li>
+  <li><a href="#sec-task-1c" id="toc-sec-task-1c" class="nav-link" data-scroll-target="#sec-task-1c">Task 1c: Joint inference of <span class="math inline">\(v_0\)</span> and <span class="math inline">\(\theta\)</span></a></li>
+  </ul></li>
+  <li><a href="#vignette-2-gravitational-slingshot" id="toc-vignette-2-gravitational-slingshot" class="nav-link" data-scroll-target="#vignette-2-gravitational-slingshot">Vignette 2: Gravitational Slingshot</a>
+  <ul class="collapse">
+  <li><a href="#task-2a-forward-simulation" id="toc-task-2a-forward-simulation" class="nav-link" data-scroll-target="#task-2a-forward-simulation">Task 2a: Forward simulation</a></li>
+  <li><a href="#task-2b-inferring-the-initial-velocity" id="toc-task-2b-inferring-the-initial-velocity" class="nav-link" data-scroll-target="#task-2b-inferring-the-initial-velocity">Task 2b: Inferring the initial velocity</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/5-physics.html">Exercise 5: Inverse Physics</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Exercise 5: Inverse Physics</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>A physics simulation maps initial conditions to outcomes — launch a projectile at angle <span class="math inline">\(\theta\)</span> and it lands at range <span class="math inline">\(R(\theta)\)</span>. In this exercise we solve the <strong>inverse problem</strong>: given a measured outcome, what were the initial conditions? Using the <a href="../appendix/WeightedSampling.html"><code>WeightedSampling.torch</code></a> library, we:</p>
+<ol type="1">
+<li><strong>Simulate forward</strong> — <code>sample</code> unknown parameters from a prior and run the physics to see what outcomes are possible.</li>
+<li><strong>Condition on data</strong> — add an <code>observe</code> statement to turn prior samples into <strong>weighted posterior samples</strong> that are consistent with the observation.</li>
+<li><strong>Extract derived quantities</strong> — plug posterior samples into any function and summarize with histograms or expectations.</li>
+</ol>
+<p>We work through two scenarios of increasing complexity.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Prerequisites: Python libraries">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Prerequisites: Python libraries
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>This exercise uses the following libraries:</p>
+<ul>
+<li><p><a href="../appendix/WeightedSampling.html"><strong>WeightedSampling.torch</strong></a> — for probabilistic programming and inference. Install via:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install git+https://github.com/MariusFurter/WeightedSampling.torch.git</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><p><a href="https://pytorch.org/"><strong>PyTorch</strong></a> — for tensor operations. A short tutorial can be found in the <a href="../appendix/pytorch.html">Appendix</a>.</p></li>
+<li><p><a href="https://matplotlib.org/"><strong>matplotlib</strong></a> — for plotting.</p></li>
+<li><p><a href="https://seaborn.pydata.org/"><strong>seaborn</strong></a> — for statistical visualization.</p></li>
+</ul>
+<p>If any packages are missing, run <code>pip install torch matplotlib seaborn</code> in your terminal.</p>
+</div>
+</div>
+</div>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<div id="12ab41cd" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.distributions <span class="im">as</span> dist</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> (</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    sample,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    observe,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    deterministic,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    summary,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    expectation,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Torch compatibility reminder">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Torch compatibility reminder
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Because the inference engine runs all <span class="math inline">\(N\)</span> particles simultaneously via PyTorch broadcasting, any computation on sampled values must use <strong>torch-compatible operations</strong>. Use <code>torch.sin(x)</code> instead of <code>math.sin(x)</code>, <code>torch.where(cond, a, b)</code> instead of Python <code>if/else</code>, etc. See the <a href="../appendix/WeightedSampling.html#sec-torch-compat">appendix</a> for details.</p>
+</div>
+</div>
+</section>
+<section id="vignette-1-lunar-cargo-delivery" class="level2">
+<h2 class="anchored" data-anchor-id="vignette-1-lunar-cargo-delivery">Vignette 1: Lunar Cargo Delivery</h2>
+<p>A research station on the Moon uses a supply launcher to deliver cargo to remote landing zones across the lunar surface. The launcher gives the cargo an initial kick at a fixed speed <span class="math inline">\(v_0 = 20\;\text{m/s}\)</span>, but at a variable launch angle <span class="math inline">\(\theta\)</span> (in radians). After launch the cargo follows a ballistic trajectory in the Moon’s gravity (<span class="math inline">\(g_{\text{moon}} = 1.62\;\text{m/s}^2\)</span>).</p>
+<p>A sensor at the landing zone recorded that cargo arrived <span class="math inline">\(R_{\text{obs}} = 200\;\text{m}\)</span> from the launcher. <strong>What was the launch angle <span class="math inline">\(\theta\)</span>?</strong></p>
+<div id="cell-fig-lunar-setup" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div id="fig-lunar-setup" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lunar-setup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="5-physics_files/figure-html/fig-lunar-setup-output-1.png" width="662" height="278" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lunar-setup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Two launch angles produce the same range — a low direct arc and a high lob arc. The landing zone is marked in red.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The range of a <a href="https://en.wikipedia.org/wiki/Projectile_motion">ballistic trajectory</a> is given by: <span class="math display">\[
+R(\theta) = \frac{v_0^2 \sin(2\theta)}{g}
+\]</span></p>
+<p>This function is <strong>non-injective</strong>: two different angles produce the same range.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Provided helper functions: ballistic trajectory">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Provided helper functions: ballistic trajectory
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The following functions are provided for you. Run this cell before starting the tasks.</p>
+<div id="0af5d9b8" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_range(v0, theta, g<span class="op">=</span><span class="fl">1.62</span>):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute the range of a ballistic projectile (flat ground).</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">        v0: initial speed (scalar or tensor)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">        theta: launch angle in radians (scalar or tensor)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">        g: gravitational acceleration (default: lunar gravity, 1.62 m/s²)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">        Range R = v0² sin(2θ) / g</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> v0<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> torch.sin(<span class="dv">2</span> <span class="op">*</span> theta) <span class="op">/</span> g</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_trajectory(v0, theta, g<span class="op">=</span><span class="fl">1.62</span>, n_points<span class="op">=</span><span class="dv">100</span>):</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute the (x, y) trajectory of a ballistic projectile.</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">        v0: initial speed (scalar)</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">        theta: launch angle in radians (scalar)</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">        g: gravitational acceleration (default: lunar gravity)</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">        n_points: number of time steps</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">        (xs, ys) — 1-D tensors of shape (n_points,)</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    t_flight <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> v0 <span class="op">*</span> torch.sin(theta) <span class="op">/</span> g</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> torch.linspace(<span class="dv">0</span>, <span class="bu">float</span>(t_flight), n_points)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> v0 <span class="op">*</span> torch.cos(theta) <span class="op">*</span> t</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    ys <span class="op">=</span> v0 <span class="op">*</span> torch.sin(theta) <span class="op">*</span> t <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> g <span class="op">*</span> t<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> xs, ys</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<section id="task-1a-forward-simulation" class="level3">
+<h3 class="anchored" data-anchor-id="task-1a-forward-simulation">Task 1a: Forward simulation</h3>
+<p>A model with only <code>sample</code> statements (no <code>observe</code>) draws from the <strong>prior</strong> — our beliefs about the parameters before any data is observed. Running such a model produces unweighted samples that we can use to explore what outcomes the physics allows.</p>
+<p><strong>Part 1.</strong> Write a <code>@model</code> function <code>lunar_launch()</code> that:</p>
+<ol type="1">
+<li>Samples a launch angle <span class="math inline">\(\theta \sim \text{Uniform}(0, \pi/2)\)</span>.</li>
+<li>Computes the range <span class="math inline">\(R\)</span> using <code>compute_range(v0, theta)</code> with <span class="math inline">\(v_0 = 20\)</span> and the lunar gravity <span class="math inline">\(g_{\text{moon}} = 1.62\;\text{m/s}^2\)</span>.</li>
+</ol>
+<p>Run the model with <code>num_particles=5000</code> and inspect the result. What data does the results object record? Use <code>summary()</code> to print statistics.</p>
+<p><strong>Part 2.</strong> Select 20 random particles from the result and plot their trajectories (use <code>compute_trajectory</code>) on a single figure.</p>
+<p><strong>Part 3.</strong> Plot a histogram of the range <span class="math inline">\(R\)</span> for all particles. Can you explain the shape of the histogram from the shape of <span class="math inline">\(R(\theta) = v_0^2 \sin(2\theta)/g\)</span>?</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint: Step-by-step approach">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint: Step-by-step approach
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Part 1 — writing and running the model:</strong></p>
+<ol type="1">
+<li><p>Define constants <code>v0 = 20.0</code> and <code>g_moon = 1.62</code>.</p></li>
+<li><p>Write a function decorated with <code>@model</code>. Inside the function, use <code>sample("theta", dist.Uniform(0, torch.pi / 2))</code> to draw a launch angle, then call <code>compute_range(v0, theta, g=g_moon)</code> to compute the range.</p></li>
+<li><p>Call the model with <code>num_particles=5000</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> lunar_launch(num_particles<span class="op">=</span><span class="dv">5000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>result</code> object is dictionary-like. Use <code>summary(result)</code> to print statistics.</p></li>
+</ol>
+<p><strong>Part 2 — plotting trajectories:</strong></p>
+<ol type="1">
+<li>Extract the angles: <code>thetas = result["theta"]</code>.</li>
+<li>Pick 20 random indices: <code>idx = torch.randperm(len(thetas))[:20]</code>.</li>
+<li>Loop over the selected indices, calling <code>compute_trajectory(v0, thetas[i], g=g_moon)</code> for each, and plot with <code>ax.plot(xs, ys)</code>.</li>
+</ol>
+<p><strong>Part 3 — histogram of ranges:</strong></p>
+<ol type="1">
+<li>Compute ranges for all particles at once: <code>ranges = compute_range(v0, thetas, g=g_moon)</code>. This works because <code>compute_range</code> is vectorized via PyTorch.</li>
+<li>Plot with <code>ax.hist(ranges, bins=60, density=True, ...)</code>.</li>
+<li>To understand the shape, think about the graph of <span class="math inline">\(R(\theta)\)</span>: where is it flat, and where is it steep? How does that affect how uniform samples in <span class="math inline">\(\theta\)</span> get mapped to values of <span class="math inline">\(R\)</span>?</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="29acaa19" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>v0 <span class="op">=</span> <span class="fl">20.0</span>  <span class="co"># m/s</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g_moon <span class="op">=</span> <span class="fl">1.62</span>  <span class="co"># m/s²</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>R_obs <span class="op">=</span> <span class="fl">200.0</span>  <span class="co"># m</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lunar_launch():</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    theta <span class="op">=</span> sample(<span class="st">"theta"</span>, dist.Uniform(<span class="dv">0</span>, torch.pi <span class="op">/</span> <span class="dv">2</span>))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    R <span class="op">=</span> compute_range(v0, theta, g<span class="op">=</span>g_moon)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> lunar_launch(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMCResult(num_particles=5000, log_evidence=0.0000, ESS=5000.0)
+  Variables: theta
+    theta: shape=(5000,)</code></pre>
+</div>
+</div>
+<div id="9a21fb48" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=5000, log_evidence=0.0000, ESS=5000.0)
+
+          │ ▇▇▇█▇▇▇▇▇█▆▇▇▇ │
+          │     theta      │
+──────────┼────────────────┤
+     mean │     0.7805     │
+      std │     0.4513     │
+ n_unique │      5000      │</code></pre>
+</div>
+</div>
+<div id="538edf2a" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result.log_weights) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([0., 0., 0.,  ..., 0., 0., 0.])</code></pre>
+</div>
+</div>
+<p>The results object records 5000 samples of <code>theta</code>, along with 5000 <code>log_weights</code> (which are all zero since there are no <code>observe</code> statements), and a <code>log_evidence</code> of 0.0 (once there are <code>observe</code> statements, this will be the log marginal likelihood of the data under the model).</p>
+<p>Note that the range <code>R</code> is not recorded in the results object since it is not a sampled variable. Hence computing <code>R</code> does not actually have any effect in this program. It will be important in the next task, once we observe <code>R</code>.</p>
+<p>If you want to record the result of the deterministic calculation, you can use <code>R = deterministic("R", compute_range(v0, theta, g=g_moon))</code> instead of a plain assignment. However, usually it is more efficient to compute derived quantities like <code>R</code> on the fly from the sampled variables when needed, rather than storing them in the results object.</p>
+<p>Next, we plot 20 randomly selected trajectories from the prior. These reflect our beliefs about how typical trajectories look given a uniform prior over <span class="math inline">\(\theta\)</span>.</p>
+<div id="215b4e84" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> result[<span class="st">"theta"</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> torch.randperm(<span class="bu">len</span>(thetas))[:<span class="dv">20</span>]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> idx:</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    xs, ys <span class="op">=</span> compute_trajectory(v0, thetas[i], g<span class="op">=</span>g_moon)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, ys, linewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Horizontal distance (m)"</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Height (m)"</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(bottom<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-9-output-1.png" width="566" height="278" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We plot a histogram of the prior distribution of ranges, with <span class="math inline">\(R_{\text{obs}}\)</span> marked:</p>
+<div id="7bb3aa4a" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> compute_range(v0, result[<span class="st">"theta"</span>], g<span class="op">=</span>g_moon)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>ax.hist(ranges, bins<span class="op">=</span><span class="dv">60</span>, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        edgecolor<span class="op">=</span><span class="st">"white"</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>ax.axvline(R_obs, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="ss">f"$R_</span><span class="ch">{{\\</span><span class="ss">mathrm</span><span class="ch">{{</span><span class="ss">obs</span><span class="ch">}}}}</span><span class="ss">$ = </span><span class="sc">{</span>R_obs<span class="sc">}</span><span class="ss"> m"</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Range (m)"</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-10-output-1.png" width="566" height="278" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The density piles up near <span class="math inline">\(R_{\max} = v_0^2/g \approx 247\;\text{m}\)</span>. To see why, look at the graph of <span class="math inline">\(R(\theta)\)</span>:</p>
+<div id="9e1f05da" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Explanation: the range function R(θ)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>theta_grid <span class="op">=</span> torch.linspace(<span class="dv">0</span>, torch.pi <span class="op">/</span> <span class="dv">2</span>, <span class="dv">200</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>R_grid <span class="op">=</span> compute_range(v0, theta_grid, g<span class="op">=</span>g_moon)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>ax.plot(theta_grid, R_grid, color<span class="op">=</span><span class="st">"steelblue"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>ax.axhline(</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    R_obs,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"red"</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    linestyle<span class="op">=</span><span class="st">"--"</span>,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.7</span>,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="ss">f"$R_</span><span class="ch">{{\\</span><span class="ss">mathrm</span><span class="ch">{{</span><span class="ss">obs</span><span class="ch">}}}}</span><span class="ss">$ = </span><span class="sc">{</span>R_obs<span class="sc">}</span><span class="ss"> m"</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Launch angle θ (rad)"</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Range R (m)"</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-11-output-1.png" width="566" height="278" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Near the peak (<span class="math inline">\(\theta = \pi/4\)</span>), the curve is flat. This means many nearby angles map to nearly the same range. Uniform samples in <span class="math inline">\(\theta\)</span> get compressed into a narrow band of <span class="math inline">\(R\)</span> values there, producing high density. Conversely, where the curve is steep (near <span class="math inline">\(\theta = 0\)</span> or <span class="math inline">\(\theta = \pi/2\)</span>), samples spread out and density is low.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="task-1b-inferring-the-launch-angle" class="level3">
+<h3 class="anchored" data-anchor-id="task-1b-inferring-the-launch-angle">Task 1b: Inferring the launch angle</h3>
+<p>Adding an <code>observe</code> statement turns prior samples into <strong>weighted posterior samples</strong> — particles that are consistent with the data receive high weight, while unlikely ones are down-weighted. The resulting collection represents our beliefs <em>after</em> seeing the observation.</p>
+<p><strong>Part 1.</strong> Modify your model to condition on the observed range. Add an <code>observe</code> statement with a Gaussian likelihood: <span class="math display">\[
+R_{\text{obs}} \sim \mathsf{Normal}(R(\theta),\; \sigma)
+\]</span> where <span class="math inline">\(\sigma = 5.0\;\text{m}\)</span> represents measurement uncertainty and <span class="math inline">\(R_{\text{obs}} = 200\;\text{m}\)</span>. Run inference with <code>num_particles=10000</code> and inspect the result. What has changed compared to task 1a?</p>
+<p><strong>Part 2.</strong> The posterior samples carry importance weights. Plot a weighted histogram of the posterior over <span class="math inline">\(\theta\)</span> by passing <code>weights=...</code> to <code>ax.hist</code>. The range equation <span class="math inline">\(R(\theta) = R_{\text{obs}}\)</span> has two exact analytical solutions: <span class="math display">\[
+\theta_{\text{low}} = \tfrac{1}{2}\arcsin\!\left(\frac{R_{\text{obs}}\, g}{v_0^2}\right), \qquad \theta_{\text{high}} = \frac{\pi}{2} - \theta_{\text{low}}.
+\]</span> Compute these two angles and overlay them on your histogram as vertical dashed lines. What do you notice?</p>
+<p><strong>Part 3.</strong> One way to summarize a distribution is its <strong>mean</strong>. Use <code>expectation()</code> to compute <span class="math inline">\(\mathbb{E}[\theta \mid R_{\text{obs}}]\)</span>. Is the mean a useful summary here?</p>
+<p><strong>Discussion:</strong> How does the Bayesian posterior relate to the two exact solutions? What happens as the measurement noise <span class="math inline">\(\sigma \to 0\)</span>?</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint: Step-by-step approach">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint: Step-by-step approach
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Part 1 — conditioning with <code>observe</code>:</strong></p>
+<ol type="1">
+<li><p>Copy your <code>lunar_launch</code> model and add two parameters: <code>R_obs</code> and <code>sigma</code>.</p></li>
+<li><p>After computing <code>R</code>, add this line:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>observe(R_obs, dist.Normal(R, sigma))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This tells the engine: “the observed range <span class="math inline">\(R_{\text{obs}}\)</span> was drawn from a Normal centered at the predicted range <span class="math inline">\(R\)</span>”. Particles whose predicted range is close to 200 m will receive high weight.</p></li>
+<li><p>Run with <code>num_particles=10000</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>result_cond <span class="op">=</span> lunar_launch_conditioned(R_obs, sigma, num_particles<span class="op">=</span><span class="dv">10000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Note that <code>R_obs</code> and <code>sigma</code> are model arguments; <code>num_particles</code> is intercepted by the engine.</p></li>
+</ol>
+<p><strong>Part 2 — weighted histogram with exact solutions:</strong></p>
+<p>When there are <code>observe</code> statements, particles carry importance weights. To plot a correct histogram, pass these weights to <code>ax.hist</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> result_cond[<span class="st">"theta"</span>]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>log_w <span class="op">=</span> result_cond.log_weights</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> torch.softmax(log_w, dim<span class="op">=</span><span class="dv">0</span>)  <span class="co"># exponentiate and normalize</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>ax.hist(thetas, weights<span class="op">=</span>weights, bins<span class="op">=</span><span class="dv">80</span>, density<span class="op">=</span><span class="va">True</span>, ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compute the exact angles and overlay them:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>theta_low <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> torch.asin(torch.tensor(R_obs <span class="op">*</span> g_moon <span class="op">/</span> v0<span class="op">**</span><span class="dv">2</span>))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>theta_high <span class="op">=</span> torch.pi <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> theta_low</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="bu">float</span>(theta_low), ...)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="bu">float</span>(theta_high), ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Part 3 — posterior mean with <code>expectation</code>:</strong></p>
+<p>The <code>expectation()</code> function takes a result object and a function whose argument names match the sampled variable names:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>E_theta <span class="op">=</span> expectation(result_cond, <span class="kw">lambda</span> theta: theta)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This returns the weighted posterior mean of <span class="math inline">\(\theta\)</span>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="202a3fed" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 1: Conditioned model</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>R_obs <span class="op">=</span> <span class="fl">200.0</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">5.0</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lunar_launch_conditioned(R_obs, sigma):</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    theta <span class="op">=</span> sample(<span class="st">"theta"</span>, dist.Uniform(<span class="dv">0</span>, torch.pi <span class="op">/</span> <span class="dv">2</span>))</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    R <span class="op">=</span> compute_range(v0, theta, g<span class="op">=</span>g_moon)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    observe(R_obs, dist.Normal(R, sigma))</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>result_cond <span class="op">=</span> lunar_launch_conditioned(R_obs, sigma, num_particles<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result_cond)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_cond))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMCResult(num_particles=10000, log_evidence=-5.4029, ESS=798.0)
+  Variables: theta
+    theta: shape=(10000,)
+SMC Summary (N=10000, log_evidence=-5.4029, ESS=798.0)
+
+          │     ▇    █▇    │
+          │     theta      │
+──────────┼────────────────┤
+     mean │     0.7867     │
+      std │     0.3130     │
+ n_unique │      9998      │</code></pre>
+</div>
+</div>
+<p>We again have 10000 samples of <code>theta</code>, but now they come with non-uniform <code>log_weights</code> that reflect how well each particle’s predicted range matches the observed range. The <code>log_evidence</code> is now negative, indicating the marginal likelihood of the data under the model.</p>
+<div id="5143b242" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 2: Compute normalized weights and exact solutions</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> result_cond[<span class="st">"theta"</span>]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>log_w <span class="op">=</span> result_cond.log_weights</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> torch.softmax(log_w, dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>theta_low <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> torch.asin(torch.tensor(R_obs <span class="op">*</span> g_moon <span class="op">/</span> v0<span class="op">**</span><span class="dv">2</span>))</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>theta_high <span class="op">=</span> torch.pi <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> theta_low</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We plot the weighted posterior histogram of <span class="math inline">\(\theta\)</span>, with the exact analytical solutions overlaid:</p>
+<div id="bd0986db" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.5</span>))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>ax.hist(thetas, weights<span class="op">=</span>weights, bins<span class="op">=</span><span class="dv">80</span>, density<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"steelblue"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>, alpha<span class="op">=</span><span class="fl">0.8</span>, label<span class="op">=</span><span class="st">"Posterior"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="bu">float</span>(theta_low), color<span class="op">=</span><span class="st">"darkorange"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="ss">f"Exact low: θ = </span><span class="sc">{</span><span class="bu">float</span>(theta_low)<span class="sc">:.2f}</span><span class="ss"> rad (</span><span class="sc">{</span><span class="bu">float</span>(theta_low)<span class="op">*</span><span class="dv">180</span><span class="op">/</span>torch<span class="sc">.</span>pi<span class="sc">:.0f}</span><span class="ss">°)"</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="bu">float</span>(theta_high), color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="ss">f"Exact high: θ = </span><span class="sc">{</span><span class="bu">float</span>(theta_high)<span class="sc">:.2f}</span><span class="ss"> rad (</span><span class="sc">{</span><span class="bu">float</span>(theta_high)<span class="op">*</span><span class="dv">180</span><span class="op">/</span>torch<span class="sc">.</span>pi<span class="sc">:.0f}</span><span class="ss">°)"</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Launch angle θ (rad)"</span>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-14-output-1.png" width="662" height="326" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The posterior is <strong>bimodal</strong>, with two peaks centered on the exact analytical solutions. The Bayesian posterior automatically discovers both solutions and quantifies how plausible each one is. Because we used a uniform prior on <code>theta</code>, both modes have roughly equal mass. If we had used a prior that favored large angles, the high-arc solution would have received more weight.</p>
+<div id="d83ac20e" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3: Posterior mean of θ</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>E_theta <span class="op">=</span> expectation(result_cond, <span class="kw">lambda</span> theta: theta)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[θ] = </span><span class="sc">{</span>E_theta<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss"> rad (</span><span class="sc">{</span>E_theta<span class="sc">.</span>item()<span class="op">*</span><span class="dv">180</span><span class="op">/</span>torch<span class="sc">.</span>pi<span class="sc">:.1f}</span><span class="ss">°)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[θ] = 0.787 rad (45.1°)</code></pre>
+</div>
+</div>
+<p>The posterior mean <span class="math inline">\(\mathbb{E}[\theta] \approx \pi/4 \approx 45°\)</span> does not correspond to any physical solution; it is the average of the low-arc (<span class="math inline">\(\sim 27°\)</span>) and high-arc (<span class="math inline">\(\sim 63°\)</span>) peaks. <strong>For multimodal posteriors, the mean can be misleading</strong> — histograms or samples are much more informative.</p>
+<p><strong>Discussion:</strong> The posterior concentrates around <span class="math inline">\(\theta_{\text{low}}\)</span> and <span class="math inline">\(\theta_{\text{high}}\)</span>, with a spread controlled by the measurement noise <span class="math inline">\(\sigma\)</span>. As <span class="math inline">\(\sigma \to 0\)</span>, the posterior peaks sharpen into a pair of delta functions at the exact solutions.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-task-1c" class="level3">
+<h3 class="anchored" data-anchor-id="sec-task-1c">Task 1c: Joint inference of <span class="math inline">\(v_0\)</span> and <span class="math inline">\(\theta\)</span></h3>
+<p>So far we assumed the launch speed <span class="math inline">\(v_0 = 20\;\text{m/s}\)</span> was known exactly. In practice, the launcher has some variability. Suppose we only know that <span class="math inline">\(v_0\)</span> is somewhere between 15 and 25 m/s. Adding a second <code>sample</code> call gives us a joint posterior over both parameters.</p>
+<p><strong>Part 1.</strong> Write a new model <code>lunar_launch_joint(R_obs, sigma)</code> that:</p>
+<ol type="1">
+<li>Samples a launch speed <span class="math inline">\(v_0 \sim \text{Uniform}(15, 25)\)</span>.</li>
+<li>Samples a launch angle <span class="math inline">\(\theta \sim \text{Uniform}(0, \pi/2)\)</span>.</li>
+<li>Computes the range <span class="math inline">\(R\)</span> using <code>compute_range(v0, theta)</code>.</li>
+<li>Conditions on the observed range using <code>observe(R_obs, dist.Normal(R, sigma))</code>.</li>
+</ol>
+<p>Run the model with <span class="math inline">\(R_{\text{obs}} = 200\)</span>, <span class="math inline">\(\sigma = 5.0\)</span>, and <code>num_particles=10000</code>. Inspect the results.</p>
+<p><strong>Part 2.</strong> Visualize the joint posterior of <span class="math inline">\((v_0, \theta)\)</span> using seaborn’s <code>sns.jointplot()</code>. Since <code>jointplot</code> does not accept importance weights, you first need to <strong>resample</strong>: call <code>.sample()</code> on the result to convert the weighted particles into an equally-weighted collection. This draws indices proportional to the importance weights — high-weight particles get duplicated, low-weight ones are dropped.</p>
+<p>What structure do you see in the joint?</p>
+<p><strong>Part 3.</strong> Posterior samples aren’t limited to the parameters themselves — we can plug them into any function to obtain samples of <strong>derived quantities</strong>. Use <code>expectation()</code> to estimate:</p>
+<ol type="1">
+<li>The expected <strong>flight time</strong> <span class="math inline">\(\mathbb{E}[T \mid R_{\text{obs}}]\)</span>, where <span class="math inline">\(T = 2 v_0 \sin(\theta) / g\)</span>.</li>
+<li>The expected <strong>maximum altitude</strong> <span class="math inline">\(\mathbb{E}[h_{\max} \mid R_{\text{obs}}]\)</span>, where <span class="math inline">\(h_{\max} = v_0^2 \sin^2(\theta) / (2g)\)</span>.</li>
+<li>The <strong>probability</strong> that the cargo flies above 100 m: <span class="math inline">\(P(h_{\max} &gt; 100\;\text{m} \mid R_{\text{obs}})\)</span>.</li>
+</ol>
+<p>To visualize the full posterior over these derived quantities (not just their means), compute <span class="math inline">\(T\)</span> and <span class="math inline">\(h_{\max}\)</span> for the resampled particles and plot histograms.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint: Step-by-step approach">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint: Step-by-step approach
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Part 1 — multi-parameter model:</strong></p>
+<p>The model is a straightforward extension of the conditioned model from Task 1b. The only change is adding a second <code>sample</code> call:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>v0 <span class="op">=</span> sample(<span class="st">"v0"</span>, dist.Uniform(<span class="fl">15.0</span>, <span class="fl">25.0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Place this <em>before</em> <code>compute_range</code>, which now uses the sampled <code>v0</code> instead of a fixed constant.</p>
+<p><strong>Part 2 — joint plot with seaborn:</strong></p>
+<p>The posterior particles carry importance weights. Since <code>jointplot</code> works with unweighted samples, use the <code>.sample()</code> method on the result to <strong>resample</strong> — drawing indices proportional to the weights to produce an equally-weighted collection:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>resampled <span class="op">=</span> result_joint.sample()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>v0_resampled <span class="op">=</span> resampled[<span class="st">"v0"</span>]</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>theta_resampled <span class="op">=</span> resampled[<span class="st">"theta"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now pass the unweighted samples to seaborn:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>sns.jointplot(x<span class="op">=</span>v0_resampled.numpy(), y<span class="op">=</span>theta_resampled.numpy(), kind<span class="op">=</span><span class="st">"scatter"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Try different <code>kind</code> options: <code>"scatter"</code>, <code>"kde"</code>, <code>"hex"</code>.</p>
+<p><strong>Part 3 — derived quantities from posterior samples:</strong></p>
+<p>The <code>expectation()</code> function matches argument names to variable names in the result. To compute a function of multiple variables, use a lambda with matching argument names:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>E_T <span class="op">=</span> expectation(result_joint, <span class="kw">lambda</span> v0, theta: <span class="dv">2</span> <span class="op">*</span> v0 <span class="op">*</span> torch.sin(theta) <span class="op">/</span> g_moon)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For a probability, pass an indicator function:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>expectation(result_joint, <span class="kw">lambda</span> v0, theta: (h_max_expr <span class="op">&gt;</span> <span class="dv">100</span>).<span class="bu">float</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For the histograms, plug the resampled posterior samples into the formulas for <span class="math inline">\(T\)</span> and <span class="math inline">\(h_{\max}\)</span>. Each resampled particle gives one sample of the derived quantity:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>T_samples <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> v0_resampled <span class="op">*</span> torch.sin(theta_resampled) <span class="op">/</span> g_moon</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>hmax_samples <span class="op">=</span> v0_resampled<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> torch.sin(theta_resampled)<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> g_moon)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="fb9e9978" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 1: Joint model</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>R_obs <span class="op">=</span> <span class="fl">200.0</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">5.0</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lunar_launch_joint(R_obs, sigma):</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    v0 <span class="op">=</span> sample(<span class="st">"v0"</span>, dist.Uniform(<span class="fl">15.0</span>, <span class="fl">25.0</span>))</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    theta <span class="op">=</span> sample(<span class="st">"theta"</span>, dist.Uniform(<span class="dv">0</span>, torch.pi <span class="op">/</span> <span class="dv">2</span>))</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    R <span class="op">=</span> compute_range(v0, theta, g<span class="op">=</span>g_moon)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    observe(R_obs, dist.Normal(R, sigma))</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>result_joint <span class="op">=</span> lunar_launch_joint(R_obs, sigma, num_particles<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_joint))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=10000, log_evidence=-5.7743, ESS=552.4)
+
+          │     ▅█▅▄▄▂▃▂▂▂ │    █▇▇█▇▆▆▆▄   │
+          │       v0       │     theta      │
+──────────┼────────────────┼────────────────┤
+     mean │    20.0800     │     0.7837     │
+      std │     2.0329     │     0.3041     │
+ n_unique │      9989      │     10000      │</code></pre>
+</div>
+</div>
+<p>The result now contains samples of both <code>v0</code> and <code>theta</code>, along with their corresponding <code>log_weights</code>. Note that the samples are <strong>paired</strong>: the first sample of <code>v0</code> corresponds to the first sample of <code>theta</code>, and so on. The collection of pairs <span class="math inline">\((v_0, \theta)\)</span> represents the joint posterior distribution.</p>
+<div id="c8a8c66d" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 2: Resample particles proportional to weights</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>resampled <span class="op">=</span> result_joint.sample()</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>v0_resampled <span class="op">=</span> resampled[<span class="st">"v0"</span>]</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>theta_resampled <span class="op">=</span> resampled[<span class="st">"theta"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We create a joint plot showing the posterior distribution of <span class="math inline">\((v_0, \theta)\)</span>:</p>
+<div id="0b30b134" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sns.jointplot(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>v0_resampled.numpy(),</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>theta_resampled.numpy(),</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    kind<span class="op">=</span><span class="st">"scatter"</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    joint_kws<span class="op">=</span>{<span class="st">"s"</span>: <span class="dv">5</span>, <span class="st">"alpha"</span>: <span class="fl">0.3</span>},</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    marginal_kws<span class="op">=</span>{<span class="st">"bins"</span>: <span class="dv">60</span>},</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="dv">6</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$v_0$ (m/s)"</span>)</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"θ (rad)"</span>)</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-18-output-1.png" width="566" height="565" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The joint posterior reveals a horseshoe shape. The marginal for <span class="math inline">\(v_0\)</span> is concentrated around <span class="math inline">\(18 \, \text{m/s}\)</span> since in that region, the two modes in <span class="math inline">\(\theta\)</span> merge into a single broad peak. The marginal for <span class="math inline">\(\theta\)</span> looks uniform.</p>
+<p>Next, we compute the expected flight time, expected maximum altitude, and probability of flying above 100 m:</p>
+<div id="ef0712c1" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3: Operational quantities from the joint posterior</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>E_T <span class="op">=</span> expectation(result_joint,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> v0, theta: <span class="dv">2</span> <span class="op">*</span> v0 <span class="op">*</span> torch.sin(theta) <span class="op">/</span> g_moon)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>E_hmax <span class="op">=</span> expectation(result_joint,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> v0, theta: v0<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> torch.sin(theta)<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> g_moon))</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>P_high <span class="op">=</span> expectation(result_joint,</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> v0, theta: (v0<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> torch.sin(theta)<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> g_moon) <span class="op">&gt;</span> <span class="dv">100</span>).<span class="bu">float</span>())</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[flight time]   = </span><span class="sc">{</span>E_T<span class="sc">.</span>item()<span class="sc">:.1f}</span><span class="ss"> s"</span>)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[max altitude]  = </span><span class="sc">{</span>E_hmax<span class="sc">.</span>item()<span class="sc">:.1f}</span><span class="ss"> m"</span>)</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(h_max &gt; 100 m) = </span><span class="sc">{</span>P_high<span class="sc">.</span>item()<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[flight time]   = 16.6 s
+E[max altitude]  = 62.6 m
+P(h_max &gt; 100 m) = 0.19</code></pre>
+</div>
+</div>
+<p>Finally, we plot histograms of the posterior distributions of flight time and maximum altitude. For this we first compute <span class="math inline">\(T\)</span> and <span class="math inline">\(h_{\max}\)</span> for each resampled particle, then plot histograms:</p>
+<div id="616a2eb8" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3 (continued): Compute derived trajectory quantities</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>T_samples <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> v0_resampled <span class="op">*</span> torch.sin(theta_resampled) <span class="op">/</span> g_moon</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>hmax_samples <span class="op">=</span> v0_resampled<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> torch.sin(theta_resampled) <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> g_moon)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="f7eb38d7" class="cell" data-execution_count="20">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">3</span>))</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].hist(</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    T_samples.numpy(),</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="dv">60</span>,</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    density<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.8</span>,</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">"Flight time (s)"</span>)</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].hist(</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>    hmax_samples.numpy(),</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="dv">60</span>,</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>    density<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.8</span>,</span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].axvline(</span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>    <span class="fl">100.0</span>, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"100 m threshold"</span></span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">"Maximum altitude (m)"</span>)</span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-21-output-1.png" width="662" height="278" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Visually, the probability of flying above 100 m is the total area to the right of the red dashed line in the second histogram.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="vignette-2-gravitational-slingshot" class="level2">
+<h2 class="anchored" data-anchor-id="vignette-2-gravitational-slingshot">Vignette 2: Gravitational Slingshot</h2>
+<p>A space probe was launched from Station Alpha (located at the origin) to explore a region of space. A massive planet at position <span class="math inline">\((p_x, p_y) = (5, 3)\)</span> bends all nearby trajectories through its gravitational pull. After <span class="math inline">\(T\)</span> seconds, a sensor detected the probe at coordinates <span class="math inline">\((x_T, y_T)\)</span>.</p>
+<p><strong>Given the observed endpoint, what was the probe’s initial velocity?</strong></p>
+<div id="cell-fig-gravity-setup" class="cell" data-execution_count="22">
+<div class="cell-output cell-output-display">
+<div id="fig-gravity-setup" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gravity-setup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="5-physics_files/figure-html/fig-gravity-setup-output-1.png" width="315" height="374" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gravity-setup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Trajectories of a probe launched from Station Alpha (green) under the gravitational influence of a massive planet (black). Different initial velocities lead to very different paths
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Provided helper function: gravity simulation">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Provided helper function: gravity simulation
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The following function is provided for you. Run this cell before starting the tasks.</p>
+<div id="adaeb8e8" class="cell" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> simulate_gravity(x0, y0, vx0, vy0,</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>                     planet_x, planet_y, planet_mass,</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>                     dt<span class="op">=</span><span class="fl">0.02</span>, n_steps<span class="op">=</span><span class="dv">300</span>, softening<span class="op">=</span><span class="fl">0.5</span>):</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Simulate a 2D trajectory under Newtonian gravity using leapfrog integration.</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="co">    All positional/velocity arguments can be tensors of shape (N,) to simulate</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="co">    N particles in parallel.</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a><span class="co">        x0, y0: initial position</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="co">        vx0, vy0: initial velocity</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="co">        planet_x, planet_y: position of the massive body</span></span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a><span class="co">        planet_mass: gravitational parameter GM of the planet</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a><span class="co">        dt: time step</span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a><span class="co">        n_steps: number of integration steps</span></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a><span class="co">        softening: softening length ε to prevent singularity at r=0;</span></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a><span class="co">                   force ∝ 1/(r² + ε²)</span></span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a><span class="co">        (xs, ys) — tensors of shape (n_steps, N) giving the trajectory</span></span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> x0.clone() <span class="cf">if</span> <span class="bu">isinstance</span>(x0, torch.Tensor) <span class="cf">else</span> torch.tensor(x0).<span class="bu">float</span>()</span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> y0.clone() <span class="cf">if</span> <span class="bu">isinstance</span>(y0, torch.Tensor) <span class="cf">else</span> torch.tensor(y0).<span class="bu">float</span>()</span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>    vx <span class="op">=</span> vx0.clone() <span class="cf">if</span> <span class="bu">isinstance</span>(vx0, torch.Tensor) <span class="cf">else</span> torch.tensor(vx0).<span class="bu">float</span>()</span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>    vy <span class="op">=</span> vy0.clone() <span class="cf">if</span> <span class="bu">isinstance</span>(vy0, torch.Tensor) <span class="cf">else</span> torch.tensor(vy0).<span class="bu">float</span>()</span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Broadcast all inputs to the same shape so that torch.stack works</span></span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>    x, y, vx, vy <span class="op">=</span> torch.broadcast_tensors(x, y, vx, vy)</span>
+<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a>    x, y, vx, vy <span class="op">=</span> x.clone(), y.clone(), vx.clone(), vy.clone()</span>
+<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a>    xs_list <span class="op">=</span> []</span>
+<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a>    ys_list <span class="op">=</span> []</span>
+<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-34"><a href="#cb39-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_steps):</span>
+<span id="cb39-35"><a href="#cb39-35" aria-hidden="true" tabindex="-1"></a>        xs_list.append(x.clone())</span>
+<span id="cb39-36"><a href="#cb39-36" aria-hidden="true" tabindex="-1"></a>        ys_list.append(y.clone())</span>
+<span id="cb39-37"><a href="#cb39-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-38"><a href="#cb39-38" aria-hidden="true" tabindex="-1"></a>        dx <span class="op">=</span> x <span class="op">-</span> planet_x</span>
+<span id="cb39-39"><a href="#cb39-39" aria-hidden="true" tabindex="-1"></a>        dy <span class="op">=</span> y <span class="op">-</span> planet_y</span>
+<span id="cb39-40"><a href="#cb39-40" aria-hidden="true" tabindex="-1"></a>        r2 <span class="op">=</span> dx<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> dy<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> softening<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb39-41"><a href="#cb39-41" aria-hidden="true" tabindex="-1"></a>        r <span class="op">=</span> torch.sqrt(r2)</span>
+<span id="cb39-42"><a href="#cb39-42" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> <span class="op">-</span>planet_mass <span class="op">/</span> r2</span>
+<span id="cb39-43"><a href="#cb39-43" aria-hidden="true" tabindex="-1"></a>        ax <span class="op">=</span> acc <span class="op">*</span> dx <span class="op">/</span> r</span>
+<span id="cb39-44"><a href="#cb39-44" aria-hidden="true" tabindex="-1"></a>        ay <span class="op">=</span> acc <span class="op">*</span> dy <span class="op">/</span> r</span>
+<span id="cb39-45"><a href="#cb39-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-46"><a href="#cb39-46" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Leapfrog: kick-drift-kick</span></span>
+<span id="cb39-47"><a href="#cb39-47" aria-hidden="true" tabindex="-1"></a>        vx <span class="op">=</span> vx <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> ax <span class="op">*</span> dt</span>
+<span id="cb39-48"><a href="#cb39-48" aria-hidden="true" tabindex="-1"></a>        vy <span class="op">=</span> vy <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> ay <span class="op">*</span> dt</span>
+<span id="cb39-49"><a href="#cb39-49" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> vx <span class="op">*</span> dt</span>
+<span id="cb39-50"><a href="#cb39-50" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> y <span class="op">+</span> vy <span class="op">*</span> dt</span>
+<span id="cb39-51"><a href="#cb39-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-52"><a href="#cb39-52" aria-hidden="true" tabindex="-1"></a>        dx <span class="op">=</span> x <span class="op">-</span> planet_x</span>
+<span id="cb39-53"><a href="#cb39-53" aria-hidden="true" tabindex="-1"></a>        dy <span class="op">=</span> y <span class="op">-</span> planet_y</span>
+<span id="cb39-54"><a href="#cb39-54" aria-hidden="true" tabindex="-1"></a>        r2 <span class="op">=</span> dx<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> dy<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> softening<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb39-55"><a href="#cb39-55" aria-hidden="true" tabindex="-1"></a>        r <span class="op">=</span> torch.sqrt(r2)</span>
+<span id="cb39-56"><a href="#cb39-56" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> <span class="op">-</span>planet_mass <span class="op">/</span> r2</span>
+<span id="cb39-57"><a href="#cb39-57" aria-hidden="true" tabindex="-1"></a>        ax <span class="op">=</span> acc <span class="op">*</span> dx <span class="op">/</span> r</span>
+<span id="cb39-58"><a href="#cb39-58" aria-hidden="true" tabindex="-1"></a>        ay <span class="op">=</span> acc <span class="op">*</span> dy <span class="op">/</span> r</span>
+<span id="cb39-59"><a href="#cb39-59" aria-hidden="true" tabindex="-1"></a>        vx <span class="op">=</span> vx <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> ax <span class="op">*</span> dt</span>
+<span id="cb39-60"><a href="#cb39-60" aria-hidden="true" tabindex="-1"></a>        vy <span class="op">=</span> vy <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> ay <span class="op">*</span> dt</span>
+<span id="cb39-61"><a href="#cb39-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-62"><a href="#cb39-62" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> torch.stack(xs_list)  <span class="co"># shape (n_steps, ...) </span></span>
+<span id="cb39-63"><a href="#cb39-63" aria-hidden="true" tabindex="-1"></a>    ys <span class="op">=</span> torch.stack(ys_list)</span>
+<span id="cb39-64"><a href="#cb39-64" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> xs, ys</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<section id="task-2a-forward-simulation" class="level3">
+<h3 class="anchored" data-anchor-id="task-2a-forward-simulation">Task 2a: Forward simulation</h3>
+<p>As before, we start by drawing from the <strong>prior</strong> — sampling velocities and running the simulation — to understand what outcomes are possible before any data is observed.</p>
+<p><strong>Part 1.</strong> Write a <code>@model</code> function <code>probe_launch()</code> that:</p>
+<ol type="1">
+<li>Samples initial velocity components <span class="math inline">\(v_x \sim \text{Normal}(0, 3)\)</span> and <span class="math inline">\(v_y \sim \text{Normal}(0, 3)\)</span>.</li>
+<li>Simulates the trajectory using <code>simulate_gravity</code> with launch from origin, planet at <span class="math inline">\((5, 3)\)</span> with <code>planet_mass = 30</code>, time step <code>dt = 0.02</code>, and <code>n_steps = 300</code>.</li>
+<li>Records the final position <span class="math inline">\((x_T, y_T)\)</span> using two deterministic variables: <code>deterministic("final_x", xs[-1])</code> and <code>deterministic("final_y", ys[-1])</code>.</li>
+</ol>
+<p>Run the model with <code>num_particles=5000</code> and inspect the result.</p>
+<p><strong>Part 2.</strong> Extract the endpoints from the result and plot a <strong>scatter</strong> of the prior distribution of endpoints (final <span class="math inline">\((x_T, y_T)\)</span> for all particles). Where is the density highest? How does the planet’s gravity shape the distribution?</p>
+<p><strong>Part 3.</strong> Select 20 random particles from the result and plot their trajectories on a single figure. Mark the planet’s position with a large dot and Station Alpha at the origin.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint: Step-by-step approach">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint: Step-by-step approach
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Part 1 — writing and running the model:</strong></p>
+<ol type="1">
+<li><p>Define constants <code>planet_x, planet_y = 5.0, 3.0</code> and <code>planet_mass = 30.0</code>.</p></li>
+<li><p>Write a function decorated with <code>@model</code>. Inside, use <code>sample("vx", dist.Normal(0.0, 3.0))</code> and similarly for <code>vy</code>, then call <code>simulate_gravity</code>. Finally, use <code>deterministic("final_x", xs[-1])</code> and <code>deterministic("final_y", ys[-1])</code> to record the final position.</p></li>
+<li><p>Call the model with <code>num_particles=5000</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> probe_launch(num_particles<span class="op">=</span><span class="dv">5000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The result is dictionary-like: <code>result["vx"]</code> and <code>result["vy"]</code> are tensors of shape <code>(5000,)</code>.</p></li>
+</ol>
+<p><strong>Part 2 — scatter of endpoints:</strong></p>
+<p>The deterministic sites <code>"final_x"</code> and <code>"final_y"</code> are stored in the result. Extract them with <code>result["final_x"]</code> and <code>result["final_y"]</code> — each is a tensor of shape <code>(5000,)</code>.</p>
+<p><strong>Part 3 — plotting trajectories:</strong></p>
+<ol type="1">
+<li>Extract the velocities: <code>vx_samples = result["vx"]</code>, <code>vy_samples = result["vy"]</code>.</li>
+<li>Pick 20 random indices: <code>idx = torch.randperm(len(vx_samples))[:20]</code>.</li>
+<li>Re-run <code>simulate_gravity</code> for the selected particles and plot each trajectory.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="461136b1" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>planet_x, planet_y <span class="op">=</span> <span class="fl">5.0</span>, <span class="fl">3.0</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>planet_mass <span class="op">=</span> <span class="fl">30.0</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> probe_launch():</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    vx <span class="op">=</span> sample(<span class="st">"vx"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">3.0</span>))</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    vy <span class="op">=</span> sample(<span class="st">"vy"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">3.0</span>))</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    xs, ys <span class="op">=</span> simulate_gravity(</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>        x0<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>        y0<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>        vx0<span class="op">=</span>vx,</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>        vy0<span class="op">=</span>vy,</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>        planet_x<span class="op">=</span>planet_x,</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>        planet_y<span class="op">=</span>planet_y,</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>        planet_mass<span class="op">=</span>planet_mass,</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>        dt<span class="op">=</span><span class="fl">0.02</span>,</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>        n_steps<span class="op">=</span><span class="dv">300</span>,</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>    deterministic(<span class="st">"final_x"</span>, xs[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>    deterministic(<span class="st">"final_y"</span>, ys[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>result_probe <span class="op">=</span> probe_launch(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_probe))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=5000, log_evidence=0.0000, ESS=5000.0)
+
+          │    ▂▃▆██▆▃▂▁   │    ▁▂▆▇█▆▃▁    │    ▁▁▃▃█▅▂▁    │     ▁▃▄█▅▂▁    │
+          │       vx       │       vy       │    final_x     │    final_y     │
+──────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+     mean │     0.0499     │    -0.0364     │     3.7868     │     1.9873     │
+      std │     2.9803     │     3.0503     │    16.0433     │    15.8321     │
+ n_unique │      5000      │      4999      │      5000      │      5000      │</code></pre>
+</div>
+</div>
+<div id="a8b2d91c" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 2: Extract endpoints from the result</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>final_x <span class="op">=</span> result_probe[<span class="st">"final_x"</span>]</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>final_y <span class="op">=</span> result_probe[<span class="st">"final_y"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We scatter-plot the prior distribution of endpoints:</p>
+<div id="a4df1f50" class="cell" data-execution_count="26">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">6</span>))</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>ax.scatter(final_x, final_y, s<span class="op">=</span><span class="dv">3</span>, alpha<span class="op">=</span><span class="fl">0.3</span>, color<span class="op">=</span><span class="st">"steelblue"</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>ax.plot(planet_x, planet_y, <span class="st">"ko"</span>, markersize<span class="op">=</span><span class="dv">12</span>, zorder<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="dv">0</span>, <span class="dv">0</span>, <span class="st">"s"</span>, color<span class="op">=</span><span class="st">"green"</span>, markersize<span class="op">=</span><span class="dv">8</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">"Station Alpha"</span>)</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Final x"</span>)</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Final y"</span>)</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Prior distribution of endpoints"</span>)</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>ax.set_aspect(<span class="st">"equal"</span>)</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-27-output-1.png" width="483" height="566" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The planet acts as a gravitational lens: many trajectories are funneled around it, producing high density near the planet and a distinctive pattern of endpoint clustering. Probes with low initial speed tend to end up close to the planet, while faster probes fly past it in various directions.</p>
+<div id="d1b36553" class="cell" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3: Re-simulate 20 random trajectories</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>vx_samples <span class="op">=</span> result_probe[<span class="st">"vx"</span>]</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>vy_samples <span class="op">=</span> result_probe[<span class="st">"vy"</span>]</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> torch.randperm(<span class="bu">len</span>(vx_samples))[:<span class="dv">20</span>]</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>all_xs, all_ys <span class="op">=</span> simulate_gravity(</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    x0<span class="op">=</span><span class="fl">0.0</span>, y0<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    vx0<span class="op">=</span>vx_samples[idx], vy0<span class="op">=</span>vy_samples[idx],</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    planet_x<span class="op">=</span>planet_x, planet_y<span class="op">=</span>planet_y,</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>    planet_mass<span class="op">=</span>planet_mass,</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="fl">0.02</span>, n_steps<span class="op">=</span><span class="dv">300</span>,</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We plot the selected trajectories:</p>
+<div id="bf6aee9d" class="cell" data-execution_count="28">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    ax.plot(all_xs[:, j], all_ys[:, j], linewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">float</span>(all_xs[<span class="op">-</span><span class="dv">1</span>, j]), <span class="bu">float</span>(all_ys[<span class="op">-</span><span class="dv">1</span>, j]), <span class="st">"o"</span>, markersize<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>ax.plot(planet_x, planet_y, <span class="st">"ko"</span>, markersize<span class="op">=</span><span class="dv">15</span>, zorder<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="dv">0</span>, <span class="dv">0</span>, <span class="st">"s"</span>, color<span class="op">=</span><span class="st">"green"</span>, markersize<span class="op">=</span><span class="dv">10</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">"Station Alpha"</span>)</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"x"</span>)</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"y"</span>)</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>ax.set_aspect(<span class="st">"equal"</span>)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-29-output-1.png" width="335" height="374" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="task-2b-inferring-the-initial-velocity" class="level3">
+<h3 class="anchored" data-anchor-id="task-2b-inferring-the-initial-velocity">Task 2b: Inferring the initial velocity</h3>
+<p>Adding an <code>observe</code> statement turns the prior samples into <strong>weighted posterior samples</strong>. In this two-dimensional setting, the observation scores each particle’s simulated endpoint against the data.</p>
+<p>Suppose the probe was detected at <span class="math inline">\((x_T, y_T) = (8.0, 1.0)\)</span> with measurement uncertainty <span class="math inline">\(\sigma = 1.0\)</span> in each coordinate.</p>
+<p><strong>Part 1.</strong> Write a new model <code>probe_conditioned(x_obs, y_obs, sigma)</code> that takes the observed coordinates and measurement noise as arguments. As before, record the final coordinates with <code>deterministic</code>. Since the observation is two-dimensional, combine both coordinates into a <strong>single</strong> <code>observe</code> call using a multivariate normal:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>final_x <span class="op">=</span> deterministic(<span class="st">"final_x"</span>, xs[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>final_y <span class="op">=</span> deterministic(<span class="st">"final_y"</span>, ys[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>endpoint <span class="op">=</span> torch.stack([final_x, final_y], dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>obs_vec <span class="op">=</span> torch.tensor([x_obs, y_obs])</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>observe(obs_vec, dist.MultivariateNormal(endpoint, sigma<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> torch.eye(<span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Why not two separate observe calls?">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Why not two separate observe calls?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The inference engine can trigger a <strong>resampling step</strong> after each <code>observe</code>. If you write two calls — first for <span class="math inline">\(x\)</span>, then for <span class="math inline">\(y\)</span> — the engine resamples particles after scoring <span class="math inline">\(x\)</span> alone. This discards particles that happen to have a poor <span class="math inline">\(x\)</span> match, even if they would have had an excellent <span class="math inline">\(y\)</span> match. The result is a severe loss of particle diversity and a degraded posterior.</p>
+<p>By combining both coordinates into a single <code>observe</code> with a multivariate normal, the engine scores the full 2D likelihood at once and resamples only afterward, preserving particles that are globally good.</p>
+</div>
+</div>
+</div>
+<p>Run inference with <code>num_particles=10000</code> and use <code>summary()</code> to inspect the result.</p>
+<p><strong>Part 2.</strong> The posterior particles carry importance weights. To work with standard plotting tools, <strong>resample</strong> with <code>.sample()</code> to get equally-weighted particles. Create two plots:</p>
+<ul>
+<li>A <strong>joint plot</strong> of the posterior over initial velocities <span class="math inline">\((v_x, v_y)\)</span> using <code>sns.jointplot</code>.</li>
+<li>An overlay of 500 resampled posterior trajectories, marking the observed endpoint, the planet, and Station Alpha.</li>
+</ul>
+<p><strong>Part 3.</strong> The posterior over velocities gives us more than just velocity estimates — we can <strong>re-simulate</strong> each posterior trajectory and compute <strong>derived quantities</strong> that depend on the entire path. Plugging posterior samples into the simulation produces new samples representing the posterior distribution over these quantities.</p>
+<p>Using the resampled posterior velocities, compute and report:</p>
+<ol type="1">
+<li>The expected <strong>closest approach</strong> to the planet: <span class="math inline">\(\mathbb{E}[d_{\min} \mid \text{obs}]\)</span>, where <span class="math inline">\(d_{\min} = \min_t \|\mathbf{r}(t) - \mathbf{r}_{\text{planet}}\|\)</span>.</li>
+<li>The expected <strong>maximum speed</strong> during transit: <span class="math inline">\(\mathbb{E}[v_{\max} \mid \text{obs}]\)</span>.</li>
+<li>The <strong>probability</strong> that the probe passed within 1 unit of the planet (a “danger zone”): <span class="math inline">\(P(d_{\min} &lt; 1 \mid \text{obs})\)</span>.</li>
+</ol>
+<p>Plot histograms of <span class="math inline">\(d_{\min}\)</span> and <span class="math inline">\(v_{\max}\)</span> across the posterior samples.</p>
+<p><strong>Discussion:</strong> Unlike the lunar launcher, where the posterior over <span class="math inline">\(\theta\)</span> was bimodal with well-separated peaks, the gravity problem has a two-dimensional velocity space. Do you see multiple clusters in the posterior? What do they correspond to physically?</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint: Step-by-step approach">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint: Step-by-step approach
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Part 1 — conditioning with a single 2D observe:</strong></p>
+<p>Combine the <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> observations into one <code>observe</code> call. First record the final coordinates as deterministic sites, then stack them:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>final_x <span class="op">=</span> deterministic(<span class="st">"final_x"</span>, xs[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>final_y <span class="op">=</span> deterministic(<span class="st">"final_y"</span>, ys[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>endpoint <span class="op">=</span> torch.stack([final_x, final_y], dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>obs_vec <span class="op">=</span> torch.tensor([x_obs, y_obs])</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>observe(obs_vec, dist.MultivariateNormal(endpoint, sigma<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> torch.eye(<span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This creates a 2D isotropic Gaussian likelihood, scoring both coordinates jointly.</p>
+<p><strong>Part 2 — joint plot and trajectories:</strong></p>
+<p>The posterior particles carry importance weights. Use <code>.sample()</code> to resample into equally-weighted particles:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>resampled <span class="op">=</span> result_cond.sample()</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>vx_resampled <span class="op">=</span> resampled[<span class="st">"vx"</span>]</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>vy_resampled <span class="op">=</span> resampled[<span class="st">"vy"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Then pass to seaborn:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>sns.jointplot(x<span class="op">=</span>vx_resampled.numpy(), y<span class="op">=</span>vy_resampled.numpy(), kind<span class="op">=</span><span class="st">"scatter"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For trajectories, plug the resampled posterior velocities into <code>simulate_gravity</code>: pick 500 of them, re-run the simulation, and plot each trajectory with a low alpha.</p>
+<p><strong>Part 3 — derived quantities from re-simulation:</strong></p>
+<p>Re-simulate all resampled posterior trajectories (you already have <code>post_xs</code> and <code>post_ys</code> from Part 2). Plugging the posterior velocity samples into the simulation gives new samples representing the posterior distribution over trajectory-level quantities. For each trajectory, compute:</p>
+<ul>
+<li>Closest approach: distance from the planet at each time step, then take the minimum.</li>
+<li>Maximum speed: compute velocity at each step from finite differences, then take the max.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Closest approach to planet</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>dx <span class="op">=</span> post_xs <span class="op">-</span> planet_x</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>dy <span class="op">=</span> post_ys <span class="op">-</span> planet_y</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>dist_to_planet <span class="op">=</span> torch.sqrt(dx<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> dy<span class="op">**</span><span class="dv">2</span>)  <span class="co"># shape (n_steps, N)</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>d_min <span class="op">=</span> dist_to_planet.<span class="bu">min</span>(dim<span class="op">=</span><span class="dv">0</span>).values     <span class="co"># shape (N,)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For speed, use finite differences on position:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>vx_traj <span class="op">=</span> (post_xs[<span class="dv">1</span>:] <span class="op">-</span> post_xs[:<span class="op">-</span><span class="dv">1</span>]) <span class="op">/</span> dt</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>vy_traj <span class="op">=</span> (post_ys[<span class="dv">1</span>:] <span class="op">-</span> post_ys[:<span class="op">-</span><span class="dv">1</span>]) <span class="op">/</span> dt</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>speed <span class="op">=</span> torch.sqrt(vx_traj<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> vy_traj<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>v_max <span class="op">=</span> speed.<span class="bu">max</span>(dim<span class="op">=</span><span class="dv">0</span>).values</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="f8e6f28f" class="cell" data-execution_count="29">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 1: Conditioned model</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>x_obs, y_obs <span class="op">=</span> <span class="fl">8.0</span>, <span class="fl">1.0</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>obs_sigma <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> probe_conditioned(x_obs, y_obs, sigma):</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>    vx <span class="op">=</span> sample(<span class="st">"vx"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">3.0</span>))</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    vy <span class="op">=</span> sample(<span class="st">"vy"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">3.0</span>))</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>    xs, ys <span class="op">=</span> simulate_gravity(</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>        x0<span class="op">=</span><span class="fl">0.0</span>, y0<span class="op">=</span><span class="fl">0.0</span>, vx0<span class="op">=</span>vx, vy0<span class="op">=</span>vy,</span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>        planet_x<span class="op">=</span>planet_x, planet_y<span class="op">=</span>planet_y,</span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>        planet_mass<span class="op">=</span>planet_mass,</span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>        dt<span class="op">=</span><span class="fl">0.02</span>, n_steps<span class="op">=</span><span class="dv">300</span>,</span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>    final_x <span class="op">=</span> deterministic(<span class="st">"final_x"</span>, xs[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>    final_y <span class="op">=</span> deterministic(<span class="st">"final_y"</span>, ys[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>    endpoint <span class="op">=</span> torch.stack([final_x, final_y], dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a>    obs_vec <span class="op">=</span> torch.tensor([x_obs, y_obs])</span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a>    observe(obs_vec, dist.MultivariateNormal(endpoint, sigma<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> torch.eye(<span class="dv">2</span>)))</span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>result_cond <span class="op">=</span> probe_conditioned(x_obs, y_obs, obs_sigma, num_particles<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_cond))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=10000, log_evidence=-6.7961, ESS=149.3)
+
+          │       █▂       │      ▆█▂       │        █       │       █        │
+          │       vx       │       vy       │    final_x     │    final_y     │
+──────────┼────────────────┼────────────────┼────────────────┼────────────────┤
+     mean │    -0.5231     │     0.0131     │     8.0541     │     0.7995     │
+      std │     0.6801     │     1.3552     │     1.1052     │     0.9871     │
+ n_unique │      9999      │      9998      │      9998      │     10000      │</code></pre>
+</div>
+</div>
+<div id="275ae7a4" class="cell" data-execution_count="30">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 2: Resample particles proportional to weights</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>resampled <span class="op">=</span> result_cond.sample()</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>vx_resampled <span class="op">=</span> resampled[<span class="st">"vx"</span>]</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>vy_resampled <span class="op">=</span> resampled[<span class="st">"vy"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We visualize the joint posterior over initial velocities:</p>
+<div id="899663ca" class="cell" data-execution_count="31">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>sns.jointplot(</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>vx_resampled.numpy(),</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>vy_resampled.numpy(),</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>    kind<span class="op">=</span><span class="st">"scatter"</span>,</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>    joint_kws<span class="op">=</span>{<span class="st">"s"</span>: <span class="dv">5</span>, <span class="st">"alpha"</span>: <span class="fl">0.3</span>},</span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>    marginal_kws<span class="op">=</span>{<span class="st">"bins"</span>: <span class="dv">60</span>},</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="dv">6</span>,</span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$v_x$ (initial)"</span>)</span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"$v_y$ (initial)"</span>)</span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-32-output-1.png" width="564" height="565" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can see that there are three clusters in the posterior, corresponding to three qualitatively different paths that could have produced the observed endpoint.</p>
+<p>We can visualize the corresponding trajectories by re-simulating the probe’s path for each resampled velocity and plotting them:</p>
+<div id="77fdaa09" class="cell" data-execution_count="32">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> torch.randperm(<span class="bu">len</span>(vx_resampled))[:<span class="dv">500</span>]</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>post_xs, post_ys <span class="op">=</span> simulate_gravity(</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>    x0<span class="op">=</span><span class="fl">0.0</span>, y0<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>    vx0<span class="op">=</span>vx_resampled[idx], vy0<span class="op">=</span>vy_resampled[idx],</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>    planet_x<span class="op">=</span>planet_x, planet_y<span class="op">=</span>planet_y,</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>    planet_mass<span class="op">=</span>planet_mass,</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="fl">0.02</span>, n_steps<span class="op">=</span><span class="dv">300</span>,</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(idx)):</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>    ax.plot(post_xs[:, j], post_ys[:, j], color<span class="op">=</span><span class="st">"steelblue"</span>, alpha<span class="op">=</span><span class="fl">0.05</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>ax.plot(x_obs, y_obs, <span class="st">"*"</span>, color<span class="op">=</span><span class="st">"red"</span>, markersize<span class="op">=</span><span class="dv">15</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">"Observed endpoint"</span>)</span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>ax.plot(planet_x, planet_y, <span class="st">"ko"</span>, markersize<span class="op">=</span><span class="dv">12</span>, zorder<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="dv">0</span>, <span class="dv">0</span>, <span class="st">"s"</span>, color<span class="op">=</span><span class="st">"green"</span>, markersize<span class="op">=</span><span class="dv">8</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">"Station Alpha"</span>)</span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"x"</span>)</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"y"</span>)</span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior trajectories (500 resampled)"</span>)</span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a>ax.set_aspect(<span class="st">"equal"</span>)</span>
+<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-33-output-1.png" width="414" height="374" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="135c08e3" class="cell" data-execution_count="33">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 3: Trajectory-level posterior quantities</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Use all resampled trajectories (re-simulate with full resample for better statistics)</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>all_post_xs, all_post_ys <span class="op">=</span> simulate_gravity(</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>    x0<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>    y0<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>    vx0<span class="op">=</span>vx_resampled,</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>    vy0<span class="op">=</span>vy_resampled,</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>    planet_x<span class="op">=</span>planet_x,</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>    planet_y<span class="op">=</span>planet_y,</span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>    planet_mass<span class="op">=</span>planet_mass,</span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="fl">0.02</span>,</span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>    n_steps<span class="op">=</span><span class="dv">300</span>,</span>
+<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb58-15"><a href="#cb58-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-16"><a href="#cb58-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Closest approach to planet</span></span>
+<span id="cb58-17"><a href="#cb58-17" aria-hidden="true" tabindex="-1"></a>dx <span class="op">=</span> all_post_xs <span class="op">-</span> planet_x</span>
+<span id="cb58-18"><a href="#cb58-18" aria-hidden="true" tabindex="-1"></a>dy <span class="op">=</span> all_post_ys <span class="op">-</span> planet_y</span>
+<span id="cb58-19"><a href="#cb58-19" aria-hidden="true" tabindex="-1"></a>dist_to_planet <span class="op">=</span> torch.sqrt(dx<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> dy<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb58-20"><a href="#cb58-20" aria-hidden="true" tabindex="-1"></a>d_min <span class="op">=</span> dist_to_planet.<span class="bu">min</span>(dim<span class="op">=</span><span class="dv">0</span>).values</span>
+<span id="cb58-21"><a href="#cb58-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-22"><a href="#cb58-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Maximum speed (finite differences)</span></span>
+<span id="cb58-23"><a href="#cb58-23" aria-hidden="true" tabindex="-1"></a>dt <span class="op">=</span> <span class="fl">0.02</span></span>
+<span id="cb58-24"><a href="#cb58-24" aria-hidden="true" tabindex="-1"></a>vx_traj <span class="op">=</span> (all_post_xs[<span class="dv">1</span>:] <span class="op">-</span> all_post_xs[:<span class="op">-</span><span class="dv">1</span>]) <span class="op">/</span> dt</span>
+<span id="cb58-25"><a href="#cb58-25" aria-hidden="true" tabindex="-1"></a>vy_traj <span class="op">=</span> (all_post_ys[<span class="dv">1</span>:] <span class="op">-</span> all_post_ys[:<span class="op">-</span><span class="dv">1</span>]) <span class="op">/</span> dt</span>
+<span id="cb58-26"><a href="#cb58-26" aria-hidden="true" tabindex="-1"></a>speed <span class="op">=</span> torch.sqrt(vx_traj<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> vy_traj<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb58-27"><a href="#cb58-27" aria-hidden="true" tabindex="-1"></a>v_max <span class="op">=</span> speed.<span class="bu">max</span>(dim<span class="op">=</span><span class="dv">0</span>).values</span>
+<span id="cb58-28"><a href="#cb58-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-29"><a href="#cb58-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[d_min | obs]  = </span><span class="sc">{</span>d_min<span class="sc">.</span>mean()<span class="sc">.</span>item()<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb58-30"><a href="#cb58-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[v_max | obs]  = </span><span class="sc">{</span>v_max<span class="sc">.</span>mean()<span class="sc">.</span>item()<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb58-31"><a href="#cb58-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(d_min &lt; 1)    = </span><span class="sc">{</span>(d_min <span class="op">&lt;</span> <span class="dv">1</span>)<span class="sc">.</span><span class="bu">float</span>()<span class="sc">.</span>mean()<span class="sc">.</span>item()<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[d_min | obs]  = 2.11
+E[v_max | obs]  = 5.82
+P(d_min &lt; 1)    = 0.38</code></pre>
+</div>
+</div>
+<p>We plot histograms of closest approach and maximum speed across the posterior:</p>
+<div id="c4d28d6e" class="cell" data-execution_count="34">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">3</span>))</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].hist(</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>    d_min.numpy(),</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="dv">60</span>,</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>    density<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.8</span>,</span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].axvline(</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>    <span class="fl">1.0</span>, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Danger zone (r=1)"</span></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">"Closest approach to planet"</span>)</span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].hist(</span>
+<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a>    v_max.numpy(),</span>
+<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="dv">60</span>,</span>
+<span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a>    density<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.8</span>,</span>
+<span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">"Maximum speed during transit"</span>)</span>
+<span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">"Density"</span>)</span>
+<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb60-32"><a href="#cb60-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5-physics_files/figure-html/cell-35-output-1.png" width="662" height="278" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These derived quantities are obtained by plugging posterior velocity samples into the simulation and computing functions of the resulting trajectories. Each sample gives one value, so the collection represents the full posterior distribution over that quantity. We can see that the distributions are quite complex, so it would be difficult to summarize them with a point or interval estimate alone.</p>
+</div>
+</div>
+</div>
+
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../exercises/4-hidden-markov-models.html" class="pagination-link" aria-label="Exercise 4: Hidden Markov models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exercise 4: Hidden Markov models</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../exercises/6-swiss-health.html" class="pagination-link" aria-label="Exercise 6: Swiss health">
+        <span class="nav-page-text">Exercise 6: Swiss health</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    var isRemark = div.classList.contains("remark");
+    // Add QED square to summary (visible when collapsed)
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>

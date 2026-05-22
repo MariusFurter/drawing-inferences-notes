@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Exercise 9: Fitting hybrid models – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../appendix/parametric-kernels.html" rel="next">
+<link href="../exercises/8-multilevel-regression.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/9-fit-hybrid.html">Exercise 9: Fitting hybrid models</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hybrid-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hybrid models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian data analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/smc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sequential Monte Carlo</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/vi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Variational inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 5: Inverse Physics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/8-multilevel-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 8: Multilevel regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/9-fit-hybrid.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Exercise 9: Fitting hybrid models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WeightedSampling.torch</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">Setup</a>
+  <ul class="collapse">
+  <li><a href="#the-dataset" id="toc-the-dataset" class="nav-link" data-scroll-target="#the-dataset">The dataset</a></li>
+  </ul></li>
+  <li><a href="#task-1.-a-hybrid-model" id="toc-task-1.-a-hybrid-model" class="nav-link" data-scroll-target="#task-1.-a-hybrid-model">Task 1. A hybrid model</a></li>
+  <li><a href="#task-2.-fit-the-hypertension-kernel" id="toc-task-2.-fit-the-hypertension-kernel" class="nav-link" data-scroll-target="#task-2.-fit-the-hypertension-kernel">Task 2. Fit the hypertension kernel</a></li>
+  <li><a href="#task-3.-fit-glucose-with-numpyro" id="toc-task-3.-fit-glucose-with-numpyro" class="nav-link" data-scroll-target="#task-3.-fit-glucose-with-numpyro">Task 3. Fit glucose with NumPyro</a></li>
+  <li><a href="#task-4-optional.-fitting-heart-disease-by-laplace-approximation" id="toc-task-4-optional.-fitting-heart-disease-by-laplace-approximation" class="nav-link" data-scroll-target="#task-4-optional.-fitting-heart-disease-by-laplace-approximation">Task 4 (Optional). Fitting heart disease by Laplace approximation</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/9-fit-hybrid.html">Exercise 9: Fitting hybrid models</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Exercise 9: Fitting hybrid models</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="hidden">
+<p><span class="math display">\[
+\def\then{\mathbin{;}}
+\def\kernel{\rightsquigarrow}
+\def\swap{\mathsf{swap}}
+\def\id{\mathsf{id}}
+\def\cp{\mathsf{copy}}
+\def\del{\mathsf{del}}
+\def\ivmark#1{[\![#1]\!]}
+\]</span></p>
+</div>
+<p>In this exercise we fit a <strong>hybrid model</strong> to the stroke dataset from Exercise 3.</p>
+<p>The main conceptual point of the sheet is in Task 1: as soon as the dataset is <strong>fully observed</strong>, conditioning erases every data wire and the joint posterior over the four parameter blocks factors into a product of four independent posteriors, one per box. Inference therefore decomposes box-by-box, and we are free to pick a different method for each:</p>
+<ul>
+<li><strong>Task 2</strong> fits the hypertension table in closed form using Beta–Bernoulli conjugacy.</li>
+<li><strong>Task 3</strong> fits the glucose regression with NumPyro / NUTS.</li>
+<li><strong>Task 4</strong> (optional) fits the logistic regression by <strong>Laplace approximation</strong> implemented from scratch in JAX using <code>jax.grad</code>, <code>jax.hessian</code>, and <code>jax.scipy.optimize.minimize</code>.</li>
+</ul>
+<p>By the end you will have one fitted hybrid model, three different inference techniques in your toolbox, and a concrete comparison of their cost and accuracy.</p>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Prerequisites: Python libraries">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Prerequisites: Python libraries
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>This exercise uses:</p>
+<ul>
+<li><a href="https://pandas.pydata.org/"><strong>pandas</strong></a> — tabular data.</li>
+<li><a href="https://scipy.org/"><strong>SciPy</strong></a> — Beta quantiles for the closed-form posterior in Task 2.</li>
+<li><a href="https://jax.readthedocs.io/"><strong>JAX</strong></a> — numerical backend, autodiff, and optimizer for Task 4.</li>
+<li><a href="https://num.pyro.ai/"><strong>NumPyro</strong></a> — probabilistic programming and NUTS in Tasks 3 and 4d.</li>
+<li><a href="https://www.arviz.org/"><strong>ArviZ</strong></a> — MCMC diagnostics and posterior summaries.</li>
+<li><a href="https://matplotlib.org/"><strong>matplotlib</strong></a> — plotting.</li>
+</ul>
+<p>Install via:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install pandas scipy jax numpyro arviz matplotlib</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<div id="setup" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> beta <span class="im">as</span> beta_dist</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax <span class="im">import</span> random</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax.scipy.stats <span class="im">import</span> norm, bernoulli</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax.scipy.optimize <span class="im">import</span> minimize</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpyro</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpyro.distributions <span class="im">as</span> dist</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numpyro.infer <span class="im">import</span> MCMC, NUTS</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> arviz <span class="im">as</span> az</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>rng_key <span class="op">=</span> random.PRNGKey(<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="the-dataset">The dataset</h3>
+<p>We work with the same <a href="https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset">Stroke Prediction Dataset</a> used in Exercise 3, but using different variables:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 35%">
+<col style="width: 28%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Values</th>
+<th>Encoding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>age</code></td>
+<td>young (&lt;35), middle (35–65), senior (≥65)</td>
+<td>0, 1, 2</td>
+</tr>
+<tr class="even">
+<td><code>hyp</code></td>
+<td>no, yes</td>
+<td>0, 1</td>
+</tr>
+<tr class="odd">
+<td><code>log_glucose</code></td>
+<td><span class="math inline">\(\log(\text{avg\_glucose\_level})\)</span>, in <span class="math inline">\(\log\)</span> mg/dL</td>
+<td>continuous</td>
+</tr>
+<tr class="even">
+<td><code>heart_disease</code></td>
+<td>no, yes</td>
+<td>0, 1</td>
+</tr>
+</tbody>
+</table>
+<p>The prepared training and test splits are:</p>
+<ul>
+<li><a href="../data/exercise-9/stroke_train_prepared.csv">stroke_train_prepared.csv</a> — training data (4088 patients)</li>
+<li><a href="../data/exercise-9/stroke_test_prepared.csv">stroke_test_prepared.csv</a> — test data (1022 patients)</li>
+</ul>
+<p>Load the training data:</p>
+<div id="cbb70580" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-9/stroke_train_prepared.csv"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"N = </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">}</span><span class="ss"> patients"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>N = 4088 patients</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th">hyp</th>
+<th data-quarto-table-cell-role="th">log_glucose</th>
+<th data-quarto-table-cell-role="th">heart_disease</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>1</td>
+<td>0</td>
+<td>4.237145</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>0</td>
+<td>0</td>
+<td>4.806068</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>2</td>
+<td>0</td>
+<td>4.704291</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>1</td>
+<td>0</td>
+<td>4.180675</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>0</td>
+<td>0</td>
+<td>4.410857</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="task-1.-a-hybrid-model" class="level2">
+<h2 class="anchored" data-anchor-id="task-1.-a-hybrid-model">Task 1. A hybrid model</h2>
+<p>We model the four variables with one box per kernel. The corresponding kernels mix discrete and continuous output types, so we pick a different family for each box:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Box</th>
+<th>Signature</th>
+<th>Kernel type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>age</code></td>
+<td><span class="math inline">\(I \kernel \mathsf{Age}\)</span></td>
+<td>general discrete (categorical on 3 values)</td>
+</tr>
+<tr class="even">
+<td><code>hyp</code></td>
+<td><span class="math inline">\(\mathsf{Age} \kernel \mathsf{Hyp}\)</span></td>
+<td>general discrete (one categorical per age)</td>
+</tr>
+<tr class="odd">
+<td><code>glu</code></td>
+<td><span class="math inline">\(\mathsf{Age} \kernel \mathbb{R}\)</span></td>
+<td>linear regression (Gaussian output)</td>
+</tr>
+<tr class="even">
+<td><code>heart</code></td>
+<td><span class="math inline">\(\mathsf{Age} \times \mathsf{Hyp} \times \mathbb{R} \kernel \mathsf{Heart}\)</span></td>
+<td>logistic regression</td>
+</tr>
+</tbody>
+</table>
+<p>By a “general discrete” kernel we mean one specified by a full table of output probabilities. The two regression kernels are the canonical GLMs from <a href="../chapters/hybrid-models.html#sec-common-regression-kernels">hybrid-models.qmd</a>: a Gaussian likelihood with a linear predictor for <code>log_glucose</code>, and a Bernoulli likelihood with sigmoid response for <code>heart_disease</code>.</p>
+<p><strong>Task 1a.</strong> Draw the string diagram for the model, taking the kernel parameters as known. The diagram should have four boxes wired up according to the signatures above.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 1a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 1a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="full-model" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="9-fit-hybrid_files/mediabag/e245f97afd20763bed99a9be6908b007824ce91a.svg" style="height:6em" class="figure-img"></p>
+<figcaption>String diagram for the hybrid model.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 1b.</strong> Now make the parameters of each box explicit. Promote each kernel to a <em>parameterized</em> kernel by adding a parameter input wire, and attach a prior to that wire.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 1b)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 1b)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="param-model" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="9-fit-hybrid_files/mediabag/7485df2443f50d0eaa41b42d23d54943a944e3ca.svg" style="height:11em" class="figure-img"></p>
+<figcaption>String diagram with parameters and priors.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 1c.</strong> Suppose we observe a fully complete dataset <span class="math inline">\((\bar a_i, \bar h_i, \bar g_i, \bar d_i)_{i=1}^N\)</span>. Condition the parameterized model from Task 1b on all four observed variables and show that the resulting diagram <strong>falls apart</strong> into four parallel components, one per box. Conclude that each box can be fit on its own.</p>
+<p><em>Hint.</em> Recall that conditioning on a variable removes every wire carrying that variable and replaces each affected kernel by a likelihood weight.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 1c)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 1c)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Conditioning on <span class="math inline">\(\bar a_{1:N}\)</span>, <span class="math inline">\(\bar h_{1:N}\)</span>, <span class="math inline">\(\bar g_{1:N}\)</span>, <span class="math inline">\(\bar d_{1:N}\)</span> erases every data wire in the diagram from Task 1b. Each of the four boxes is replaced by a weight corresponding to the per-datum likelihoods.</p>
+<div id="param-split" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="9-fit-hybrid_files/mediabag/23db445a67fb59622e522722d391aec02c25eaac.svg" style="height:11em" class="figure-img"></p>
+<figcaption>String diagram with parameters and priors after conditioning.</figcaption>
+</figure>
+</div>
+<p>Algebraically, the joint posterior factors as</p>
+<p><span class="math display">\[
+\begin{aligned}
+p(\theta_{\text{age}}, \theta_{\text{hyp}}, \theta_{\text{glu}}, \theta_{\text{heart}} \mid \text{data})
+\;\propto\; &amp; \;p_{\text{age}}(\theta_{\text{age}}) \, \prod_{i=1}^{N} \ell_{\text{age}}(\bar a_i \mid \theta_{\text{age}}) \\
+\times\;&amp; \;p_{\text{hyp}}(\theta_{\text{hyp}}) \, \prod_{i=1}^{N} \ell_{\text{hyp}}(\bar h_i \mid \bar a_i, \theta_{\text{hyp}}) \\
+\times\;&amp; \;p_{\text{glu}}(\theta_{\text{glu}}) \, \prod_{i=1}^{N} \ell_{\text{glu}}(\bar g_i \mid \bar a_i, \theta_{\text{glu}}) \\
+\times\;&amp; \;p_{\text{heart}}(\theta_{\text{heart}}) \, \prod_{i=1}^{N} \ell_{\text{heart}}(\bar d_i \mid \bar a_i, \bar h_i, \bar g_i, \theta_{\text{heart}}).
+\end{aligned}
+\]</span></p>
+<p>This decomposition depends critically on having a <strong>fully observed</strong> dataset. If, for example, some entries of <code>log_glucose</code> were missing, the data wire for <code>log_glucose</code> would only be partially cut, and the <code>glu</code> and <code>heart</code> boxes would remain linked.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="task-2.-fit-the-hypertension-kernel" class="level2">
+<h2 class="anchored" data-anchor-id="task-2.-fit-the-hypertension-kernel">Task 2. Fit the hypertension kernel</h2>
+<p>We now focus on the hypertension box. The most general way to model this is to say that for each age category <span class="math inline">\(a \in \{0, 1, 2\}\)</span>, the kernel <span class="math inline">\(\theta_{\text{hyp}, a}\)</span> is a Bernoulli distribution on <span class="math inline">\(\{0, 1\}\)</span> with parameters <span class="math inline">\(p_a := P(\text{hyp} = 1 \mid \text{age} = a)\)</span>. Hence, to fit this kernel, we need to infer the three parameters <span class="math inline">\(p_0, p_1, p_2\)</span> from the data. We will do so in closed form using the Beta-Bernoulli conjugacy.</p>
+<p>For each fixed age <span class="math inline">\(a\)</span>, the kernel <span class="math inline">\(\theta_{\text{hyp}, a}\)</span> is a Bernoulli distribution. If we put a <span class="math inline">\(\mathrm{Beta}(\alpha_a, \beta_a)\)</span> prior on <span class="math inline">\(p_a\)</span>, then the posterior is a <span class="math inline">\(\mathrm{Beta}\)</span> distribution as well: <span class="math display">\[
+p_a \mid \text{data}
+  \;\sim\; \mathrm{Beta}\bigl(\alpha_a + n_{a, 1},\; \beta_a + n_{a, 0}\bigr),
+\]</span></p>
+<p>where <span class="math inline">\(n_{a, h}\)</span> is the number of training patients with age <span class="math inline">\(a\)</span> and hypertension status <span class="math inline">\(h\)</span>. The prior parameters <span class="math inline">\(\alpha_a\)</span> and <span class="math inline">\(\beta_a\)</span> act as pseudo-counts of hypertensives and non-hypertensives in age stratum <span class="math inline">\(a\)</span> that are simply augmented by the observed counts. For simplicity, we take <span class="math inline">\(\alpha_a = \beta_a = 1\)</span> for all <span class="math inline">\(a\)</span>, which corresponds to a uniform prior on <span class="math inline">\(p_a\)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="More than two outputs: Dirichlet–Categorical">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>More than two outputs: Dirichlet–Categorical
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>If <code>hyp</code> had <span class="math inline">\(K &gt; 2\)</span> possible values, the same idea would still work, with Beta replaced by Dirichlet and Bernoulli replaced by Categorical. Putting a <span class="math inline">\(\mathrm{Dirichlet}(\alpha_1,
+\ldots, \alpha_K)\)</span> prior on each row of the kernel and observing <span class="math inline">\(n_{a, k}\)</span> patients in age stratum <span class="math inline">\(a\)</span> with <span class="math inline">\(\text{hyp} = k\)</span>, the posterior on row <span class="math inline">\(a\)</span> is</p>
+<p><span class="math display">\[
+\theta_{\text{hyp}, a} \mid \text{data}
+  \;\sim\; \mathrm{Dirichlet}\bigl(\alpha_1 + n_{a, 1},\, \ldots,\,
+                                   \alpha_K + n_{a, K}\bigr).
+\]</span></p>
+<p>The prior parameters <span class="math inline">\(\alpha_k\)</span> act as pseudo-counts that are simply augmented by the observed counts. See <a href="../chapters/practical.html#exm-dirichlet-categorical" class="quarto-xref">Example&nbsp;<span>7.3</span></a> in <a href="../chapters/practical.html#exm-dirichlet-categorical"><code>practical.qmd</code></a> for the derivation and discussion. The Beta–Bernoulli case used in this task is the <span class="math inline">\(K = 2\)</span> specialization.</p>
+</div>
+</div>
+</div>
+<p><strong>Task 2a.</strong> For each <span class="math inline">\(a \in \{0, 1, 2\}\)</span>, count <span class="math inline">\(n_{a, 0}\)</span> and <span class="math inline">\(n_{a, 1}\)</span> in the training data, and derive the <span class="math inline">\(\mathrm{Beta}\)</span> posterior. Report its mean together with a 90% equal-tailed credible interval for <span class="math inline">\(p_a\)</span>. Present the results in a table indexed by age category.</p>
+<p><em>Hint</em>: Use <code>pd.crosstab</code> to get the counts <span class="math inline">\(n_{a, h}\)</span> in one line. Use <code>scipy.stats.beta</code> to compute the credible intervals from the Beta parameters.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 2a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 2a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We use <code>pd.crosstab</code> to get the counts of hypertensives and non-hypertensives in each age category:</p>
+<div id="e375c072" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> pd.crosstab(df[<span class="st">"age"</span>], df[<span class="st">"hyp"</span>])  <span class="co"># rows: age, cols: hyp value</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>n_a0 <span class="op">=</span> counts[<span class="dv">0</span>].to_numpy()</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>n_a1 <span class="op">=</span> counts[<span class="dv">1</span>].to_numpy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The mean of a <span class="math inline">\(\mathrm{Beta}(\alpha, \beta)\)</span> distribution is <span class="math inline">\(\alpha / (\alpha + \beta)\)</span>. This is exactly the relative frequency of the augmented counts. The 90% equal-tailed credible interval can be computed with <code>scipy.stats.beta.ppf</code> at the 5% and 95% quantiles. Both operations broadcast over the three age strata:</p>
+<div id="ed7e3d0f" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>a_post <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> n_a1   <span class="co"># Beta(1 + n_{a,1}, 1 + n_{a,0})</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>b_post <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> n_a0</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>mean   <span class="op">=</span> a_post <span class="op">/</span> (a_post <span class="op">+</span> b_post)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>lo     <span class="op">=</span> beta_dist.ppf(<span class="fl">0.05</span>, a_post, b_post)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>hi     <span class="op">=</span> beta_dist.ppf(<span class="fl">0.95</span>, a_post, b_post)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"age"</span>:  [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>],</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"n_a0"</span>: n_a0, <span class="st">"n_a1"</span>: n_a1,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mean"</span>: mean, <span class="st">"5%"</span>: lo, <span class="st">"95%"</span>: hi,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>}).<span class="bu">round</span>(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th">n_a0</th>
+<th data-quarto-table-cell-role="th">n_a1</th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">5%</th>
+<th data-quarto-table-cell-role="th">95%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>0</td>
+<td>1444</td>
+<td>17</td>
+<td>0.012</td>
+<td>0.008</td>
+<td>0.017</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>1</td>
+<td>1605</td>
+<td>195</td>
+<td>0.109</td>
+<td>0.097</td>
+<td>0.121</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>2</td>
+<td>642</td>
+<td>185</td>
+<td>0.224</td>
+<td>0.201</td>
+<td>0.249</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 2b (Optional — derivation).</strong> Derive the Beta–Bernoulli update formula. Let <span class="math display">\[
+\begin{aligned}
+p &amp;\sim \mathrm{Beta}(\alpha, \beta), \\
+h_i &amp;\sim \mathrm{Bernoulli}(p), \quad i = 1, \ldots, n.
+\end{aligned}
+\]</span></p>
+<p>Show that the posterior distribution of <span class="math inline">\(p\)</span> given <span class="math inline">\(h_{1:n}\)</span> is <span class="math display">\[
+p \mid h_{1:n} \;\sim\; \mathrm{Beta}\bigl(\alpha + \sum_i h_i,\; \beta + n - \sum_i h_i\bigr).
+\]</span></p>
+<p><em>Strategy.</em> Write down the joint density of <span class="math inline">\(p\)</span> together with the observed hypertension statuses <span class="math inline">\(h_1, \ldots, h_{n}\)</span>. Then look at it as a function of <span class="math inline">\(p\)</span> and identify the form. No integrals are required: the normalizing constant is whatever it must be for a density to integrate to one.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 2b, optional)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 2b, optional)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Let <span class="math inline">\(s := \sum_i h_i\)</span> be the number of successes. The joint density of <span class="math inline">\(p\)</span> and <span class="math inline">\(h_{1:n}\)</span>, obtained by copy-composing the prior and the Bernoulli likelihood, is</p>
+<p><span class="math display">\[
+\begin{aligned}
+\ell(p, h_{1:n})
+  &amp;= \ell_{\mathrm{Beta}}(p \mid \alpha, \beta) \,
+        \prod_{i=1}^{n} p^{h_i} (1 - p)^{1 - h_i} \\
+  &amp;= \frac{p^{\alpha - 1} (1 - p)^{\beta - 1}}{B(\alpha, \beta)} \,
+        p^{\sum_i h_i} (1 - p)^{\sum_i (1 - h_i)} \\
+  &amp;= \frac{p^{\alpha - 1} (1 - p)^{\beta - 1}}{B(\alpha, \beta)} \,
+        p^{s} (1 - p)^{n - s} \\
+  &amp;= \frac{p^{\alpha + s - 1} (1 - p)^{\beta + (n - s) - 1}}{B(\alpha, \beta)}.
+\end{aligned}
+\]</span></p>
+<p>As a function of <span class="math inline">\(p\)</span> for fixed data, this has the form of an (unnormalized) <span class="math inline">\(\mathrm{Beta}(\alpha + s,\; \beta + n - s)\)</span> density. Since the posterior must integrate to one and there is only one normalizing constant that achieves this, we conclude</p>
+<p><span class="math display">\[
+p \mid h_{1:n} \;\sim\; \mathrm{Beta}\bigl(\alpha + s,\; \beta + n - s\bigr).
+\]</span></p>
+<p>The prior parameters <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> act as pseudo-counts of successes and failures that are simply augmented by the observed counts.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="task-3.-fit-glucose-with-numpyro" class="level2">
+<h2 class="anchored" data-anchor-id="task-3.-fit-glucose-with-numpyro">Task 3. Fit glucose with NumPyro</h2>
+<p>To fit the log glucose kernel, we use NumPyro to run NUTS. Since there is only one discrete input variable (<code>age</code>), we are effectively fitting one distribution per age category. We model each distribution as a Gaussian with its own mean and noise:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mu_a &amp;\sim \mathrm{Normal}(4.5,\; 1.0), \quad a \in \{0, 1, 2\}, \\
+\sigma_a &amp;\sim \mathrm{HalfNormal}(1.0), \quad a \in \{0, 1, 2\}, \\
+g_i &amp;\sim \mathrm{Normal}(\mu_{a_i},\; \sigma_{a_i}), \quad i = 1, \ldots, N.
+\end{aligned}
+\]</span></p>
+<p>The prior mean <span class="math inline">\(4.5\)</span> is roughly the log of typical fasting glucose in mg/dL (<span class="math inline">\(e^{4.5} \approx 90\)</span>). The prior sd of <span class="math inline">\(1.0\)</span> is very weakly informative on this scale. The <code>HalfNormal(1.0)</code> prior on each <span class="math inline">\(\sigma_a\)</span> similarly allows a wide range of noise levels. Because Task 1c showed that this box decouples from the rest of the model once all variables are observed, we may treat <span class="math inline">\(a_i\)</span> as a known input and put priors only on <span class="math inline">\(\theta_{\text{glu}} = (\mu, \sigma)\)</span>.</p>
+<p><strong>Task 3a.</strong> Write this model as a NumPyro function <code>glu_model(age, log_glu=None)</code> and run NUTS on the training data. Use 1000 warmup draws, 2000 post-warmup draws, 4 chains. Convert the result to ArviZ with <code>az.from_numpyro</code>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 3a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 3a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="88ec73f9" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>age     <span class="op">=</span> jnp.array(df[<span class="st">"age"</span>].to_numpy())</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>log_glu <span class="op">=</span> jnp.array(df[<span class="st">"log_glucose"</span>].to_numpy())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="5af248f6" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> glu_model(age, log_glu<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> numpyro.plate(<span class="st">"age_cells"</span>, <span class="dv">3</span>):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        mu <span class="op">=</span> numpyro.sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">4.5</span>, <span class="fl">1.0</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        sigma <span class="op">=</span> numpyro.sample(<span class="st">"sigma"</span>, dist.HalfNormal(<span class="fl">1.0</span>))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    numpyro.sample(<span class="st">"obs"</span>, dist.Normal(mu[age], sigma[age]), obs<span class="op">=</span>log_glu)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="e2fe7dde" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>kernel <span class="op">=</span> NUTS(glu_model)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>mcmc <span class="op">=</span> MCMC(kernel, num_warmup<span class="op">=</span><span class="dv">1000</span>, num_samples<span class="op">=</span><span class="dv">2000</span>, num_chains<span class="op">=</span><span class="dv">4</span>, progress_bar<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>mcmc.run(random.PRNGKey(<span class="dv">0</span>), age, log_glu)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>dt_glu <span class="op">=</span> az.from_numpyro(mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 3b.</strong> Look at <code>az.summary(dt_glu)</code>. Check the convergence diagnostics. Comment on the pattern in the posterior cell means. Compare the inferred values to the empirical means and standard deviations of log-glucose in each age category.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 3b)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 3b)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="3d9e08d1" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>az.summary(dt_glu)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">mu[0]</th>
+<td>4.5068</td>
+<td>0.00708</td>
+<td>4.5</td>
+<td>4.5</td>
+<td>12195</td>
+<td>6402</td>
+<td>1.00</td>
+<td>6.4e-05</td>
+<td>4.6e-05</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">mu[1]</th>
+<td>4.6128</td>
+<td>0.0087</td>
+<td>4.6</td>
+<td>4.6</td>
+<td>10651</td>
+<td>6448</td>
+<td>1.00</td>
+<td>8.5e-05</td>
+<td>6e-05</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">mu[2]</th>
+<td>4.7077</td>
+<td>0.0154</td>
+<td>4.7</td>
+<td>4.7</td>
+<td>11014</td>
+<td>6473</td>
+<td>1.00</td>
+<td>0.00015</td>
+<td>0.0001</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">sigma[0]</th>
+<td>0.26916</td>
+<td>0.00491</td>
+<td>0.26</td>
+<td>0.28</td>
+<td>12306</td>
+<td>6600</td>
+<td>1.00</td>
+<td>4.4e-05</td>
+<td>3e-05</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">sigma[1]</th>
+<td>0.3679</td>
+<td>0.00612</td>
+<td>0.36</td>
+<td>0.38</td>
+<td>11699</td>
+<td>5846</td>
+<td>1.00</td>
+<td>5.7e-05</td>
+<td>3.9e-05</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">sigma[2]</th>
+<td>0.4469</td>
+<td>0.011</td>
+<td>0.43</td>
+<td>0.46</td>
+<td>11620</td>
+<td>6445</td>
+<td>1.00</td>
+<td>0.0001</td>
+<td>7.4e-05</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><strong>Diagnostics.</strong> All six <span class="math inline">\(\hat R\)</span> values are <span class="math inline">\(1.00\)</span>, and the bulk and tail effective sample sizes are several thousand for every parameter. We have a clean fit and can trust the posterior summaries.</p>
+<p><strong>Cell means.</strong> Posterior mean log-glucose increases monotonically with age: <span class="math inline">\(\mu_0 \approx 4.51 &lt; \mu_1 \approx 4.61 &lt; \mu_2 \approx 4.71\)</span>. The 89% credible intervals are narrow (width <span class="math inline">\(\lesssim 0.05\)</span>) and clearly non-overlapping across cells. Hence, age seems to shift average log-glucose upward.</p>
+<p><strong>Cell noise.</strong> The within-cell spread also grows with age: <span class="math inline">\(\sigma_0 \approx
+0.27\)</span>, <span class="math inline">\(\sigma_1 \approx 0.37\)</span>, <span class="math inline">\(\sigma_2 \approx 0.45\)</span>. This is a real feature of the data: older patients have not just higher but also more variable glucose.</p>
+<p><strong>Comparison with the empirical estimates.</strong> The empirical mean and standard deviation of <code>log_glucose</code> in each age category are:</p>
+<div id="e7b60d8a" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"age"</span>)[<span class="st">"log_glucose"</span>].agg([<span class="st">"mean"</span>, <span class="st">"std"</span>, <span class="st">"count"</span>]).<span class="bu">round</span>(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">std</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>4.507</td>
+<td>0.269</td>
+<td>1461</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>4.613</td>
+<td>0.368</td>
+<td>1800</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>4.708</td>
+<td>0.446</td>
+<td>827</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The posterior means of <span class="math inline">\(\mu_a\)</span> and <span class="math inline">\(\sigma_a\)</span> agree with the empirical mean and sd to three decimal places. With <span class="math inline">\(N \approx 4000\)</span> observations and very weak priors, NUTS is doing nothing more than recovering the maximum-likelihood estimates. Hence, running MCMC for this kernel is overkill. The advantage of the Bayesian formulation is that it lets us inject domain knowledge which the plain ML estimator cannot accommodate.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="task-4-optional.-fitting-heart-disease-by-laplace-approximation" class="level2">
+<h2 class="anchored" data-anchor-id="task-4-optional.-fitting-heart-disease-by-laplace-approximation">Task 4 (Optional). Fitting heart disease by Laplace approximation</h2>
+<p>The heart disease box has binary output and mixed inputs. We model it using a logistic regression. Because Task 1c shows that this box decouples from the rest of the model under full observation, we again fit its parameters in isolation.</p>
+<p>Instead of using NumPyro, we will fit this box with a <strong>Laplace approximation</strong> (<a href="../chapters/practical.html#def-laplace-approximation" class="quarto-xref">Definition&nbsp;<span>7.2</span></a>), implemented in plain JAX. This will give us a chance to illustrate optimization and automatic differentiation tools. In particular, we will use <code>jax.grad</code>, <code>jax.hessian</code>, <code>jax.jit</code>, and <code>jax.scipy.optimize.minimize</code>, which together let us optimize the log-posterior and extract its curvature without ever writing a gradient or Hessian by hand.</p>
+<p><span class="math display">\[
+\begin{aligned}
+b_0 &amp;\sim \mathrm{Normal}(-3, 2), \\
+b_{\text{age}, 0} &amp;= 0 \quad \text{(reference)}, \\
+b_{\text{age}, 1},\, b_{\text{age}, 2} &amp;\sim \mathrm{Normal}(0, 1), \\
+b_{\text{hyp}},\, b_{\text{glu}} &amp;\sim \mathrm{Normal}(0, 1), \\
+p_i
+  &amp;= \mathrm{sigmoid}(b_0 + b_{\text{age}, a_i} + b_{\text{hyp}}\, h_i + b_{\text{glu}}\,(g_i - 4.5)), \\
+d_i &amp;\sim \mathrm{Bernoulli}(p_i), \quad i = 1, \ldots, N.
+\end{aligned}
+\]</span></p>
+<p>We use reference coding for the age effect, fixing <span class="math inline">\(b_{\text{age}, 0} = 0\)</span>, so that the remaining age coefficients are identifiable contrasts against the young category. The shift <span class="math inline">\(-4.5\)</span> centers log-glucose at the prior mean from Task 3, which improves numerical conditioning for the optimizer.</p>
+<p><strong>Task 4a.</strong> Write the unnormalized log-posterior as a JAX function <code>log_posterior(theta, age, hyp, log_glu, heart)</code> returning the scalar log-density of the posterior. Your function should go through the model and sum up all log-density contributions. You may drop any additive constants that do not depend on the parameters.</p>
+<p><em>Hint.</em> Use <code>jnp.concatenate</code> to prepend the reference parameter <span class="math inline">\(b_{\text{age}, 0} = 0\)</span> to <span class="math inline">\(b_{\text{age}, 1:2}\)</span>. The log-densities of the Normal prior and the Bernoulli likelihood are available as <code>jax.scipy.stats.norm.logpdf</code> and <code>jax.scipy.stats.bernoulli.logpmf</code>. The sigmoid function is <code>jax.nn.sigmoid</code>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4a)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 4a)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We follow the model line by line: each <span class="math inline">\(\mathrm{Normal}\)</span> prior contributes a <code>norm.logpdf</code> term, the sigmoid turns the linear predictor into the success probability <span class="math inline">\(p_i\)</span>, and the Bernoulli observation contributes a <code>bernoulli.logpmf</code> term.</p>
+<div id="e33d79f8" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>age <span class="op">=</span> jnp.array(df[<span class="st">"age"</span>].to_numpy())</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>hyp <span class="op">=</span> jnp.array(df[<span class="st">"hyp"</span>].to_numpy())</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>log_glu <span class="op">=</span> jnp.array(df[<span class="st">"log_glucose"</span>].to_numpy())</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>heart <span class="op">=</span> jnp.array(df[<span class="st">"heart_disease"</span>].to_numpy())</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_posterior(theta, age, hyp, log_glu, heart):</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    b0, b_age_free, b_hyp, b_glu <span class="op">=</span> theta[<span class="dv">0</span>], theta[<span class="dv">1</span>:<span class="dv">3</span>], theta[<span class="dv">3</span>], theta[<span class="dv">4</span>]</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reference-coded age effect: b_age[0] = 0.</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    b_age <span class="op">=</span> jnp.concatenate([jnp.zeros(<span class="dv">1</span>), b_age_free])</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Log-prior.</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">=</span> norm.logpdf(b0, <span class="op">-</span><span class="fl">3.0</span>, <span class="fl">2.0</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">+=</span> jnp.<span class="bu">sum</span>(norm.logpdf(b_age_free, <span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">+=</span> norm.logpdf(b_hyp, <span class="fl">0.0</span>, <span class="fl">1.0</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">+=</span> norm.logpdf(b_glu, <span class="fl">0.0</span>, <span class="fl">1.0</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Bernoulli log-likelihood with sigmoid link.</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    logits <span class="op">=</span> b0 <span class="op">+</span> b_age[age] <span class="op">+</span> b_hyp <span class="op">*</span> hyp <span class="op">+</span> b_glu <span class="op">*</span> (log_glu <span class="op">-</span> <span class="fl">4.5</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    ll <span class="op">=</span> jnp.<span class="bu">sum</span>(bernoulli.logpmf(heart, jax.nn.sigmoid(logits)))</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lp <span class="op">+</span> ll</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Sanity-check at <span class="math inline">\(\theta = \mathbf{0}\)</span>:</p>
+<div id="6b48ff41" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">float</span>(log_posterior(jnp.zeros(<span class="dv">5</span>), age, hyp, log_glu, heart))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>-2840.000244140625</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 4b.</strong> Find the MAP estimator <span class="math inline">\(\hat\theta = \arg\max_\theta \log\ell(\theta \mid \text{data})\)</span> by minimizing the negative log-posterior with <code>jax.scipy.optimize.minimize</code>, method <code>"BFGS"</code>. Initialize at <span class="math inline">\(\theta_0 = \mathbf{0}\)</span>. Report <span class="math inline">\(\hat\theta\)</span>, the value <span class="math inline">\(\log\ell(\hat\theta)\)</span>, and the wall time of the optimization (we will compare this to NUTS in Task 4d).</p>
+<p>BFGS will call the objective and its (auto-diffed) gradient many times. Wrap the objective with fixed data arguments in <code>jax.jit</code> so it is compiled once and then runs as fast native code on every subsequent call:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>neg_log_posterior <span class="op">=</span> jax.jit(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> theta: <span class="op">-</span>log_posterior(theta, age, hyp, log_glu, heart)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4b)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 4b)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We time the optimization so we can compare it later to the cost of full MCMC. <code>block_until_ready()</code> forces JAX to finish its asynchronous dispatch before we stop the clock.</p>
+<div id="2f23aad4" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>neg_log_posterior <span class="op">=</span> jax.jit(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> theta: <span class="op">-</span>log_posterior(theta, age, hyp, log_glu, heart)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> minimize(neg_log_posterior, jnp.zeros(<span class="dv">5</span>), method<span class="op">=</span><span class="st">"BFGS"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="op">=</span> result.x.block_until_ready()</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>t_bfgs <span class="op">=</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>names <span class="op">=</span> [<span class="st">"b0"</span>, <span class="st">"b_age[1]"</span>, <span class="st">"b_age[2]"</span>, <span class="st">"b_hyp"</span>, <span class="st">"b_glu"</span>]</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, value <span class="kw">in</span> <span class="bu">zip</span>(names, theta_hat):</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">:&gt;10}</span><span class="ss"> = </span><span class="sc">{</span><span class="bu">float</span>(value)<span class="sc">: .4f}</span><span class="ss">"</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"log posterior at MAP = </span><span class="sc">{</span><span class="op">-</span><span class="bu">float</span>(result.fun)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"BFGS wall time: </span><span class="sc">{</span>t_bfgs<span class="sc">:.2f}</span><span class="ss"> s"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        b0 = -5.3579
+  b_age[1] =  1.9953
+  b_age[2] =  3.5293
+     b_hyp =  0.1125
+     b_glu =  0.9010
+log posterior at MAP = -704.7112
+BFGS wall time: 1.14 s</code></pre>
+</div>
+</div>
+<p>The optimizer reports <code>result.success = False</code> (status 3, line-search abort) but the gradient norm at <span class="math inline">\(\hat\theta\)</span> is below <span class="math inline">\(10^{-2}\)</span>, so we have effectively found the MAP:</p>
+<div id="1d4e6493" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">float</span>(jnp.linalg.norm(jax.grad(neg_log_posterior)(theta_hat)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>0.003995549399405718</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 4c.</strong> Now turn the MAP into a full Gaussian posterior approximation <span class="math display">\[
+p(\theta \mid \text{data}) \;\approx\; \mathcal{N}(\hat\theta,\; \Sigma),
+\qquad \Sigma = H^{-1},\quad H = -\nabla^2 \log\ell(\hat\theta).
+\]</span> Compute the Hessian with <code>jax.hessian</code> evaluated at <span class="math inline">\(\hat\theta\)</span>, negate it, and invert to obtain <span class="math inline">\(\Sigma\)</span>. Then report:</p>
+<ol type="1">
+<li>The posterior mean <span class="math inline">\(\hat\theta\)</span> and marginal sd <span class="math inline">\(\sqrt{\mathrm{diag}(\Sigma)}\)</span> for each of the five coefficients.</li>
+<li>An 89% credible interval <span class="math inline">\(\hat\theta_k \pm 1.598\,\sqrt{\Sigma_{kk}}\)</span> for each coefficient.</li>
+<li>The wall time for the Hessian computation and inversion, to be added to the BFGS time from Task 4b for the comparison with NUTS in Task 4d.</li>
+</ol>
+<p>JAX provides exact derivatives of any scalar Python function <code>f</code> it can trace , via the function transformations <code>jax.grad</code> and <code>jax.hessian</code>: <code>jax.grad(f)</code> returns a <em>new function</em> that computes <span class="math inline">\(\nabla f\)</span>, and <code>jax.hessian(f)</code> returns one that computes <span class="math inline">\(\nabla^2 f\)</span>. Hence to compute <span class="math inline">\(H\)</span> at <span class="math inline">\(\hat\theta\)</span>, we simply compose the transformation with the function:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>H <span class="op">=</span> jax.hessian(neg_log_posterior)(theta_hat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We can invert <span class="math inline">\(H\)</span> with <code>jnp.linalg.inv</code> to get <span class="math inline">\(\Sigma\)</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4c)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 4c)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The Hessian of the <em>negative</em> log-posterior at <span class="math inline">\(\hat\theta\)</span> already is <span class="math inline">\(H = -\nabla^2 \log\ell(\hat\theta)\)</span>, so we can invert it directly. We again time the computation:</p>
+<div id="c925aa5c" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>H <span class="op">=</span> jax.hessian(neg_log_posterior)(theta_hat)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> jnp.linalg.inv(H)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>cov.block_until_ready()</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>t_hess <span class="op">=</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>sds <span class="op">=</span> jnp.sqrt(jnp.diag(cov))</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>z89 <span class="op">=</span> <span class="fl">1.5982</span>  <span class="co"># 0.945 quantile of N(0, 1)</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>names <span class="op">=</span> [<span class="st">"b0"</span>, <span class="st">"b_age[1]"</span>, <span class="st">"b_age[2]"</span>, <span class="st">"b_hyp"</span>, <span class="st">"b_glu"</span>]</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>laplace_table <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"param"</span>: names,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mean"</span>:  theta_hat,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sd"</span>:    sds,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lb89"</span>:  theta_hat <span class="op">-</span> z89 <span class="op">*</span> sds,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ub89"</span>:  theta_hat <span class="op">+</span> z89 <span class="op">*</span> sds,</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>}).<span class="bu">round</span>(<span class="dv">3</span>)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Hessian + inversion wall time: </span><span class="sc">{</span>t_hess<span class="sc">:.2f}</span><span class="ss"> s"</span>)</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>laplace_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Hessian + inversion wall time: 1.04 s</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">param</th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">lb89</th>
+<th data-quarto-table-cell-role="th">ub89</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>b0</td>
+<td>-5.358</td>
+<td>0.328</td>
+<td>-5.883</td>
+<td>-4.833</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>b_age[1]</td>
+<td>1.995</td>
+<td>0.346</td>
+<td>1.443</td>
+<td>2.548</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>b_age[2]</td>
+<td>3.529</td>
+<td>0.341</td>
+<td>2.984</td>
+<td>4.074</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>b_hyp</td>
+<td>0.112</td>
+<td>0.182</td>
+<td>-0.179</td>
+<td>0.404</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>b_glu</td>
+<td>0.901</td>
+<td>0.165</td>
+<td>0.637</td>
+<td>1.165</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><strong>Interpretation.</strong> All three age and glucose coefficients are positive and their 89% intervals exclude zero, confirming the clinically expected direction: older patients and patients with higher log-glucose have substantially higher heart-disease log-odds. The two age contrasts are large and ordered, <span class="math inline">\(\hat b_{\text{age},1} \approx 2.0 &lt;
+\hat b_{\text{age},2} \approx 3.5\)</span>, so the senior category carries the strongest risk.</p>
+<p>The hypertension coefficient <span class="math inline">\(\hat b_{\text{hyp}} \approx 0.11\)</span> is positive but its 89% interval <span class="math inline">\([-0.18,\, 0.40]\)</span> contains zero. Once age and glucose are in the model, hypertension carries little <em>additional</em> information about heart disease — most likely because hypertension is already strongly correlated with both age and elevated glucose, so its marginal contribution is small.</p>
+</div>
+</div>
+</div>
+<p><strong>Task 4d.</strong> The Laplace approximation replaces the posterior by the Gaussian that best matches its curvature at the mode. Whether that is a good approximation can only be checked against a more expensive method that samples from the true posterior. Re-fit the same logistic regression in NumPyro with NUTS (1000 warmup, 2000 post-warmup, 4 chains) and compare the posterior means and 89% intervals to the Laplace table from Task 4c. Also time the NUTS run and compare it to the Laplace cost from Tasks 4b–c.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4d)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 4d)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The NumPyro version of the model mirrors the JAX log-posterior. We use a <code>numpyro.plate</code> for the two free age contrasts and pass the linear predictor to <code>dist.Bernoulli(logits=...)</code>, which is the direct analogue of <code>sigmoid + bernoulli.logpmf</code>.</p>
+<div id="a9d5f457" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> heart_model(age, hyp, log_glu, heart<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Priors</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    b0 <span class="op">=</span> numpyro.sample(<span class="st">"b0"</span>, dist.Normal(<span class="op">-</span><span class="fl">3.0</span>, <span class="fl">2.0</span>))</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> numpyro.plate(<span class="st">"age_free"</span>, <span class="dv">2</span>):</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        b_age_free <span class="op">=</span> numpyro.sample(<span class="st">"b_age_free"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    b_age <span class="op">=</span> jnp.concatenate([jnp.zeros(<span class="dv">1</span>), b_age_free])</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    b_hyp <span class="op">=</span> numpyro.sample(<span class="st">"b_hyp"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    b_glu <span class="op">=</span> numpyro.sample(<span class="st">"b_glu"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Logistic regression likelihood with sigmoid link.</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    logits <span class="op">=</span> b0 <span class="op">+</span> b_age[age] <span class="op">+</span> b_hyp <span class="op">*</span> hyp <span class="op">+</span> b_glu <span class="op">*</span> (log_glu <span class="op">-</span> <span class="fl">4.5</span>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    numpyro.sample(<span class="st">"obs"</span>, dist.Bernoulli(logits<span class="op">=</span>logits), obs<span class="op">=</span>heart)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="93de5660" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>kernel <span class="op">=</span> NUTS(heart_model)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>mcmc <span class="op">=</span> MCMC(kernel, num_warmup<span class="op">=</span><span class="dv">1000</span>, num_samples<span class="op">=</span><span class="dv">2000</span>,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>            num_chains<span class="op">=</span><span class="dv">4</span>, progress_bar<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>mcmc.run(random.PRNGKey(<span class="dv">0</span>), age, hyp, log_glu, heart)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>t_nuts <span class="op">=</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>dt_heart <span class="op">=</span> az.from_numpyro(mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="8bfea12c" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NUTS wall time: </span><span class="sc">{</span>t_nuts<span class="sc">:.2f}</span><span class="ss"> s"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>az.summary(dt_heart).<span class="bu">round</span>(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NUTS wall time: 20.67 s</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">b0</th>
+<td>-5.41</td>
+<td>0.331</td>
+<td>-6</td>
+<td>-4.9</td>
+<td>2838</td>
+<td>3149</td>
+<td>1.00</td>
+<td>0.0063</td>
+<td>0.0044</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">b_age_free[0]</th>
+<td>2.03</td>
+<td>0.347</td>
+<td>1.5</td>
+<td>2.6</td>
+<td>2923</td>
+<td>3255</td>
+<td>1.00</td>
+<td>0.0065</td>
+<td>0.0045</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">b_age_free[1]</th>
+<td>3.57</td>
+<td>0.345</td>
+<td>3</td>
+<td>4.1</td>
+<td>2871</td>
+<td>3257</td>
+<td>1.00</td>
+<td>0.0065</td>
+<td>0.0045</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">b_glu</th>
+<td>0.903</td>
+<td>0.165</td>
+<td>0.64</td>
+<td>1.2</td>
+<td>4430</td>
+<td>4152</td>
+<td>1.00</td>
+<td>0.0025</td>
+<td>0.0018</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">b_hyp</th>
+<td>0.112</td>
+<td>0.18</td>
+<td>-0.18</td>
+<td>0.4</td>
+<td>4916</td>
+<td>4435</td>
+<td>1.00</td>
+<td>0.0026</td>
+<td>0.0018</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><strong>Agreement.</strong> Posterior means and standard deviations from NUTS match the Laplace table closely on every coefficient and the <span class="math inline">\(\hat R\)</span> values are all <span class="math inline">\(1.00\)</span> with effective sample sizes in the thousands. Laplace is essentially exact here because the posterior is unimodal and, with <span class="math inline">\(N \approx 4000\)</span> binary observations, very nearly Gaussian.</p>
+<p><strong>Cost comparison.</strong> Laplace ran in <span class="math inline">\(\approx 1.5\)</span> s on this machine, versus <span class="math inline">\(\approx 15\)</span> s for the four NUTS chains. The gap grows with the parameter dimension: BFGS and one Hessian solve cost <span class="math inline">\(O(d^3)\)</span> per evaluation of the model, while NUTS costs <span class="math inline">\(O(d)\)</span> per leapfrog step but needs thousands of such steps per chain.</p>
+<p>For unimodal log-concave models like this one, Laplace cheap and accurate. To get an exact approximation, we can use the Laplace estimate as a proposal distribution for importance sampling.</p>
+</div>
+</div>
+</div>
+
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../exercises/8-multilevel-regression.html" class="pagination-link" aria-label="Exercise 8: Multilevel regression">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exercise 8: Multilevel regression</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../appendix/parametric-kernels.html" class="pagination-link" aria-label="Parametric kernels reference">
+        <span class="nav-page-text">Parametric kernels reference</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    var isRemark = div.classList.contains("remark");
+    // Add QED square to summary (visible when collapsed)
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>

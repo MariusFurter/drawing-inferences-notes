@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Exercise 1: Classic puzzles – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../exercises/2-credit-card.html" rel="next">
+<link href="../chapters/practical.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercise 1: Classic puzzles</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hybrid-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hybrid models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 5: Inverse Physics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/8-multilevel-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 8: Multilevel regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WeightedSampling.torch</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#background-expectation-and-the-law-of-large-numbers" id="toc-background-expectation-and-the-law-of-large-numbers" class="nav-link active" data-scroll-target="#background-expectation-and-the-law-of-large-numbers">Background: Expectation and the Law of Large Numbers</a>
+  <ul class="collapse">
+  <li><a href="#expectation" id="toc-expectation" class="nav-link" data-scroll-target="#expectation">Expectation</a></li>
+  <li><a href="#the-law-of-large-numbers" id="toc-the-law-of-large-numbers" class="nav-link" data-scroll-target="#the-law-of-large-numbers">The Law of Large Numbers</a></li>
+  <li><a href="#estimating-probabilities" id="toc-estimating-probabilities" class="nav-link" data-scroll-target="#estimating-probabilities">Estimating probabilities</a></li>
+  <li><a href="#rejection-sampling-from-the-conditional-distribution" id="toc-rejection-sampling-from-the-conditional-distribution" class="nav-link" data-scroll-target="#rejection-sampling-from-the-conditional-distribution">Rejection sampling from the conditional distribution</a></li>
+  </ul></li>
+  <li><a href="#warm-up-simulating-discrete-distributions" id="toc-warm-up-simulating-discrete-distributions" class="nav-link" data-scroll-target="#warm-up-simulating-discrete-distributions">Warm-up: Simulating discrete distributions</a></li>
+  <li><a href="#dice-problems" id="toc-dice-problems" class="nav-link" data-scroll-target="#dice-problems">Dice problems</a>
+  <ul class="collapse">
+  <li><a href="#de-mérés-problem" id="toc-de-mérés-problem" class="nav-link" data-scroll-target="#de-mérés-problem">De Méré’s problem</a></li>
+  <li><a href="#galileo-and-the-grand-dukes-dice" id="toc-galileo-and-the-grand-dukes-dice" class="nav-link" data-scroll-target="#galileo-and-the-grand-dukes-dice">Galileo and the Grand Duke’s dice</a></li>
+  </ul></li>
+  <li><a href="#bertrands-box-paradox" id="toc-bertrands-box-paradox" class="nav-link" data-scroll-target="#bertrands-box-paradox">Bertrand’s box paradox</a>
+  <ul class="collapse">
+  <li><a href="#simulating-the-experiment" id="toc-simulating-the-experiment" class="nav-link" data-scroll-target="#simulating-the-experiment">Simulating the experiment</a></li>
+  <li><a href="#conditioning-by-filtering" id="toc-conditioning-by-filtering" class="nav-link" data-scroll-target="#conditioning-by-filtering">Conditioning by filtering</a></li>
+  <li><a href="#exact-computation" id="toc-exact-computation" class="nav-link" data-scroll-target="#exact-computation">Exact computation</a></li>
+  </ul></li>
+  <li><a href="#the-monty-hall-problem" id="toc-the-monty-hall-problem" class="nav-link" data-scroll-target="#the-monty-hall-problem">The Monty Hall problem</a>
+  <ul class="collapse">
+  <li><a href="#simulating-the-standard-game" id="toc-simulating-the-standard-game" class="nav-link" data-scroll-target="#simulating-the-standard-game">Simulating the standard game</a></li>
+  <li><a href="#host-variants-the-generating-mechanism-matters" id="toc-host-variants-the-generating-mechanism-matters" class="nav-link" data-scroll-target="#host-variants-the-generating-mechanism-matters">Host variants — the generating mechanism matters</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercise 1: Classic puzzles</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Exercise 1: Classic puzzles</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Some of the best-known puzzles in probability are famous precisely because the correct answer defies most people’s intuition. In this exercise sheet, we use simulation to tackle several of these classics, estimating probabilities and expectations via sampling and the Law of Large Numbers.</p>
+<section id="background-expectation-and-the-law-of-large-numbers" class="level2">
+<h2 class="anchored" data-anchor-id="background-expectation-and-the-law-of-large-numbers">Background: Expectation and the Law of Large Numbers</h2>
+<section id="expectation" class="level3">
+<h3 class="anchored" data-anchor-id="expectation">Expectation</h3>
+<p>If you roll a fair die many times and average the results, you will get a number close to <span class="math inline">\(3.5\)</span>. This is intuitive: each face appears roughly <span class="math inline">\(1/6\)</span> of the time, so the average is approximately</p>
+<p><span class="math display">\[
+\frac{1}{6}\cdot 1 + \frac{1}{6}\cdot 2 + \cdots + \frac{1}{6}\cdot 6 = 3.5.
+\]</span></p>
+<p>This motivates the general definition. Given a finite set <span class="math inline">\(\Omega\)</span> with a probability distribution <span class="math inline">\(p\)</span>, the <strong>expectation</strong> of a function <span class="math inline">\(t \colon \Omega \to \mathbb{R}\)</span> is:</p>
+<p><span class="math display">\[
+\mathbb{E}_{p(\omega)}[t(\omega)] := \sum_{\omega \in \Omega} t(\omega)\, p(\omega).
+\]</span></p>
+<p>Each outcome is weighted by its probability. This is exactly what averaging over many samples approximates. In the die example, <span class="math inline">\(\Omega = \{1, \ldots, 6\}\)</span> with uniform distribution <span class="math inline">\(p\)</span>, and <span class="math inline">\(t\)</span> is the identity function <span class="math inline">\(t(\omega) := \omega\)</span>.</p>
+<p>The function <span class="math inline">\(t\)</span> is a <strong>measurement</strong> or <strong>test function</strong>. It extracts a numerical quantity from each outcome. Two useful ways to think about <span class="math inline">\(\mathbb{E}_{p(\omega)}[t(\omega)]\)</span>:</p>
+<ul>
+<li><strong>Fair price of a gamble:</strong> If a game pays out <span class="math inline">\(t(\omega)\)</span> dollars on outcome <span class="math inline">\(\omega\)</span>, then <span class="math inline">\(\mathbb{E}_{p(\omega)}[t(\omega)]\)</span> is the entry fee at which neither side has an advantage.</li>
+<li><strong>Best single-number summary:</strong> <span class="math inline">\(\mathbb{E}_{p(\omega)}[t(\omega)]\)</span> is the constant <span class="math inline">\(c\)</span> that minimizes <span class="math inline">\(\mathbb{E}_{p(\omega)}[(t(\omega) - c)^2].\)</span> In this sense it is the single number that best represents the distribution of <span class="math inline">\(t\)</span>-values.</li>
+</ul>
+</section>
+<section id="the-law-of-large-numbers" class="level3">
+<h3 class="anchored" data-anchor-id="the-law-of-large-numbers">The Law of Large Numbers</h3>
+<p>The averaging intuition above is made precise by the <strong>Law of Large Numbers</strong> (LLN). If <span class="math inline">\(\omega_1, \omega_2, \ldots\)</span> are independent draws from <span class="math inline">\(p\)</span>, then for any <span class="math inline">\(t \colon \Omega \to \mathbb{R}\)</span>:</p>
+<p><span class="math display">\[
+\frac{1}{N}\sum_{i=1}^N t(\omega_i) \;\longrightarrow\; \mathbb{E}_{p(\omega)}[t(\omega)] \quad \text{as } N \to \infty.
+\]</span></p>
+<p>For our purposes, this means that we can <strong>estimate any expectation by sampling</strong>: draw <span class="math inline">\(N\)</span> samples from <span class="math inline">\(p\)</span>, apply <span class="math inline">\(t\)</span> to each, and average. For large enough <span class="math inline">\(N\)</span>, the result will be close to the true expectation. This is the core idea behind <strong>Monte Carlo estimation</strong>, which forms the basis of this course.</p>
+</section>
+<section id="estimating-probabilities" class="level3">
+<h3 class="anchored" data-anchor-id="estimating-probabilities">Estimating probabilities</h3>
+<p>For any event <span class="math inline">\(E \subseteq \Omega\)</span>, the <strong>indicator function</strong> <span class="math inline">\(\mathbf{1}_E : \Omega \to \mathbb{R}\)</span> equals 1 on outcomes in <span class="math inline">\(E\)</span> and 0 otherwise:</p>
+<p><span class="math display">\[
+\mathbf{1}_E(\omega) := \begin{cases}
+1 &amp; \text{if } \omega \in E, \\
+0 &amp; \text{if } \omega \notin E.
+\end{cases}
+\]</span></p>
+<p><strong>Task 1.</strong> <em>(Easy.)</em> Show that <span class="math inline">\(\mathbb{E}_{p(\omega)}[\mathbf{1}_E(\omega)] = P(E)\)</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>By definition of expectation, <span class="math display">\[
+\mathbb{E}_{p(\omega)}[\mathbf{1}_E(\omega)] = \sum_{\omega \in \Omega} \mathbf{1}_E(\omega)\, p(\omega) = \sum_{\omega \in E} p(\omega) = P(E).
+\]</span></p>
+</div>
+</div>
+</div>
+<p>By the Law of Large Numbers, this means we can <strong>estimate any probability</strong> by sampling and counting the fraction of samples that fall in <span class="math inline">\(E\)</span>:</p>
+<p><span class="math display">\[
+P(E) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_E(\omega_i).
+\]</span></p>
+</section>
+<section id="rejection-sampling-from-the-conditional-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="rejection-sampling-from-the-conditional-distribution">Rejection sampling from the conditional distribution</h3>
+<p>Often we want to estimate a quantity that depends not on the full distribution <span class="math inline">\(p\)</span>, but on the <strong>conditional distribution</strong> <span class="math inline">\(p(\,\cdot \mid F)\)</span> given some observed event <span class="math inline">\(F\)</span>. By the Law of Large Numbers, it suffices to generate samples from <span class="math inline">\(p(\,\cdot \mid F)\)</span> — but how do we do that when we only know how to sample from <span class="math inline">\(p\)</span>?</p>
+<p>The simplest strategy is <strong>rejection sampling</strong> (also called <em>conditioning by filtering</em>): draw many samples from <span class="math inline">\(p\)</span> and <strong>discard</strong> every sample that does not lie in <span class="math inline">\(F\)</span>. The surviving samples behave as draws from the conditional distribution and can be used to estimate conditional expectations.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Rejection sampling">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Rejection sampling
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>To estimate an expectation <span class="math inline">\(\mathbb{E}_{p(\omega \mid F)}[t(\omega)]\)</span>:</p>
+<ol type="1">
+<li>Draw <span class="math inline">\(N\)</span> independent samples <span class="math inline">\(\omega_1, \dots, \omega_N \sim p\)</span>.</li>
+<li>Filter the samples, keeping only those where <span class="math inline">\(\omega_i \in F\)</span>.</li>
+<li>Compute the average of <span class="math inline">\(t(\omega)\)</span> over the surviving samples.</li>
+</ol>
+<p>The fraction of samples that survive is called the <strong>acceptance rate</strong> and converges to <span class="math inline">\(p(F)\)</span>.</p>
+</div>
+</div>
+<p><strong>Task 2.</strong> <em>(Tricky. Requires some probability knowledge.)</em> Show that this procedure correctly estimates the conditional expectation <span class="math inline">\(\mathbb{E}_{p(\omega \mid F)}[t(\omega)]\)</span>. Further, show that the acceptance rate converges to <span class="math inline">\(p(F)\)</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We can prove this directly using the LLN. By definition, the conditional expectation is: <span class="math display">\[
+\mathbb{E}_{p(\omega \mid F)}[t(\omega)]
+= \sum_{\omega \in \Omega} t(\omega) p(\omega \mid F)
+= \sum_{\omega \in \Omega} t(\omega) \frac{p(\{\omega\} \cap F)}{p(F)}
+= \sum_{\omega \in F} t(\omega) \frac{p(\omega)}{p(F)}
+= \frac{\mathbb{E}_{p(\omega)}[t(\omega) \mathbf{1}_F(\omega)]}{p(F)}
+\]</span></p>
+<p>If we draw <span class="math inline">\(N\)</span> independent samples <span class="math inline">\(\omega_1, \dots, \omega_N\)</span> from <span class="math inline">\(p\)</span>, the LLN lets us estimate the numerator and denominator separately: <span class="math display">\[
+\mathbb{E}_{p(\omega)}[t(\omega) \mathbf{1}_F(\omega)] \approx \frac{1}{N} \sum_{i=1}^N t(\omega_i) \mathbf{1}_F(\omega_i) \quad \text{and} \quad p(F) \approx \frac{1}{N} \sum_{i=1}^N \mathbf{1}_F(\omega_i)
+\]</span></p>
+<p>Taking their ratio, the factors of <span class="math inline">\(1/N\)</span> cancel: <span class="math display">\[
+\frac{\sum_{i=1}^N t(\omega_i) \mathbf{1}_F(\omega_i)}{\sum_{i=1}^N \mathbf{1}_F(\omega_i)}
+= \frac{\sum_{j=1}^{N_s} t(\bar \omega_j) }{N_s},
+\]</span></p>
+<p>where <span class="math inline">\(\bar \omega_1, \ldots, \bar \omega_{N_s}\)</span> are the surviving samples and <span class="math inline">\(N_s\)</span> is their count. The right-hand side is precisely the average of <span class="math inline">\(t\)</span> over the surviving samples. As <span class="math inline">\(N \to \infty\)</span>, both LLN estimates converge to their true values, so the ratio converges to <span class="math inline">\(\mathbb{E}_{p(\omega \mid F)}[t(\omega)]\)</span>, by the continuous mapping theorem. This validates the rejection sampling procedure.</p>
+<p>Finally, the acceptance rate is the fraction of samples that survive the filter: <span class="math inline">\(\frac{1}{N} \sum_{i=1}^N \mathbf{1}_F(\omega_i)\)</span>. By the LLN, this converges to <span class="math inline">\(\mathbb{E}_{p(\omega)}[\mathbf{1}_F(\omega)] = p(F)\)</span>.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="warm-up-simulating-discrete-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="warm-up-simulating-discrete-distributions">Warm-up: Simulating discrete distributions</h2>
+<p>Before tackling the puzzles, we set up a basic sampling toolkit. Each distribution below is a building block for the simulations that follow. The goal is to get comfortable generating random samples in Python. We recommend using <a href="https://pytorch.org/docs/stable/distributions.html"><code>torch.distributions</code></a> for sampling, <a href="https://matplotlib.org"><code>matplotlib</code></a> for general plotting, and <a href="https://seaborn.pydata.org"><code>seaborn</code></a> for statistical plots like histograms. You can find a short tutorial on using PyTorch for sampling in the <a href="../appendix/pytorch.html">Appendix</a>.</p>
+<p><strong>Distributions to know:</strong></p>
+<ul>
+<li><strong>Discrete Uniform</strong> — rolling a fair die. Each of the <span class="math inline">\(k\)</span> outcomes is equally likely.</li>
+<li><strong>Bernoulli</strong> — a single coin flip with two outcomes (success/failure).</li>
+<li><strong>Binomial</strong> — the number of successes in <span class="math inline">\(n\)</span> independent Bernoulli trials.</li>
+<li><strong>Geometric</strong> — the number of failures before the first success. (<em>Warning:</em> Sometimes defined as the number of trials until the first success, which is 1 plus the version we use here.)</li>
+<li><strong>Categorical</strong> — a loaded die or weighted lottery. Generalizes the uniform distribution to unequal probabilities. Can be used to simulate any discrete distribution by assigning the appropriate probabilities to each outcome.</li>
+</ul>
+<p><strong>Task 3.</strong> For each distribution above, choose concrete parameters, sample <span class="math inline">\(N = 10\,000\)</span> values, and plot a histogram of the results.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="349b9927" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.distributions <span class="im">import</span> Bernoulli, Binomial, Geometric, Categorical</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">10_000</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Discrete Uniform: fair six-sided die (values 1–6)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>uniform_samples <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">6</span>)).sample((N,)) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Bernoulli (p = 0.5): fair coin flip</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>bernoulli_samples <span class="op">=</span> Bernoulli(probs<span class="op">=</span>torch.tensor(<span class="fl">0.5</span>)).sample((N,))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Binomial (n = 10, p = 0.3): successes in 10 trials</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>binom_samples <span class="op">=</span> Binomial(total_count<span class="op">=</span><span class="dv">10</span>, probs<span class="op">=</span>torch.tensor(<span class="fl">0.3</span>)).sample((N,))</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Geometric (p = 1/6): failures before first 6</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>geom_samples <span class="op">=</span> Geometric(probs<span class="op">=</span>torch.tensor(<span class="dv">1</span> <span class="op">/</span> <span class="dv">6</span>)).sample((N,))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Categorical: loaded die with weights [1, 1, 1, 1, 1, 3]</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>loaded_probs <span class="op">=</span> torch.tensor([<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>], dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>cat_samples <span class="op">=</span> Categorical(probs<span class="op">=</span>loaded_probs).sample((N,)) <span class="op">+</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We plot the histograms of the results using <a href="https://seaborn.pydata.org/generated/seaborn.histplot.html"><code>seaborn.histplot</code></a>.</p>
+<div id="54aec2b8" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">7</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>panels <span class="op">=</span> [</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    (uniform_samples, <span class="st">"Uniform (fair die)"</span>, <span class="va">None</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    (bernoulli_samples, <span class="st">"Bernoulli (p = 0.5)"</span>, <span class="va">None</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    (binom_samples, <span class="st">"Binomial (n=10, p=0.3)"</span>, <span class="va">None</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    (geom_samples, <span class="st">"Geometric (p = 1/6)"</span>, <span class="dv">40</span>),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    (cat_samples, <span class="st">"Categorical (loaded die)"</span>, <span class="va">None</span>),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (data, title, clip) <span class="kw">in</span> <span class="bu">zip</span>(axes, panels):</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    vals <span class="op">=</span> data.<span class="bu">int</span>().numpy()</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> <span class="bu">int</span>(vals.<span class="bu">min</span>()), <span class="bu">int</span>(vals.<span class="bu">max</span>())</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> clip:</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        hi <span class="op">=</span> <span class="bu">min</span>(hi, clip)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        vals <span class="op">=</span> vals[vals <span class="op">&lt;=</span> clip]</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    bins <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(lo, hi <span class="op">+</span> <span class="dv">2</span>))</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    sns.histplot(</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        vals,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        bins<span class="op">=</span>bins,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        discrete<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        stat<span class="op">=</span><span class="st">"probability"</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        ax<span class="op">=</span>ax,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        edgecolor<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        linewidth<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">""</span>)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">""</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">5</span>].set_visible(<span class="va">False</span>)  <span class="co"># hide unused panel</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>fig.supylabel(<span class="st">"Probability"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1-classic-puzzles_files/figure-html/cell-3-output-1.png" width="569" height="662" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 4.</strong> Roll a fair die <span class="math inline">\(N = 10\,000\)</span> times. Plot the <strong>running average</strong> (i.e.&nbsp;the cumulative mean after each roll) as a function of the number of rolls on a logarithmic scale. Overlay the true expectation <span class="math inline">\(3.5\)</span> as a horizontal line. Observe how the running average converges. <em>Hint: Use <a href="https://pytorch.org/docs/stable/generated/torch.cumsum.html"><code>torch.cumsum</code></a> to compute cumulative sums.</em></p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>First, we simulate the die rolls and compute the running average using <code>torch.cumsum</code>.</p>
+<div id="d6714a69" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">10_000</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">41</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Roll a fair 6-sided die N times</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>die_rolls <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">6</span>)).sample((N,)) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the running average</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>n_rolls <span class="op">=</span> torch.arange(<span class="dv">1</span>, N <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>running_average <span class="op">=</span> torch.cumsum(die_rolls, dim<span class="op">=</span><span class="dv">0</span>) <span class="op">/</span> n_rolls</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Next, we plot the running average on a logarithmic scale and overlay the true expectation:</p>
+<div id="33335afd" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">3</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    n_rolls.numpy(),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    running_average.numpy(),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"Running Average"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>plt.axhline(y<span class="op">=</span><span class="fl">3.5</span>, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"True Expectation (3.5)"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>plt.xscale(<span class="st">"log"</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Number of rolls (n)"</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Average value"</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Law of Large Numbers: Running Average of Die Rolls"</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1-classic-puzzles_files/figure-html/cell-5-output-1.png" width="650" height="276" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="dice-problems" class="level2">
+<h2 class="anchored" data-anchor-id="dice-problems">Dice problems</h2>
+<p>Dice were among the first objects studied probabilistically. Here we revisit two classic dice problems and solve them by simulation.</p>
+<section id="de-mérés-problem" class="level3">
+<h3 class="anchored" data-anchor-id="de-mérés-problem">De Méré’s problem</h3>
+<p>The <a href="https://en.wikipedia.org/wiki/Antoine_Gombaud">Chevalier de Méré</a>, a French nobleman and avid gambler, suspected that getting at least one 6 in four rolls of a single die was more likely than getting at least one double-six in 24 rolls of two dice. He posed the question to Blaise Pascal, who confirmed his intuition.</p>
+<p><strong>Task 5a.</strong> Write a function <code>one_six(N)</code> that simulates this experiment <span class="math inline">\(N\)</span> times:</p>
+<ol type="1">
+<li>Roll a single die 4 times.</li>
+<li>Check whether at least one roll is a 6.</li>
+</ol>
+<p>Return the fraction of trials where this occurs. Report the estimate for <span class="math inline">\(N = 100\,000\)</span>.</p>
+<p><strong>Task 5b.</strong> Write a function <code>double_six(N)</code> that simulates the following experiment <span class="math inline">\(N\)</span> times:</p>
+<ol type="1">
+<li>Roll two dice 24 times.</li>
+<li>Check whether at least one roll is a double-six (both dice show 6).</li>
+</ol>
+<p>Return the fraction of trials where this occurs. Report the estimate for <span class="math inline">\(N = 100\,000\)</span>.</p>
+<p><strong>Task 5c.</strong> What are the exact probabilities for both experiments? How do they compare to the estimates?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="39a6978e" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> one_six(N):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Roll a single die 4 times for N trials</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Shape: (N, 4)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    rolls <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">6</span>)).sample((N, <span class="dv">4</span>)) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check if at least one roll is a 6 in each trial</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># rolls == 6 creates a boolean tensor of shape (N, 4)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># .any(dim=1) checks if there's at least one True in each row</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    has_six <span class="op">=</span> (rolls <span class="op">==</span> <span class="dv">6</span>).<span class="bu">any</span>(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> has_six.<span class="bu">float</span>().mean().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="f1750988" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> double_six(N):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Roll two dice 24 times for N trials</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Shape: (N, 24, 2)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    rolls <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">6</span>)).sample((N, <span class="dv">24</span>, <span class="dv">2</span>)) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check if both dice are 6</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Shape: (N, 24)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    is_double_six <span class="op">=</span> (rolls[:, :, <span class="dv">0</span>] <span class="op">==</span> <span class="dv">6</span>) <span class="op">&amp;</span> (rolls[:, :, <span class="dv">1</span>] <span class="op">==</span> <span class="dv">6</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check if at least one double-six occurred in the 24 rolls</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    has_double_six <span class="op">=</span> is_double_six.<span class="bu">any</span>(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> has_double_six.<span class="bu">float</span>().mean().item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We simulate both experiments with <span class="math inline">\(N = 100\,000\)</span> and report the results:</p>
+<div id="5fa18aef" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>p_one_six <span class="op">=</span> one_six(N)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>p_double_six <span class="op">=</span> double_six(N)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(at least one 6 in 4 rolls):       </span><span class="sc">{</span>p_one_six<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(at least one double-6 in 24 rolls): </span><span class="sc">{</span>p_double_six<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(at least one 6 in 4 rolls):       0.5186
+P(at least one double-6 in 24 rolls): 0.4893</code></pre>
+</div>
+</div>
+<p>The exact answer can be computed using <span class="math inline">\(p(E) = 1 - p(E^c)\)</span>. For the first experiment, the complement event is “no 6 in 4 rolls”, which has probability <span class="math inline">\((5/6)^4\)</span>. For the second experiment, the complement is “no double-6 in 24 rolls”. The probability of not getting a double-6 in a single roll of two dice is <span class="math inline">\(35/36\)</span>, so the complement has probability <span class="math inline">\((35/36)^{24}\)</span>. Thus, the first experiment has probability <span class="math inline">\(1 - (5/6)^4 \approx 0.5177\)</span>, while the second has probability <span class="math inline">\(1 - (35/36)^{24} \approx 0.4914\)</span>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="galileo-and-the-grand-dukes-dice" class="level3">
+<h3 class="anchored" data-anchor-id="galileo-and-the-grand-dukes-dice">Galileo and the Grand Duke’s dice</h3>
+<p>Around 1620, <a href="https://en.wikipedia.org/wiki/Cosimo_II_de%27_Medici">Cosimo II de’ Medici</a> noticed that when rolling three dice, the <strong>sum 10 appeared more often than 9</strong>, even though both can be written as a sum of three integers (from 1 to 6) in exactly 6 ways. He asked <a href="https://en.wikipedia.org/wiki/Galileo_Galilei">Galileo</a> to explain.</p>
+<p><strong>Task 6.</strong> Simulate rolling 3 fair dice <span class="math inline">\(N = 100\,000\)</span> times. Compute the sum <span class="math inline">\(S = D_1 + D_2 + D_3\)</span> for each trial. Plot a histogram of <span class="math inline">\(S\)</span> and confirm that <span class="math inline">\(p(S = 10) &gt; p(S = 9)\)</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="fb190ec9" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Roll 3 dice N times</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Shape: (N, 3)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>dice_rolls <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">6</span>)).sample((N, <span class="dv">3</span>)) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the sum of the 3 dice for each trial</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Shape: (N,)</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> dice_rolls.<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate probabilities</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>p_9 <span class="op">=</span> (S <span class="op">==</span> <span class="dv">9</span>).<span class="bu">float</span>().mean().item()</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>p_10 <span class="op">=</span> (S <span class="op">==</span> <span class="dv">10</span>).<span class="bu">float</span>().mean().item()</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(S = 9):  </span><span class="sc">{</span>p_9<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(S = 10): </span><span class="sc">{</span>p_10<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>p(S = 9):  0.1157
+p(S = 10): 0.1252</code></pre>
+</div>
+</div>
+<p>We plot the histogram of the sums using <code>seaborn.histplot</code>:</p>
+<div id="b69b4210" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>sns.histplot(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    S.numpy(),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="bu">range</span>(<span class="dv">3</span>, <span class="dv">20</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    discrete<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    stat<span class="op">=</span><span class="st">"probability"</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>plt.xticks(<span class="bu">range</span>(<span class="dv">3</span>, <span class="dv">19</span>))</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Sum of 3 dice (S)"</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Probability"</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Galileo's Dice: Distribution of Sums"</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1-classic-puzzles_files/figure-html/cell-10-output-1.png" width="566" height="374" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>The following box contains and explanation of why a sum of 10 is more likely than a sum of 9, even though both have the same number of partitions into three parts from <span class="math inline">\(\{1, \ldots, 6\}\)</span>. If you want, you can try to figure it out yourself before reading it.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Why does 10 beat 9?">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why does 10 beat 9?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>A <strong>partition</strong> of a number is a way to write it as an unordered sum (e.g.&nbsp;<span class="math inline">\(\{1, 2, 6\}\)</span> is a partition of 9). Both 9 and 10 have exactly 6 partitions into three parts from <span class="math inline">\(\{1,\ldots,6\}\)</span>. However, when we take <span class="math inline">\(\{1,\ldots,6\}^3\)</span> as the set of all possible outcomes, we are assuming that we can distinguish which die shows which face — in other words, order matters. Thus the relevant favorable outcomes are <strong>ordered</strong> partitions (permutations of a partition). For example, the partition <span class="math inline">\(\{1, 2, 6\}\)</span> gives rise to <span class="math inline">\(3! = 6\)</span> ordered outcomes: <span class="math inline">\((1,2,6)\)</span>, <span class="math inline">\((1,6,2)\)</span>, <span class="math inline">\((2,1,6)\)</span>, etc. It happens that 10 has more ordered partitions than 9, since 9 includes the partition <span class="math inline">\(\{3, 3, 3\}\)</span> which has only 1 ordering.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="bertrands-box-paradox" class="level2">
+<h2 class="anchored" data-anchor-id="bertrands-box-paradox">Bertrand’s box paradox</h2>
+<p><a href="https://en.wikipedia.org/wiki/Bertrand%27s_box_paradox">Bertrand’s box paradox</a>, posed by <a href="https://en.wikipedia.org/wiki/Joseph_Bertrand">Joseph Bertrand</a> in 1889, is a probability puzzle where naive intuition leads most people astray.</p>
+<p><strong>The setup.</strong> There are three boxes:</p>
+<ul>
+<li><strong>Box 1:</strong> contains 2 gold coins.</li>
+<li><strong>Box 2:</strong> contains 2 silver coins.</li>
+<li><strong>Box 3:</strong> contains 1 gold coin and 1 silver coin.</li>
+</ul>
+<p>You pick a box uniformly at random. Without looking inside, you reach in and draw one coin — it turns out to be <strong>gold</strong>. What is the probability that the <em>other</em> coin in the same box is also gold?</p>
+<section id="simulating-the-experiment" class="level3">
+<h3 class="anchored" data-anchor-id="simulating-the-experiment">Simulating the experiment</h3>
+<p><strong>Task 7a.</strong> Write a function <code>bertrand_box(N)</code> that simulates the full experiment <span class="math inline">\(N\)</span> times:</p>
+<ol type="1">
+<li>Pick one of the three boxes uniformly at random.</li>
+<li>Pick one of the two coins in that box uniformly at random — this is your drawn coin.</li>
+<li>Record the color of the drawn coin and the color of the remaining coin.</li>
+</ol>
+<p>Run <span class="math inline">\(N = 100\,000\)</span> simulations.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="468b0c19" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bertrand_box(N):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Represent Gold as 1, Silver as 0</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Box 0: Gold, Gold   -&gt; [1, 1]</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Box 1: Silver, Silver -&gt; [0, 0]</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Box 2: Gold, Silver   -&gt; [1, 0]</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    boxes <span class="op">=</span> torch.tensor([[<span class="dv">1</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">0</span>], [<span class="dv">1</span>, <span class="dv">0</span>]], dtype<span class="op">=</span>torch.<span class="bu">long</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Pick a box uniformly at random</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    box_indices <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">3</span>)).sample((N,))</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Pick one of the two coins in that box uniformly at random</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    coin_indices <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">2</span>)).sample((N,))</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Retrieve the drawn coin</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># We use advanced indexing: boxes[row_indices, col_indices]</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    drawn_coin <span class="op">=</span> boxes[box_indices, coin_indices]</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Identify the other coin</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The other coin is at index (1 - coin_indices)</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    other_coin_indices <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> coin_indices</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    other_coin <span class="op">=</span> boxes[box_indices, other_coin_indices]</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> drawn_coin, other_coin</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>drawn_coins, other_coins <span class="op">=</span> bertrand_box(N)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="conditioning-by-filtering" class="level3">
+<h3 class="anchored" data-anchor-id="conditioning-by-filtering">Conditioning by filtering</h3>
+<p><strong>Task 7b.</strong> Using rejection sampling on the <span class="math inline">\(N\)</span> simulations above, estimate both <span class="math inline">\(P(\text{other coin is gold} \mid \text{drawn coin is gold})\)</span> and <span class="math inline">\(P(\text{other coin is gold} \mid \text{drawn coin is silver})\)</span>. For each conditioning event:</p>
+<ol type="1">
+<li><strong>Filter:</strong> keep only the trials matching the condition (e.g.&nbsp;drawn coin is gold).</li>
+<li>Among the survivors, compute the fraction where the other coin is also gold.</li>
+<li>Compute the <strong>acceptance rate</strong> — what fraction of trials survived the filter?</li>
+</ol>
+<p>Explain why both acceptance rates are approximately <span class="math inline">\(1/2\)</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="2cde0632" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate p(other is gold | drawn is gold)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter: Keep only trials where drawn coin is gold (1)</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>is_drawn_gold <span class="op">=</span> drawn_coins <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>other_given_gold <span class="op">=</span> other_coins[is_drawn_gold]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate probability</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>p_other_gold_given_gold <span class="op">=</span> other_given_gold.<span class="bu">float</span>().mean().item()</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>acceptance_rate <span class="op">=</span> is_drawn_gold.<span class="bu">float</span>().mean().item()</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(other is gold | drawn is gold): </span><span class="sc">{</span>p_other_gold_given_gold<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Acceptance rate: </span><span class="sc">{</span>acceptance_rate<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate p(other is gold | drawn is silver)</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter: Keep only trials where drawn coin is silver (0)</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>is_drawn_silver <span class="op">=</span> drawn_coins <span class="op">==</span> <span class="dv">0</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>other_given_silver <span class="op">=</span> other_coins[is_drawn_silver]</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate probability</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>p_other_gold_given_silver <span class="op">=</span> other_given_silver.<span class="bu">float</span>().mean().item()</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>acceptance_rate <span class="op">=</span> is_drawn_silver.<span class="bu">float</span>().mean().item()</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(other is gold | drawn is silver): </span><span class="sc">{</span>p_other_gold_given_silver<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Acceptance rate: </span><span class="sc">{</span>acceptance_rate<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(other is gold | drawn is gold): 0.6649
+Acceptance rate: 0.5007
+P(other is gold | drawn is silver): 0.3316
+Acceptance rate: 0.4993</code></pre>
+</div>
+</div>
+<p><strong>Explanation of acceptance rate:</strong> The acceptance rate is the marginal probability of drawing a gold coin, <span class="math inline">\(P(\text{drawn coin is gold})\)</span>. There are 6 coins in total across the three boxes: 3 gold and 3 silver. Since each coin is equally likely to be picked (by symmetry of picking a box then a coin), the probability of drawing a gold coin is exactly <span class="math inline">\(3/6 = 1/2\)</span>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="exact-computation" class="level3">
+<h3 class="anchored" data-anchor-id="exact-computation">Exact computation</h3>
+<p><strong>Task 7c.</strong> Use Bayes’ theorem to compute the exact answer.</p>
+<p><em>Hint</em>: Let <span class="math inline">\(G\)</span> be the event of drawing gold, and <span class="math inline">\(B_i\)</span> the event of picking Box <span class="math inline">\(i\)</span>. Determine <span class="math inline">\(p(G \mid B_i)\)</span> for each <span class="math inline">\(i \in \{1,2,3\}\)</span>, then apply Bayes’ rule to find <span class="math inline">\(P(B_i \mid G)\)</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We use the notation from the hint. Observe that <span class="math inline">\(p(\text{other is gold} \mid G) = p(B_1 \mid G)\)</span> since the other coin is gold if and only if we are in Box 1.</p>
+<p>By Bayes’ theorem: <span class="math display">\[
+p(B_1 \mid G) = \frac{p(G \mid B_1) p(B_1)}{p(G)}
+\]</span></p>
+<p>We know:</p>
+<ul>
+<li><span class="math inline">\(p(B_1) = p(B_2) = p(B_3) = 1/3\)</span> (boxes are chosen uniformly).</li>
+<li><span class="math inline">\(p(G \mid B_1) = 1\)</span> (Box 1 has 2 gold coins).</li>
+<li><span class="math inline">\(p(G \mid B_2) = 0\)</span> (Box 2 has 0 gold coins).</li>
+<li><span class="math inline">\(p(G \mid B_3) = 1/2\)</span> (Box 3 has 1 gold, 1 silver).</li>
+</ul>
+<p>By marginalization, the total probability of drawing gold is: <span class="math display">\[
+p(G) = p(G \mid B_1)p(B_1) + p(G \mid B_2)p(B_2) + p(G \mid B_3)p(B_3)
+= 1 \cdot \frac{1}{3} + 0 \cdot \frac{1}{3} + \frac{1}{2} \cdot \frac{1}{3} = \frac{1}{3} + \frac{1}{6} = \frac{1}{2}.
+\]</span></p>
+<p>Substituting back: <span class="math display">\[
+p(B_1 \mid G) = \frac{1 \cdot (1/3)}{1/2} = \frac{1/3}{1/2} = \frac{2}{3}.
+\]</span></p>
+<p>So the probability that the other coin is gold is <strong>2/3</strong>.</p>
+</div>
+</div>
+</div>
+<p><strong>Task 7d.</strong> Can you arrive at the answer without any calculations?</p>
+<p><em>Hint:</em> Think about <strong>all six coins</strong> individually, rather than reasoning at the level of boxes.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Intuitive explanation">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Intuitive explanation
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Imagine that instead of picking a box and then a coin, you simply pick one of the <strong>six coins</strong> at random (since boxes and coins are chosen uniformly, every coin has an equal <span class="math inline">\(1/6\)</span> chance of being picked).</p>
+<p>We are told that the coin you picked is <strong>gold</strong>. There are only 3 gold coins in the whole game:</p>
+<ul>
+<li>Two of them are in Box 1 (the GG box).</li>
+<li>One of them is in Box 3 (the GS box).</li>
+</ul>
+<p>If you picked one of the two gold coins from Box 1, the <em>other</em> coin in the box is also <strong>gold</strong>. If you picked the single gold coin from Box 3, the <em>other</em> coin in the box is <strong>silver</strong>.</p>
+<p>Since you are equally likely to have picked any of these 3 gold coins, in <strong>2 out of 3 cases</strong>, the other coin is gold. Thus, the probability is <span class="math inline">\(2/3\)</span>.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="the-monty-hall-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-monty-hall-problem">The Monty Hall problem</h2>
+<p>The <a href="https://en.wikipedia.org/wiki/Monty_Hall_problem">Monty Hall problem</a> is one of the most famous puzzles in probability, named after the host of the American television game show <em>Let’s Make a Deal</em>. It became widely known in 1990 when <a href="https://en.wikipedia.org/wiki/Marilyn_vos_Savant#Monty_Hall_problem">Marilyn vos Savant</a> published the correct solution in her magazine column, prompting thousands of readers — including many professional mathematicians — to write in insisting she was wrong.</p>
+<p><strong>The setup.</strong> A game show host presents you with three doors. Behind one door is a car; behind the other two are goats. The game proceeds in three steps:</p>
+<ol type="1">
+<li><strong>You pick a door</strong> (say door 1).</li>
+<li><strong>The host opens another door</strong> to reveal a goat. The host <em>knows</em> what is behind each door and will always open a door with a goat.</li>
+<li><strong>You are offered a choice:</strong> stick with your original door, or switch to the remaining unopened door.</li>
+</ol>
+<p><strong>Should you switch?</strong> Use simulation to find out.</p>
+<section id="simulating-the-standard-game" class="level3">
+<h3 class="anchored" data-anchor-id="simulating-the-standard-game">Simulating the standard game</h3>
+<p><strong>Task 8.</strong> Write a function <code>monty_hall(N)</code> that simulates the full game <span class="math inline">\(N\)</span> times:</p>
+<ol type="1">
+<li>Place the car uniformly at random behind one of the three doors.</li>
+<li>The contestant picks door 1.</li>
+<li>The host opens a door (not the contestant’s, not the car’s) to reveal a goat. If the host has a choice of two goat doors, the host picks one uniformly at random.</li>
+<li>Record the identity of the door the host opens, whether <strong>staying</strong> wins, and whether <strong>switching</strong> wins.</li>
+</ol>
+<p>Run <span class="math inline">\(N = 100\,000\)</span> simulations. Estimate the probabilities of winning by staying and by switching.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="2e2eab4e" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> monty_hall(N):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Car is placed uniformly at random behind door 0, 1, or 2</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    car_door <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">3</span>)).sample((N,))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Contestant picks door 0 (representing "door 1")</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    pick_door <span class="op">=</span> torch.zeros(N, dtype<span class="op">=</span>torch.<span class="bu">long</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Host opens a door</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If contestant picked the car, host randomly picks one of the other two doors</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The other two doors are (pick_door + 1) % 3 and (pick_door + 2) % 3</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    random_shift <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">2</span>)).sample((N,)) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    host_door_if_match <span class="op">=</span> (pick_door <span class="op">+</span> random_shift) <span class="op">%</span> <span class="dv">3</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If contestant picked a goat, host must pick the remaining door</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Since doors sum to 3 (0 + 1 + 2), the remaining door is 3 - car_door - pick_door</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    host_door_if_diff <span class="op">=</span> <span class="dv">3</span> <span class="op">-</span> car_door <span class="op">-</span> pick_door</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    host_door <span class="op">=</span> torch.where(</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        car_door <span class="op">==</span> pick_door, host_door_if_match, host_door_if_diff</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4. Contestant switches to the remaining unopened door</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    switch_door <span class="op">=</span> <span class="dv">3</span> <span class="op">-</span> pick_door <span class="op">-</span> host_door</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate win probabilities</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    win_stay <span class="op">=</span> pick_door <span class="op">==</span> car_door</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    p_stay <span class="op">=</span> win_stay.<span class="bu">float</span>().mean().item()</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    win_switch <span class="op">=</span> switch_door <span class="op">==</span> car_door</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    p_switch <span class="op">=</span> win_switch.<span class="bu">float</span>().mean().item()</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> p_stay, p_switch</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We now run the simulation with <span class="math inline">\(N = 100\,000\)</span> and report the results:</p>
+<div id="0bcf20b2" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>p_stay, p_switch <span class="op">=</span> monty_hall(N)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(win by staying):  </span><span class="sc">{</span>p_stay<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p(win by switching): </span><span class="sc">{</span>p_switch<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>p(win by staying):  0.3329
+p(win by switching): 0.6671</code></pre>
+</div>
+</div>
+<p>The answer — which surprises most people — is that <strong>switching wins with probability <span class="math inline">\(2/3\)</span></strong>, while staying wins with probability <span class="math inline">\(1/3\)</span>. The key insight is that the host’s action gives you information: by always revealing a goat, the host <em>concentrates</em> the probability of the two doors you didn’t pick onto the single remaining door.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="host-variants-the-generating-mechanism-matters" class="level3">
+<h3 class="anchored" data-anchor-id="host-variants-the-generating-mechanism-matters">Host variants — the generating mechanism matters</h3>
+<p>Much of the controversy surrounding the Monty Hall problem stems from the fact that the problem statement doesn’t always make the host’s strategy explicit. Different assumptions about <em>why</em> the host opens a door lead to different conditional probabilities — even when the observable event (you see a goat) is the same. This is a crucial lesson: <strong>getting conditioning right requires a precise model of the data-generating process, not just a description of what was observed.</strong></p>
+<p><strong>Task 9a.</strong> <em>(The ignorant host)</em> The host <strong><em>does not know where the car is</em></strong> and simply opens one of the two remaining doors uniformly at random. If the host accidentally reveals the car, the game is void. Simulate this variant. Among the <strong>non-void</strong> games (where the host happened to reveal a goat), estimate the conditional probability of winning by switching given that the host revealed a goat. Is the anwer what you expected?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="795c9b2c" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> monty_hall_ignorant(N):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Car is placed uniformly at random behind door 0, 1, or 2</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    car_door <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">3</span>)).sample((N,))</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Contestant picks door 0</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    pick_door <span class="op">=</span> torch.zeros(N, dtype<span class="op">=</span>torch.<span class="bu">long</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Host opens a door uniformly at random from the two remaining doors</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    random_shift <span class="op">=</span> Categorical(probs<span class="op">=</span>torch.ones(<span class="dv">2</span>)).sample((N,)) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    host_door <span class="op">=</span> (pick_door <span class="op">+</span> random_shift) <span class="op">%</span> <span class="dv">3</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Filter out void games where the host accidentally revealed the car</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    valid_games <span class="op">=</span> host_door <span class="op">!=</span> car_door</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Keep only the valid games</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    car_door_valid <span class="op">=</span> car_door[valid_games]</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    pick_door_valid <span class="op">=</span> pick_door[valid_games]</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    host_door_valid <span class="op">=</span> host_door[valid_games]</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4. Contestant switches to the remaining unopened door</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    switch_door <span class="op">=</span> <span class="dv">3</span> <span class="op">-</span> pick_door_valid <span class="op">-</span> host_door_valid</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate win probabilities among valid games</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    win_stay <span class="op">=</span> pick_door_valid <span class="op">==</span> car_door_valid</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    p_stay <span class="op">=</span> win_stay.<span class="bu">float</span>().mean().item()</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    win_switch <span class="op">=</span> switch_door <span class="op">==</span> car_door_valid</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    p_switch <span class="op">=</span> win_switch.<span class="bu">float</span>().mean().item()</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> p_stay, p_switch</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="fbca86f6" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100_000</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>p_stay_ignorant, p_switch_ignorant <span class="op">=</span> monty_hall_ignorant(N)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Ignorant host - p(win by staying):  </span><span class="sc">{</span>p_stay_ignorant<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Ignorant host - p(win by switching): </span><span class="sc">{</span>p_switch_ignorant<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Ignorant host - p(win by staying):  0.4982
+Ignorant host - p(win by switching): 0.5018</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 9b.</strong> <em>(The malicious host)</em> Without simulating, determine the answer for the following variant: The host knows where the car is and <strong><em>only offers the switch when the contestant has picked the car</em></strong>. What is the conditional probability of winning by switching given that you are offered the switch?</p>
+<p><strong>Task 9c.</strong> <em>(The benevolent host)</em> Same question, but now the host knows where the car is and <strong><em>only offers the switch when the contestant has picked a goat</em></strong>. What is the conditional probability of winning by switching given that you are offered the switch?</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In the malicious host variant, the host only offers the switch when the contestant has already won by picking the car. Thus, if you are offered the switch, you know you have already won by staying, so switching would cause you to lose. Therefore, <span class="math inline">\(p(\text{win by switching} \mid \text{offered switch}) = 0\)</span>.</p>
+<p>Similarly, in the benevolent host variant, the host only offers the switch when the contestant has picked a goat. If you are offered the switch, you know you have already lost by picking a goat, so switching would cause you to win. Therefore, <span class="math inline">\(p(\text{win by switching} \mid \text{offered switch}) = 1\)</span>.</p>
+</div>
+</div>
+</div>
+
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/practical.html" class="pagination-link" aria-label="Inference in practice">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../exercises/2-credit-card.html" class="pagination-link" aria-label="Exercise 2: Credit card fraud detection">
+        <span class="nav-page-text">Exercise 2: Credit card fraud detection</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    var isRemark = div.classList.contains("remark");
+    // Add QED square to summary (visible when collapsed)
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>

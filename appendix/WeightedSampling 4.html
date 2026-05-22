@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>WeightedSampling.torch – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../references.html" rel="next">
+<link href="../appendix/pytorch.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Appendix</a></li><li class="breadcrumb-item"><a href="../appendix/WeightedSampling.html">WeightedSampling.torch</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hybrid-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hybrid models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 5: Inverse Physics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/8-multilevel-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 8: Multilevel regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">WeightedSampling.torch</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-write-model" id="toc-sec-write-model" class="nav-link active" data-scroll-target="#sec-write-model">Writing models</a>
+  <ul class="collapse">
+  <li><a href="#a-first-example-noisy-measurement" id="toc-a-first-example-noisy-measurement" class="nav-link" data-scroll-target="#a-first-example-noisy-measurement">A first example: noisy measurement</a></li>
+  <li><a href="#conditioning-with-observe" id="toc-conditioning-with-observe" class="nav-link" data-scroll-target="#conditioning-with-observe">Conditioning with <code>observe</code></a></li>
+  <li><a href="#named-sites-and-intermediate-variables" id="toc-named-sites-and-intermediate-variables" class="nav-link" data-scroll-target="#named-sites-and-intermediate-variables">Named sites and intermediate variables</a></li>
+  <li><a href="#sec-model-decorator" id="toc-sec-model-decorator" class="nav-link" data-scroll-target="#sec-model-decorator">The <code>@model</code> decorator</a></li>
+  <li><a href="#model-arguments" id="toc-model-arguments" class="nav-link" data-scroll-target="#model-arguments">Model arguments</a></li>
+  <li><a href="#sec-inference-params" id="toc-sec-inference-params" class="nav-link" data-scroll-target="#sec-inference-params">Inference parameters</a></li>
+  <li><a href="#sec-smc-result" id="toc-sec-smc-result" class="nav-link" data-scroll-target="#sec-smc-result">The result object</a></li>
+  <li><a href="#sec-summary" id="toc-sec-summary" class="nav-link" data-scroll-target="#sec-summary"><code>summary</code>: quick posterior overview</a></li>
+  <li><a href="#sec-linreg-basic" id="toc-sec-linreg-basic" class="nav-link" data-scroll-target="#sec-linreg-basic">Example: Bayesian linear regression</a></li>
+  <li><a href="#sec-nesting-models" id="toc-sec-nesting-models" class="nav-link" data-scroll-target="#sec-nesting-models">Composing models</a></li>
+  </ul></li>
+  <li><a href="#sec-evaluate-results" id="toc-sec-evaluate-results" class="nav-link" data-scroll-target="#sec-evaluate-results">Evaluating results</a>
+  <ul class="collapse">
+  <li><a href="#computing-expectations" id="toc-computing-expectations" class="nav-link" data-scroll-target="#computing-expectations">Computing expectations</a></li>
+  <li><a href="#sec-sample-method" id="toc-sec-sample-method" class="nav-link" data-scroll-target="#sec-sample-method">Resampling with <code>.sample()</code></a></li>
+  <li><a href="#sec-visualize-posterior" id="toc-sec-visualize-posterior" class="nav-link" data-scroll-target="#sec-visualize-posterior">Visualizing the posterior</a></li>
+  <li><a href="#log-evidence-for-model-comparison" id="toc-log-evidence-for-model-comparison" class="nav-link" data-scroll-target="#log-evidence-for-model-comparison">Log evidence for model comparison</a></li>
+  </ul></li>
+  <li><a href="#sec-behind-scenes" id="toc-sec-behind-scenes" class="nav-link" data-scroll-target="#sec-behind-scenes">Behind the scenes</a>
+  <ul class="collapse">
+  <li><a href="#sec-weight-collapse" id="toc-sec-weight-collapse" class="nav-link" data-scroll-target="#sec-weight-collapse">Weight collapse</a></li>
+  <li><a href="#sec-resampling" id="toc-sec-resampling" class="nav-link" data-scroll-target="#sec-resampling">Resampling</a></li>
+  </ul></li>
+  <li><a href="#sec-mh-moves" id="toc-sec-mh-moves" class="nav-link" data-scroll-target="#sec-mh-moves">Metropolis-Hastings moves</a>
+  <ul class="collapse">
+  <li><a href="#randomwalkproposal" id="toc-randomwalkproposal" class="nav-link" data-scroll-target="#randomwalkproposal"><code>RandomWalkProposal</code></a></li>
+  <li><a href="#adaptiveproposal" id="toc-adaptiveproposal" class="nav-link" data-scroll-target="#adaptiveproposal"><code>AdaptiveProposal</code></a></li>
+  </ul></li>
+  <li><a href="#sec-discrete-bayes-nets" id="toc-sec-discrete-bayes-nets" class="nav-link" data-scroll-target="#sec-discrete-bayes-nets">Discrete Bayesian networks</a>
+  <ul class="collapse">
+  <li><a href="#example-wet-grass-network" id="toc-example-wet-grass-network" class="nav-link" data-scroll-target="#example-wet-grass-network">Example: wet grass network</a></li>
+  </ul></li>
+  <li><a href="#sec-importance-sampling" id="toc-sec-importance-sampling" class="nav-link" data-scroll-target="#sec-importance-sampling">Importance sampling</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix/parametric-kernels.html">Appendix</a></li><li class="breadcrumb-item"><a href="../appendix/WeightedSampling.html">WeightedSampling.torch</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-weighted-sampling-torch" class="quarto-section-identifier">WeightedSampling.torch</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><code>WeightedSampling.torch</code> is a small <strong>probabilistic programming</strong> library that automates the weighted sampling ideas from the <a href="../chapters/conditioning.html">conditioning chapter</a>. It provides a concise syntax for building probabilistic models and performing inference, hiding the bookkeeping behind a few key primitives.</p>
+<p>The library can be installed via pip:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install git+https://github.com/MariusFurter/WeightedSampling.torch.git</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You will need to import the main primitives to use the library:</p>
+<div id="eb561120" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.distributions <span class="im">as</span> dist</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> (</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    sample,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    observe,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    deterministic,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    summary,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    expectation,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)  <span class="co"># for reproducibility</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This package is in early development. Make sure you are using the most recent version. If you encounter any bugs, please file an issue on the <a href="https://github.com/MariusFurter/WeightedSampling.torch/issues">GitHub issue tracker</a>.</p>
+</div>
+</div>
+<p>A typical workflow involves writing a model from <code>sample</code> and <code>observe</code> primitives, running it to produce a collection of weighted <strong>particles</strong> (random samples, each carrying a weight), and using these to estimate quantities of interest. We introduce the library through progressively richer examples, then cover more advanced features in later sections.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="What does SMC stand for?">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What does SMC stand for?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>SMC stands for <strong>Sequential Monte Carlo</strong>, a general family of particle-based inference algorithms. It includes <strong>importance sampling</strong> (a single weighting step) and <strong>sequential importance sampling</strong> (multiple weighting steps with resampling) as special cases. The library uses “SMC” as a catch-all name for the engine, even for simple models where basic importance sampling would suffice.</p>
+</div>
+</div>
+</div>
+<section id="sec-write-model" class="level2">
+<h2 class="anchored" data-anchor-id="sec-write-model">Writing models</h2>
+<p>A probabilistic model is an ordinary Python function that builds a joint distribution step by step. Two primitives do the work:</p>
+<ul>
+<li><strong><code>sample(name, distribution)</code></strong> — draws a value from <code>distribution</code>, records it under <code>name</code>, and returns the sampled tensor.</li>
+<li><strong><code>observe(value, distribution)</code></strong> — conditions on the observed <code>value</code> by evaluating the log-density of <code>distribution</code> at <code>value</code> and adding it to the running log-weight.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Torch compatibility
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Because the engine runs all <span class="math inline">\(N\)</span> particles simultaneously via PyTorch broadcasting, any computation on sampled values must use <strong>torch-compatible operations</strong>. Specifically:</p>
+<ul>
+<li>Use <code>torch</code> functions instead of Python / NumPy equivalents (e.g.&nbsp;<code>torch.exp(x)</code> not <code>math.exp(x)</code>).</li>
+<li>Use <code>torch.where(cond, a, b)</code> instead of Python <code>if/else</code> on tensor values.</li>
+<li>Comparison operators (<code>&gt;</code>, <code>==</code>, etc.) on tensors return boolean tensors — call <code>.float()</code> before arithmetic.</li>
+</ul>
+<p>This requirement only applies to code that operates on the sampled tensors. Ordinary Python logic — loops, list operations, data loading — works as usual.</p>
+</div>
+</div>
+<section id="a-first-example-noisy-measurement" class="level3">
+<h3 class="anchored" data-anchor-id="a-first-example-noisy-measurement">A first example: noisy measurement</h3>
+<p>Consider estimating an unknown quantity <span class="math inline">\(\mu\)</span> from a noisy measurement <span class="math inline">\(x\)</span>. We place a prior on <span class="math inline">\(\mu\)</span> and model the measurement as <span class="math inline">\(\mu\)</span> plus Gaussian noise:</p>
+<div id="af23902a" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> measurement():</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">5.0</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> sample(<span class="st">"x"</span>, dist.Normal(mu, <span class="fl">0.5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Here <code>mu</code> is drawn from <span class="math inline">\(\mathsf{Normal}(0, 25)\)</span>, then <code>x</code> is drawn from <span class="math inline">\(\mathsf{Normal}(\mu, 0.25)\)</span>. The two variables are dependent because <code>x</code> depends on the sampled value of <code>mu</code>.</p>
+<p>The <code>@model</code> decorator makes the function callable with inference parameters (see <a href="#sec-inference-params" class="quarto-xref"><span>Inference parameters</span></a>). We run it by specifying the number of particles:</p>
+<div id="78c74795" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMCResult(num_particles=5000, log_evidence=0.0000, ESS=5000.0)
+  Variables: mu, x
+    mu: shape=(5000,)
+    x: shape=(5000,)</code></pre>
+</div>
+</div>
+<p>The returned <code>result</code> is a dictionary-like object containing the sampled tensors and metadata — we describe its structure below. The <code>summary</code> function gives us a histogram, the weighted mean, standard deviation, and number of unique particles for each variable.</p>
+<div id="d0cb215a" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=5000, log_evidence=0.0000, ESS=5000.0)
+
+          │   ▁▂▃▇██▆▄▂    │   ▁▂▄▇██▆▄▂    │
+          │       mu       │       x        │
+──────────┼────────────────┼────────────────┤
+     mean │     0.0347     │     0.0321     │
+      std │     4.9271     │     4.9611     │
+ n_unique │      5000      │      5000      │</code></pre>
+</div>
+</div>
+</section>
+<section id="conditioning-with-observe" class="level3">
+<h3 class="anchored" data-anchor-id="conditioning-with-observe">Conditioning with <code>observe</code></h3>
+<p>Now suppose we observe that the measurement takes value <span class="math inline">\(x = 3.2\)</span>. We replace the second <code>sample</code> with an <code>observe</code>:</p>
+<div id="3bb5e17b" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> conditioned_measurement():</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">5.0</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    observe(<span class="fl">3.2</span>, dist.Normal(mu, <span class="fl">0.5</span>))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> conditioned_measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[mu] = </span><span class="sc">{</span>summary(result)[<span class="st">'mu'</span>][<span class="st">'mean'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[mu] = 3.169</code></pre>
+</div>
+</div>
+<p>The <code>observe</code> call evaluates the Gaussian density <span class="math inline">\(\ell(3.2 \mid \mu)\)</span> for each particle’s sampled <code>mu</code> and uses the result as a weight. Particles whose <code>mu</code> is close to <span class="math inline">\(3.2\)</span> receive high weight; those far away receive low weight. This is precisely the density-based conditioning from the <a href="../chapters/conditioning.html">conditioning chapter</a>.</p>
+</section>
+<section id="named-sites-and-intermediate-variables" class="level3">
+<h3 class="anchored" data-anchor-id="named-sites-and-intermediate-variables">Named sites and intermediate variables</h3>
+<p>Only <strong>named sites</strong> — created by <code>sample</code> or <code>deterministic</code> — are recorded in the result object. Any other computation inside the model is an <strong>intermediate variable</strong> that is not stored. For example, if we write <code>y = mu + 1</code> inside the model, <code>y</code> is computed but not recorded.</p>
+<p>The <strong><code>deterministic(name, value)</code></strong> primitive records a computed (non-random) value under <code>name</code> and returns it unchanged. Like <code>sample</code>, the return value can be captured for use later in the model:</p>
+<div id="3c566570" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> measurement_with_derived():</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">5.0</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    prediction <span class="op">=</span> deterministic(<span class="st">"prediction"</span>, mu <span class="op">+</span> <span class="fl">1.0</span>)  <span class="co"># recorded &amp; returned</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    observe(<span class="fl">3.2</span>, dist.Normal(prediction, <span class="fl">0.5</span>))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> measurement_with_derived(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result[<span class="st">"prediction"</span>].shape)  <span class="co"># recorded in the result</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>torch.Size([5000])
+SMC Summary (N=5000, log_evidence=-2.6223, ESS=647.7)
+
+          │         █      │         █      │
+          │       mu       │   prediction   │
+──────────┼────────────────┼────────────────┤
+     mean │     2.1497     │     3.1497     │
+      std │     0.5004     │     0.5004     │
+ n_unique │      4999      │      4999      │</code></pre>
+</div>
+</div>
+<p>This is useful when a model computes a derived quantity that is both needed later in the model (e.g.&nbsp;as the mean of an <code>observe</code>) and worth inspecting in the result. However, when a derived quantity is only needed <em>after</em> inference, it is often simpler to compute it from the sampled variables directly rather than storing it inside the model.</p>
+</section>
+<section id="sec-model-decorator" class="level3">
+<h3 class="anchored" data-anchor-id="sec-model-decorator">The <code>@model</code> decorator</h3>
+<p>The <strong><code>@model</code></strong> decorator connects the function to the inference engine (see <a href="#sec-behind-scenes" class="quarto-xref"><span>Behind the scenes</span></a>). Writing</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> my_model():</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> my_model(num_particles<span class="op">=</span><span class="dv">1000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>is equivalent to calling the engine directly:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> run_smc</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> my_model():</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> run_smc(my_model, num_particles<span class="op">=</span><span class="dv">1000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="model-arguments" class="level3">
+<h3 class="anchored" data-anchor-id="model-arguments">Model arguments</h3>
+<p>Model functions can accept arbitrary arguments — data, hyperparameters, configuration — which are passed through to the underlying function. Inference parameters (<code>num_particles</code>, <code>ess_threshold</code>, etc.) are intercepted by the decorator and never reach the model body:</p>
+<div id="17270861" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flexible_measurement(observed_value, prior_std<span class="op">=</span><span class="fl">5.0</span>):</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">0.0</span>, prior_std))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    observe(observed_value, dist.Normal(mu, <span class="fl">0.5</span>))</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 'observed_value' and 'prior_std' go to the model; 'num_particles' goes to the engine</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> flexible_measurement(<span class="fl">3.2</span>, prior_std<span class="op">=</span><span class="fl">2.0</span>, num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[mu] = </span><span class="sc">{</span>summary(result)[<span class="st">'mu'</span>][<span class="st">'mean'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[mu] = 2.995</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Avoid naming model parameters <code>num_particles</code>, <code>ess_threshold</code>, <code>track_joint</code>, <code>progress_bar</code>, <code>validate</code>, or <code>debug</code> — these names are reserved for the inference engine. If passed as keyword arguments, the decorator will intercept them silently.</p>
+</div>
+</div>
+</section>
+<section id="sec-inference-params" class="level3">
+<h3 class="anchored" data-anchor-id="sec-inference-params">Inference parameters</h3>
+<p>The key parameters controlling inference are:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 27%">
+<col style="width: 39%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>num_particles</code></td>
+<td>1000</td>
+<td>Number of particles <span class="math inline">\(N\)</span>. More particles = better estimates but more computation.</td>
+</tr>
+<tr class="even">
+<td><code>ess_threshold</code></td>
+<td>0.5</td>
+<td>Fraction of <span class="math inline">\(N\)</span> below which resampling triggers (see <a href="#sec-resampling" class="quarto-xref"><span>Resampling</span></a>). Set to <span class="math inline">\(0\)</span> to disable.</td>
+</tr>
+</tbody>
+</table>
+<p>For models that take a long time to run, you can also enable a progress bar by passing <code>progress_bar=True</code>.</p>
+</section>
+<section id="sec-smc-result" class="level3">
+<h3 class="anchored" data-anchor-id="sec-smc-result">The result object</h3>
+<p>Calling a decorated model runs the inference engine and returns a result object (of type <code>SMCResult</code>). This is a dictionary-like object where each <code>sample</code> call produces a tensor of shape <span class="math inline">\((N, \ldots)\)</span>:</p>
+<div id="c14f7e2b" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMCResult(num_particles=5000, log_evidence=0.0000, ESS=5000.0)
+  Variables: mu, x
+    mu: shape=(5000,)
+    x: shape=(5000,)</code></pre>
+</div>
+</div>
+<p>Three metadata entries are always present:</p>
+<ul>
+<li><strong><code>result.log_weights</code></strong> — log-weights accumulated from <code>observe</code> calls, shape <span class="math inline">\((N,)\)</span>.</li>
+<li><strong><code>result.norm_weights</code></strong> — normalized weights (i.e.&nbsp;<code>softmax</code> of <code>log_weights</code>), shape <span class="math inline">\((N,)\)</span>. These sum to <span class="math inline">\(1\)</span> and are convenient for computing weighted averages or plotting.</li>
+<li><strong><code>result.log_evidence</code></strong> — estimate of <span class="math inline">\(\log p(\text{observations})\)</span>, useful for model comparison.</li>
+</ul>
+<p>You can access each variable with <code>result["var_name"]</code> or <code>result.var_name</code>.</p>
+<div id="cc32d58e" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>result[<span class="st">"x"</span>]</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>result.x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>tensor([ 5.2938, -0.4008, -4.4538,  ...,  3.8232,  2.2977,  2.2212])</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-summary" class="level3">
+<h3 class="anchored" data-anchor-id="sec-summary"><code>summary</code>: quick posterior overview</h3>
+<p>The <code>summary</code> function computes weighted mean, standard deviation, and the number of unique particles for each variable. It is also available as a method on the result object: <code>result.summary()</code>. Printing the summary gives an overview including a histogram for each variable:</p>
+<div id="e1f3838a" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> conditioned_measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>stats <span class="op">=</span> summary(result)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(stats)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=5000, log_evidence=-2.7376, ESS=579.8)
+
+          │         █▁     │
+          │       mu       │
+──────────┼────────────────┤
+     mean │     3.1706     │
+      std │     0.5058     │
+ n_unique │      5000      │</code></pre>
+</div>
+</div>
+<p>You can also extract specific statistics for a variable:</p>
+<div id="7be8f364" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[mu | x=3.2] = </span><span class="sc">{</span>stats[<span class="st">'mu'</span>][<span class="st">'mean'</span>]<span class="sc">:.3f}</span><span class="ss"> ± </span><span class="sc">{</span>stats[<span class="st">'mu'</span>][<span class="st">'std'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Unique particles: </span><span class="sc">{</span>stats[<span class="st">'mu'</span>][<span class="st">'n_unique'</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[mu | x=3.2] = 3.171 ± 0.506
+Unique particles: 5000</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-linreg-basic" class="level3">
+<h3 class="anchored" data-anchor-id="sec-linreg-basic">Example: Bayesian linear regression</h3>
+<p>As a more realistic example, consider inferring the slope <span class="math inline">\(a\)</span> and intercept <span class="math inline">\(b\)</span> of a line from noisy data. We place informative priors and assume known noise:</p>
+<div id="1a5a8131" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bayesian_linreg(data):</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> sample(<span class="st">"a"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">2.0</span>))  <span class="co"># prior on slope</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> sample(<span class="st">"b"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">2.0</span>))  <span class="co"># prior on intercept</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> data:</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>        observe(y, dist.Normal(a <span class="op">*</span> x <span class="op">+</span> b, <span class="fl">0.2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We generate synthetic data from a known ground truth and run inference:</p>
+<div id="2404d370" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>true_a, true_b <span class="op">=</span> <span class="fl">2.0</span>, <span class="op">-</span><span class="fl">1.0</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> torch.linspace(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">5</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>ys <span class="op">=</span> true_a <span class="op">*</span> xs <span class="op">+</span> true_b <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> torch.randn(<span class="dv">5</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="bu">list</span>(<span class="bu">zip</span>(xs, ys))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> bayesian_linreg(data, num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=10000, log_evidence=-12.6592, ESS=5908.3)
+
+          │ █              │              █ │
+          │       a        │       b        │
+──────────┼────────────────┼────────────────┤
+     mean │     2.0247     │    -1.1471     │
+      std │     0.0035     │     0.0032     │
+ n_unique │       8        │       8        │</code></pre>
+</div>
+</div>
+<p>The posterior means are close to the true values. We will revisit this example in <a href="#sec-behind-scenes" class="quarto-xref"><span>Behind the scenes</span></a> to examine how the inference engine handles the five observations internally.</p>
+</section>
+<section id="sec-nesting-models" class="level3">
+<h3 class="anchored" data-anchor-id="sec-nesting-models">Composing models</h3>
+<p>Models can call other functions that use <code>sample</code> and <code>observe</code>. This is the primary way to build modular models. However, only the <strong>outermost</strong> function should carry the <code>@model</code> decorator. For example, we can rewrite <code>bayesian_linreg</code> by extracting the prior sampling into a helper:</p>
+<div id="0c9f9fdd" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_parameters():</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Sample the regression parameters from their priors."""</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> sample(<span class="st">"a"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">2.0</span>))</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> sample(<span class="st">"b"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">2.0</span>))</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> a, b</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bayesian_linreg_v2(data):</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    a, b <span class="op">=</span> sample_parameters()</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> data:</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>        observe(y, dist.Normal(a <span class="op">*</span> x <span class="op">+</span> b, <span class="fl">0.2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The undecorated <code>sample_parameters</code> shares the calling model’s context, so its <code>sample</code> calls are recorded alongside those of the outer model.</p>
+</section>
+</section>
+<section id="sec-evaluate-results" class="level2">
+<h2 class="anchored" data-anchor-id="sec-evaluate-results">Evaluating results</h2>
+<section id="computing-expectations" class="level3">
+<h3 class="anchored" data-anchor-id="computing-expectations">Computing expectations</h3>
+<p>The <code>expectation</code> function computes <span class="math inline">\(\mathbb{E}[t(X)]\)</span> for an arbitrary <strong>test function</strong> <span class="math inline">\(t\)</span>. The function’s argument names are matched against the variable names in the result. Like <code>summary</code>, it is also available as a method: <code>result.expectation(f)</code>. The standalone function is a wrapper around this method.</p>
+<div id="85bfea5f" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>E_mu <span class="op">=</span> expectation(result, <span class="kw">lambda</span> mu: mu)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>E_mu2 <span class="op">=</span> expectation(result, <span class="kw">lambda</span> mu: mu<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>var_mu <span class="op">=</span> E_mu2 <span class="op">-</span> E_mu<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"E[mu]   = </span><span class="sc">{</span>E_mu<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Var[mu] = </span><span class="sc">{</span>var_mu<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>E[mu]   = -0.018
+Var[mu] = 25.716</code></pre>
+</div>
+</div>
+<p><strong>Joint quantities</strong> Since each particle carries values for all variables, we can estimate expectations of functions of several variables, such as covariances:</p>
+<div id="7266ee5e" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>E_mu <span class="op">=</span> expectation(result, <span class="kw">lambda</span> mu: mu)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>E_x <span class="op">=</span> expectation(result, <span class="kw">lambda</span> x: x)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> expectation(result, <span class="kw">lambda</span> mu, x: (mu <span class="op">-</span> E_mu) <span class="op">*</span> (x <span class="op">-</span> E_x))</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Cov[mu, x] = </span><span class="sc">{</span>cov<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Cov[mu, x] = 25.678</code></pre>
+</div>
+</div>
+<p><strong>Computing probabilities</strong> To estimate probabilities, use an indicator function.</p>
+<div id="365c3e16" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>p_pos <span class="op">=</span> expectation(result, <span class="kw">lambda</span> mu: mu <span class="op">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(mu &gt; 0)  = </span><span class="sc">{</span>p_pos<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(mu &gt; 0)  = 0.501</code></pre>
+</div>
+</div>
+<p>The anonymous function notation is optional. You can also define a named function and pass it to <code>expectation</code>, as long as the argument names match the variable names in the result:</p>
+<div id="03ecbbed" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> indicator(mu):</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mu <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>p_pos <span class="op">=</span> expectation(result, indicator)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(mu &gt; 0)  = </span><span class="sc">{</span>p_pos<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(mu &gt; 0)  = 0.501</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-sample-method" class="level3">
+<h3 class="anchored" data-anchor-id="sec-sample-method">Resampling with <code>.sample()</code></h3>
+<p>Often, it is necessary to work with unweighted samples. In such cases, you can sample directly from the weighted set by calling the <code>.sample()</code> method on the result:</p>
+<div id="9de96e57" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> conditioned_measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>resampled <span class="op">=</span> result.sample(<span class="dv">1000</span>)  <span class="co"># draw 1000 equally-weighted samples</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The method draws indices proportional to the importance weights (with replacement), returning a plain dictionary of tensors. If <code>num_samples</code> is omitted, it defaults to the number of particles in the original result:</p>
+<div id="2d5b4742" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>resampled_all <span class="op">=</span> result.sample()  <span class="co"># same as result.sample(5000)</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(resampled_all[<span class="st">"mu"</span>].shape)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>torch.Size([5000])</code></pre>
+</div>
+</div>
+<p>This is especially useful for passing posterior samples to external tools that expect unweighted data, such as plotting libraries.</p>
+</section>
+<section id="sec-visualize-posterior" class="level3">
+<h3 class="anchored" data-anchor-id="sec-visualize-posterior">Visualizing the posterior</h3>
+<p>We can visualize the posterior distribution by resampling the particles and plotting the results with low opacity:</p>
+<div id="f201586d" class="cell" data-execution_count="21">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> bayesian_linreg(data, num_particles<span class="op">=</span><span class="dv">10_000</span>, ess_threshold<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>log_w <span class="op">=</span> result.log_weights</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> result.norm_weights</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: posterior regression lines (resampled)</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>alpha <span class="op">=</span> weights</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>resampled <span class="op">=</span> result.sample()</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">200</span>):</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>    ax.plot(</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>        xs,</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>        (resampled[<span class="st">"a"</span>][i] <span class="op">*</span> xs <span class="op">+</span> resampled[<span class="st">"b"</span>][i]).numpy(),</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"steelblue"</span>,</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>        alpha<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, true_a <span class="op">*</span> xs <span class="op">+</span> true_b, color<span class="op">=</span><span class="st">"red"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"True line"</span>)</span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>ax.scatter(xs, ys, color<span class="op">=</span><span class="st">"black"</span>, s<span class="op">=</span><span class="dv">25</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">"Data"</span>)</span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"x"</span>, ylabel<span class="op">=</span><span class="st">"y"</span>, title<span class="op">=</span><span class="st">"Posterior regression lines"</span>)</span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Right: joint posterior (color ∝ weight)</span></span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">1</span>]</span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>ax.scatter(resampled[<span class="st">"a"</span>], resampled[<span class="st">"b"</span>], s<span class="op">=</span><span class="dv">8</span>, alpha<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a>ax.axvline(true_a, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>, label<span class="op">=</span><span class="ss">f"true a = </span><span class="sc">{</span>true_a<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a>ax.axhline(true_b, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>, label<span class="op">=</span><span class="ss">f"true b = </span><span class="sc">{</span>true_b<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"a (slope)"</span>, ylabel<span class="op">=</span><span class="st">"b (intercept)"</span>, title<span class="op">=</span><span class="st">"Joint posterior"</span>)</span>
+<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-34"><a href="#cb39-34" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb39-35"><a href="#cb39-35" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="WeightedSampling_files/figure-html/cell-22-output-1.png" width="566" height="278" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="log-evidence-for-model-comparison" class="level3">
+<h3 class="anchored" data-anchor-id="log-evidence-for-model-comparison">Log evidence for model comparison</h3>
+<p>The log evidence <span class="math inline">\(\log \hat p(y)\)</span> of the data is computed automatically as a byproduct of sampling. It estimates the marginal likelihood of the observations under the model. For the conditioned measurement model, this is the observation likelihood <span class="math inline">\(p(x = 3.2)\)</span>:</p>
+<div id="0b4b0ef1" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> conditioned_measurement(num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Log evidence: </span><span class="sc">{</span>result<span class="sc">.</span>log_evidence<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Log evidence: -2.790</code></pre>
+</div>
+</div>
+<p>We can verify this against the exact marginal <span class="math inline">\(p(x) = \int p(x \mid \mu)\, p(\mu)\, d\mu\)</span>, which for two Gaussians is <span class="math inline">\(\mathsf{Normal}(0, \sigma_\mu^2 + \sigma_x^2)\)</span>:</p>
+<div id="99ad46bd" class="cell" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>exact <span class="op">=</span> dist.Normal(<span class="fl">0.0</span>, (<span class="fl">5.0</span><span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">**</span><span class="dv">2</span>)<span class="op">**</span><span class="fl">0.5</span>).log_prob(torch.tensor(<span class="fl">3.2</span>))</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Exact:        </span><span class="sc">{</span>exact<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Exact:        -2.736</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-behind-scenes" class="level2">
+<h2 class="anchored" data-anchor-id="sec-behind-scenes">Behind the scenes</h2>
+<p>The two primitives correspond directly to the two operations in the weighted sampling procedure from the <a href="../chapters/conditioning.html">conditioning chapter</a>:</p>
+<ul>
+<li><strong><code>sample</code></strong> extends the current sample by drawing from the specified distribution.</li>
+<li><strong><code>observe</code></strong> evaluates the density at the observed value and adds its logarithm to the running log-weight.</li>
+</ul>
+<p>The engine runs <span class="math inline">\(N\)</span> independent <strong>particles</strong> in parallel, each maintaining its own sample trace and log-weight. After all particles finish, expectations are estimated with the <strong>self-normalized estimator</strong>:</p>
+<p><span class="math display">\[
+\mathbb{E}[t(y)] \approx \frac{\sum_{i=1}^N w_i\, t(y_i)}{\sum_{i=1}^N w_i}.
+\]</span></p>
+<p>When there are no <code>observe</code> statements, all weights are equal and this reduces to a simple average.</p>
+<section id="sec-weight-collapse" class="level3">
+<h3 class="anchored" data-anchor-id="sec-weight-collapse">Weight collapse</h3>
+<p>When there are many observations, most particles end up with negligible weight. We can see this clearly in the linear regression example by disabling resampling (<code>ess_threshold=0</code>):</p>
+<div id="02e8d0ac" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>result_no_resample <span class="op">=</span> bayesian_linreg(data, num_particles<span class="op">=</span><span class="dv">5000</span>, ess_threshold<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>log_w <span class="op">=</span> result_no_resample.log_weights</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> result_no_resample.norm_weights</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="a833eacd" class="cell" data-execution_count="25">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>ax.hist(w.numpy(), bins<span class="op">=</span><span class="dv">50</span>, log<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"steelblue"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Normalized weight"</span>,</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"Count"</span>,</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Weight distribution (no resampling)"</span>,</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="WeightedSampling_files/figure-html/cell-26-output-1.png" width="565" height="278" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>With 5 observations and no resampling, almost all the weight concentrates on a tiny fraction of the particles. The vast majority contribute essentially nothing to the estimate.</p>
+</section>
+<section id="sec-resampling" class="level3">
+<h3 class="anchored" data-anchor-id="sec-resampling">Resampling</h3>
+<p>The engine monitors the <strong>effective sample size</strong> (ESS):</p>
+<p><span class="math display">\[
+\text{ESS} = \frac{1}{\sum_{i=1}^N \bar w_i^2},
+\]</span></p>
+<p>where <span class="math inline">\(\bar w_i\)</span> are the normalized weights. When ESS drops below <code>ess_threshold</code> <span class="math inline">\(\times\, N\)</span>, the engine <strong>resamples</strong>: it draws <span class="math inline">\(N\)</span> new particles from the current set with replacement, in proportion to their weights, and resets all weights to be equal.</p>
+<p>With the default <code>ess_threshold=0.5</code>, the linear regression model resamples after each observation that causes ESS to drop too low:</p>
+<div id="636fd5ff" class="cell" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>result_resample <span class="op">=</span> bayesian_linreg(data, num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_resample))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=5000, log_evidence=-17.8740, ESS=2707.5)
+
+          │ █              │       █      ▁ │
+          │       a        │       b        │
+──────────┼────────────────┼────────────────┤
+     mean │     2.1408     │    -1.2262     │
+      std │     0.0008     │     0.0368     │
+ n_unique │       3        │       3        │</code></pre>
+</div>
+</div>
+<p>Resampling prevents weight collapse, but it comes at a cost: many particles become copies of the same ancestor, reducing <strong>diversity</strong>. The low number of unique particles above shows that most of the 5000 particles collapsed onto a handful of ancestors during resampling. The next section introduces Metropolis-Hastings moves as a remedy.</p>
+</section>
+</section>
+<section id="sec-mh-moves" class="level2">
+<h2 class="anchored" data-anchor-id="sec-mh-moves">Metropolis-Hastings moves</h2>
+<p>When a model has many <code>observe</code> statements, resampling causes particles to coalesce. The <code>move</code> primitive applies a <strong>Metropolis-Hastings (MH) step</strong> to diversify the particles after each observation. A move proposes new values for specified variables and accepts or rejects the proposal based on the full model density.</p>
+<!-- Add note that moves should could leave domain of variable. -->
+<section id="randomwalkproposal" class="level3">
+<h3 class="anchored" data-anchor-id="randomwalkproposal"><code>RandomWalkProposal</code></h3>
+<p>The simplest proposal is a symmetric random walk. We revisit the linear regression example, now adding a <code>move</code> after each observation:</p>
+<div id="11792026" class="cell" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> move, RandomWalkProposal</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bayesian_linreg_mh(data):</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> sample(<span class="st">"a"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">2.0</span>))</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> sample(<span class="st">"b"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">5.0</span>))</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> data:</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>        observe(y, dist.Normal(a <span class="op">*</span> x <span class="op">+</span> b, <span class="fl">0.3</span>))</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>        move([<span class="st">"a"</span>, <span class="st">"b"</span>], RandomWalkProposal(scale<span class="op">=</span><span class="fl">0.1</span>), threshold<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>result_mh <span class="op">=</span> bayesian_linreg_mh(data, num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_mh))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=5000, log_evidence=-9.6287, ESS=2980.6)
+
+          │    ▂▃▆█▄▂      │    ▁▁▂▄█▇▆▃▂▁  │
+          │       a        │       b        │
+──────────┼────────────────┼────────────────┤
+     mean │     2.0168     │    -1.0641     │
+      std │     0.0817     │     0.2480     │
+ n_unique │      3679      │      3682      │</code></pre>
+</div>
+</div>
+<p>The number of unique particles is now much higher. The <code>threshold</code> parameter controls when the move fires: it only runs when the diversity ratio (unique particles / <span class="math inline">\(N\)</span>) drops below the threshold.</p>
+<p><code>RandomWalkProposal(scale=s)</code> proposes <span class="math inline">\(x' \sim \mathsf{Normal}(x, s)\)</span> independently for each variable. The <code>scale</code> parameter controls the step size — too small and the moves barely explore; too large and most proposals get rejected.</p>
+</section>
+<section id="adaptiveproposal" class="level3">
+<h3 class="anchored" data-anchor-id="adaptiveproposal"><code>AdaptiveProposal</code></h3>
+<p>The <code>AdaptiveProposal</code> automatically tunes the proposal covariance from the current particle population, using an adaptive Metropolis strategy:</p>
+<div id="04ab505a" class="cell" data-execution_count="28">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> AdaptiveProposal</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bayesian_linreg_adaptive(data):</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> sample(<span class="st">"a"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">2.0</span>))</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> sample(<span class="st">"b"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">5.0</span>))</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> data:</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>        observe(y, dist.Normal(a <span class="op">*</span> x <span class="op">+</span> b, <span class="fl">0.3</span>))</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>        move([<span class="st">"a"</span>, <span class="st">"b"</span>], AdaptiveProposal(), threshold<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>result_adapt <span class="op">=</span> bayesian_linreg_adaptive(data, num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result_adapt))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=5000, log_evidence=-9.9339, ESS=3071.9)
+
+          │    ▁▄█▇▂▁      │      ▂▄▆██▄▁▁  │
+          │       a        │       b        │
+──────────┼────────────────┼────────────────┤
+     mean │     2.0295     │    -1.0975     │
+      std │     0.0711     │     0.2201     │
+ n_unique │      3041      │      3044      │</code></pre>
+</div>
+</div>
+<p>The <code>AdaptiveProposal</code> estimates the weighted covariance of the targeted variables from the current particles, scales it using a factor of <span class="math inline">\(2.38 / \sqrt{d}\)</span> (optimal for Gaussian targets), and adds a small ridge for numerical stability. This generally works well without manual tuning..</p>
+<div id="e86831ba" class="cell" data-execution_count="29">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>result_no_moves <span class="op">=</span> bayesian_linreg(data, num_particles<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (res, title) <span class="kw">in</span> <span class="bu">zip</span>(</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    axes,</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>        (result_no_moves, <span class="st">"No moves"</span>),</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>        (result_mh, <span class="st">"RandomWalkProposal"</span>),</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>        (result_adapt, <span class="st">"AdaptiveProposal"</span>),</span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> res <span class="kw">is</span> <span class="kw">not</span> result_no_moves:</span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>        res_resampled <span class="op">=</span> res.sample()</span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>        a_s <span class="op">=</span> res_resampled[<span class="st">"a"</span>]</span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>        b_s <span class="op">=</span> res_resampled[<span class="st">"b"</span>]</span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:  <span class="co"># plot all points for the no-move case, since diversity is very low</span></span>
+<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>        a_s <span class="op">=</span> res[<span class="st">"a"</span>]</span>
+<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a>        b_s <span class="op">=</span> res[<span class="st">"b"</span>]</span>
+<span id="cb52-20"><a href="#cb52-20" aria-hidden="true" tabindex="-1"></a>    ax.scatter(a_s, b_s, color<span class="op">=</span><span class="st">"steelblue"</span>, s<span class="op">=</span><span class="dv">8</span>, alpha<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb52-21"><a href="#cb52-21" aria-hidden="true" tabindex="-1"></a>    ax.axvline(true_a, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb52-22"><a href="#cb52-22" aria-hidden="true" tabindex="-1"></a>    ax.axhline(true_b, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb52-23"><a href="#cb52-23" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"a (slope)"</span>)</span>
+<span id="cb52-24"><a href="#cb52-24" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">"b (intercept)"</span>)</span>
+<span id="cb52-25"><a href="#cb52-25" aria-hidden="true" tabindex="-1"></a>    stats_i <span class="op">=</span> summary(res)</span>
+<span id="cb52-26"><a href="#cb52-26" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"</span><span class="sc">{</span>title<span class="sc">}</span><span class="ch">\n</span><span class="ss">(unique: </span><span class="sc">{</span>stats_i[<span class="st">'a'</span>][<span class="st">'n_unique'</span>]<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb52-27"><a href="#cb52-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-28"><a href="#cb52-28" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb52-29"><a href="#cb52-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="WeightedSampling_files/figure-html/cell-30-output-1.png" width="758" height="279" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-discrete-bayes-nets" class="level2">
+<h2 class="anchored" data-anchor-id="sec-discrete-bayes-nets">Discrete Bayesian networks</h2>
+<p>For models with discrete variables, <code>DiscreteConditional</code> provides a convenient way to define discrete kernels. You do so by giving it a function that maps each input value to a probability vector.</p>
+<section id="example-wet-grass-network" class="level3">
+<h3 class="anchored" data-anchor-id="example-wet-grass-network">Example: wet grass network</h3>
+<p>The classic “wet grass” network has four binary variables:</p>
+<p><span class="math display">\[
+\text{Cloudy} \to \text{Rain}, \quad \text{Cloudy} \to \text{Sprinkler}, \quad (\text{Rain}, \text{Sprinkler}) \to \text{WetGrass}.
+\]</span></p>
+<p>We encode each CPT as a <code>DiscreteConditional</code>, specifying the domain size of each parent:</p>
+<div id="06700254" class="cell" data-execution_count="30">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> DiscreteConditional</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>cloudy_cpt <span class="op">=</span> DiscreteConditional(<span class="kw">lambda</span>: [<span class="fl">0.5</span>, <span class="fl">0.5</span>], domain_sizes<span class="op">=</span>[])</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>rain_cpt <span class="op">=</span> DiscreteConditional(</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> c: [<span class="fl">0.2</span>, <span class="fl">0.8</span>] <span class="cf">if</span> c <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> [<span class="fl">0.8</span>, <span class="fl">0.2</span>],</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>    domain_sizes<span class="op">=</span>[<span class="dv">2</span>],</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>sprinkler_cpt <span class="op">=</span> DiscreteConditional(</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> c: [<span class="fl">0.9</span>, <span class="fl">0.1</span>] <span class="cf">if</span> c <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> [<span class="fl">0.5</span>, <span class="fl">0.5</span>],</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>    domain_sizes<span class="op">=</span>[<span class="dv">2</span>],</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>wet_grass_cpt <span class="op">=</span> DiscreteConditional(</span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> s, r: [<span class="fl">0.01</span>, <span class="fl">0.99</span>] <span class="cf">if</span> s <span class="op">==</span> <span class="dv">1</span> <span class="kw">and</span> r <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>               <span class="cf">else</span> [<span class="fl">0.1</span>, <span class="fl">0.9</span>]  <span class="cf">if</span> s <span class="op">==</span> <span class="dv">1</span> <span class="kw">or</span> r <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>               <span class="cf">else</span> [<span class="fl">1.0</span>, <span class="fl">0.0</span>],</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>    domain_sizes<span class="op">=</span>[<span class="dv">2</span>, <span class="dv">2</span>],</span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The <code>domain_sizes</code> argument lists the number of values each <em>parent</em> can take (in the order they appear in the function signature). A root node has <code>domain_sizes=[]</code>. The CPT function maps parent values to a list of probabilities: entry <span class="math inline">\(i\)</span> is <span class="math inline">\(P(\text{child} = i \mid \text{parents})\)</span>.</p>
+<p>Calling a <code>DiscreteConditional</code> with parent tensors returns a <code>torch.distributions.Categorical</code>, which can be passed to <code>sample</code> or <code>observe</code>:</p>
+<div id="db674b08" class="cell" data-execution_count="31">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> wet_grass_model():</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> sample(<span class="st">"cloudy"</span>, cloudy_cpt())</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> sample(<span class="st">"rain"</span>, rain_cpt(c))</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> sample(<span class="st">"sprinkler"</span>, sprinkler_cpt(c))</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>    observe(torch.tensor(<span class="dv">1</span>), wet_grass_cpt(s, r))</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> wet_grass_model(num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=10000, log_evidence=-0.4308, ESS=7123.2)
+
+          │ ▆            █ │ ▃            █ │ █            ▆ │
+          │     cloudy     │      rain      │   sprinkler    │
+──────────┼────────────────┼────────────────┼────────────────┤
+     mean │     0.5813     │     0.7202     │     0.4187     │
+      std │     0.4933     │     0.4489     │     0.4934     │
+ n_unique │       2        │       2        │       2        │</code></pre>
+</div>
+</div>
+<p>The CPT function is called lazily — only for parent configurations that actually appear among the particles — and results are cached. This means you can define CPTs over large parent domains without computing the entire table upfront.</p>
+</section>
+</section>
+<section id="sec-importance-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="sec-importance-sampling">Importance sampling</h2>
+<p>The <code>ImportanceSampler</code> lets you use a <strong>target</strong> density that is not a standard <code>torch.distributions</code> object — for example, a density you can evaluate but not sample from directly. You provide a <code>proposal</code> distribution to draw particles from, and the engine reweights them using <span class="math inline">\(\log p_{\text{target}}(x) - \log q_{\text{proposal}}(x)\)</span>.</p>
+<p>The <code>target</code> only needs a <code>log_prob</code> method. The <code>proposal</code> must support both <code>sample</code> and <code>log_prob</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The target density can be unnormalized — posterior expectations will still be correct because they use the self-normalized estimator. However, an unnormalized target will invalidate the <code>log_evidence</code> estimate, since it depends on absolute density values.</p>
+</div>
+</div>
+<p>As an example, suppose we want to use a prior proportional to <span class="math inline">\(e^{-x^4}\)</span>, a super-Gaussian density that is not available in <code>torch.distributions</code>:</p>
+<div id="f0b1ebb3" class="cell" data-execution_count="32">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> weighted_sampling <span class="im">import</span> ImportanceSampler</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SuperGaussian:</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Unnormalized density proportional to exp(-x^4)."""</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> log_prob(<span class="va">self</span>, x):</span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span>(x<span class="op">**</span><span class="dv">4</span>)</span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a><span class="at">@model</span></span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> super_gaussian_measurement():</span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> sample(</span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mu"</span>,</span>
+<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a>        ImportanceSampler(</span>
+<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a>            target<span class="op">=</span>SuperGaussian(),</span>
+<span id="cb56-17"><a href="#cb56-17" aria-hidden="true" tabindex="-1"></a>            proposal<span class="op">=</span>dist.Normal(<span class="fl">0.0</span>, <span class="fl">1.0</span>),</span>
+<span id="cb56-18"><a href="#cb56-18" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb56-19"><a href="#cb56-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb56-20"><a href="#cb56-20" aria-hidden="true" tabindex="-1"></a>    observe(<span class="fl">1.5</span>, dist.Normal(mu, <span class="fl">0.5</span>))</span>
+<span id="cb56-21"><a href="#cb56-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-22"><a href="#cb56-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-23"><a href="#cb56-23" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> super_gaussian_measurement(num_particles<span class="op">=</span><span class="dv">10_000</span>)</span>
+<span id="cb56-24"><a href="#cb56-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(summary(result))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>SMC Summary (N=10000, log_evidence=-1.9238, ESS=2818.0)
+
+          │        ▂█▁     │
+          │       mu       │
+──────────┼────────────────┤
+     mean │     0.7948     │
+      std │     0.2945     │
+ n_unique │     10000      │</code></pre>
+</div>
+</div>
+<p>The <code>ImportanceSampler</code> draws from the Gaussian proposal and reweights to target the custom <code>SuperGaussian</code> density. Combined with the <code>observe</code> likelihood, inference targets the correct posterior <span class="math inline">\(p(\mu \mid x = 1.5) \propto e^{-\mu^4} \cdot \ell(1.5 \mid \mu)\)</span>.</p>
+
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../appendix/pytorch.html" class="pagination-link" aria-label="PyTorch Tutorial">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">PyTorch Tutorial</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    var isRemark = div.classList.contains("remark");
+    // Add QED square to summary (visible when collapsed)
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>

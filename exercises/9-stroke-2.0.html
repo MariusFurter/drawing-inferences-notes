@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Exercise 9: Stroke prediction 2.0 – Drawing Inferences</title>
+<title>Exercise 9: – Drawing Inferences</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,10 +20,45 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -77,6 +112,9 @@ window.MathJax = {
   }
 };
 </script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -119,7 +157,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/9-stroke-2.0.html">Exercise 9: Stroke prediction 2.0</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/9-stroke-2.0.html">Exercise 9:</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -181,7 +219,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian data analysis</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -194,6 +232,18 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/smc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sequential Monte Carlo</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/vi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Variational inference</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -256,7 +306,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../exercises/9-stroke-2.0.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Exercise 9: Stroke prediction 2.0</span></a>
+ <span class="menu-text">Exercise 9:</span></a>
   </div>
 </li>
       </ul>
@@ -310,21 +360,20 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#the-dataset" id="toc-the-dataset" class="nav-link" data-scroll-target="#the-dataset">The dataset</a></li>
   </ul></li>
-  <li><a href="#task-1.-a-hybrid-causal-model" id="toc-task-1.-a-hybrid-causal-model" class="nav-link" data-scroll-target="#task-1.-a-hybrid-causal-model">Task 1. A hybrid causal model</a></li>
-  <li><a href="#task-2.-fit-the-discrete-boxes-analytically" id="toc-task-2.-fit-the-discrete-boxes-analytically" class="nav-link" data-scroll-target="#task-2.-fit-the-discrete-boxes-analytically">Task 2. Fit the discrete boxes analytically</a></li>
-  <li><a href="#task-3.-fit-log_glucose-age-hyp-with-numpyro" id="toc-task-3.-fit-log_glucose-age-hyp-with-numpyro" class="nav-link" data-scroll-target="#task-3.-fit-log_glucose-age-hyp-with-numpyro">Task 3. Fit <code>log_glucose | age, hyp</code> with NumPyro</a></li>
-  <li><a href="#task-4-optional.-fit-heart_disease-age-hyp-log_glucose" id="toc-task-4-optional.-fit-heart_disease-age-hyp-log_glucose" class="nav-link" data-scroll-target="#task-4-optional.-fit-heart_disease-age-hyp-log_glucose">Task 4 (Optional). Fit <code>heart_disease | age, hyp, log_glucose</code></a></li>
-  <li><a href="#task-5.-missing-data-completely-at-random-mcar" id="toc-task-5.-missing-data-completely-at-random-mcar" class="nav-link" data-scroll-target="#task-5.-missing-data-completely-at-random-mcar">Task 5. Missing data, completely at random (MCAR)</a></li>
-  <li><a href="#task-6.-informative-missingness-threshold-censoring" id="toc-task-6.-informative-missingness-threshold-censoring" class="nav-link" data-scroll-target="#task-6.-informative-missingness-threshold-censoring">Task 6. Informative missingness: threshold censoring</a></li>
+  <li><a href="#task-1.-a-hybrid-model" id="toc-task-1.-a-hybrid-model" class="nav-link" data-scroll-target="#task-1.-a-hybrid-model">Task 1. A hybrid model</a></li>
+  <li><a href="#task-2.-fit-the-hypertension-kernel" id="toc-task-2.-fit-the-hypertension-kernel" class="nav-link" data-scroll-target="#task-2.-fit-the-hypertension-kernel">Task 2. Fit the hypertension kernel</a></li>
+  <li><a href="#task-3.-fit-glucose-with-numpyro" id="toc-task-3.-fit-glucose-with-numpyro" class="nav-link" data-scroll-target="#task-3.-fit-glucose-with-numpyro">Task 3. Fit glucose with NumPyro</a></li>
+  <li><a href="#task-4-optional.-fitting-heart-disease-by-laplace-approximation" id="toc-task-4-optional.-fitting-heart-disease-by-laplace-approximation" class="nav-link" data-scroll-target="#task-4-optional.-fitting-heart-disease-by-laplace-approximation">Task 4 (Optional). Fitting heart disease by Laplace approximation</a></li>
+  <li><a href="#task-5-missing-data" id="toc-task-5-missing-data" class="nav-link" data-scroll-target="#task-5-missing-data">Task 5: Missing data</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/9-stroke-2.0.html">Exercise 9: Stroke prediction 2.0</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/1-classic-puzzles.html">Exercises</a></li><li class="breadcrumb-item"><a href="../exercises/9-stroke-2.0.html">Exercise 9:</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Exercise 9: Stroke prediction 2.0</h1>
+<h1 class="title">Exercise 9:</h1>
 </div>
 
 
@@ -362,17 +411,15 @@ It illustrates the key concepts of `chapters/practical.qmd`:
   * Conditioning on full data splits a model into independent parts.
   * Dirichlet-Categorical conjugate update for a discrete kernel (with optional
     derivation, mirroring exm-dirichlet-categorical in practical.qmd).
-  * NumPyro fits for a Gaussian-regression kernel (and optionally a logistic
-    regression kernel).
-  * Missing data: MCAR (model still works, requires joint imputation) vs.
-    informative threshold censoring (need to add the missingness mechanism,
-    mirroring exm-missing-gaussian).
+  * NumPyro fits for a Gaussian-regression kernel.
+  * Laplace approximation (in plain JAX) for an optional logistic-regression
+    kernel.
 
 MODEL: a hybrid sub-model with 3 boxes (+ 1 optional logistic-regression box):
 
   age            : I            ~> Age            (categorical, 3 bins)
   hyp            : Age          ~> {0, 1}         (discrete kernel)
-  log_glu        : Age x Hyp    ~> R              (Gaussian regression)
+  log_glu        : Age          ~> R              (Gaussian regression)
   heart_disease  : Age x Hyp x R ~> {0, 1}        (logistic regression, OPT)
 
 Variables come from data/exercise-3/healthcare-dataset-stroke-data.csv via
@@ -394,15 +441,14 @@ TODO (intro paragraph):
     kernels estimated by Laplace-smoothed counts.
   - Now we extend the model with a CONTINUOUS variable (log-glucose) and use
     proper Bayesian inference: Dirichlet-Categorical analytically for one
-    discrete kernel, and NumPyro for the regression kernels.
-  - Three pedagogical themes (pointers to practical.qmd):
+    discrete kernel, NumPyro/NUTS for the Gaussian-regression kernel, and
+    Laplace approximation in JAX for the optional logistic-regression kernel.
+  - Two pedagogical themes (pointers to practical.qmd):
       1. Conditioning on all variables splits the model into independent boxes,
          so each kernel can be fit on its own.
       2. The Dirichlet-Categorical update gives a closed-form posterior for
          discrete kernels (this is the Bayesian justification of Ex. 3's
          Laplace smoothing).
-      3. Missing data breaks the split; we must reason about the missingness
-         mechanism to avoid bias.
 -->
 <div class="callout callout-style-default callout-note callout-titled" title="Prerequisites: Python libraries">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -428,28 +474,7 @@ TODO (intro paragraph):
 </div>
 <section id="the-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="the-dataset">The dataset</h3>
-<!--
-TODO (describe the prepared dataset):
-  - Same patients as Exercise 3, but a different subset of columns and
-    different processing of glucose.
-  - age (0=young<35, 1=middle 35-65, 2=senior>=65) — same bins as Ex. 3.
-  - hyp (0=no, 1=yes)
-  - log_glucose (continuous; natural log of avg_glucose_level in mg/dL)
-  - heart_disease (0=no, 1=yes)
-  - Motivate log-transforming glucose: the raw distribution is right-skewed
-    (clinical values cluster near 70-100 with a long high tail). Log-
-    transforming gives a roughly Gaussian distribution, making a Normal
-    likelihood reasonable.
-  - Link to the prepared CSVs and to data/exercise-9/prepare_data.py.
-
-Stub a code cell that loads the train CSV, prints head() and summary stats,
-and shows a histogram of log_glucose (with the raw glucose histogram for
-comparison) to motivate the Normal likelihood.
--->
-<ul>
-<li><a href="../data/exercise-9/stroke_train_prepared.csv">stroke_train_prepared.csv</a> — training data (4088 patients)</li>
-<li><a href="../data/exercise-9/stroke_test_prepared.csv">stroke_test_prepared.csv</a> — test data (1022 patients)</li>
-</ul>
+<p>We work with the same <a href="https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset">Stroke Prediction Dataset</a> used in Exercise 3, but using different variables:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 35%">
@@ -486,35 +511,120 @@ comparison) to motivate the Normal likelihood.
 </tr>
 </tbody>
 </table>
+<p>The prepared training and test splits are:</p>
+<ul>
+<li><a href="../data/exercise-9/stroke_train_prepared.csv">stroke_train_prepared.csv</a> — training data (4088 patients)</li>
+<li><a href="../data/exercise-9/stroke_test_prepared.csv">stroke_test_prepared.csv</a> — test data (1022 patients)</li>
+</ul>
+<p>Load the training data:</p>
+<div id="818ccf71" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"../data/exercise-9/stroke_train_prepared.csv"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"N = </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">}</span><span class="ss"> patients"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>N = 4088 patients</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th">hyp</th>
+<th data-quarto-table-cell-role="th">log_glucose</th>
+<th data-quarto-table-cell-role="th">heart_disease</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>1</td>
+<td>0</td>
+<td>4.237145</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>0</td>
+<td>0</td>
+<td>4.806068</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>2</td>
+<td>0</td>
+<td>4.704291</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>1</td>
+<td>0</td>
+<td>4.180675</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>0</td>
+<td>0</td>
+<td>4.410857</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
 </section>
 </section>
-<section id="task-1.-a-hybrid-causal-model" class="level2">
-<h2 class="anchored" data-anchor-id="task-1.-a-hybrid-causal-model">Task 1. A hybrid causal model</h2>
-<!--
-TODO (Task 1 narrative):
-
-Causal story (justify each arrow briefly):
-  - age is exogenous;
-  - hyp | age: arterial stiffening with age raises hypertension risk;
-  - log_glucose | age, hyp: insulin resistance and metabolic syndrome cluster
-    with both age and hypertension, shifting glucose upward;
-  - heart_disease | age, hyp, log_glucose: classical cardiovascular risk
-    factors (OPTIONAL box).
-
-Generators / kernels:
-  age   : I                       ~> Age
-  hyp   : Age                     ~> Hyp
-  glu   : Age x Hyp               ~> R          (continuous: log_glucose)
-  heart : Age x Hyp x R           ~> Heart      (OPTIONAL)
--->
-<p><strong>Task 1a.</strong> Draw the string diagram for the hybrid model (with the optional heart-disease box, or without if Task 4 is skipped).</p>
-<!--
-TODO (Task 1a):
-  Create tikz file: diagrams/exercises/stroke-2.0-model.tikz
-  (mirror diagrams/stroke-prediction/stroke-causal.tikz). Include the
-  continuous-output box (log_glucose) and the optional discrete-output
-  heart_disease box.
--->
+<section id="task-1.-a-hybrid-model" class="level2">
+<h2 class="anchored" data-anchor-id="task-1.-a-hybrid-model">Task 1. A hybrid model</h2>
+<p>We model the four variables with one box per kernel. The corresponding kernels mix discrete and continuous output types, so we pick a different family for each box:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Box</th>
+<th>Signature</th>
+<th>Kernel type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>age</code></td>
+<td><span class="math inline">\(I \kernel \mathsf{Age}\)</span></td>
+<td>general discrete (categorical on 3 values)</td>
+</tr>
+<tr class="even">
+<td><code>hyp</code></td>
+<td><span class="math inline">\(\mathsf{Age} \kernel \mathsf{Hyp}\)</span></td>
+<td>general discrete (one categorical per age)</td>
+</tr>
+<tr class="odd">
+<td><code>glu</code></td>
+<td><span class="math inline">\(\mathsf{Age} \kernel \mathbb{R}\)</span></td>
+<td>linear regression (Gaussian output)</td>
+</tr>
+<tr class="even">
+<td><code>heart</code></td>
+<td><span class="math inline">\(\mathsf{Age} \times \mathsf{Hyp} \times \mathbb{R} \kernel \mathsf{Heart}\)</span></td>
+<td>logistic regression</td>
+</tr>
+</tbody>
+</table>
+<p>By a “general discrete” kernel we mean one specified by a full table of output probabilities. The two regression kernels are the canonical GLMs from <a href="../chapters/hybrid-models.html#sec-common-regression-kernels">hybrid-models.qmd</a>: a Gaussian likelihood with a linear predictor for <code>log_glucose</code>, and a Bernoulli likelihood with sigmoid response for <code>heart_disease</code>.</p>
+<p><strong>Task 1a.</strong> Draw the string diagram for the model, taking the kernel parameters as known. The diagram should have four boxes wired up according to the signatures above.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 1a)">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -527,42 +637,16 @@ TODO (Task 1a):
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<!-- TODO: tikz string diagram of the full hybrid model. -->
+<div id="full-model" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="9-stroke-2.0_files/mediabag/e245f97afd20763bed99a9be6908b007824ce91a.svg" style="height:6em" class="figure-img"></p>
+<figcaption>String diagram for the hybrid model.</figcaption>
+</figure>
 </div>
 </div>
 </div>
-<p><strong>Task 1b.</strong> Suppose we observe a fully complete dataset <span class="math inline">\((\bar a_i, \bar h_i, \bar g_i, \bar d_i)_{i=1}^N\)</span>. Add a separate parameter prior to each box and condition on the data. Argue that the resulting model <strong>factors</strong> into independent parallel parts, one per kernel.</p>
-<!--
-TODO (Task 1b):
-  Each kernel carries its own latent parameter:
-    - age generator parameterized by theta_age ~ Dirichlet(1,1,1)
-    - hyp | age parameterized by theta_hyp (one Dirichlet per row of age)
-    - glu | age, hyp parameterized by (mu_{a,h}, sigma)
-    - heart | age, hyp, glu parameterized by logistic-regression coefficients
-  Conditioning on every variable removes all wires between the kernels in
-  the diagram. The diagram falls apart into parallel pieces, one per box.
-
-Diagrams: create two tikz files mirroring practical.qmd split-1 / split-2:
-    diagrams/exercises/stroke-2.0-split-1.tikz   (model with shared wires)
-    diagrams/exercises/stroke-2.0-split-2.tikz   (model after conditioning,
-                                                  showing the split)
-
-Solution callout: write out the joint density factoring:
-    p(theta_age, theta_hyp, theta_glu, theta_heart | data)
-      ∝ p(theta_age) * prod_i p(a_i | theta_age)
-        * p(theta_hyp) * prod_i p(h_i | a_i, theta_hyp)
-        * p(theta_glu) * prod_i p(g_i | a_i, h_i, theta_glu)
-        * p(theta_heart) * prod_i p(d_i | a_i, h_i, g_i, theta_heart)
-  Each line depends on disjoint parameters, so the posterior factors as a
-  product. Hence we can fit each box independently.
-
-Pedagogical payoff: inference for the whole model reduces to N small
-inference problems. This is precisely the strategy of practical.qmd's
-section "Conditioning splits models", applied here to a hybrid model.
-
-End with a note: this depends on having FULLY OBSERVED data. Section 5 will
-revisit what happens when some entries are missing.
--->
+</div>
+<p><strong>Task 1b.</strong> Now make the parameters of each box explicit. Promote each kernel to a <em>parameterized</em> kernel by adding a parameter input wire, and attach a prior to that wire.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 1b)">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -575,45 +659,86 @@ revisit what happens when some entries are missing.
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<!-- TODO: split-1 / split-2 tikz diagrams + factoring of the posterior. -->
+<div id="param-model" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="9-stroke-2.0_files/mediabag/7485df2443f50d0eaa41b42d23d54943a944e3ca.svg" style="height:11em" class="figure-img"></p>
+<figcaption>String diagram with parameters and priors.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 1c.</strong> Suppose we observe a fully complete dataset <span class="math inline">\((\bar a_i, \bar h_i, \bar g_i, \bar d_i)_{i=1}^N\)</span>. Condition the parameterized model from Task 1b on all four observed variables and show that the resulting diagram <strong>falls apart</strong> into four parallel components, one per box. Conclude that each box can be fit on its own.</p>
+<p><em>Hint.</em> Recall that conditioning on a variable removes every wire carrying that variable and replaces each affected kernel by a likelihood weight.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 1c)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 1c)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Conditioning on <span class="math inline">\(\bar a_{1:N}\)</span>, <span class="math inline">\(\bar h_{1:N}\)</span>, <span class="math inline">\(\bar g_{1:N}\)</span>, <span class="math inline">\(\bar d_{1:N}\)</span> erases every data wire in the diagram from Task 1b. Each of the four boxes is replaced by a weight corresponding to the per-datum likelihoods.</p>
+<div id="param-split" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="9-stroke-2.0_files/mediabag/23db445a67fb59622e522722d391aec02c25eaac.svg" style="height:11em" class="figure-img"></p>
+<figcaption>String diagram with parameters and priors after conditioning.</figcaption>
+</figure>
+</div>
+<p>Algebraically, the joint posterior factors as</p>
+<p><span class="math display">\[
+\begin{aligned}
+p(\theta_{\text{age}}, \theta_{\text{hyp}}, \theta_{\text{glu}}, \theta_{\text{heart}} \mid \text{data})
+\;\propto\; &amp; \;p_{\text{age}}(\theta_{\text{age}}) \, \prod_{i=1}^{N} \ell_{\text{age}}(\bar a_i \mid \theta_{\text{age}}) \\
+\times\;&amp; \;p_{\text{hyp}}(\theta_{\text{hyp}}) \, \prod_{i=1}^{N} \ell_{\text{hyp}}(\bar h_i \mid \bar a_i, \theta_{\text{hyp}}) \\
+\times\;&amp; \;p_{\text{glu}}(\theta_{\text{glu}}) \, \prod_{i=1}^{N} \ell_{\text{glu}}(\bar g_i \mid \bar a_i, \theta_{\text{glu}}) \\
+\times\;&amp; \;p_{\text{heart}}(\theta_{\text{heart}}) \, \prod_{i=1}^{N} \ell_{\text{heart}}(\bar d_i \mid \bar a_i, \bar h_i, \bar g_i, \theta_{\text{heart}}).
+\end{aligned}
+\]</span></p>
+<p>This decomposition depends critically on having a <strong>fully observed</strong> dataset. If, for example, some entries of <code>log_glucose</code> were missing, the data wire for <code>log_glucose</code> would only be partially cut, and the <code>glu</code> and <code>heart</code> boxes would remain linked.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="task-2.-fit-the-discrete-boxes-analytically" class="level2">
-<h2 class="anchored" data-anchor-id="task-2.-fit-the-discrete-boxes-analytically">Task 2. Fit the discrete boxes analytically</h2>
-<!--
-TODO (Task 2 narrative):
-  Both the age generator and hyp | age are discrete kernels. Put a Dirichlet
-  prior on each (independently per row for hyp | age) and use the
-  Dirichlet-Categorical conjugate update from practical.qmd
-  (exm-dirichlet-categorical).
--->
-<p><strong>Task 2a.</strong> Fit the <strong>age generator</strong> using a Dirichlet–Categorical update. Use a uniform <span class="math inline">\(\mathrm{Dirichlet}(1, 1, 1)\)</span> prior. Report the posterior mean and a 90% credible interval for each <span class="math inline">\(p_a := P(\text{age} = a)\)</span>.</p>
-<!--
-TODO (Task 2a):
-  Prior: Dirichlet(1, 1, 1).
-  Posterior: Dirichlet(1 + n_0, 1 + n_1, 1 + n_2), n_k = count of age=k.
-  Posterior mean = alpha_post / alpha_post.sum().
-  Credible intervals: use scipy.stats.dirichlet or, since the marginals of
-  a Dirichlet are Beta, use scipy.stats.beta.ppf(q, alpha_k, alpha_total - alpha_k).
-
-  Code stub:
-      import torch, pandas as pd
-      from scipy.stats import beta as beta_dist
-      df = pd.read_csv("../data/exercise-9/stroke_train_prepared.csv")
-      n_age = torch.tensor([(df["age"]==k).sum().item() for k in range(3)],
-                            dtype=torch.float)
-      alpha_post = 1.0 + n_age
-      mean = alpha_post / alpha_post.sum()
-      # 90% CI per marginal Beta(alpha_k, alpha_tot - alpha_k)
-      a_tot = alpha_post.sum().item()
-      ci = [(beta_dist.ppf(0.05, a, a_tot - a),
-             beta_dist.ppf(0.95, a, a_tot - a)) for a in alpha_post.tolist()]
-      # Tabulate.
--->
+<section id="task-2.-fit-the-hypertension-kernel" class="level2">
+<h2 class="anchored" data-anchor-id="task-2.-fit-the-hypertension-kernel">Task 2. Fit the hypertension kernel</h2>
+<p>We now focus on the hypertension box. The most general way to model this is to say that for each age category <span class="math inline">\(a \in \{0, 1, 2\}\)</span>, the kernel <span class="math inline">\(\theta_{\text{hyp}, a}\)</span> is a Bernoulli distribution on <span class="math inline">\(\{0, 1\}\)</span> with parameters <span class="math inline">\(p_a := P(\text{hyp} = 1 \mid \text{age} = a)\)</span>. Hence, to fit this kernel, we need to infer the three parameters <span class="math inline">\(p_0, p_1, p_2\)</span> from the data. We will do so in closed form using the Beta-Bernoulli conjugacy.</p>
+<p>For each fixed age <span class="math inline">\(a\)</span>, the kernel <span class="math inline">\(\theta_{\text{hyp}, a}\)</span> is a Bernoulli distribution. If we put a <span class="math inline">\(\mathrm{Beta}(\alpha_a, \beta_a)\)</span> prior on <span class="math inline">\(p_a\)</span>, then the posterior is a <span class="math inline">\(\mathrm{Beta}\)</span> distribution as well: <span class="math display">\[
+p_a \mid \text{data}
+  \;\sim\; \mathrm{Beta}\bigl(\alpha_a + n_{a, 1},\; \beta_a + n_{a, 0}\bigr),
+\]</span></p>
+<p>where <span class="math inline">\(n_{a, h}\)</span> is the number of training patients with age <span class="math inline">\(a\)</span> and hypertension status <span class="math inline">\(h\)</span>. The prior parameters <span class="math inline">\(\alpha_a\)</span> and <span class="math inline">\(\beta_a\)</span> act as pseudo-counts of hypertensives and non-hypertensives in age stratum <span class="math inline">\(a\)</span> that are simply augmented by the observed counts. For simplicity, we take <span class="math inline">\(\alpha_a = \beta_a = 1\)</span> for all <span class="math inline">\(a\)</span>, which corresponds to a uniform prior on <span class="math inline">\(p_a\)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="More than two outputs: Dirichlet–Categorical">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>More than two outputs: Dirichlet–Categorical
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>If <code>hyp</code> had <span class="math inline">\(K &gt; 2\)</span> possible values, the same idea would still work, with Beta replaced by Dirichlet and Bernoulli replaced by Categorical. Putting a <span class="math inline">\(\mathrm{Dirichlet}(\alpha_1,
+\ldots, \alpha_K)\)</span> prior on each row of the kernel and observing <span class="math inline">\(n_{a, k}\)</span> patients in age stratum <span class="math inline">\(a\)</span> with <span class="math inline">\(\text{hyp} = k\)</span>, the posterior on row <span class="math inline">\(a\)</span> is</p>
+<p><span class="math display">\[
+\theta_{\text{hyp}, a} \mid \text{data}
+  \;\sim\; \mathrm{Dirichlet}\bigl(\alpha_1 + n_{a, 1},\, \ldots,\,
+                                   \alpha_K + n_{a, K}\bigr).
+\]</span></p>
+<p>The prior parameters <span class="math inline">\(\alpha_k\)</span> act as pseudo-counts that are simply augmented by the observed counts. See <a href="../chapters/practical.html#exm-dirichlet-categorical" class="quarto-xref">Example&nbsp;<span>7.3</span></a> in <a href="../chapters/practical.html#exm-dirichlet-categorical"><code>practical.qmd</code></a> for the derivation and discussion. The Beta–Bernoulli case used in this task is the <span class="math inline">\(K = 2\)</span> specialization.</p>
+</div>
+</div>
+</div>
+<p><strong>Task 2a.</strong> For each <span class="math inline">\(a \in \{0, 1, 2\}\)</span>, count <span class="math inline">\(n_{a, 0}\)</span> and <span class="math inline">\(n_{a, 1}\)</span> in the training data, and derive the <span class="math inline">\(\mathrm{Beta}\)</span> posterior. Report its mean together with a 90% equal-tailed credible interval for <span class="math inline">\(p_a\)</span>. Present the results in a table indexed by age category.</p>
+<p><em>Hint</em>: Use <code>pd.crosstab</code> to get the counts <span class="math inline">\(n_{a, h}\)</span> in one line. Use <code>scipy.stats.beta</code> to compute the credible intervals from the Beta parameters.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 2a)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -622,137 +747,137 @@ TODO (Task 2a):
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<!-- TODO: Dirichlet posterior code + summary table. -->
-</div>
-</div>
-</div>
-<p><strong>Task 2b.</strong> Fit <code>hyp | age</code> <strong>row by row</strong> using independent Dirichlet–Categorical updates. Use a <span class="math inline">\(\mathrm{Dirichlet}(1, 1)\)</span> prior on each row. Report the posterior mean kernel and 90% credible intervals for <span class="math inline">\(P(\text{hyp}=1 \mid \text{age}=a)\)</span> for each <span class="math inline">\(a\)</span>.</p>
-<!--
-TODO (Task 2b):
-  For each age category a in {0, 1, 2}:
-    Prior: Dirichlet(1, 1) over (P(hyp=0|a), P(hyp=1|a)).
-            Equivalently Beta(1, 1) on p_a := P(hyp=1|a).
-    Update: alpha'_{a,h} = 1 + n_{a,h}.
-    Posterior on p_a is Beta(alpha'_{a,1}, alpha'_{a,0}).
-  Tabulate: rows = age categories, columns = posterior mean, 5%, 95%.
-
-  Mention in passing that this is exactly the Bayesian justification of
-  Ex. 3's Laplace smoothing (the posterior MEAN with Dirichlet(1,1) prior
-  equals Laplace-smoothed frequency).
-
-  Code stub:
-      n_ah = torch.zeros(3, 2)
-      for _, row in df.iterrows():
-          n_ah[int(row["age"]), int(row["hyp"])] += 1
-      alpha_post = 1.0 + n_ah               # shape (3, 2)
-      kernel_mean = alpha_post / alpha_post.sum(dim=-1, keepdim=True)
-      # CI for p_a = P(hyp=1|a):
-      from scipy.stats import beta as beta_dist
-      for a in range(3):
-          a1 = alpha_post[a, 1].item()
-          a0 = alpha_post[a, 0].item()
-          lo = beta_dist.ppf(0.05, a1, a0)
-          hi = beta_dist.ppf(0.95, a1, a0)
-          ...
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 2b)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 2b)
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<!-- TODO: per-row Dirichlet update for hyp | age, posterior table. -->
-</div>
-</div>
-</div>
-<p><strong>Task 2c (Optional — derivation).</strong> Starting from a <span class="math inline">\(\mathrm{Beta}(1, 1)\)</span> prior on <span class="math inline">\(p_a := P(\text{hyp} = 1 \mid \text{age} = a)\)</span> and the Bernoulli likelihood for the <span class="math inline">\(n_a\)</span> observations of <code>hyp</code> in age category <span class="math inline">\(a\)</span>, derive the posterior in closed form. Conclude with the Dirichlet–Categorical generalization for kernels with more than two output categories.</p>
-<!--
-TODO (Task 2c):
-  Mirror exm-dirichlet-categorical in practical.qmd, specialized to a single
-  row of hyp | age. Steps:
-    1. Write the likelihood for row a:
-         L(p_a | y_1,...,y_{n_a}) = p_a^{n_{a,1}} (1 - p_a)^{n_{a,0}}.
-    2. Write the prior Beta(alpha=1, beta=1).
-    3. Multiply (copy-composition): joint up to normalization is
-         p_a^{n_{a,1}} (1 - p_a)^{n_{a,0}}
-         (which is unnormalized Beta(1 + n_{a,1}, 1 + n_{a,0})).
-    4. Normalize: posterior = Beta(1 + n_{a,1}, 1 + n_{a,0}).
-    5. Mention that rows are independent given the data (the diagram for
-       hyp | age splits row-wise once age is observed for every datum),
-       so the joint posterior over the full kernel factors as a product of
-       row-wise Beta posteriors.
-    6. State the multivariate generalization (Dirichlet-Categorical) for
-       kernels with K > 2 output categories: alpha'_{a,k} = alpha_{a,k} +
-       n_{a,k}.
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 2c, optional)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 2c, optional)
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<!-- TODO: derive the Beta-Bernoulli / Dirichlet-Categorical update for a row
-of hyp | age, mirroring exm-dirichlet-categorical in practical.qmd. -->
+<p>We use <code>pd.crosstab</code> to get the counts of hypertensives and non-hypertensives in each age category:</p>
+<div id="196d4bfd" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> pd.crosstab(df[<span class="st">"age"</span>], df[<span class="st">"hyp"</span>])  <span class="co"># rows: age, cols: hyp value</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The mean of a <span class="math inline">\(\mathrm{Beta}(\alpha, \beta)\)</span> distribution is <span class="math inline">\(\alpha / (\alpha + \beta)\)</span>. This is exactly the relative frequency of the augmented counts. The 90% equal-tailed credible interval can be computed with <code>scipy.stats.beta.ppf</code> at the 5% and 95% quantiles:</p>
+<div id="d3fcbc68" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> beta <span class="im">as</span> beta_dist</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    n_a0, n_a1 <span class="op">=</span> <span class="bu">int</span>(counts.loc[a, <span class="dv">0</span>]), <span class="bu">int</span>(counts.loc[a, <span class="dv">1</span>])</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    a_post, b_post <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> n_a1, <span class="dv">1</span> <span class="op">+</span> n_a0  <span class="co"># Beta(1 + n_{a,1}, 1 + n_{a,0})</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    mean <span class="op">=</span> a_post <span class="op">/</span> (a_post <span class="op">+</span> b_post)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> beta_dist.ppf([<span class="fl">0.05</span>, <span class="fl">0.95</span>], a_post, b_post)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    rows.append(</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"age"</span>: a, <span class="st">"n_a0"</span>: n_a0, <span class="st">"n_a1"</span>: n_a1, <span class="st">"mean"</span>: mean, <span class="st">"5%"</span>: lo, <span class="st">"95%"</span>: hi}</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(rows).<span class="bu">round</span>(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th">n_a0</th>
+<th data-quarto-table-cell-role="th">n_a1</th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">5%</th>
+<th data-quarto-table-cell-role="th">95%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>0</td>
+<td>1444</td>
+<td>17</td>
+<td>0.012</td>
+<td>0.008</td>
+<td>0.017</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>1</td>
+<td>1605</td>
+<td>195</td>
+<td>0.109</td>
+<td>0.097</td>
+<td>0.121</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>2</td>
+<td>642</td>
+<td>185</td>
+<td>0.224</td>
+<td>0.201</td>
+<td>0.249</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>Task 2b (Optional — derivation).</strong> Derive the Beta–Bernoulli update formula. Let <span class="math display">\[
+\begin{aligned}
+p &amp;\sim \mathrm{Beta}(\alpha, \beta), \\
+h_i &amp;\sim \mathrm{Bernoulli}(p), \quad i = 1, \ldots, n.
+\end{aligned}
+\]</span></p>
+<p>Show that the posterior distribution of <span class="math inline">\(p\)</span> given <span class="math inline">\(h_{1:n}\)</span> is <span class="math display">\[
+p \mid h_{1:n} \;\sim\; \mathrm{Beta}\bigl(\alpha + \sum_i h_i,\; \beta + n - \sum_i h_i\bigr).
+\]</span></p>
+<p><em>Strategy.</em> Write down the joint density of <span class="math inline">\(p\)</span> together with the observed hypertension statuses <span class="math inline">\(h_1, \ldots, h_{n}\)</span>. Then look at it as a function of <span class="math inline">\(p\)</span> and identify the form. No integrals are required: the normalizing constant is whatever it must be for a density to integrate to one.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 2b, optional)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution (Task 2b, optional)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Let <span class="math inline">\(s := \sum_i h_i\)</span> be the number of successes. The joint density of <span class="math inline">\(p\)</span> and <span class="math inline">\(h_{1:n}\)</span>, obtained by copy-composing the prior and the Bernoulli likelihood, is</p>
+<p><span class="math display">\[
+\begin{aligned}
+\ell(p, h_{1:n})
+  &amp;= \ell_{\mathrm{Beta}}(p \mid \alpha, \beta) \,
+        \prod_{i=1}^{n} p^{h_i} (1 - p)^{1 - h_i} \\
+  &amp;= \frac{p^{\alpha - 1} (1 - p)^{\beta - 1}}{B(\alpha, \beta)} \,
+        p^{\sum_i h_i} (1 - p)^{\sum_i (1 - h_i)} \\
+  &amp;= \frac{p^{\alpha - 1} (1 - p)^{\beta - 1}}{B(\alpha, \beta)} \,
+        p^{s} (1 - p)^{n - s} \\
+  &amp;= \frac{p^{\alpha + s - 1} (1 - p)^{\beta + (n - s) - 1}}{B(\alpha, \beta)}.
+\end{aligned}
+\]</span></p>
+<p>As a function of <span class="math inline">\(p\)</span> for fixed data, this has the form of an (unnormalized) <span class="math inline">\(\mathrm{Beta}(\alpha + s,\; \beta + n - s)\)</span> density. Since the posterior must integrate to one and there is only one normalizing constant that achieves this, we conclude</p>
+<p><span class="math display">\[
+p \mid h_{1:n} \;\sim\; \mathrm{Beta}\bigl(\alpha + s,\; \beta + n - s\bigr).
+\]</span></p>
+<p>The prior parameters <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> act as pseudo-counts of successes and failures that are simply augmented by the observed counts.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="task-3.-fit-log_glucose-age-hyp-with-numpyro" class="level2">
-<h2 class="anchored" data-anchor-id="task-3.-fit-log_glucose-age-hyp-with-numpyro">Task 3. Fit <code>log_glucose | age, hyp</code> with NumPyro</h2>
-<!--
-TODO (Task 3 narrative):
-  This is the continuous-output box. Use NumPyro with NUTS.
-
-  Cell-mean parameterization (cleaner than additive for 3x2 = 6 cells):
-    mu_{a,h} ~ Normal(4.5, 1.0)          # centered near empirical log-mean ~4.6
-    sigma     ~ HalfNormal(1.0)
-    log_glu_i ~ Normal(mu_{a_i, h_i}, sigma)
-
-  Emphasize again: because the model split (Task 1b), we treat (a_i, h_i)
-  as KNOWN inputs and only put priors on parameters of THIS kernel.
--->
-<p><strong>Task 3a.</strong> Implement the cell-mean Normal model in NumPyro and run MCMC. Report the posterior summary (<code>mcmc.print_summary()</code>).</p>
-<!--
-TODO (Task 3a code stub):
-    import jax.numpy as jnp
-    from jax import random
-    import numpyro
-    import numpyro.distributions as dist
-    from numpyro.infer import MCMC, NUTS
-
-    age_idx = jnp.array(df["age"].to_numpy())
-    hyp_idx = jnp.array(df["hyp"].to_numpy())
-    log_glu = jnp.array(df["log_glucose"].to_numpy())
-
-    def glu_model(age_idx, hyp_idx, log_glu=None):
-        with numpyro.plate("age_plate", 3):
-            with numpyro.plate("hyp_plate", 2):
-                mu = numpyro.sample("mu", dist.Normal(4.5, 1.0))   # shape (2, 3)
-        sigma = numpyro.sample("sigma", dist.HalfNormal(1.0))
-        cell_mu = mu[hyp_idx, age_idx]
-        numpyro.sample("obs", dist.Normal(cell_mu, sigma), obs=log_glu)
-
-    mcmc = MCMC(NUTS(glu_model), num_warmup=500, num_samples=1000,
-                progress_bar=False)
-    mcmc.run(random.PRNGKey(0), age_idx, hyp_idx, log_glu)
-    mcmc.print_summary()
--->
+<section id="task-3.-fit-glucose-with-numpyro" class="level2">
+<h2 class="anchored" data-anchor-id="task-3.-fit-glucose-with-numpyro">Task 3. Fit glucose with NumPyro</h2>
+<p>To fit the log glucose kernel, we use NumPyro to run NUTS. Since there is only one discrete input variable (<code>age</code>), we are effectively fitting one distribution per age category. We model each distribution as a Gaussian with its own mean and noise:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mu_a &amp;\sim \mathrm{Normal}(4.5,\; 1.0), \quad a \in \{0, 1, 2\}, \\
+\sigma_a &amp;\sim \mathrm{HalfNormal}(1.0), \quad a \in \{0, 1, 2\}, \\
+g_i &amp;\sim \mathrm{Normal}(\mu_{a_i},\; \sigma_{a_i}), \quad i = 1, \ldots, N.
+\end{aligned}
+\]</span></p>
+<p>The prior mean <span class="math inline">\(4.5\)</span> is roughly the log of typical fasting glucose in mg/dL (<span class="math inline">\(e^{4.5} \approx 90\)</span>). The prior sd of <span class="math inline">\(1.0\)</span> is very weakly informative on this scale. The <code>HalfNormal(1.0)</code> prior on each <span class="math inline">\(\sigma_a\)</span> similarly allows a wide range of noise levels. Because Task 1c showed that this box decouples from the rest of the model once all variables are observed, we may treat <span class="math inline">\(a_i\)</span> as a known input and put priors only on <span class="math inline">\(\theta_{\text{glu}} = (\mu, \sigma)\)</span>.</p>
+<p><strong>Task 3a.</strong> Write this model as a NumPyro function <code>glu_model(age, log_glu=None)</code> and run NUTS on the training data. Use 1000 warmup draws, 2000 post-warmup draws, 4 chains. Convert the result to ArviZ with <code>az.from_numpyro</code>.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 3a)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -761,21 +886,40 @@ TODO (Task 3a code stub):
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<!-- TODO: NumPyro code + mcmc.print_summary() output. -->
+<div id="844da3ac" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax <span class="im">import</span> random</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpyro</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpyro.distributions <span class="im">as</span> dist</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numpyro.infer <span class="im">import</span> MCMC, NUTS</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> arviz <span class="im">as</span> az</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="bc8dc644" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>age     <span class="op">=</span> jnp.array(df[<span class="st">"age"</span>].to_numpy())</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>log_glu <span class="op">=</span> jnp.array(df[<span class="st">"log_glucose"</span>].to_numpy())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="b23f1728" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> glu_model(age, log_glu<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> numpyro.plate(<span class="st">"age_cells"</span>, <span class="dv">3</span>):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        mu <span class="op">=</span> numpyro.sample(<span class="st">"mu"</span>, dist.Normal(<span class="fl">4.5</span>, <span class="fl">1.0</span>))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        sigma <span class="op">=</span> numpyro.sample(<span class="st">"sigma"</span>, dist.HalfNormal(<span class="fl">1.0</span>))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    numpyro.sample(<span class="st">"obs"</span>, dist.Normal(mu[age], sigma[age]), obs<span class="op">=</span>log_glu)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="bf15f2f8" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>kernel <span class="op">=</span> NUTS(glu_model)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>mcmc <span class="op">=</span> MCMC(kernel, num_warmup<span class="op">=</span><span class="dv">1000</span>, num_samples<span class="op">=</span><span class="dv">2000</span>, num_chains<span class="op">=</span><span class="dv">4</span>, progress_bar<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>mcmc.run(random.PRNGKey(<span class="dv">0</span>), age, log_glu)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>dt_glu <span class="op">=</span> az.from_numpyro(mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
-<p><strong>Task 3b.</strong> Plot posterior means and 90% credible intervals for each cell <span class="math inline">\(\mu_{a,h}\)</span> alongside the <strong>empirical cell means</strong> as a sanity check.</p>
-<!--
-TODO (Task 3b):
-  Compute empirical mean per (age, hyp) cell from the training data.
-  Overlay forest plot of posterior CI per cell with empirical mean as a
-  black cross. Six points total.
--->
+</div>
+<p><strong>Task 3b.</strong> Look at <code>az.summary(dt_glu)</code>. Check the convergence diagnostics. Comment on the pattern in the posterior cell means. Compare the inferred values to the empirical means and standard deviations of log-glucose in each age category.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 3b)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -784,69 +928,182 @@ TODO (Task 3b):
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-8" class="callout-8-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<!-- TODO: forest plot of mu_{a,h} posteriors vs. empirical means. -->
-</div>
-</div>
-</div>
-<p><strong>Task 3c.</strong> Which factor — age or hypertension — has a larger effect on mean log-glucose? Quantify using the posterior of the differences.</p>
-<!--
-TODO (Task 3c):
-  Compute posterior of mu[1, 2] - mu[0, 0] (hyp effect at senior age) etc.
-  Empirically, both shift log_glu upward; expect hypertension to give a
-  larger jump than age does within a hyp stratum.
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 3c)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 3c)
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<!-- TODO: compute and discuss differences in posterior. -->
+<div id="0cad46d3" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>az.summary(dt_glu)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">mu[0]</th>
+<td>4.5068</td>
+<td>0.00708</td>
+<td>4.5</td>
+<td>4.5</td>
+<td>12195</td>
+<td>6402</td>
+<td>1.00</td>
+<td>6.4e-05</td>
+<td>4.6e-05</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">mu[1]</th>
+<td>4.6128</td>
+<td>0.0087</td>
+<td>4.6</td>
+<td>4.6</td>
+<td>10651</td>
+<td>6448</td>
+<td>1.00</td>
+<td>8.5e-05</td>
+<td>6e-05</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">mu[2]</th>
+<td>4.7077</td>
+<td>0.0154</td>
+<td>4.7</td>
+<td>4.7</td>
+<td>11014</td>
+<td>6473</td>
+<td>1.00</td>
+<td>0.00015</td>
+<td>0.0001</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">sigma[0]</th>
+<td>0.26916</td>
+<td>0.00491</td>
+<td>0.26</td>
+<td>0.28</td>
+<td>12306</td>
+<td>6600</td>
+<td>1.00</td>
+<td>4.4e-05</td>
+<td>3e-05</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">sigma[1]</th>
+<td>0.3679</td>
+<td>0.00612</td>
+<td>0.36</td>
+<td>0.38</td>
+<td>11699</td>
+<td>5846</td>
+<td>1.00</td>
+<td>5.7e-05</td>
+<td>3.9e-05</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">sigma[2]</th>
+<td>0.4469</td>
+<td>0.011</td>
+<td>0.43</td>
+<td>0.46</td>
+<td>11620</td>
+<td>6445</td>
+<td>1.00</td>
+<td>0.0001</td>
+<td>7.4e-05</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><strong>Diagnostics.</strong> All six <span class="math inline">\(\hat R\)</span> values are <span class="math inline">\(1.00\)</span>, and the bulk and tail effective sample sizes are several thousand for every parameter. We have a clean fit and can trust the posterior summaries.</p>
+<p><strong>Cell means.</strong> Posterior mean log-glucose increases monotonically with age: <span class="math inline">\(\mu_0 \approx 4.51 &lt; \mu_1 \approx 4.61 &lt; \mu_2 \approx 4.71\)</span>. The 89% credible intervals are narrow (width <span class="math inline">\(\lesssim 0.05\)</span>) and clearly non-overlapping across cells. Hence, age seems to shift average log-glucose upward.</p>
+<p><strong>Cell noise.</strong> The within-cell spread also grows with age: <span class="math inline">\(\sigma_0 \approx
+0.27\)</span>, <span class="math inline">\(\sigma_1 \approx 0.37\)</span>, <span class="math inline">\(\sigma_2 \approx 0.45\)</span>. This is a real feature of the data: older patients have not just higher but also more variable glucose.</p>
+<p><strong>Comparison with the empirical estimates.</strong> The empirical mean and standard deviation of <code>log_glucose</code> in each age category are:</p>
+<div id="d06676c6" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"age"</span>)[<span class="st">"log_glucose"</span>].agg([<span class="st">"mean"</span>, <span class="st">"std"</span>, <span class="st">"count"</span>]).<span class="bu">round</span>(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">std</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>4.507</td>
+<td>0.269</td>
+<td>1461</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>4.613</td>
+<td>0.368</td>
+<td>1800</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>4.708</td>
+<td>0.446</td>
+<td>827</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The posterior means of <span class="math inline">\(\mu_a\)</span> and <span class="math inline">\(\sigma_a\)</span> agree with the empirical mean and sd to three decimal places. With <span class="math inline">\(N \approx 4000\)</span> observations and very weak priors, NUTS is doing nothing more than recovering the maximum-likelihood estimates. Hence, running MCMC for this kernel is overkill. The advantage of the Bayesian formulation is that it lets us inject domain knowledge which the plain ML estimator cannot accommodate.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="task-4-optional.-fit-heart_disease-age-hyp-log_glucose" class="level2">
-<h2 class="anchored" data-anchor-id="task-4-optional.-fit-heart_disease-age-hyp-log_glucose">Task 4 (Optional). Fit <code>heart_disease | age, hyp, log_glucose</code></h2>
-<!--
-TODO (Task 4 narrative):
-  Optional logistic-regression box.
-
-  Model:
-    logit P(heart=1 | age, hyp, log_glu)
-      = b0
-      + b_age[age]                  # 3 levels; use Normal(0, 1) on all 3
-      + b_hyp * hyp
-      + b_glu * (log_glu - 4.5)     # center for numerical stability
-  Priors: Normal(0, 1) on all coefficients except b0 ~ Normal(-3, 2)
-  (heart disease prevalence is ~5%, so log-odds around -3).
-
-  Reminder: this box can also be fit INDEPENDENTLY of all the others because
-  conditioning on (age, hyp, log_glu, heart) splits the diagram.
--->
-<p><strong>Task 4a.</strong> Fit the logistic-regression model in NumPyro. Report posterior means and 90% credible intervals for all coefficients.</p>
-<!--
-TODO (Task 4a code stub):
-    def heart_model(age_idx, hyp_idx, log_glu, heart=None):
-        b0    = numpyro.sample("b0",    dist.Normal(-3.0, 2.0))
-        b_age = numpyro.sample("b_age", dist.Normal(jnp.zeros(3), 1.0).to_event(1))
-        b_hyp = numpyro.sample("b_hyp", dist.Normal(0.0, 1.0))
-        b_glu = numpyro.sample("b_glu", dist.Normal(0.0, 1.0))
-        logits = b0 + b_age[age_idx] + b_hyp * hyp_idx + b_glu * (log_glu - 4.5)
-        numpyro.sample("heart", dist.Bernoulli(logits=logits), obs=heart)
-
-  Note: b_age has a redundancy with b0; can either constrain b_age[0] = 0
-  (reference encoding) or just accept the soft non-identifiability since the
-  prior regularizes. Mention this in passing.
--->
+<section id="task-4-optional.-fitting-heart-disease-by-laplace-approximation" class="level2">
+<h2 class="anchored" data-anchor-id="task-4-optional.-fitting-heart-disease-by-laplace-approximation">Task 4 (Optional). Fitting heart disease by Laplace approximation</h2>
+<p>The heart disease box has binary output and mixed inputs. We model it using a logistic regression. Because Task 1c shows that this box decouples from the rest of the model under full observation, we again fit its parameters in isolation.</p>
+<p>Instead of using NumPyro, we will fit this box with a <strong>Laplace approximation</strong> (<a href="../chapters/practical.html#def-laplace-approximation" class="quarto-xref">Definition&nbsp;<span>7.2</span></a>), implemented in plain JAX. This will give us a chance to illustrate optimization and automatic differentiation tools.</p>
+<p><span class="math display">\[
+\begin{aligned}
+b_0 &amp;\sim \mathrm{Normal}(-3, 2), \\
+b_{\text{age}, 0} &amp;= 0 \quad \text{(reference)}, \\
+b_{\text{age}, 1},\, b_{\text{age}, 2} &amp;\sim \mathrm{Normal}(0, 1), \\
+b_{\text{hyp}},\, b_{\text{glu}} &amp;\sim \mathrm{Normal}(0, 1), \\
+p_i
+  &amp;= \mathrm{sigmoid}(b_0 + b_{\text{age}, a_i} + b_{\text{hyp}}\, h_i + b_{\text{glu}}\,(g_i - 4.5)), \\
+d_i &amp;\sim \mathrm{Bernoulli}(p_i), \quad i = 1, \ldots, N.
+\end{aligned}
+\]</span></p>
+<p>We use reference coding for the age effect, fixing <span class="math inline">\(b_{\text{age}, 0} = 0\)</span>, so that the remaining age coefficients are identifiable contrasts against the young category. The shift <span class="math inline">\(-4.5\)</span> centers log-glucose at the prior mean from Task 3, which improves numerical conditioning for the optimizer.</p>
+<p><strong>Task 4a.</strong> Write the unnormalized log-posterior as a JAX function <code>log_posterior(theta, age, hyp, log_glu, heart)</code> returning the scalar log-density of the posterior. Your function should go through the model and sum up all log-density contributions. You may drop any additive constants that do not depend on the parameters.</p>
+<p><em>Hint.</em> Use <code>jnp.concatenate</code> to prepend the reference parameter <span class="math inline">\(b_{\text{age}, 0} = 0\)</span> to <span class="math inline">\(b_{\text{age}, 1:2}\)</span>. The log-densities of the Normal prior and the Bernoulli likelihood are available as <code>jax.scipy.stats.norm.logpdf</code> and <code>jax.scipy.stats.bernoulli.logpmf</code>. The sigmoid function is <code>jax.nn.sigmoid</code>.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4a)">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -859,11 +1116,51 @@ TODO (Task 4a code stub):
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<!-- TODO: NumPyro logistic regression fit + posterior summary. -->
+<p>We follow the model line by line: each <span class="math inline">\(\mathrm{Normal}\)</span> prior contributes a <code>norm.logpdf</code> term, the sigmoid turns the linear predictor into the success probability <span class="math inline">\(p_i\)</span>, and the Bernoulli observation contributes a <code>bernoulli.logpmf</code> term.</p>
+<div id="4a573f49" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax.scipy.stats <span class="im">import</span> norm, bernoulli</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>age <span class="op">=</span> jnp.array(df[<span class="st">"age"</span>].to_numpy())</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>hyp <span class="op">=</span> jnp.array(df[<span class="st">"hyp"</span>].to_numpy())</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>log_glu <span class="op">=</span> jnp.array(df[<span class="st">"log_glucose"</span>].to_numpy())</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>heart <span class="op">=</span> jnp.array(df[<span class="st">"heart_disease"</span>].to_numpy())</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_posterior(theta, age, hyp, log_glu, heart):</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    b0, b_age_free, b_hyp, b_glu <span class="op">=</span> (theta[<span class="dv">0</span>], theta[<span class="dv">1</span>:<span class="dv">3</span>], theta[<span class="dv">3</span>], theta[<span class="dv">4</span>])</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reference-coded age effect: b_age[0] = 0.</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    b_age <span class="op">=</span> jnp.concatenate([jnp.zeros(<span class="dv">1</span>), b_age_free])</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Log-prior.</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">=</span> norm.logpdf(b0, <span class="op">-</span><span class="fl">3.0</span>, <span class="fl">2.0</span>)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">+=</span> jnp.<span class="bu">sum</span>(norm.logpdf(b_age_free, <span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">+=</span> norm.logpdf(b_hyp, <span class="fl">0.0</span>, <span class="fl">1.0</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">+=</span> norm.logpdf(b_glu, <span class="fl">0.0</span>, <span class="fl">1.0</span>)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Bernoulli log-likelihood with sigmoid link.</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> jax.nn.sigmoid(b0 <span class="op">+</span> b_age[age] <span class="op">+</span> b_hyp <span class="op">*</span> hyp <span class="op">+</span> b_glu <span class="op">*</span> (log_glu <span class="op">-</span> <span class="fl">4.5</span>))</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    ll <span class="op">=</span> jnp.<span class="bu">sum</span>(bernoulli.logpmf(heart, p))</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lp <span class="op">+</span> ll</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Sanity-check at <span class="math inline">\(\theta = \mathbf{0}\)</span>:</p>
+<div id="f072795d" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">float</span>(log_posterior(jnp.zeros(<span class="dv">5</span>), age, hyp, log_glu, heart))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>-2840.000244140625</code></pre>
 </div>
 </div>
 </div>
-<p><strong>Task 4b.</strong> Interpret the signs of the coefficients. Do age, hypertension, and elevated glucose all contribute positively to heart-disease log-odds?</p>
+</div>
+</div>
+<p><strong>Task 4b.</strong> Find the MAP estimator <span class="math inline">\(\hat\theta = \arg\max_\theta \log\ell(\theta \mid \text{data})\)</span> by minimizing the negative log-posterior with <code>jax.scipy.optimize.minimize</code>, method <code>"BFGS"</code>. Initialize at <span class="math inline">\(\theta_0 = \mathbf{0}\)</span>. Report <span class="math inline">\(\hat\theta\)</span> and the value <span class="math inline">\(\log\ell(\hat\theta)\)</span>.</p>
+<p>BFGS will call the objective and its (auto-diffed) gradient many times. Wrap the objective with fixed data arguments in <code>jax.jit</code> so it is compiled once and then runs as fast native code on every subsequent call:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>neg_log_posterior <span class="op">=</span> jax.jit(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> theta: <span class="op">-</span>log_posterior(theta, age, hyp, log_glu, heart)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4b)">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -876,286 +1173,306 @@ TODO (Task 4a code stub):
 </div>
 <div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<!-- TODO: discussion. Expect all coefficients positive. -->
+<p>We time the optimization so we can compare it later to the cost of full MCMC. <code>block_until_ready()</code> forces JAX to finish its asynchronous dispatch before we stop the clock.</p>
+<div id="1152bec1" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax.scipy.optimize <span class="im">import</span> minimize</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>neg_log_posterior <span class="op">=</span> jax.jit(</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> theta: <span class="op">-</span>log_posterior(theta, age, hyp, log_glu, heart)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> minimize(neg_log_posterior, jnp.zeros(<span class="dv">5</span>), method<span class="op">=</span><span class="st">"BFGS"</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="op">=</span> result.x.block_until_ready()</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>t_bfgs <span class="op">=</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>names <span class="op">=</span> [<span class="st">"b0"</span>, <span class="st">"b_age[1]"</span>, <span class="st">"b_age[2]"</span>, <span class="st">"b_hyp"</span>, <span class="st">"b_glu"</span>]</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, value <span class="kw">in</span> <span class="bu">zip</span>(names, theta_hat):</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">:&gt;10}</span><span class="ss"> = </span><span class="sc">{</span><span class="bu">float</span>(value)<span class="sc">: .4f}</span><span class="ss">"</span>)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"log posterior at MAP ="</span>, <span class="bu">float</span>(log_posterior(theta_hat, age, hyp, log_glu, heart))</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"BFGS wall time: </span><span class="sc">{</span>t_bfgs<span class="sc">:.2f}</span><span class="ss"> s"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        b0 = -5.3579
+  b_age[1] =  1.9953
+  b_age[2] =  3.5293
+     b_hyp =  0.1125
+     b_glu =  0.9010
+log posterior at MAP = -704.711181640625
+BFGS wall time: 1.15 s</code></pre>
+</div>
+</div>
+<p>The optimizer reports <code>result.success = False</code> (status 3, line-search abort) but the gradient norm at <span class="math inline">\(\hat\theta\)</span> is below <span class="math inline">\(10^{-2}\)</span>, so we have effectively found the MAP:</p>
+<div id="ade917ad" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">float</span>(jnp.linalg.norm(jax.grad(neg_log_posterior)(theta_hat)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>0.003995549399405718</code></pre>
 </div>
 </div>
 </div>
-</section>
-<section id="task-5.-missing-data-completely-at-random-mcar" class="level2">
-<h2 class="anchored" data-anchor-id="task-5.-missing-data-completely-at-random-mcar">Task 5. Missing data, completely at random (MCAR)</h2>
-<!--
-TODO (Task 5 narrative):
-  Construct a sub-dataset where ~30% of `log_glucose` values are dropped
-  uniformly at random (independent of any variable). Use a fixed seed.
-
-  KEY POINT: if we want to fit only `log_glu | age, hyp` (Task 3), MCAR rows
-  with missing log_glu contribute no information and can simply be dropped —
-  the model still factors. The interesting case is when we want to predict
-  HEART_DISEASE from log_glu: a row with missing log_glu still contributes
-  via the marginal of log_glu AND via heart | ..., log_glu. The model no
-  longer factors cleanly and we MUST IMPUTE log_glu for the missing rows.
-
-  So Task 5 *requires* the optional Task 4. Students who skipped Task 4 can
-  still read through it; or you can use a simplified version where the
-  "downstream consumer" is just hyp -> log_glu and we fit it jointly. The
-  cleanest pedagogical presentation uses the full 4-box model.
--->
-<p><strong>Task 5a.</strong> Randomly drop ~30% of <code>log_glucose</code> values from the training data (use <code>jax.random.PRNGKey(42)</code> for reproducibility). Confirm the fraction missing.</p>
-<!--
-TODO (Task 5a code stub):
-    import jax
-    p_missing = 0.30
-    rng = jax.random.PRNGKey(42)
-    N = len(df)
-    missing_mask = jax.random.uniform(rng, (N,)) < p_missing
-    log_glu_true = jnp.array(df["log_glucose"].to_numpy())
-    log_glu_obs  = jnp.where(missing_mask, jnp.nan, log_glu_true)
-    print(f"missing: {int(missing_mask.sum())} / {N}")
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 5a)">
+</div>
+</div>
+<p><strong>Task 4c.</strong> Now turn the MAP into a full Gaussian posterior approximation <span class="math display">\[
+p(\theta \mid \text{data}) \;\approx\; \mathcal{N}(\hat\theta,\; \Sigma),
+\qquad \Sigma = H^{-1},\quad H = -\nabla^2 \log\ell(\hat\theta).
+\]</span> Compute the Hessian with <code>jax.hessian</code> evaluated at <span class="math inline">\(\hat\theta\)</span>, negate it, and invert to obtain <span class="math inline">\(\Sigma\)</span>. Then report:</p>
+<ol type="1">
+<li>The posterior mean <span class="math inline">\(\hat\theta\)</span> and marginal sd <span class="math inline">\(\sqrt{\mathrm{diag}(\Sigma)}\)</span> for each of the five coefficients.</li>
+<li>An 89% credible interval <span class="math inline">\(\hat\theta_k \pm 1.598\,\sqrt{\Sigma_{kk}}\)</span> for each coefficient.</li>
+</ol>
+<p>JAX provides exact derivatives of any scalar Python function <code>f</code> it can trace , via the function transformations <code>jax.grad</code> and <code>jax.hessian</code>: <code>jax.grad(f)</code> returns a <em>new function</em> that computes <span class="math inline">\(\nabla f\)</span>, and <code>jax.hessian(f)</code> returns one that computes <span class="math inline">\(\nabla^2 f\)</span>. Hence to compute <span class="math inline">\(H\)</span> at <span class="math inline">\(\hat\theta\)</span>, we simply compose the transformation with the function:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>H <span class="op">=</span> jax.hessian(neg_log_posterior)(theta_hat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We can invert <span class="math inline">\(H\)</span> with <code>jnp.linalg.inv</code> to get <span class="math inline">\(\Sigma\)</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4c)">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 5a)
+<span class="screen-reader-only">Tip</span>Solution (Task 4c)
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<!-- TODO: code + count of missing values. -->
+<p>The Hessian of the <em>negative</em> log-posterior at <span class="math inline">\(\hat\theta\)</span> already is <span class="math inline">\(H = -\nabla^2 \log\ell(\hat\theta)\)</span>, so we can invert it directly. We again time the computation:</p>
+<div id="ff5e2243" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>H <span class="op">=</span> jax.hessian(neg_log_posterior)(theta_hat)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> jnp.linalg.inv(H)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>cov.block_until_ready()</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>t_hess <span class="op">=</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>sds <span class="op">=</span> jnp.sqrt(jnp.diag(cov))</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>z89 <span class="op">=</span> <span class="fl">1.5982</span>  <span class="co"># 0.945 quantile of N(0, 1)</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>names <span class="op">=</span> [<span class="st">"b0"</span>, <span class="st">"b_age[1]"</span>, <span class="st">"b_age[2]"</span>, <span class="st">"b_hyp"</span>, <span class="st">"b_glu"</span>]</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>laplace_table <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"param"</span>: names,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mean"</span>: [<span class="bu">float</span>(theta_hat[k]) <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>)],</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sd"</span>:   [<span class="bu">float</span>(sds[k])       <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>)],</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lb89"</span>: [<span class="bu">float</span>(theta_hat[k] <span class="op">-</span> z89 <span class="op">*</span> sds[k]) <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>)],</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ub89"</span>: [<span class="bu">float</span>(theta_hat[k] <span class="op">+</span> z89 <span class="op">*</span> sds[k]) <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>)],</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>).<span class="bu">round</span>(<span class="dv">3</span>)</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Hessian + inversion wall time: </span><span class="sc">{</span>t_hess<span class="sc">:.2f}</span><span class="ss"> s"</span>)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>laplace_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Hessian + inversion wall time: 0.65 s</code></pre>
 </div>
-</div>
-</div>
-<p><strong>Task 5b.</strong> Build a <strong>joint</strong> NumPyro model containing both the <code>log_glu | age, hyp</code> box and the <code>heart | age, hyp, log_glu</code> box. For rows where <code>log_glu</code> is missing, introduce a latent imputed value <code>x_imp</code> via <code>.mask(False)</code> (see <code>practical.qmd</code>, <code>exm-missing-regression</code>). Fit by MCMC.</p>
-<!--
-TODO (Task 5b code stub):
-    def joint_model(age_idx, hyp_idx, log_glu_obs, missing_mask, heart):
-        # log_glu | age, hyp (Task 3 priors)
-        with numpyro.plate("age_plate", 3):
-            with numpyro.plate("hyp_plate", 2):
-                mu = numpyro.sample("mu", dist.Normal(4.5, 1.0))   # (2, 3)
-        sigma = numpyro.sample("sigma", dist.HalfNormal(1.0))
-        cell_mu = mu[hyp_idx, age_idx]
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div>
 
-        # Impute missing log_glu using mask(False) trick.
-        x_imp = numpyro.sample(
-            "x_imp",
-            dist.Normal(cell_mu, sigma).mask(False),
-        )
-        x = jnp.where(missing_mask, x_imp, log_glu_obs)
-        numpyro.sample("log_glu_obs", dist.Normal(cell_mu, sigma), obs=x)
 
-        # heart | age, hyp, log_glu (Task 4 priors)
-        b0    = numpyro.sample("b0",    dist.Normal(-3.0, 2.0))
-        b_age = numpyro.sample("b_age", dist.Normal(jnp.zeros(3), 1.0).to_event(1))
-        b_hyp = numpyro.sample("b_hyp", dist.Normal(0.0, 1.0))
-        b_glu = numpyro.sample("b_glu", dist.Normal(0.0, 1.0))
-        logits = b0 + b_age[age_idx] + b_hyp * hyp_idx + b_glu * (x - 4.5)
-        numpyro.sample("heart", dist.Bernoulli(logits=logits), obs=heart)
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 5b)">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">param</th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">lb89</th>
+<th data-quarto-table-cell-role="th">ub89</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>b0</td>
+<td>-5.358</td>
+<td>0.328</td>
+<td>-5.883</td>
+<td>-4.833</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>b_age[1]</td>
+<td>1.995</td>
+<td>0.346</td>
+<td>1.443</td>
+<td>2.548</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>b_age[2]</td>
+<td>3.529</td>
+<td>0.341</td>
+<td>2.984</td>
+<td>4.074</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>b_hyp</td>
+<td>0.112</td>
+<td>0.182</td>
+<td>-0.179</td>
+<td>0.404</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>b_glu</td>
+<td>0.901</td>
+<td>0.165</td>
+<td>0.637</td>
+<td>1.165</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><strong>Interpretation.</strong> All three age and glucose coefficients are positive and their 89% intervals exclude zero, confirming the clinically expected direction: older patients and patients with higher log-glucose have substantially higher heart-disease log-odds. The two age contrasts are large and ordered, <span class="math inline">\(\hat b_{\text{age},1} \approx 2.0 &lt;
+\hat b_{\text{age},2} \approx 3.5\)</span>, so the senior category carries the strongest risk.</p>
+<p>The hypertension coefficient <span class="math inline">\(\hat b_{\text{hyp}} \approx 0.11\)</span> is positive but its 89% interval <span class="math inline">\([-0.18,\, 0.40]\)</span> contains zero. Once age and glucose are in the model, hypertension carries little <em>additional</em> information about heart disease — most likely because hypertension is already strongly correlated with both age and elevated glucose, so its marginal contribution is small.</p>
+</div>
+</div>
+</div>
+<p><strong>Task 4d.</strong> The Laplace approximation replaces the posterior by the Gaussian that best matches its curvature at the mode. Whether that is a good approximation can only be checked against a more expensive method that samples from the true posterior. Re-fit the same logistic regression in NumPyro with NUTS (1000 warmup, 2000 post-warmup, 4 chains) and compare the posterior means and 89% intervals to the Laplace table from Task 4c. Also time the NUTS run and compare it to the Laplace cost from Tasks 4b–c.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 4d)">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 5b)
+<span class="screen-reader-only">Tip</span>Solution (Task 4d)
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<!-- TODO: joint model code + run MCMC. -->
+<p>The NumPyro version of the model mirrors the JAX log-posterior. We use a <code>numpyro.plate</code> for the two free age contrasts and pass the linear predictor to <code>dist.Bernoulli(logits=...)</code>, which is the direct analogue of <code>sigmoid + bernoulli.logpmf</code>.</p>
+<div id="2edf6d4b" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> heart_model(age, hyp, log_glu, heart<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Priors</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    b0 <span class="op">=</span> numpyro.sample(<span class="st">"b0"</span>, dist.Normal(<span class="op">-</span><span class="fl">3.0</span>, <span class="fl">2.0</span>))</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> numpyro.plate(<span class="st">"age_free"</span>, <span class="dv">2</span>):</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        b_age_free <span class="op">=</span> numpyro.sample(<span class="st">"b_age_free"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    b_age <span class="op">=</span> jnp.concatenate([jnp.zeros(<span class="dv">1</span>), b_age_free])</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    b_hyp <span class="op">=</span> numpyro.sample(<span class="st">"b_hyp"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    b_glu <span class="op">=</span> numpyro.sample(<span class="st">"b_glu"</span>, dist.Normal(<span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Logistic regression likelihood with sigmoid link.</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    logits <span class="op">=</span> b0 <span class="op">+</span> b_age[age] <span class="op">+</span> b_hyp <span class="op">*</span> hyp <span class="op">+</span> b_glu <span class="op">*</span> (log_glu <span class="op">-</span> <span class="fl">4.5</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    numpyro.sample(<span class="st">"obs"</span>, dist.Bernoulli(logits<span class="op">=</span>logits), obs<span class="op">=</span>heart)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="04fd3b49" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>kernel <span class="op">=</span> NUTS(heart_model)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>mcmc <span class="op">=</span> MCMC(kernel, num_warmup<span class="op">=</span><span class="dv">1000</span>, num_samples<span class="op">=</span><span class="dv">2000</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>            num_chains<span class="op">=</span><span class="dv">4</span>, progress_bar<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>mcmc.run(random.PRNGKey(<span class="dv">0</span>), age, hyp, log_glu, heart)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>t_nuts <span class="op">=</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>dt_heart <span class="op">=</span> az.from_numpyro(mcmc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="c2b96a08" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NUTS wall time: </span><span class="sc">{</span>t_nuts<span class="sc">:.2f}</span><span class="ss"> s"</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>az.summary(dt_heart).<span class="bu">round</span>(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NUTS wall time: 17.01 s</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">b0</th>
+<td>-5.41</td>
+<td>0.331</td>
+<td>-6</td>
+<td>-4.9</td>
+<td>2838</td>
+<td>3149</td>
+<td>1.00</td>
+<td>0.0063</td>
+<td>0.0044</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">b_age_free[0]</th>
+<td>2.03</td>
+<td>0.347</td>
+<td>1.5</td>
+<td>2.6</td>
+<td>2923</td>
+<td>3255</td>
+<td>1.00</td>
+<td>0.0065</td>
+<td>0.0045</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">b_age_free[1]</th>
+<td>3.57</td>
+<td>0.345</td>
+<td>3</td>
+<td>4.1</td>
+<td>2871</td>
+<td>3257</td>
+<td>1.00</td>
+<td>0.0065</td>
+<td>0.0045</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">b_glu</th>
+<td>0.903</td>
+<td>0.165</td>
+<td>0.64</td>
+<td>1.2</td>
+<td>4430</td>
+<td>4152</td>
+<td>1.00</td>
+<td>0.0025</td>
+<td>0.0018</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">b_hyp</th>
+<td>0.112</td>
+<td>0.18</td>
+<td>-0.18</td>
+<td>0.4</td>
+<td>4916</td>
+<td>4435</td>
+<td>1.00</td>
+<td>0.0026</td>
+<td>0.0018</td>
+</tr>
+</tbody>
+</table>
+
 </div>
 </div>
 </div>
-<p><strong>Task 5c.</strong> Compare the posterior coefficients of the heart model (Task 4) with those obtained from the joint MCAR fit. Are they consistent?</p>
-<!--
-TODO (Task 5c):
-  Expect posterior means to roughly agree. CIs may be slightly wider in the
-  MCAR fit because we lost ~30% of the direct log_glu information.
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 5c)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 5c)
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-14" class="callout-14-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<!-- TODO: comparison table / forest plot of coefficients. -->
-</div>
-</div>
-</div>
-<p><strong>Task 5d.</strong> Make a forest plot of the posterior 90% credible intervals for the imputed <code>log_glu</code> values at the missing positions, with the true (hidden) values overlaid. Mirrors <code>fig-imputation-forest</code> in <code>practical.qmd</code>.</p>
-<!--
-TODO (Task 5d):
-  Code pattern from exm-missing-regression: extract posterior['x_imp'] at
-  the missing indices, plot mean + 5/95 percentile bars, overlay true
-  hidden value as a black cross, sort rows by true value.
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 5d)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 5d)
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-15" class="callout-15-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<!-- TODO: forest plot of imputed log_glu vs. truth. -->
+<p><strong>Agreement.</strong> Posterior means and standard deviations from NUTS match the Laplace table closely on every coefficient and the <span class="math inline">\(\hat R\)</span> values are all <span class="math inline">\(1.00\)</span> with effective sample sizes in the thousands. Laplace is essentially exact here because the posterior is unimodal and, with <span class="math inline">\(N \approx 4000\)</span> binary observations, very nearly Gaussian.</p>
+<p><strong>Cost comparison.</strong> Laplace ran in <span class="math inline">\(\approx 1.5\)</span> s on this machine, versus <span class="math inline">\(\approx 15\)</span> s for the four NUTS chains. The gap grows with the parameter dimension: BFGS and one Hessian solve cost <span class="math inline">\(O(d^3)\)</span> per evaluation of the model, while NUTS costs <span class="math inline">\(O(d)\)</span> per leapfrog step but needs thousands of such steps per chain.</p>
+<p>For unimodal log-concave models like this one, Laplace cheap and accurate. To get an exact approximation, we can use the Laplace estimate as a proposal distribution for importance sampling.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="task-6.-informative-missingness-threshold-censoring" class="level2">
-<h2 class="anchored" data-anchor-id="task-6.-informative-missingness-threshold-censoring">Task 6. Informative missingness: threshold censoring</h2>
-<!--
-TODO (Task 6 narrative):
-  Story: the lab only reports a glucose measurement when log_glucose <= c.
-  Values with log_glucose > c are reported as NaN. Missingness is
-  INFORMATIVE: a missing value tells us the truth was above c.
-
-  Choose c = 5.0 (i.e. glucose > ~148 mg/dL), which censors roughly the
-  upper 20% of log_glucose. (Verify after running prepare_data.py.)
-
-  Mirrors exm-missing-gaussian in practical.qmd, specialized to a cell-mean
-  Normal model.
--->
-<p><strong>Task 6a.</strong> Construct the censored dataset by replacing <code>log_glucose</code> with <code>NaN</code> for all rows where <code>log_glucose &gt; c</code> (use <span class="math inline">\(c = 5.0\)</span>). Report the fraction censored overall and <strong>per cell</strong> <span class="math inline">\((a, h)\)</span>.</p>
-<!--
-TODO (Task 6a code stub):
-    c = 5.0
-    censored_mask = log_glu_true > c
-    log_glu_cens  = jnp.where(censored_mask, jnp.nan, log_glu_true)
-    print(f"censored: {int(censored_mask.sum())} / {N}"
-          f" ({float(censored_mask.mean()):.1%})")
-
-  Also report a 3x2 table of censoring rates by (age, hyp). Expect higher
-  censoring in (senior, hypertensive) cell.
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 6a)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 6a)
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-16" class="callout-16-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<!-- TODO: build censored dataset, per-cell censoring rates. -->
-</div>
-</div>
-</div>
-<p><strong>Task 6b (Naive).</strong> Refit the Task 3 cell-mean Normal model <strong>dropping</strong> the censored rows. Show that the posterior cell means <span class="math inline">\(\mu_{a,h}\)</span> are biased <strong>downward</strong>, especially in heavily-censored cells (senior, hypertensive).</p>
-<!--
-TODO (Task 6b):
-  Same model as Task 3a, but pass only the non-censored rows. Compare
-  posterior of mu[1, 2] (senior hypertensive) with the Task 3 ground truth
-  fit on the full data.
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 6b)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 6b)
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-17" class="callout-17-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<!-- TODO: naive fit + bias demonstration. -->
-</div>
-</div>
-</div>
-<p><strong>Task 6c (Censored likelihood).</strong> Add a <code>numpyro.factor</code> term for each censored row equal to <span class="math inline">\(\log P(\text{log\_glu} &gt; c \mid \mu_{a,h}, \sigma)
-= \log(1 - \Phi((c - \mu_{a,h})/\sigma))\)</span>. Refit and show the posterior recovers unbiased estimates. Plot the posterior of <span class="math inline">\(\mu_{2,1}\)</span> for the naive vs.&nbsp;censored vs.&nbsp;full-data models on one axis.</p>
-<!--
-TODO (Task 6c code stub):
-    import jax.scipy.stats as jstats
-
-    def censored_model(age_obs, hyp_obs, log_glu_obs,
-                       age_miss, hyp_miss, c):
-        with numpyro.plate("age_plate", 3):
-            with numpyro.plate("hyp_plate", 2):
-                mu = numpyro.sample("mu", dist.Normal(4.5, 1.0))
-        sigma = numpyro.sample("sigma", dist.HalfNormal(1.0))
-
-        # Observed rows: standard Gaussian likelihood.
-        cell_mu_obs = mu[hyp_obs, age_obs]
-        numpyro.sample("obs", dist.Normal(cell_mu_obs, sigma), obs=log_glu_obs)
-
-        # Censored rows: add log survival function.
-        cell_mu_miss = mu[hyp_miss, age_miss]
-        log_surv = jstats.norm.logsf(c, loc=cell_mu_miss, scale=sigma)
-        numpyro.factor("censored", log_surv.sum())
-
-  Plot: three posterior densities for mu[1, 2] (senior hypertensive) ---
-  naive (drop), censored likelihood, and Task 3 ground truth. Mirrors
-  fig-missing-data-posteriors in practical.qmd.
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 6c)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 6c)
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-18" class="callout-18-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<!-- TODO: censored-likelihood model + side-by-side posterior plot. -->
-</div>
-</div>
-</div>
-<p><strong>Task 6d.</strong> Contrast Tasks 5 (MCAR) and 6 (threshold censoring): under which mechanism does naive deletion work, and under which does it fail? Explain in terms of the string diagram.</p>
-<!--
-TODO (Task 6d):
-  Discussion points:
-    - MCAR: missing rows give zero information; dropping is wasteful but
-      unbiased. In the string diagram, the missingness mechanism is a kernel
-      that is INDEPENDENT of all latents, so it factors out and conditioning
-      on the observed data alone is correct.
-    - Threshold censoring: the missingness indicator is a DETERMINISTIC
-      function of the value (m_i = [log_glu_i > c]). Seeing m_i = 1
-      tells us log_glu_i > c. Dropping these rows effectively conditions
-      on log_glu <= c without telling the model, biasing mu downward.
-    - The fix is to compose the model with the threshold kernel (a
-      deterministic kernel R -> {0,1}) and condition on (m_i, log_glu_obs_i)
-      jointly. This is what the numpyro.factor term encodes.
--->
-<div class="callout callout-style-default callout-tip callout-titled" title="Solution (Task 6d)">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Solution (Task 6d)
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-19" class="callout-19-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<!-- TODO: short discussion contrasting MCAR vs. threshold censoring. -->
-</div>
-</div>
-</div>
+<section id="task-5-missing-data" class="level2">
+<h2 class="anchored" data-anchor-id="task-5-missing-data">Task 5: Missing data</h2>
+<p>When any of the rows have missing entries, the model no longer factors. In this case we need to either discard the offending rows, or fit all boxes together.</p>
+<p><strong>Task 5a</strong>: Write a NumPyro model for the full model that includes all the parameter priors and run MCMC.</p>
 
 
 

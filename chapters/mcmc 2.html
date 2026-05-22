@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; Mechanics of MCMC – Drawing Inferences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/practical.html" rel="next">
+<link href="../chapters/bayesian-data-analysis.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b4eb411248a4f8aa32895289c8fdd901.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+window.MathJax = {
+  chtml: {
+    scale: 0.9
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/mcmc.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../images/drawing-inferences-logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../"></a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/discrete-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Discrete graphical models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/conditioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Conditioning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hybrid-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hybrid models</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/mcmc.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/practical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/1-classic-puzzles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 1: Classic puzzles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/2-credit-card.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 2: Credit card fraud detection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/3-stroke-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 3: Stroke prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/4-hidden-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 4: Hidden Markov models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/5-physics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 5: Inverse Physics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/6-swiss-health.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 6: Swiss health</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/7-robust-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 7: Robust linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/8-multilevel-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercise 8: Multilevel regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/parametric-kernels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametric kernels reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/pytorch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PyTorch Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix/WeightedSampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WeightedSampling.torch</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#random-dynamics-and-stationary-distributions" id="toc-random-dynamics-and-stationary-distributions" class="nav-link active" data-scroll-target="#random-dynamics-and-stationary-distributions"><span class="header-section-number">6.1</span> Random dynamics and stationary distributions</a></li>
+  <li><a href="#ergodicity-time-averages-equal-spatial-averages" id="toc-ergodicity-time-averages-equal-spatial-averages" class="nav-link" data-scroll-target="#ergodicity-time-averages-equal-spatial-averages"><span class="header-section-number">6.2</span> Ergodicity: time averages equal spatial averages</a></li>
+  <li><a href="#when-does-ergodicity-hold" id="toc-when-does-ergodicity-hold" class="nav-link" data-scroll-target="#when-does-ergodicity-hold"><span class="header-section-number">6.3</span> When does ergodicity hold?</a></li>
+  <li><a href="#metropolis-hastings" id="toc-metropolis-hastings" class="nav-link" data-scroll-target="#metropolis-hastings"><span class="header-section-number">6.4</span> Metropolis-Hastings</a>
+  <ul class="collapse">
+  <li><a href="#detailed-balance" id="toc-detailed-balance" class="nav-link" data-scroll-target="#detailed-balance"><span class="header-section-number">6.4.1</span> Detailed balance</a></li>
+  <li><a href="#the-mh-kernel" id="toc-the-mh-kernel" class="nav-link" data-scroll-target="#the-mh-kernel"><span class="header-section-number">6.4.2</span> The MH kernel</a></li>
+  <li><a href="#the-mh-algorithm" id="toc-the-mh-algorithm" class="nav-link" data-scroll-target="#the-mh-algorithm"><span class="header-section-number">6.4.3</span> The MH algorithm</a></li>
+  <li><a href="#using-mh-in-bayesian-inference" id="toc-using-mh-in-bayesian-inference" class="nav-link" data-scroll-target="#using-mh-in-bayesian-inference"><span class="header-section-number">6.4.4</span> Using MH in Bayesian inference</a></li>
+  <li><a href="#optimality-of-the-acceptance-ratio" id="toc-optimality-of-the-acceptance-ratio" class="nav-link" data-scroll-target="#optimality-of-the-acceptance-ratio"><span class="header-section-number">6.4.5</span> Optimality of the acceptance ratio</a></li>
+  <li><a href="#choosing-the-proposal" id="toc-choosing-the-proposal" class="nav-link" data-scroll-target="#choosing-the-proposal"><span class="header-section-number">6.4.6</span> Choosing the proposal</a></li>
+  <li><a href="#harris-recurrence-and-aperiodicity-of-mh" id="toc-harris-recurrence-and-aperiodicity-of-mh" class="nav-link" data-scroll-target="#harris-recurrence-and-aperiodicity-of-mh"><span class="header-section-number">6.4.7</span> Harris recurrence and aperiodicity of MH</a></li>
+  <li><a href="#composing-mh-steps" id="toc-composing-mh-steps" class="nav-link" data-scroll-target="#composing-mh-steps"><span class="header-section-number">6.4.8</span> Composing MH steps</a></li>
+  <li><a href="#the-gibbs-sampler" id="toc-the-gibbs-sampler" class="nav-link" data-scroll-target="#the-gibbs-sampler"><span class="header-section-number">6.4.9</span> The Gibbs sampler</a></li>
+  </ul></li>
+  <li><a href="#coding-mh-samplers" id="toc-coding-mh-samplers" class="nav-link" data-scroll-target="#coding-mh-samplers"><span class="header-section-number">6.5</span> Coding MH samplers</a>
+  <ul class="collapse">
+  <li><a href="#the-generative-model-in-jax" id="toc-the-generative-model-in-jax" class="nav-link" data-scroll-target="#the-generative-model-in-jax"><span class="header-section-number">6.5.1</span> The generative model in JAX</a></li>
+  <li><a href="#one-metropolis-hastings-step" id="toc-one-metropolis-hastings-step" class="nav-link" data-scroll-target="#one-metropolis-hastings-step"><span class="header-section-number">6.5.2</span> One Metropolis-Hastings step</a></li>
+  <li><a href="#running-the-chain" id="toc-running-the-chain" class="nav-link" data-scroll-target="#running-the-chain"><span class="header-section-number">6.5.3</span> Running the chain</a></li>
+  <li><a href="#comparing-proposals" id="toc-comparing-proposals" class="nav-link" data-scroll-target="#comparing-proposals"><span class="header-section-number">6.5.4</span> Comparing proposals</a></li>
+  <li><a href="#independent-proposal" id="toc-independent-proposal" class="nav-link" data-scroll-target="#independent-proposal"><span class="header-section-number">6.5.5</span> Independent proposal</a></li>
+  <li><a href="#random-walk-proposal" id="toc-random-walk-proposal" class="nav-link" data-scroll-target="#random-walk-proposal"><span class="header-section-number">6.5.6</span> Random-walk proposal</a></li>
+  <li><a href="#mala-proposal" id="toc-mala-proposal" class="nav-link" data-scroll-target="#mala-proposal"><span class="header-section-number">6.5.7</span> MALA proposal</a></li>
+  <li><a href="#hmc-proposal" id="toc-hmc-proposal" class="nav-link" data-scroll-target="#hmc-proposal"><span class="header-section-number">6.5.8</span> HMC proposal</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">6.5.9</span> Summary</a></li>
+  </ul></li>
+  <li><a href="#diagnosing-convergence" id="toc-diagnosing-convergence" class="nav-link" data-scroll-target="#diagnosing-convergence"><span class="header-section-number">6.6</span> Diagnosing convergence</a></li>
+  <li><a href="#bibliographic-notes" id="toc-bibliographic-notes" class="nav-link" data-scroll-target="#bibliographic-notes"><span class="header-section-number">6.7</span> Bibliographic notes</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mechanics of MCMC</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="hidden">
+<p><span class="math display">\[
+\def\then{\mathbin{;}}
+\def\kernel{\rightsquigarrow}
+\def\ivmark#1{[\![#1]\!]}
+\]</span></p>
+</div>
+<p>Markov chain Monte Carlo (MCMC) is a family of algorithms that lets us sample from distributions we cannot sample from directly. The trick is to design a Markov chain whose long-run behavior matches our target distribution, then run the chain and treat its trajectory as an approximate sample. To understand why this works, we need a picture of how Markov chains settle into stationary distributions, what it means for a single trajectory to be representative of that distribution, and how to engineer a chain so that its stationary distribution is the one we want.</p>
+<section id="random-dynamics-and-stationary-distributions" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="random-dynamics-and-stationary-distributions"><span class="header-section-number">6.1</span> Random dynamics and stationary distributions</h2>
+<p>Imagine a swarm of insects moving around a light source at night. Each insect moves around independently according a simple rule.</p>
+<div id="cell-fig-particle-cloud" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div id="fig-particle-cloud" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-particle-cloud-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="mcmc_files/figure-html/fig-particle-cloud-output-1.png" width="678" height="196" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-particle-cloud-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: Ten insects following overdamped Langevin dynamics toward the light source at the origin.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We model this with a <strong>transition kernel</strong> <span class="math inline">\(k : X \kernel X\)</span> on a state space <span class="math inline">\(X\)</span>. For each current state <span class="math inline">\(x\)</span>, the kernel specifies the probability <span class="math inline">\(k(x' \mid x)\)</span> of moving to state <span class="math inline">\(x'\)</span> in one step. If the population at time <span class="math inline">\(t\)</span> is described by a distribution <span class="math inline">\(p_t\)</span>, then the kernel acts on it by sequential composition to produce the distribution at the next time step: <span class="math display">\[
+p_{t+1} = p_t \then k.
+\]</span></p>
+<p>We have already seen that this kind of model is called a <strong>Markov chain</strong>. In string diagrams, we can depict it as follows:</p>
+<div id="Markov chain" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="mcmc_files/mediabag/048fc23f5cf10c3991a4d5ded30ea510f026d421.svg" style="height:3em" class="figure-img"></p>
+<figcaption>A Markov chain with transition kernel <span class="math inline">\(k : X \kernel X\)</span> and initial distribution <span class="math inline">\(p_0 : I \kernel X\)</span>.</figcaption>
+</figure>
+</div>
+<p>Run the dynamics long enough and something striking happens. Although every individual particle keeps moving, the <em>shape</em> of the cloud stops changing. The population settles into a fixed pattern: as many particles flow into each region as flow out. This fixed pattern is the <strong>stationary distribution</strong>.</p>
+<div id="cell-fig-stationary-convergence" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div id="fig-stationary-convergence" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stationary-convergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="mcmc_files/figure-html/fig-stationary-convergence-output-1.png" width="619" height="357" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stationary-convergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.2: 400 insects under the same Langevin dynamics. The dashed circles mark the 1σ and 2σ contours of a <span class="math inline">\(\mathcal{N}(0, I)\)</span>. Starting from a uniform scatter, the cloud progressively contracts inward, settling into stationarity.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="def-stationary-distribution" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 6.1</strong></span> A distribution <span class="math inline">\(p_\infty\)</span> on <span class="math inline">\(X\)</span> is a <strong>stationary distribution</strong> for the kernel <span class="math inline">\(k : X \kernel X\)</span> if it is a fixed point of the dynamics: <span class="math display">\[
+p_\infty = p_\infty \then k.
+\]</span></p>
+<p>In string diagrams,</p>
+<img src="mcmc_files/mediabag/1a1004ff998c80e3484fd8d9aa07ef21c1ba28f1.svg" style="height:3em">
+</div>
+<p>The stationary distribution describes the long-run <em>spatial</em> census of the population. If we froze time after the cloud had settled and counted how many particles sit in each region, the answer would be proportional to <span class="math inline">\(p_\infty\)</span>.</p>
+</section>
+<section id="ergodicity-time-averages-equal-spatial-averages" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="ergodicity-time-averages-equal-spatial-averages"><span class="header-section-number">6.2</span> Ergodicity: time averages equal spatial averages</h2>
+<p>Keeping track of an entire population is hard work. Instead, we would like to follow a single particle and use its trajectory to learn about the stationary distribution. When can we do this?</p>
+<p>Imagine the population in stationarity. The reason certain regions have more particles than others is that the dynamics keep sending more particles into them than out. Hence, if we follow a single particle, it will spend more time in high-density regions and less time in low-density regions. If we wait long enough, the fraction of time it spends in each region should match the fraction of particles in that region under <span class="math inline">\(p_\infty\)</span>. In other words, if we look at the trajectory of one particle, we should see it visiting different regions with frequencies proportional to their stationary mass.</p>
+<div id="cell-fig-ergodic-visits" class="cell" data-fig-height="3.2" data-fig-width="7" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div id="fig-ergodic-visits" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ergodic-visits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="mcmc_files/figure-html/fig-ergodic-visits-output-1.png" width="664" height="313" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ergodic-visits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.3: <strong>Left:</strong> A single insect (grey dot = start, blue dot = end) drifting under Langevin dynamics. <strong>Right:</strong> Instantaneous fraction of a 400-particle population inside <span class="math inline">\(R\)</span> (grey), and running time average of the single trajectory (blue). The two quantities settle at the same level, illustrating the ergodic theorem.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>In order for this to work, the dynamics must allow every particle to explore the entire space well. This condition is called <strong>ergodicity</strong>. There are two main consequences of ergodicity: First, the long-run distribution of the chain converges to <span class="math inline">\(p_\infty\)</span> regardless of where it started: <span class="math display">\[
+k^N(y \mid x) \xrightarrow{N \to \infty} p_\infty(y) \quad \text{for all } x, y \in X.
+\]</span> As a consequence, the system will eventually forget its initial distribution and settle into the same stationary pattern.</p>
+<p>Second, the <em>time average</em> along that one trajectory matches the <em>spatial average</em> over the whole population. This is often called the <strong>ergodic theorem</strong>: For any integrable function <span class="math inline">\(f : X \to \mathbb{R}\)</span>, <span class="math display">\[
+\underbrace{\frac{1}{N} \sum_{t=1}^N f(x_t)}_{\text{time average along one chain}} \;\;\xrightarrow{N \to \infty}\;\; \underbrace{\mathbb{E}_{x \sim p_\infty}[f(x)]}_{\text{spatial average over } p_\infty}.
+\]</span> Hence, we can use the samples along the trajectory to estimate expectations under the stationary distribution. This works despite the fact that they are not independent samples from <span class="math inline">\(p_\infty\)</span>.</p>
+</section>
+<section id="when-does-ergodicity-hold" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="when-does-ergodicity-hold"><span class="header-section-number">6.3</span> When does ergodicity hold?</h2>
+<p>Two structural failures can prevent ergodicity:</p>
+<p><strong>(a) Reachability and recurrence.</strong> The chain must be able to reach every region that carries stationary mass, and keep coming back to it. If the state space splits into disjoint pieces with no transitions between them, a particle started in one piece never visits the other, and a single trajectory cannot represent the full distribution. More subtly, even within a connected space the chain might wander off to infinity and never return to a region it once visited.</p>
+<div id="cell-fig-obstruction-recurrence" class="cell" data-fig-height="3.2" data-fig-width="7" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div id="fig-obstruction-recurrence" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-obstruction-recurrence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="mcmc_files/figure-html/fig-obstruction-recurrence-output-1.png" width="636" height="319" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-obstruction-recurrence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.4: Two failures of recurrence. <strong>Left:</strong> the state space is split by an impassable wall; chains started in <span class="math inline">\(A\)</span> (blue) stay in <span class="math inline">\(A\)</span> forever, chains in <span class="math inline">\(B\)</span> (red) stay in <span class="math inline">\(B\)</span>. <strong>Right:</strong> a 1D chain with a constant rightward drift. Trajectories never return to the shaded start region.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Formally, the correct reachability condition is <strong>Harris recurrence</strong>: For all “interesting” measurable sets <span class="math inline">\(A\)</span>, the chain must return to <span class="math inline">\(A\)</span> infinitely often starting from any state. The qualifier “interesting” is needed to rule out sets of measure zero that the chain can never hit. Formally, such sets are quantified with respect to a reference measure <span class="math inline">\(\psi\)</span>.</p>
+<div id="def-harris-recurrence" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 6.2</strong></span> A probability kernel <span class="math inline">\(k: X \kernel X\)</span> is <strong>Harris recurrent</strong> if there exists a non-zero <span class="math inline">\(\sigma\)</span>-finite measure <span class="math inline">\(\psi\)</span> such that whenever <span class="math inline">\(\psi(A) &gt; 0\)</span>, the chain returns to <span class="math inline">\(A\)</span> infinitely often with probability <span class="math inline">\(1\)</span>, starting from any state <span class="math inline">\(x\)</span>.</p>
+</div>
+<p>Provided the kernel has a stationary distribution, Harris recurrence is sufficient for temporal averages to converge to spatial averages over <span class="math inline">\(p_\infty\)</span>. However, for the iterated kernel <span class="math inline">\(k^N\)</span> to converge to <span class="math inline">\(p_\infty\)</span> regardless of initial distribution, we need a further condition:</p>
+<p><strong>(b) No deterministic cycles.</strong> The chain must not get locked into a periodic schedule. If transitions force it to alternate strictly between disjoint sets <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> at every step, then at any given time only one of the two sets is occupied, and the distribution at time <span class="math inline">\(t\)</span> depends on the parity of <span class="math inline">\(t\)</span> rather than settling.</p>
+<div id="cell-fig-obstruction-periodicity" class="cell" data-fig-height="3.2" data-fig-width="7" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div id="fig-obstruction-periodicity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-obstruction-periodicity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="mcmc_files/figure-html/fig-obstruction-periodicity-output-1.png" width="651" height="313" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-obstruction-periodicity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.5: Failure of aperiodicity: a strict 2-cycle. <strong>Left:</strong> all particles start in <span class="math inline">\(A\)</span>; at every step the entire population swaps to <span class="math inline">\(B\)</span> and back, so particles are in <span class="math inline">\(A\)</span> at even steps and in <span class="math inline">\(B\)</span> at odd steps. <strong>Right:</strong> the fraction of the population in <span class="math inline">\(A\)</span> oscillates between <span class="math inline">\(1\)</span> and <span class="math inline">\(0\)</span> indefinitely and never converges to the stationary value <span class="math inline">\(p_\infty(A) = 0.5\)</span> (dashed orange).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Formally, the condition that rules this out is <strong>aperiodicity</strong>: the chain must not be forced to cycle through a sequence of disjoint sets in a fixed order.</p>
+<div id="def-aperiodicity" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 6.3</strong></span> A probability kernel <span class="math inline">\(k: X \kernel X\)</span> is <strong>aperiodic</strong> if there is no sequence of non-empty disjoint measurable sets <span class="math inline">\(A_1, A_2, \ldots, A_k\)</span> with <span class="math inline">\(k \ge 2\)</span> such that the chain must cycle through them in order. In other words, we must not have <span class="math inline">\(k(A_{i+1} \mid x) = 1\)</span> for all <span class="math inline">\(x \in A_i\)</span> and <span class="math inline">\(i = 1, \ldots, k\)</span> (treating <span class="math inline">\(A_{k+1} = A_1\)</span>).</p>
+</div>
+</section>
+<section id="metropolis-hastings" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="metropolis-hastings"><span class="header-section-number">6.4</span> Metropolis-Hastings</h2>
+<p>The idea behind Markov chain Monte Carlo is to design a kernel <span class="math inline">\(k\)</span> that has a desired target distribution <span class="math inline">\(p_\infty\)</span> as its stationary distribution. If the kernel is Harris recurrent and aperiodic, it will converge to <span class="math inline">\(p_\infty\)</span> and we can use a single trajectory to estimate expectations under <span class="math inline">\(p_\infty\)</span>.</p>
+<section id="detailed-balance" class="level3" data-number="6.4.1">
+<h3 data-number="6.4.1" class="anchored" data-anchor-id="detailed-balance"><span class="header-section-number">6.4.1</span> Detailed balance</h3>
+<p>Solving the global fixed-point equation <span class="math inline">\(p_\infty = p_\infty \then k\)</span> for <span class="math inline">\(k\)</span> is difficult. The Metropolis-Hastings algorithm instead enforces a stronger but simpler local condition called <strong>detailed balance</strong>.</p>
+<div id="def-detailed-balance" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 6.4</strong></span> Suppose that <span class="math inline">\(k\)</span> and <span class="math inline">\(p_\infty\)</span> have densities with respect to a common measure. Then <span class="math inline">\(k\)</span> satisfies <strong>detailed balance</strong> with respect to <span class="math inline">\(p_\infty\)</span> if, for all <span class="math inline">\(x, x' \in X\)</span>, <span class="math display">\[
+p_\infty(x) \, k(x' \mid x) = p_\infty(x') \, k(x \mid x'),
+\]</span></p>
+<p>where the equation is between density functions.</p>
+</div>
+<p>Intuitively, we think of <span class="math inline">\(p_\infty(x)\)</span> as the probability mass at state <span class="math inline">\(x\)</span> and <span class="math inline">\(k(x' \mid x)\)</span> as the flow of probability mass from <span class="math inline">\(x\)</span> to <span class="math inline">\(x'\)</span>. Hence, the total flow from <span class="math inline">\(x\)</span> to <span class="math inline">\(x'\)</span> is <span class="math inline">\(p_\infty(x) \, k(x' \mid x)\)</span>. Thus detailed balance says that the flow from <span class="math inline">\(x\)</span> to <span class="math inline">\(x'\)</span> equals the flow from <span class="math inline">\(x'\)</span> to <span class="math inline">\(x\)</span> for every pair of states. This is a much stronger condition than stationarity, which only requires that the total flow into each state equals the total flow out.</p>
+<div id="prp-db-implies-stationary" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 6.5</strong></span> If <span class="math inline">\(k\)</span> satisfies detailed balance with respect to <span class="math inline">\(p_\infty\)</span>, then <span class="math inline">\(p_\infty\)</span> is stationary for <span class="math inline">\(k\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span><span class="math display">\[
+(p_\infty \then k)(x') = \int_{x \in X} p_\infty(x) \, k(x' \mid x) \, dx \stackrel{\text{DB}}{=} \int_{x \in X} p_\infty(x') \, k(x \mid x') \, dx = p_\infty(x') \int_{x \in X} k(x \mid x') \, dx = p_\infty(x').
+\]</span></p>
+</div>
+</section>
+<section id="the-mh-kernel" class="level3" data-number="6.4.2">
+<h3 data-number="6.4.2" class="anchored" data-anchor-id="the-mh-kernel"><span class="header-section-number">6.4.2</span> The MH kernel</h3>
+<p>We will now construct a kernel <span class="math inline">\(k\)</span> that satisfies detailed balance with respect to a given target distribution <span class="math inline">\(p_\infty\)</span>. The construction starts with an arbitrary proposal <strong>proposal kernel</strong> <span class="math inline">\(q(x' \mid x)\)</span> that is easy to sample from an corrects it to satisfy detailed balance. We assume that <span class="math inline">\(q\)</span> has a density with respect to the same measure as <span class="math inline">\(p_\infty\)</span>.</p>
+<p>In general, the proposal <span class="math inline">\(q\)</span> does not satisfy detailed balance with respect to <span class="math inline">\(p_\infty\)</span> since both flows are generally unequal: <span class="math display">\[
+p_\infty(x) \, q(x' \mid x) \quad \text{and} \quad p_\infty(x') \, q(x \mid x')
+\]</span></p>
+<p>To balance the flows, we throttle the flow in one direction. For this, we introduce an <strong>acceptance probability</strong> <span class="math inline">\(\alpha(x' \mid x)\)</span>. After sampling a proposed move <span class="math inline">\(x \to x'\)</span> from <span class="math inline">\(q\)</span>, we accept it (and move) with probability <span class="math inline">\(\alpha(x' \mid x)\)</span>, and otherwise reject it (and stay at <span class="math inline">\(x\)</span>). Hence, the modified kernel <span class="math inline">\(k\)</span> transitions from <span class="math inline">\(x\)</span> to <span class="math inline">\(x'\)</span> according to <span class="math inline">\(q(x' \mid x) \, \alpha(x' \mid x)\)</span> and stays at <span class="math inline">\(x\)</span> with the remaining probability. Formally, <span class="math display">\[
+k(x' \mid x) = q(x' \mid x)\,\alpha(x' \mid x) + \delta_x(x')\int \bigl[1 - \alpha(y \mid x)\bigr]\,q(dy \mid x),
+\]</span> where <span class="math inline">\(\delta_x\)</span> is the Dirac delta at <span class="math inline">\(x\)</span>. The first term accounts for accepted moves, and the second term accounts for rejected moves.</p>
+<p>To enforce detailed balance, we must choose <span class="math inline">\(\alpha\)</span> such that the flow in both directions is equal. <span class="math display">\[
+p_\infty(x) \, q(x' \mid x) \, \alpha(x' \mid x) = p_\infty(x') \, q(x \mid x') \, \alpha(x \mid x').
+\]</span></p>
+<p>There are two degrees of freedom in this equation. Choosing <span class="math inline">\(\alpha(x \mid x') = 1\)</span> for the reverse direction (always accept), we get <span class="math display">\[
+p_\infty(x) \, q(x' \mid x) \, \alpha(x' \mid x) = p_\infty(x') \, q(x \mid x') \cdot 1.
+\]</span></p>
+<p>Solving for <span class="math inline">\(\alpha(x' \mid x)\)</span> yields the classical Metropolis-Hastings formula:</p>
+<div id="def-mh-acceptance" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 6.6</strong></span> The <strong>Metropolis-Hastings acceptance probability</strong> is <span class="math display">\[
+\alpha(x' \mid x) = \min\left(1, \, \frac{p_\infty(x') \, q(x \mid x')}{p_\infty(x) \, q(x' \mid x)}\right).
+\]</span></p>
+</div>
+<div id="prp-mh-detailed-balance" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 6.7</strong></span> The kernel <span class="math inline">\(k\)</span> obtained by combining the proposal <span class="math inline">\(q\)</span> with the Metropolis-Hastings acceptance probability <span class="math inline">\(\alpha\)</span> satisfies detailed balance with respect to <span class="math inline">\(p_\infty\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>For <span class="math inline">\(x \neq x'\)</span>, assume without loss of generality that <span class="math inline">\(p_\infty(x') q(x \mid x') \le p_\infty(x) q(x' \mid x)\)</span>. Then <span class="math inline">\(\alpha(x \mid x') = 1\)</span> and <span class="math display">\[\alpha(x' \mid x) = \frac{p_\infty(x') q(x \mid x')}{p_\infty(x) q(x' \mid x)}.\]</span></p>
+<p>Hence <span class="math display">\[
+p_\infty(x) \, k(x' \mid x)
+= p_\infty(x) \, q(x' \mid x) \, \alpha(x' \mid x)
+= p_\infty(x') \, q(x \mid x')
+= p_\infty(x') \, k(x \mid x').
+\]</span></p>
+<p>The case <span class="math inline">\(x = x'\)</span> is trivial since the flow from <span class="math inline">\(x\)</span> to itself is just the probability of rejecting a move, which is automatically balanced.</p>
+</div>
+</section>
+<section id="the-mh-algorithm" class="level3" data-number="6.4.3">
+<h3 data-number="6.4.3" class="anchored" data-anchor-id="the-mh-algorithm"><span class="header-section-number">6.4.3</span> The MH algorithm</h3>
+<p>Putting the above pieces together, the Metropolis-Hastings algorithm is as follows:</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Metropolis-Hastings algorithm">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Metropolis-Hastings algorithm
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Start at an arbitrary state <span class="math inline">\(x_0\)</span>. For <span class="math inline">\(t = 1, \ldots, n\)</span>:</p>
+<ol type="1">
+<li>Sample a proposed move <span class="math inline">\(x' \sim q(- \mid x_{t-1})\)</span>.</li>
+<li>Compute the acceptance probability <span class="math inline">\(\alpha(x' \mid x_{t-1}) := \min\left(1, \, \frac{p_\infty(x') \, q(x_{t-1} \mid x')}{p_\infty(x_{t-1}) \, q(x' \mid x_{t-1})}\right)\)</span>.</li>
+<li>With probability <span class="math inline">\(\alpha(x' \mid x_{t-1})\)</span>, accept the move and set <span class="math inline">\(x_t := x'\)</span>. Otherwise, reject the move and set <span class="math inline">\(x_t := x_{t-1}\)</span>.</li>
+</ol>
+</div>
+</div>
+<p>Samples from the trajectory <span class="math inline">\(x_{0:n}\)</span> are not independent, but can be used to estimate expectations under <span class="math inline">\(p_\infty\)</span> by the ergodic theorem: <span class="math inline">\(\frac{1}{n} \sum_{t=0}^{n} f(x_t) \to \mathbb{E}_{p_\infty(x)}[f(x)]\)</span> as <span class="math inline">\(n \to \infty\)</span>.</p>
+</section>
+<section id="using-mh-in-bayesian-inference" class="level3" data-number="6.4.4">
+<h3 data-number="6.4.4" class="anchored" data-anchor-id="using-mh-in-bayesian-inference"><span class="header-section-number">6.4.4</span> Using MH in Bayesian inference</h3>
+<p>An important feature of the formula is that <span class="math inline">\(p_\infty\)</span> enters only through the ratio <span class="math inline">\(p_\infty(x') / p_\infty(x)\)</span>. Hence the algorithm only needs to evaluate <span class="math inline">\(p_\infty\)</span> up to an unknown normalizing constant. In the Bayesian setting, the target distribution is the posterior <span class="math display">\[p_\infty(\theta) = p(\theta \mid y) = \frac{p(y ,\theta)}{p(y)}.\]</span></p>
+<p>Since the normalizing constant <span class="math inline">\(p(y)\)</span> cancels in the ratio <span class="math inline">\(p_\infty(\theta') / p_\infty(\theta)\)</span>, we can compute the acceptance probability using only the joint distribution <span class="math inline">\(p(y ,\theta)\)</span> over the parameters and data.</p>
+<p>In a generative model composed of several kernels, the joint distribution accross all variables factorizes into a product of kernels by copy-composition. Hence, computing this quantity is straightforward: we just multiply the densities of all kernels in the model evaluated at the current state. In practice, we work with log-densities to avoid numerical underflow and to turn products into sums.</p>
+</section>
+<section id="optimality-of-the-acceptance-ratio" class="level3" data-number="6.4.5">
+<h3 data-number="6.4.5" class="anchored" data-anchor-id="optimality-of-the-acceptance-ratio"><span class="header-section-number">6.4.5</span> Optimality of the acceptance ratio</h3>
+<p>There are many ways to define <span class="math inline">\(\alpha\)</span> that balance the flows, for example, by scaling both directions down by an arbitrary common factor. The Metropolis-Hastings choice is the one that <em>maximizes</em> the acceptance probability in each direction. The following heuristic argument explains why this is the right choice.</p>
+<p>Whenever the chain rejects a proposal, the trajectory records a duplicate of the current state. Lower acceptance rates produce more duplicate samples, increasing the <strong>autocorrelation</strong> of the trajectory. Because the Monte Carlo estimator averages over the trajectory, correlated samples carry less independent information than uncorrelated ones, slowing the convergence in the ergodic theorem. By accepting as often as possible while preserving detailed balance, the Metropolis-Hastings ratio gives the lowest asymptotic variance among all detailed-balance corrections of <span class="math inline">\(q\)</span>.</p>
+</section>
+<section id="choosing-the-proposal" class="level3" data-number="6.4.6">
+<h3 data-number="6.4.6" class="anchored" data-anchor-id="choosing-the-proposal"><span class="header-section-number">6.4.6</span> Choosing the proposal</h3>
+<p>Although the Metropolis-Hastings ratio is optimal <em>given</em> a proposal, the practical efficiency of the algorithm depends heavily on choosing <span class="math inline">\(q\)</span> well. There is a fundamental tradeoff:</p>
+<ul>
+<li><strong>Tiny steps.</strong> If <span class="math inline">\(q\)</span> proposes states very close to the current state, then <span class="math inline">\(p_\infty(x)\)</span> and <span class="math inline">\(p_\infty(x')\)</span> are similar and acceptance is nearly always granted. But the chain explores the space slowly: it takes many steps to traverse regions where <span class="math inline">\(p_\infty\)</span> has support.</li>
+<li><strong>Large steps.</strong> If <span class="math inline">\(q\)</span> proposes states far from the current state, the chain can in principle traverse the space quickly. But most proposals land in low-probability regions and are rejected, again producing duplicate samples and high autocorrelation.</li>
+</ul>
+<p>A good proposal balances these extremes: it takes the largest steps that still maintain a reasonably high acceptance rate.</p>
+</section>
+<section id="harris-recurrence-and-aperiodicity-of-mh" class="level3" data-number="6.4.7">
+<h3 data-number="6.4.7" class="anchored" data-anchor-id="harris-recurrence-and-aperiodicity-of-mh"><span class="header-section-number">6.4.7</span> Harris recurrence and aperiodicity of MH</h3>
+<p>We have constructed the MH kernel to satisfy detailed balance with respect to <span class="math inline">\(p_\infty\)</span>, so <span class="math inline">\(p_\infty\)</span> is stationary. However, for MCMC to be theoretically justified, we also need to check that the kernel is Harris recurrent and aperiodic.</p>
+<p>Aperiodicity is guaranteed as long as the proposal has some chance of being rejected. This is usually the case, with the notable exception of Gibbs samplers which always accept their proposals.</p>
+<p>Harris recurrence is guaranteed for MH kernels as long as the chain can eventually reach every region <span class="math inline">\(A\)</span> of the state space for which <span class="math inline">\(p_\infty(A) &gt; 0\)</span> from any starting point. For example, this is easily satsified if the proposal is positive everywhere.</p>
+<p>Hence, Harris recurrence and aperiodicity are not usually a concern for MH samplers. The choice of proposal is a much more important practical concern.</p>
+</section>
+<section id="composing-mh-steps" class="level3" data-number="6.4.8">
+<h3 data-number="6.4.8" class="anchored" data-anchor-id="composing-mh-steps"><span class="header-section-number">6.4.8</span> Composing MH steps</h3>
+<p>So far we have treated the proposal <span class="math inline">\(q\)</span> as a single distribution that updates <em>all</em> parameters at once. Nothing in the construction forces this. If <span class="math inline">\(K_1, K_2, \dots, K_m\)</span> are each MH kernels that leave the same target <span class="math inline">\(p_\infty\)</span> stationary, then any composition <span class="math inline">\(K_1 ; \cdots ; K_m\)</span> also leaves <span class="math inline">\(p_\infty\)</span> stationary. This gives us the freedom to <strong>break a single MH update into a sequence of smaller MH updates</strong>, each acting on a different <em>block</em> of parameters while holding the rest fixed.</p>
+<p>Concretely, partition <span class="math inline">\(\theta = (\theta_1, \dots, \theta_m)\)</span> into blocks. The <span class="math inline">\(i\)</span>-th sub-step proposes a new value <span class="math inline">\(\theta_i'\)</span> from a block proposal <span class="math inline">\(q_i(\theta_i' \mid \theta)\)</span> and accepts it with the usual MH ratio, treating the other blocks as constants in the target: <span class="math display">\[
+\alpha_i \;=\; \min\!\left(1,\; \frac{p_\infty(\theta_1, \dots, \theta_i', \dots, \theta_m)}{p_\infty(\theta_1, \dots, \theta_i, \dots, \theta_m)} \cdot \frac{q_i(\theta_i \mid \theta_1, \dots, \theta_i', \dots)}{q_i(\theta_i' \mid \theta)}\right).
+\]</span> Each sub-step satisfies detailed balance for <span class="math inline">\(p_\infty\)</span> on its own, so their composition is a valid MH sampler.</p>
+<p>The trade-off is the same one we saw between tiny and large steps, but along a different axis. A block update changes fewer coordinates at a time, so the proposed state is “closer” to the current one in joint log-density and is more likely to be accepted. The price is that traversing the full parameter space now takes <span class="math inline">\(m\)</span> sub-steps instead of one, and each sub-step typically requires its own evaluation of <span class="math inline">\(p_\infty\)</span>. Block updates are especially useful when different parameters have very different scales or when the posterior is strongly correlated only <em>within</em> certain groups of parameters: a single joint proposal would have to compromise on a step size that works for all of them, while block proposals can be tuned per-block.</p>
+</section>
+<section id="the-gibbs-sampler" class="level3" data-number="6.4.9">
+<h3 data-number="6.4.9" class="anchored" data-anchor-id="the-gibbs-sampler"><span class="header-section-number">6.4.9</span> The Gibbs sampler</h3>
+<p>The Gibbs sampler is the limiting case of block-MH in which each block proposal is the <em>exact</em> conditional distribution <span class="math inline">\(q_i(\theta_i' \mid \theta) = p_\infty(\theta_i' \mid \theta_{-i})\)</span>, where <span class="math inline">\(\theta_{-i}\)</span> denotes all components of <span class="math inline">\(\theta\)</span> except <span class="math inline">\(\theta_i\)</span>. Plugging this into the block MH ratio, the joint density factors as <span class="math inline">\(p_\infty(\theta) = p_\infty(\theta_i \mid \theta_{-i}) \, p_\infty(\theta_{-i})\)</span>, the marginal <span class="math inline">\(p_\infty(\theta_{-i})\)</span> cancels, and the conditional terms cancel against the proposal ratio. The result is <span class="math inline">\(\alpha_i = 1\)</span>: every Gibbs proposal is accepted by construction. A full sweep cycles through all blocks <span class="math inline">\(\theta_i\)</span>, drawing each one from its conditional given the current values of the others.</p>
+<p>The appeal of Gibbs sampling is that there are no rejected steps, no autocorrelation from duplicated samples, and no proposal parameters to tune. The catch is that we need to be able to <em>sample exactly</em> from each conditional <span class="math inline">\(p_\infty(\theta_i \mid \theta_{-i})\)</span>. This is only tractable for specific model structures. Outside that regime the conditionals have no closed form and Gibbs is no longer applicable. Even when it does apply, Gibbs can mix poorly along directions of strong posterior correlation, because each sub-step is constrained to move along a single coordinate axis. Modern gradient-based samplers like HMC sidestep both limitations by exploiting the joint geometry directly, which is why this chapter focuses on them.</p>
+</section>
+</section>
+<section id="coding-mh-samplers" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="coding-mh-samplers"><span class="header-section-number">6.5</span> Coding MH samplers</h2>
+<p>In <a href="bayesian-data-analysis.html" class="quarto-xref"><span>Chapter 5</span></a> we saw how to use NumPyro to run MCMC samplers. We will now implement a simple Metropolis-Hastings sampler from scratch in JAX. This will give us a deeper understanding of how the algorithm works and how to choose proposals.</p>
+<p>To keep things simple, we focus on <strong>Bayesian linear regression</strong>: we observe pairs <span class="math inline">\((x_n, y_n)\)</span> with <span class="math inline">\(x_n \in \mathbb{R}^d\)</span> and <span class="math inline">\(y_n \in \mathbb{R}\)</span> and model <span class="math display">\[
+y_n \mid x_n, \beta, \sigma \;\sim\; \mathcal{N}\!\bigl(x_n^\top \beta,\, \sigma^2\bigr),
+\]</span> with regression coefficients <span class="math inline">\(\beta \in \mathbb{R}^d\)</span> and noise scale <span class="math inline">\(\sigma &gt; 0\)</span>. The unknowns form a <span class="math inline">\((d+1)\)</span>-dimensional continuous parameter space.</p>
+<p>We will fit the model to <strong>synthetic data</strong> generated from known <span class="math inline">\(\beta, \sigma\)</span>. This lets us check parameter recovery and isolate the effect of the proposal.</p>
+<div id="setup" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax <span class="im">import</span> random</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax.scipy <span class="im">import</span> stats</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="synth-data" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>N, d <span class="op">=</span> <span class="dv">100</span>, <span class="dv">4</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>true_beta <span class="op">=</span> jnp.array([<span class="fl">1.0</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">2.0</span>, <span class="fl">0.3</span>])</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>true_sigma <span class="op">=</span> <span class="fl">0.7</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>key_x, key_eps <span class="op">=</span> random.split(random.PRNGKey(<span class="dv">0</span>))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>X_cov <span class="op">=</span> random.normal(key_x, (N, d <span class="op">-</span> <span class="dv">1</span>))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> jnp.concatenate([jnp.ones((N, <span class="dv">1</span>)), X_cov], axis<span class="op">=</span><span class="dv">1</span>)  <span class="co"># design matrix with intercept</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> X <span class="op">@</span> true_beta <span class="op">+</span> true_sigma <span class="op">*</span> random.normal(key_eps, (N,))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="the-generative-model-in-jax" class="level3" data-number="6.5.1">
+<h3 data-number="6.5.1" class="anchored" data-anchor-id="the-generative-model-in-jax"><span class="header-section-number">6.5.1</span> The generative model in JAX</h3>
+<p>MCMC works best in <em>unconstrained</em> coordinates. Hence, we work with <span class="math inline">\(\log \sigma \in \mathbb{R}\)</span> rather than <span class="math inline">\(\sigma &gt; 0\)</span>, so the chain never has to bounce off a boundary. Under this choice, the full model is <span class="math display">\[
+\begin{aligned}
+\beta_j &amp;\sim \mathcal{N}(0,\, \tau_\beta^2), \quad j = 1, \ldots, d, \\
+\log \sigma &amp;\sim \mathcal{N}(0,\, \tau_{\log\sigma}^2), \\
+y_n \mid x_n, \beta, \sigma &amp;\sim \mathcal{N}\!\bigl(x_n^\top \beta,\, \sigma^2\bigr), \quad n = 1, \ldots, N.
+\end{aligned}
+\]</span></p>
+<p>We choose weakly informative Gaussian priors, which discourage absurd values without committing to specific ones. We pack all parameters into a single flat vector <code>theta</code> of length <span class="math inline">\(d + 1,\)</span> with the regression coefficients in the first <span class="math inline">\(d\)</span> entries and <span class="math inline">\(\log \sigma\)</span> in the last.</p>
+<p>To run MCMC, we need to be able to compute the full joint distribution <span class="math display">\[
+p(\beta, \log\sigma, y \mid X) \;=\; \underbrace{p(\beta) \, p(\log \sigma)}_{\text{prior}} \cdot \underbrace{\prod_{n=1}^N \mathcal{N}\!\bigl(y_n \mid x_n^\top \beta,\, \sigma^2\bigr)}_{\text{likelihood}}.
+\]</span></p>
+<p>For numerical stability, we will work with the log joint distribution, which turns products into sums. This means the log joint function can walk through the model from top to bottom and add up the log densities of all kernels evaluated at the current state.</p>
+<div id="model" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_joint(theta, X, y, tau_beta<span class="op">=</span><span class="fl">5.0</span>, tau_log_sigma<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Log p(beta, log_sigma, y | X) with theta = [beta_0, ..., beta_{d-1}, log_sigma]."""</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Unpack: first d entries are the regression coefficients, last is log sigma.</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    beta, log_sigma <span class="op">=</span> theta[:<span class="op">-</span><span class="dv">1</span>], theta[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    sigma <span class="op">=</span> jnp.exp(log_sigma)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sum log-densities of priors and likelihood (= log of their product).</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    log_prior_beta      <span class="op">=</span> jnp.<span class="bu">sum</span>(stats.norm.logpdf(beta, <span class="fl">0.0</span>, tau_beta))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    log_prior_log_sigma <span class="op">=</span> stats.norm.logpdf(log_sigma, <span class="fl">0.0</span>, tau_log_sigma)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    log_lik             <span class="op">=</span> jnp.<span class="bu">sum</span>(stats.norm.logpdf(y, X <span class="op">@</span> beta, sigma))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> log_prior_beta <span class="op">+</span> log_prior_log_sigma <span class="op">+</span> log_lik</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Bake in X and y so the sampler only sees a function of theta.</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>target <span class="op">=</span> jax.jit(<span class="kw">lambda</span> theta: log_joint(theta, X, y))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A few remarks on the JAX-specific bits:</p>
+<ul>
+<li><code>jax.numpy</code> (imported as <code>jnp</code>) is a near drop-in replacement for <code>numpy</code> whose arrays live on the accelerator and can be differentiated.</li>
+<li><code>jax.scipy.stats.norm.logpdf</code> is the same density function you would use in NumPyro priors and likelihoods, just exposed directly as a numerical function rather than wrapped in a sample statement.</li>
+<li>We work with <span class="math inline">\(\log \sigma \in \mathbb{R}\)</span> rather than <span class="math inline">\(\sigma &gt; 0\)</span> so the chain never has to bounce off a boundary. NumPyro performs such transforms automatically.</li>
+<li>The <code>@jax.jit</code> decorator <strong>just-in-time compiles</strong> the function: on the first call JAX traces through the Python code, builds a computation graph, and compiles it to optimised machine code. All subsequent calls skip the Python interpreter entirely and run the compiled version directly. Without JIT, each call re-executes the Python, which adds overhead proportional to the number of operations. Here we JIT both <code>log_joint</code> and <code>target</code> so that every log-density evaluation inside the sampler is as fast as possible.</li>
+</ul>
+<p>As a sanity check, we evaluate the log joint at zero and at the ground-truth parameters; the truth should score considerably higher.</p>
+<div id="sanity-check" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>theta_zeros <span class="op">=</span> jnp.zeros(d <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>theta_truth <span class="op">=</span> jnp.concatenate([true_beta, jnp.array([jnp.log(true_sigma)])])</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"log p at zeros: </span><span class="sc">{</span><span class="bu">float</span>(target(theta_zeros))<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"log p at truth: </span><span class="sc">{</span><span class="bu">float</span>(target(theta_truth))<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log p at zeros: -390.1
+log p at truth: -121.5</code></pre>
+</div>
+</div>
+</section>
+<section id="one-metropolis-hastings-step" class="level3" data-number="6.5.2">
+<h3 data-number="6.5.2" class="anchored" data-anchor-id="one-metropolis-hastings-step"><span class="header-section-number">6.5.2</span> One Metropolis-Hastings step</h3>
+<p>We now translate <a href="#def-mh-acceptance">Definition&nbsp;6.6</a> into code. The state is the current <span class="math inline">\(\theta\)</span>, together with its log-density (so we don’t recompute it every time). Each step delegates the actual jump to a <code>propose</code> function, evaluates the log target at the proposal, and applies the MH accept/reject rule.</p>
+<p>Recall that JAX’s RNG is <em>stateless</em>. A “key” <code>random.PRNGKey(seed)</code> is a small array that you must pass into every random function, and <code>random.split(key, n)</code> produces <span class="math inline">\(n\)</span> fresh keys from one. This is what makes a JAX program reproducible regardless of how it is parallelised.</p>
+<div id="mh-step" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mh_step(key, theta, log_p_theta, log_p, propose):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""One Metropolis-Hastings step.</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">        key:         JAX PRNG key.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">        theta:       current state.</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">        log_p_theta: cached value of log_p(theta).</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">        log_p:       function theta -&gt; log target density.</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">        propose:     function (key, theta, log_p) -&gt; (theta', log_q_ratio).</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns: (theta_new, log_p_new, accepted).</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    k_prop, k_acc <span class="op">=</span> random.split(key)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Propose a move and evaluate the target there.</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    theta_prop, log_q_ratio <span class="op">=</span> propose(k_prop, theta, log_p)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    log_p_prop <span class="op">=</span> log_p(theta_prop)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># MH acceptance rule (in log space).</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    log_alpha <span class="op">=</span> log_p_prop <span class="op">-</span> log_p_theta <span class="op">+</span> log_q_ratio</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    accepted <span class="op">=</span> jnp.log(random.uniform(k_acc)) <span class="op">&lt;</span> log_alpha</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Either jump to the proposal or stay put.</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    theta_new <span class="op">=</span> jnp.where(accepted, theta_prop, theta)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    log_p_new <span class="op">=</span> jnp.where(accepted, log_p_prop, log_p_theta)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> theta_new, log_p_new, accepted</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The <code>propose</code> argument has signature <code>(key, theta, log_p) -&gt; (theta_proposal, log_q_ratio)</code> and returns the log-density ratio <span class="math display">\[
+r_q(\theta, \theta') := \log q(\theta \mid \theta') - \log q(\theta' \mid \theta),
+\]</span> which is the only piece of the acceptance probability that depends on the proposal. Symmetric proposals just return <span class="math inline">\(r_q = 0\)</span>. By keeping the MH formula in <code>mh_step</code> and putting the proposal-specific logic in <code>propose</code>, we can easily swap in different proposals and compare their performance.</p>
+</section>
+<section id="running-the-chain" class="level3" data-number="6.5.3">
+<h3 data-number="6.5.3" class="anchored" data-anchor-id="running-the-chain"><span class="header-section-number">6.5.3</span> Running the chain</h3>
+<p>To run the chain for <code>n_steps</code>, we need a loop that updates the state <span class="math inline">\((\theta_t, \log p(\theta_t))\)</span>. A plain Python <code>for</code> loop would work, but JAX provides <code>lax.scan</code>, which compiles the entire loop into a single accelerator program. It expects a step function with signature <code>(carry, x) -&gt; (new_carry, output)</code>. Then <code>scan</code> threads the carry through the loop and stacks the per-step outputs into arrays. It outputs the final carry and the stacked outputs.</p>
+<div id="mh-driver" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> functools</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax <span class="im">import</span> lax</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># log_p, propose, n_steps are Python callables / ints, not arrays — mark them static.</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">@functools.partial</span>(jax.jit, static_argnums<span class="op">=</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_mh(key, theta0, log_p, propose, n_steps):</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run an MH chain for n_steps. Returns (trajectory, accepted_flags)."""</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    log_p0 <span class="op">=</span> log_p(theta0)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step(carry, k):</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        theta, log_p_t <span class="op">=</span> carry</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        theta_new, log_p_new, accepted <span class="op">=</span> mh_step(k, theta, log_p_t, log_p, propose)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (theta_new, log_p_new), (theta_new, accepted)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    keys <span class="op">=</span> random.split(key, n_steps)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    _, (trajectory, accepts) <span class="op">=</span> lax.scan(step, (theta0, log_p0), keys)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> trajectory, accepts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Because <code>log_p</code>, <code>propose</code>, and <code>n_steps</code> are Python-level values that JAX cannot represent as abstract arrays, they are declared <em>static</em> via <code>static_argnums</code>: JAX traces and caches a separate compiled version for each distinct combination of these arguments, which is fine since we only use a handful of proposal/target pairs.</p>
+</section>
+<section id="comparing-proposals" class="level3" data-number="6.5.4">
+<h3 data-number="6.5.4" class="anchored" data-anchor-id="comparing-proposals"><span class="header-section-number">6.5.4</span> Comparing proposals</h3>
+<p>We now implement four progressively more sophisticated proposals and compare them as we go. To keep the code per proposal tight, we first set up everything that is shared: a routine to run multiple chains in parallel, an ArviZ converter, and an <code>evaluate</code> helper that runs a proposal, prints its acceptance rate, and produces a posterior summary along with trace and rank plots.</p>
+<div id="multi-chain" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_chains(key, log_p, propose, n_steps, n_chains, init_scale<span class="op">=</span><span class="fl">0.5</span>):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run n_chains independent chains from Gaussian starts (vectorised over chains)."""</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    keys <span class="op">=</span> random.split(key, <span class="dv">2</span> <span class="op">*</span> n_chains)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    init_keys, run_keys <span class="op">=</span> keys[:n_chains], keys[n_chains:]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    theta0s <span class="op">=</span> init_scale <span class="op">*</span> jax.vmap(<span class="kw">lambda</span> k: random.normal(k, (d <span class="op">+</span> <span class="dv">1</span>,)))(init_keys)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    run_one <span class="op">=</span> <span class="kw">lambda</span> kr, t0: run_mh(kr, t0, log_p, propose, n_steps)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    trajs, accepts <span class="op">=</span> jax.vmap(run_one)(run_keys, theta0s)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> trajs, accepts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="diagnostics-setup" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> arviz <span class="im">as</span> az</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>n_steps, n_chains, warmup <span class="op">=</span> <span class="dv">3_000</span>, <span class="dv">4</span>, <span class="dv">2_000</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>param_names <span class="op">=</span> [<span class="ss">f"beta_</span><span class="sc">{</span>j<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(d)] <span class="op">+</span> [<span class="st">"log_sigma"</span>]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> to_idata(trajs, warmup):</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Convert a (chains, steps, params) array to an ArviZ InferenceData."""</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    draws <span class="op">=</span> trajs[:, warmup:, :]</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> az.from_dict(</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"posterior"</span>: {name: draws[:, :, i] <span class="cf">for</span> i, name <span class="kw">in</span> <span class="bu">enumerate</span>(param_names)}}</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate(name, propose, key):</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run chains for one proposal and report all four diagnostics in order:</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">    acceptance rate, trace plot (with burn-in visible), rank plot, and az.summary.</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">    Quarto displays the returned summary as the cell's output.</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    trajs, accepts <span class="op">=</span> run_chains(key, target, propose, n_steps, n_chains)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">: acceptance rate </span><span class="sc">{</span><span class="bu">float</span>(accepts.mean())<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Trace plot keeps burn-in visible so we can see chains converge.</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    idata_full <span class="op">=</span> to_idata(trajs, warmup<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    az.plot_trace(</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        idata_full, var_names<span class="op">=</span>[<span class="st">"beta_0"</span>, <span class="st">"log_sigma"</span>], figure_kwargs<span class="op">=</span>{<span class="st">"figsize"</span>: (<span class="dv">7</span>, <span class="dv">2</span>)}</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    plt.suptitle(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> — trace"</span>, y<span class="op">=</span><span class="fl">1.02</span>)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Rank plot and summary use only the post-warmup samples.</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    idata <span class="op">=</span> to_idata(trajs, warmup)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    az.plot_rank(</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>        idata, var_names<span class="op">=</span>[<span class="st">"beta_0"</span>, <span class="st">"log_sigma"</span>], figure_kwargs<span class="op">=</span>{<span class="st">"figsize"</span>: (<span class="dv">7</span>, <span class="dv">2</span>)}</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    plt.suptitle(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> — rank"</span>, y<span class="op">=</span><span class="fl">1.02</span>)</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> az.summary(idata)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We will use the same number of steps, chains, and warmup for every proposal, so any difference in the diagnostics reflects a difference in the proposal itself rather than in the experimental setup. We purposefully include the burn-in in the trace plot so we can see how quickly the chains converge.</p>
+<p>Each proposal below is written as a small <em>factory</em> that fixes a tuning parameter (e.g.&nbsp;a step size) and returns the actual proposal function with the required <code>(key, theta, log_p) -&gt; (theta', log_q_ratio)</code> signature. This keeps tuning parameters out of the sampler loop.</p>
+</section>
+<section id="independent-proposal" class="level3" data-number="6.5.5">
+<h3 data-number="6.5.5" class="anchored" data-anchor-id="independent-proposal"><span class="header-section-number">6.5.5</span> Independent proposal</h3>
+<p>Our simplest proposal draws a value from a Gaussian distribution centred at the origin, independent of the current state. Since the Gaussian can propose any value (including worse ones), the resulting MH chain is aperiodic and Harris recurrent.</p>
+<div id="proposal-independent" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> propose_independent(scale):</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""q(theta' | theta) = N(0, scale^2 I): independent of the current state."""</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> propose(key, theta, log_p):</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        theta_new <span class="op">=</span> scale <span class="op">*</span> random.normal(key, theta.shape)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Asymmetric proposal: q does not depend on the from-state, but the</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ratio q(theta | theta') / q(theta' | theta) is still nontrivial.</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        log_q_fwd <span class="op">=</span> jnp.<span class="bu">sum</span>(stats.norm.logpdf(theta_new, <span class="fl">0.0</span>, scale))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        log_q_rev <span class="op">=</span> jnp.<span class="bu">sum</span>(stats.norm.logpdf(theta,     <span class="fl">0.0</span>, scale))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> theta_new, log_q_rev <span class="op">-</span> log_q_fwd</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> propose</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="eval-independent" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>evaluate(<span class="st">"independent(σ=1)"</span>, propose_independent(<span class="fl">1.0</span>), random.PRNGKey(<span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>independent(σ=1): acceptance rate 0.002</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mcmc_files/figure-html/eval-independent-output-2.png" id="eval-independent-1" width="637" height="201" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mcmc_files/figure-html/eval-independent-output-3.png" id="eval-independent-2" width="654" height="201" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div id="eval-independent-3" class="cell-output cell-output-display" data-execution_count="16">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">beta_0</th>
+<td>1</td>
+<td>0.3</td>
+<td>0.58</td>
+<td>1.5</td>
+<td>4</td>
+<td>4</td>
+<td>15.80</td>
+<td>0.17</td>
+<td>0.085</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">beta_1</th>
+<td>-0.4</td>
+<td>0.21</td>
+<td>-0.66</td>
+<td>-0.095</td>
+<td>4</td>
+<td>4</td>
+<td>15.01</td>
+<td>0.1</td>
+<td>0.044</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">beta_2</th>
+<td>1.8</td>
+<td>0.2</td>
+<td>1.4</td>
+<td>2.1</td>
+<td>4</td>
+<td>4</td>
+<td>3.29</td>
+<td>0.097</td>
+<td>0.052</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">beta_3</th>
+<td>0.2</td>
+<td>0.3</td>
+<td>-0.17</td>
+<td>0.52</td>
+<td>4</td>
+<td>4</td>
+<td>15.80</td>
+<td>0.12</td>
+<td>0.065</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">log_sigma</th>
+<td>0</td>
+<td>0.17</td>
+<td>-0.27</td>
+<td>0.27</td>
+<td>4</td>
+<td>4</td>
+<td>6.38</td>
+<td>0.086</td>
+<td>0.04</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The posterior occupies a tiny corner of the proposal’s support, so almost every move is rejected. The acceptance rate is near zero, the trace shows chains stuck at their starting points, and <span class="math inline">\(\hat R \gg 1\)</span>. This is a textbook example of a chain that has not converged.</p>
+</section>
+<section id="random-walk-proposal" class="level3" data-number="6.5.6">
+<h3 data-number="6.5.6" class="anchored" data-anchor-id="random-walk-proposal"><span class="header-section-number">6.5.6</span> Random-walk proposal</h3>
+<p>The independent proposal ignores the current state entirely, so it cannot exploit progress that the chain has already made. A <strong>random walk</strong> proposal fixes this by adding Gaussian noise <em>to the current state</em>: once the chain finds a high-probability region it will tend to stay nearby. The proposal is symmetric, so <span class="math inline">\(\log q\)</span>-ratio <span class="math inline">\(= 0\)</span>. Since the Gaussian allows proposing any value, the chain remains aperiodic and Harris recurrent.</p>
+<div id="proposal-random-walk" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> propose_random_walk(scale):</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""q(theta' | theta) = N(theta, scale^2 I): symmetric, so log_q_ratio = 0."""</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> propose(key, theta, log_p):</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        theta_new <span class="op">=</span> theta <span class="op">+</span> scale <span class="op">*</span> random.normal(key, theta.shape)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> theta_new, <span class="fl">0.0</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> propose</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="eval-random-walk" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>evaluate(<span class="st">"random-walk(σ=0.1)"</span>, propose_random_walk(<span class="fl">0.1</span>), random.PRNGKey(<span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>random-walk(σ=0.1): acceptance rate 0.178</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mcmc_files/figure-html/eval-random-walk-output-2.png" id="eval-random-walk-1" width="648" height="201" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mcmc_files/figure-html/eval-random-walk-output-3.png" id="eval-random-walk-2" width="654" height="201" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div id="eval-random-walk-3" class="cell-output cell-output-display" data-execution_count="18">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">beta_0</th>
+<td>0.864</td>
+<td>0.072</td>
+<td>0.75</td>
+<td>0.97</td>
+<td>248</td>
+<td>254</td>
+<td>1.01</td>
+<td>0.0045</td>
+<td>0.0034</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">beta_1</th>
+<td>-0.446</td>
+<td>0.066</td>
+<td>-0.56</td>
+<td>-0.35</td>
+<td>186</td>
+<td>168</td>
+<td>1.02</td>
+<td>0.0049</td>
+<td>0.0032</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">beta_2</th>
+<td>1.916</td>
+<td>0.065</td>
+<td>1.8</td>
+<td>2</td>
+<td>266</td>
+<td>253</td>
+<td>1.02</td>
+<td>0.0041</td>
+<td>0.0032</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">beta_3</th>
+<td>0.306</td>
+<td>0.072</td>
+<td>0.19</td>
+<td>0.42</td>
+<td>213</td>
+<td>285</td>
+<td>1.02</td>
+<td>0.0049</td>
+<td>0.0036</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">log_sigma</th>
+<td>-0.33</td>
+<td>0.073</td>
+<td>-0.44</td>
+<td>-0.21</td>
+<td>188</td>
+<td>282</td>
+<td>1.02</td>
+<td>0.0054</td>
+<td>0.0037</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The chains now converge: after a short burn-in they fluctuate around the same level, the rank plot is much closer to uniform, and ESS and <span class="math inline">\(\hat R\)</span> are good. For this simple model, a random walk with a well-chosen step size is sufficient to explore the posterior. For more complex models, however, the random walk can struggle to find and traverse narrow high-probability regions, which is why we will now look at gradient-based proposals.</p>
+</section>
+<section id="mala-proposal" class="level3" data-number="6.5.7">
+<h3 data-number="6.5.7" class="anchored" data-anchor-id="mala-proposal"><span class="header-section-number">6.5.7</span> MALA proposal</h3>
+<p>The random walk takes uninformed steps. The <strong>Metropolis-adjusted Langevin algorithm (MALA)</strong> uses the gradient of the log target to nudge proposals toward higher-probability regions: <span class="math display">\[
+\theta' = \theta + \frac{\text{scale}^2}{2} \nabla \log p(\theta) + \text{scale} \cdot \varepsilon, \qquad \varepsilon \sim \mathcal{N}(0, I).
+\]</span> This allows larger steps while keeping the acceptance rate high. The proposal is asymmetric: the drift is different at <span class="math inline">\(\theta\)</span> and at <span class="math inline">\(\theta'\)</span>. Hence, we must compute a non-trivial <span class="math inline">\(\log q\)</span>-ratio. JAX gives us <span class="math inline">\(\nabla \log p\)</span> for free via <code>jax.grad</code>. Each step now requires one gradient evaluation in addition to the usual log-density evaluation. To avoid exploding gradients, we clip the gradient to a maximum L2 norm before computing the drift.</p>
+<div id="proposal-mala" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> propose_mala(scale, max_grad_norm<span class="op">=</span><span class="fl">10.0</span>):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Langevin proposal: theta' = theta + (scale^2 / 2) clip(∇log p(theta)) + scale ε.</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Gradients are clipped to L2 norm &lt;= max_grad_norm before computing the drift.</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> clip_grad(g):</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        norm <span class="op">=</span> jnp.linalg.norm(g)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> jnp.where(norm <span class="op">&gt;</span> max_grad_norm, g <span class="op">*</span> (max_grad_norm <span class="op">/</span> norm), g)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> propose(key, theta, log_p):</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        val_and_grad <span class="op">=</span> jax.value_and_grad(log_p)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        _, g_fwd  <span class="op">=</span> val_and_grad(theta)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        mean_fwd  <span class="op">=</span> theta <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> scale<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> clip_grad(g_fwd)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        theta_new <span class="op">=</span> mean_fwd <span class="op">+</span> scale <span class="op">*</span> random.normal(key, theta.shape)</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># value_and_grad at theta_new gives both the log density (reused by mh_step</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># via the proposal cache) and the reverse-drift gradient in one pass.</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        _, g_rev  <span class="op">=</span> val_and_grad(theta_new)</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>        mean_rev  <span class="op">=</span> theta_new <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> scale<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> clip_grad(g_rev)</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        log_q_fwd <span class="op">=</span> jnp.<span class="bu">sum</span>(stats.norm.logpdf(theta_new, mean_fwd, scale))</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        log_q_rev <span class="op">=</span> jnp.<span class="bu">sum</span>(stats.norm.logpdf(theta, mean_rev, scale))</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        log_q_ratio <span class="op">=</span> log_q_rev <span class="op">-</span> log_q_fwd</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> theta_new, log_q_ratio</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> propose</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="eval-mala" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>evaluate(<span class="st">"MALA(σ=0.05)"</span>, propose_mala(<span class="fl">0.05</span>), random.PRNGKey(<span class="dv">5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>MALA(σ=0.05): acceptance rate 0.601</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mcmc_files/figure-html/eval-mala-output-2.png" id="eval-mala-1" width="637" height="201" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mcmc_files/figure-html/eval-mala-output-3.png" id="eval-mala-2" width="654" height="201" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div id="eval-mala-3" class="cell-output cell-output-display" data-execution_count="20">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">beta_0</th>
+<td>0.85</td>
+<td>0.077</td>
+<td>0.72</td>
+<td>0.97</td>
+<td>231</td>
+<td>392</td>
+<td>1.01</td>
+<td>0.005</td>
+<td>0.0035</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">beta_1</th>
+<td>-0.438</td>
+<td>0.066</td>
+<td>-0.54</td>
+<td>-0.33</td>
+<td>356</td>
+<td>487</td>
+<td>1.01</td>
+<td>0.0035</td>
+<td>0.0024</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">beta_2</th>
+<td>1.918</td>
+<td>0.069</td>
+<td>1.8</td>
+<td>2</td>
+<td>281</td>
+<td>373</td>
+<td>1.01</td>
+<td>0.0042</td>
+<td>0.0031</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">beta_3</th>
+<td>0.301</td>
+<td>0.076</td>
+<td>0.18</td>
+<td>0.42</td>
+<td>235</td>
+<td>385</td>
+<td>1.01</td>
+<td>0.0049</td>
+<td>0.0036</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">log_sigma</th>
+<td>-0.32</td>
+<td>0.08</td>
+<td>-0.44</td>
+<td>-0.18</td>
+<td>208</td>
+<td>245</td>
+<td>1.01</td>
+<td>0.0057</td>
+<td>0.0044</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="hmc-proposal" class="level3" data-number="6.5.8">
+<h3 data-number="6.5.8" class="anchored" data-anchor-id="hmc-proposal"><span class="header-section-number">6.5.8</span> HMC proposal</h3>
+<p>While MALA moves in the direction of high probability, it is unable to move well between different high-probability regions. <strong>Hamiltonian Monte Carlo (HMC)</strong> generates long, gradient-guided proposals by simulating the physics of a frictionless skater rolling on the landscape of the negative log target (see <span class="citation" data-cites="BetancourtHMC2018">Betancourt (<a href="../references.html#ref-BetancourtHMC2018" role="doc-biblioref">2018</a>)</span>). The key trick is to <em>augment</em> the state with an auxiliary <strong>momentum</strong> <span class="math inline">\(\rho \in \mathbb{R}^d\)</span>, giving a joint distribution <span class="math display">\[
+p(\theta, \rho) \;\propto\; \exp\bigl(-H(\theta, \rho)\bigr), \qquad H(\theta, \rho) \;=\; \underbrace{-\log p(\theta)}_{\text{potential } V(\theta)} \;+\; \underbrace{\tfrac{1}{2}\|\rho\|^2}_{\text{kinetic } T(\rho)}.
+\]</span> Because <span class="math inline">\(\rho\)</span> is independent of <span class="math inline">\(\theta\)</span> in the joint, the <span class="math inline">\(\theta\)</span>-marginal is unchanged. If at each step we draw a fresh <span class="math inline">\(\rho \sim \mathcal{N}(0, I)\)</span> and then move along a curve of constant <span class="math inline">\(H\)</span> (i.e.&nbsp;exactly conserving energy), the resulting move leaves the joint invariant and we can simply discard <span class="math inline">\(\rho\)</span> at the end.</p>
+<p>Such an energy-preserving curve is the solution of <strong>Hamilton’s equations</strong> <span class="math inline">\(\dot\theta = \partial H/\partial \rho = \rho\)</span> and <span class="math inline">\(\dot\rho = -\partial H/\partial \theta = \nabla \log p(\theta)\)</span>. We approximate them with the <strong>leapfrog integrator</strong>, which alternates a half-kick of momentum, a full drift of position, and another half-kick: <span class="math display">\[
+\rho_{t+1/2} = \rho_t + \tfrac{\varepsilon}{2}\nabla\log p(\theta_t), \qquad
+\theta_{t+1} = \theta_t + \varepsilon\, \rho_{t+1/2}, \qquad
+\rho_{t+1} = \rho_{t+1/2} + \tfrac{\varepsilon}{2}\nabla\log p(\theta_{t+1}).
+\]</span> Leapfrog is <strong>symplectic</strong> and <strong>time-reversible</strong>, properties that would make <span class="math inline">\(H\)</span> exactly conserved and every proposal accepted in the continuous limit. The finite step size <span class="math inline">\(\varepsilon\)</span> introduces a small discretisation error that causes <span class="math inline">\(H\)</span> to drift, and the MH acceptance ratio corrects for it: <span class="math display">\[
+\log\alpha
+  \;=\; H(\theta, \rho) - H(\theta', \rho')
+  \;=\; \underbrace{\log p(\theta') - \log p(\theta)}_{\texttt{log\_p\_prop} - \texttt{log\_p\_theta}}
+  \;+\; \underbrace{\tfrac{1}{2}\bigl(\|\rho\|^2 - \|\rho'\|^2\bigr)}_{\texttt{log\_q\_ratio}}.
+\]</span></p>
+<p>The price of these long trajectories is that leapfrog is only stable when the step size <span class="math inline">\(\varepsilon\)</span> is small compared to the local curvature of <span class="math inline">\(V\)</span>. Above that bound the simulated <span class="math inline">\(H\)</span> explodes (called “divergent transitions”), every proposal is rejected, and the chain freezes. Tuning HMC therefore requires picking <span class="math inline">\(\varepsilon\)</span> small enough for stability and <span class="math inline">\(L\)</span> large enough to traverse the typical set without retracing steps; the NUTS sampler in tools like Stan and NumPyro automates both.</p>
+<div id="proposal-hmc" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> propose_hmc(step_size, n_leapfrog):</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""HMC: L leapfrog steps at step size ε.</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co">    log_q_ratio = 0.5*(||p0||² - ||p'||²) corrects for discretisation error."""</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> propose(key, theta, log_p):</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        grad_log_p <span class="op">=</span> jax.grad(log_p)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        p0 <span class="op">=</span> random.normal(key, theta.shape)  <span class="co"># fresh momentum, ~ N(0, I)</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>        theta_t, p_t <span class="op">=</span> theta, p0</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_leapfrog):</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>            p_half <span class="op">=</span> p_t <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> step_size <span class="op">*</span> grad_log_p(theta_t)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>            theta_t <span class="op">=</span> theta_t <span class="op">+</span> step_size <span class="op">*</span> p_half</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>            p_t <span class="op">=</span> p_half <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> step_size <span class="op">*</span> grad_log_p(theta_t)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>        log_q_ratio <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> (jnp.<span class="bu">sum</span>(p0<span class="op">**</span><span class="dv">2</span>) <span class="op">-</span> jnp.<span class="bu">sum</span>(p_t<span class="op">**</span><span class="dv">2</span>))</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> theta_t, log_q_ratio</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> propose</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="eval-hmc" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>evaluate(<span class="st">"HMC(ε=0.035, L=10)"</span>, propose_hmc(<span class="fl">0.035</span>, <span class="dv">10</span>), random.PRNGKey(<span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>HMC(ε=0.035, L=10): acceptance rate 0.952</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mcmc_files/figure-html/eval-hmc-output-2.png" id="eval-hmc-1" width="647" height="201" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mcmc_files/figure-html/eval-hmc-output-3.png" id="eval-hmc-2" width="654" height="201" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div id="eval-hmc-3" class="cell-output cell-output-display" data-execution_count="22">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">eti89_lb</th>
+<th data-quarto-table-cell-role="th">eti89_ub</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">beta_0</th>
+<td>0.851</td>
+<td>0.074</td>
+<td>0.73</td>
+<td>0.97</td>
+<td>2310</td>
+<td>2773</td>
+<td>1.00</td>
+<td>0.0015</td>
+<td>0.0011</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">beta_1</th>
+<td>-0.436</td>
+<td>0.069</td>
+<td>-0.55</td>
+<td>-0.32</td>
+<td>1085</td>
+<td>1513</td>
+<td>1.00</td>
+<td>0.0021</td>
+<td>0.0015</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">beta_2</th>
+<td>1.917</td>
+<td>0.067</td>
+<td>1.8</td>
+<td>2</td>
+<td>1244</td>
+<td>1821</td>
+<td>1.00</td>
+<td>0.0019</td>
+<td>0.0014</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">beta_3</th>
+<td>0.3</td>
+<td>0.074</td>
+<td>0.18</td>
+<td>0.42</td>
+<td>2500</td>
+<td>2665</td>
+<td>1.00</td>
+<td>0.0015</td>
+<td>0.0011</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">log_sigma</th>
+<td>-0.323</td>
+<td>0.072</td>
+<td>-0.44</td>
+<td>-0.21</td>
+<td>2354</td>
+<td>3057</td>
+<td>1.00</td>
+<td>0.0015</td>
+<td>0.001</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>HMC achieves the highest ESS of all four proposals: the trace plots look essentially uncorrelated and the rank plots are visibly closer to uniform. The cost is <span class="math inline">\(L = 10\)</span> gradient evaluations per proposed move rather than one.</p>
+</section>
+<section id="summary" class="level3" data-number="6.5.9">
+<h3 data-number="6.5.9" class="anchored" data-anchor-id="summary"><span class="header-section-number">6.5.9</span> Summary</h3>
+<p>The progression illustrates a single principle: <em>the more the proposal exploits the geometry of the target, the higher the ESS per chain</em>. This comes at the cost of more gradient work per step. The independent proposal ignores the state entirely and fails. The random walk uses only the current position. MALA adds the gradient. HMC adds the gradient at <span class="math inline">\(L\)</span> intermediate points along a Hamiltonian trajectory. Each of these proposals also has free parameters whose tuning matters: the rule-of-thumb acceptance targets are roughly <span class="math inline">\(25\%\)</span> for random-walk, <span class="math inline">\(57\%\)</span> for MALA, and <span class="math inline">\(65-80\%\)</span> for HMC. In practice these are adjusted during a warm-up phase, which is exactly what NumPyro’s NUTS sampler does automatically.</p>
+</section>
+</section>
+<section id="diagnosing-convergence" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="diagnosing-convergence"><span class="header-section-number">6.6</span> Diagnosing convergence</h2>
+<p>The diagnostics in this section follow the treatment in Chapter 11 of <span class="citation" data-cites="GelmanBDA2013">Gelman et al. (<a href="../references.html#ref-GelmanBDA2013" role="doc-biblioref">2013</a>)</span>. The basic problem of MCMC inference is that we never observe the stationary distribution directly. Instead we only see a finite collection of correlated draws from a few chains. Two failure modes can spoil our inferences. First, the chains may not have <strong>mixed</strong>: different chains can settle in different regions of parameter space and look stationary on their own while disagreeing with each other. Second, even if the chains agree, each individual chain may not have reached <strong>stationarity</strong>: an early-iteration drift can persist into the post-warmup samples. Both must be ruled out before we trust averages over the draws.</p>
+<p>To detect both problems with a single number, we follow Gelman et al.&nbsp;and <strong>split each chain in half</strong> after discarding the warm-up. If we run <span class="math inline">\(M\)</span> chains of post-warmup length <span class="math inline">\(2n\)</span>, splitting gives us <span class="math inline">\(m = 2M\)</span> half-chains of length <span class="math inline">\(n\)</span>. Mixing failures show up as disagreement between chains; stationarity failures show up as disagreement between the first and second half of the same chain. Hence both look like between-chain disagreement once the splits are pooled. The diagnostics below all operate on these <span class="math inline">\(m\)</span> split-chains.</p>
+<p>Fix a scalar quantity of interest <span class="math inline">\(\psi\)</span> (a parameter, a derived quantity, or <span class="math inline">\(\log p(\theta \mid y)\)</span>). Write <span class="math inline">\(\psi_{ij}\)</span> for draw <span class="math inline">\(i\)</span> of split-chain <span class="math inline">\(j\)</span>, with chain mean <span class="math inline">\(\bar\psi_{\cdot j}\)</span> and grand mean <span class="math inline">\(\bar\psi_{\cdot\cdot}\)</span>. The <strong>between-chain</strong> and <strong>within-chain</strong> variances are <span class="math display">\[
+B \;=\; \frac{n}{m-1}\sum_{j=1}^{m}\bigl(\bar\psi_{\cdot j} - \bar\psi_{\cdot\cdot}\bigr)^{2},
+\qquad
+W \;=\; \frac{1}{m}\sum_{j=1}^{m} s_{j}^{2},
+\qquad
+s_{j}^{2} = \frac{1}{n-1}\sum_{i=1}^{n}\bigl(\psi_{ij} - \bar\psi_{\cdot j}\bigr)^{2}.
+\]</span> The factor <span class="math inline">\(n\)</span> in <span class="math inline">\(B\)</span> rescales the variance of the chain <em>means</em> into a variance on the same footing as <span class="math inline">\(W\)</span>. Intuitively, <span class="math inline">\(W\)</span> measures how much each chain wiggles around its own mean, and <span class="math inline">\(B\)</span> measures how much the chain means disagree with each other.</p>
+<p>If the chains had truly converged we would have <span class="math inline">\(B \approx W\)</span>: each chain would explore the full posterior, so its sample variance would equal the marginal posterior variance, and the chain means would all sit near the true posterior mean. As long as the starting distribution is overdispersed relative to the target, <span class="math inline">\(W\)</span> <em>underestimates</em> the posterior variance (chains have not had time to explore the tails) while a weighted combination <span class="math display">\[
+\widehat{\mathrm{var}}^{+}(\psi \mid y) \;=\; \frac{n-1}{n}\, W \;+\; \frac{1}{n}\, B
+\]</span> <em>overestimates</em> it. The <strong>potential scale reduction factor</strong> <span class="math inline">\(\hat R\)</span> compares these two estimates: <span class="math display">\[
+\hat R \;=\; \sqrt{\frac{\widehat{\mathrm{var}}^{+}(\psi \mid y)}{W}}.
+\]</span> <span class="math inline">\(\hat R\)</span> measures by what factor the posterior scale could shrink if we ran the chains forever. As <span class="math inline">\(n \to \infty\)</span> both estimates converge to the true variance and <span class="math inline">\(\hat R \to 1\)</span>. A common practical threshold is <span class="math inline">\(\hat R &lt; 1.01\)</span>; values noticeably above <span class="math inline">\(1\)</span> signal that some chains are still exploring distinct regions or that individual chains have not yet stabilised.</p>
+<p>Convergence is necessary but not sufficient: even well-mixed chains produce <em>correlated</em> draws, so <span class="math inline">\(mn\)</span> samples are worth fewer than <span class="math inline">\(mn\)</span> independent draws. The <strong>effective sample size</strong> quantifies this loss. The asymptotic variance of the chain average <span class="math inline">\(\bar\psi_{\cdot\cdot}\)</span> as an estimator of <span class="math inline">\(\mathbb{E}[\psi \mid y]\)</span> is <span class="math display">\[
+\lim_{n\to\infty}\, mn \cdot \mathrm{var}(\bar\psi_{\cdot\cdot}) \;=\; \Bigl(1 + 2\sum_{t=1}^{\infty}\rho_{t}\Bigr)\,\mathrm{var}(\psi \mid y),
+\]</span> where <span class="math inline">\(\rho_t\)</span> is the lag-<span class="math inline">\(t\)</span> autocorrelation of <span class="math inline">\(\psi\)</span> along a chain. If the draws were independent, this variance would just be <span class="math inline">\(\mathrm{var}(\psi \mid y)\)</span>, so the inflation factor in parentheses is the price of correlation. Defining <span class="math display">\[
+n_{\mathrm{eff}} \;=\; \frac{mn}{1 + 2\sum_{t=1}^{\infty}\rho_{t}}
+\]</span> gives the number of independent draws that would carry the same information as the <span class="math inline">\(mn\)</span> correlated ones. A chain that proposes tiny steps has <span class="math inline">\(\rho_t\)</span> close to <span class="math inline">\(1\)</span> for many lags and a small <span class="math inline">\(n_{\mathrm{eff}}\)</span>; a well-tuned HMC sampler has rapidly decaying <span class="math inline">\(\rho_t\)</span> and <span class="math inline">\(n_{\mathrm{eff}}\)</span> approaching <span class="math inline">\(mn\)</span>.</p>
+<p>The estimator computes empirical autocorrelations according to <span class="math display">\[
+\hat\rho_t := 1 - \frac{V_t}{2 \widehat{\mathrm{var}}^{+}(\psi \mid y)}, \qquad
+V_t := \frac{1}{m(n-t)}\sum_{j=1}^m \sum_{i=t+1}^n (\psi_{ij}-\psi_{i-t,j})^2.
+\]</span> This formula is motivated by solving the identity <span class="math inline">\(\mathbb{E}(\psi_i - \psi_{i-t})^2 = 2 \mathrm{var}(\psi \mid y) (1 - \rho_t)\)</span> for <span class="math inline">\(\rho_t\)</span> and plugging in the variance estimator. Since these estimates get noisy as <span class="math inline">\(t\)</span> increases, the sum is then truncated at the first lag <span class="math inline">\(T\)</span> where consecutive pairs <span class="math inline">\(\hat\rho_{2t} + \hat\rho_{2t+1}\)</span> turn negative. <span class="citation" data-cites="GelmanBDA2013">Gelman et al. (<a href="../references.html#ref-GelmanBDA2013" role="doc-biblioref">2013</a>)</span> recommends running until <span class="math inline">\(\hat n_{\mathrm{eff}} \gtrsim 5m\)</span> ( ten effective draws per split-chain) in addition to <span class="math inline">\(\hat R\)</span> being near <span class="math inline">\(1\)</span>.</p>
+<p>A few caveats. Both <span class="math inline">\(\hat R\)</span> and <span class="math inline">\(\hat n_{\mathrm{eff}}\)</span> are computed <em>per scalar quantity</em>: a chain may converge cleanly for one parameter and badly for another, so all quantities of interest must be checked. Both diagnostics rely on means and variances and so behave best for approximately Gaussian marginals; for heavy-tailed or constrained quantities one transforms first (logs, logits, or ranks). Morever, neither diagnostic can detect modes that the chains never visited. Convergence checks only confirm that the chains agree with each other, not that they have found everything.</p>
+<!-- ## Finite Markov chains: a formal treatment {#sec-finite-mc}
+
+This section gives a rigorous version of the conceptual story above for the case of a **finite** state space. The finite setting is enough to justify everything from first principles, and even chains for continuous distributions are ultimately implemented as discrete approximations on a computer. The general theory extends to continuous state spaces using measure-theoretic machinery, but the conceptual content is the same.
+
+Throughout, $X$ is a finite state space. The distribution of particles at time $t$ is a probability measure $p_t(x)$, viewed as a kernel $p_t : I \kernel X$. The law of motion is a transition kernel $k : X \kernel X$, and the $t$-step evolution is the kernel composition
+$$k^t := \underbrace{k \then \cdots \then k}_{t\text{-times}}.$$
+
+### The strong Markov property
+
+If we know the exact state of a particle at time $s$, then the future trajectory from $s$ onward behaves like a fresh trajectory starting from that state. This holds even if $s$ is a random time determined by the history of the trajectory up to $s$.
+
+
+::: {#lem-trajectory}
+Let $x_0, x_1, \dots$ be a trajectory generated by $k$. Then:
+
+1. **Multi-step kernel.** For any deterministic $t \ge 0$, $p(x_t = z \mid x_0 = x) = k^t(z \mid x)$.
+2. **Strong Markov property.** Let $s$ be a *stopping time*, meaning the event $\{s = n\}$ is strictly determined by the history $x_0, \dots, x_n$. Conditional on $\{x_s = y\}$, the future trajectory behaves as a fresh start from $y$:
+$$
+p(x_{s+r} = z \mid x_0 = x, x_s = y) = k^r(z \mid y).
+$$
+:::
+
+::: {.proof collapse="true"}
+**(1) Multi-step kernel & deterministic Markov property.** Consider a deterministic time $n$, a horizon $r \ge 1$, and an arbitrary event $E$ determined entirely by the trajectory's history up to time $n$. Conditioning the future trajectory on $E$ and the present state $x_n = y$ involves summing the joint probabilities over all valid pasts:
+$$
+p(x_{n+1}, \ldots, x_{n+r} \mid E, x_n = y) 
+= \frac{\sum_{x_{0:n-1}} p(x_0, \ldots, x_{n-1}, x_n=y, x_{n+1}, \dots, x_{n+r}) \ivmark{(x_{0:n-1}, y) \in E}}{\sum_{x_{0:n-1}} p(x_0, \ldots, x_{n-1}, x_n=y) \ivmark{(x_{0:n-1}, y) \in E}}.
+$$
+The joint probability in the numerator factors into the past and the future transitions. Because the future transitions $k(x_{n+i} \mid x_{n+i-1})$ do not depend on the specific past sequence $x_{0:n-1}$, we can pull their product out of the sum. This causes the sum over the pasts to perfectly cancel with the denominator:
+$$
+\frac{\left( \sum_{x_{0:n-1}} p(x_0, \dots, x_{n-1}, x_n=y) \ivmark{\dots} \right) \prod_{i=1}^r k(x_{n+i} \mid x_{n+i-1})}{\sum_{x_{0:n-1}} p(x_0, \dots, x_{n-1}, x_n=y) \ivmark{\dots}}
+= \prod_{i=1}^r k(x_{n+i} \mid x_{n+i-1}).
+$$
+This demonstrates that given $x_n = y$, the future is conditionally independent of *any* past event $E$. Summing out the intermediate future states $x_{n+1}, \dots, x_{n+r-1}$ evaluates the $r$-fold kernel composition $k^r$, giving $p(x_{n+r} = z \mid E, x_n = y) = k^r(z \mid y)$. Setting $n=0$ and a trivial $E$ yields the multi-step kernel claim (1).
+
+**(2) Strong Markov property.** Decomposing over $n = s$:
+$$
+p(x_{s+r} = z \mid x_0 = x, x_s = y) = \sum_{n \ge 0} p(s = n \mid x_0=x, x_s=y) \, p(x_{n+r} = z \mid x_0=x, x_n=y, s=n).
+$$
+Because $s$ is a stopping time, the combined event $E = \{x_0 = x, s = n\}$ is determined entirely by the history up to time $n$. Thus, applying our generalized result from (1), the second factor evaluates to exactly $k^r(z \mid y)$, independent of $n$. It pulls out of the sum, which then marginalizes to $1$.
+:::
+
+### Ergodic kernels
+
+The intuitive notion of "the dynamics mixes" is captured formally by the following definition.
+
+::: {#def-ergodic-kernel}
+A Markov kernel $k : X \kernel X$ is **ergodic** if for any initial states $x, y \in X$ and any destination state $z \in X$, the multi-step transition probabilities have the same point-wise limit:
+$$
+\lim_{t \to \infty} k^t(z \mid x) = \lim_{t \to \infty} k^t(z \mid y).
+$$
+:::
+
+An ergodic chain *forgets* where it started: in the long run, the probability of ending up in state $z$ does not depend on the initial state. We can therefore define the limiting distribution
+$$
+p_\infty(z) := \lim_{t \to \infty} k^t(z \mid x) \quad \text{(for any } x\text{)}.
+$$
+
+This is a valid probability distribution: since $\sum_z k^t(z \mid x) = 1$ for every $t$ we have
+$$\sum_z p_\infty(z) = \sum_z \lim_{t \to \infty} k^t(z \mid x) = \lim_{t \to \infty} \sum_z k^t(z \mid x) = 1,$$
+using the fact that finite sums can be interchanged with limits. In matrix terms, $k^t$ converges to a matrix in which every row equals the same probability vector $p_\infty$.
+
+The single mathematical limit in @def-ergodic-kernel has three immediate consequences that justify treating $p_\infty$ as *the* stationary distribution.
+
+::: {#thm-ergodic-properties}
+Let $k : X \kernel X$ be an ergodic kernel with limiting distribution $p_\infty$. Then:
+
+1. **Universal convergence.** For any initial distribution $p_0$, we have $p_0 \then k^t \to p_\infty$ as $t \to \infty$.
+2. **Stationarity.** $p_\infty$ is a stationary distribution: $p_\infty = p_\infty \then k$.
+3. **Uniqueness.** $p_\infty$ is the unique stationary distribution.
+:::
+
+::: {.proof}
+**(1) Universal convergence.**
+$$
+\lim_{t \to \infty} (p_0 \then k^t)(z) = \lim_{t \to \infty} \sum_{x \in X} p_0(x) \, k^t(z \mid x) = \sum_{x \in X} p_0(x) \, p_\infty(z) = p_\infty(z).
+$$
+
+**(2) Stationarity.**
+$$
+(p_\infty \then k)(z) = \sum_{x' \in X} k(z \mid x') \, p_\infty(x') = \sum_{x' \in X} k(z \mid x') \lim_{t \to \infty} k^t(x' \mid x) = \lim_{t \to \infty} k^{t+1}(z \mid x) = p_\infty(z).
+$$
+
+**(3) Uniqueness.** Suppose $p'_\infty$ is another stationary distribution. Setting $p_0 = p'_\infty$ in (1), the chain stays at $p'_\infty$ forever by stationarity, but universal convergence forces it to converge to $p_\infty$. Hence $p'_\infty = p_\infty$.
+:::
+
+::: {#prp-mean-return-times}
+**Mean return time formula.** Let $k$ be an ergodic kernel on a finite state space $X$. For any state $z \in X$, let $M$ be the first return time to $z$ and let $\mu_z := \mathbb{E}[M \mid x_0 = z]$ be the mean return time. Then $\mu_z < \infty$, and the stationary distribution $p_\infty$ satisfies
+$$
+p_\infty(z) = \frac{1}{\mu_z}.
+$$
+:::
+
+::: {.proof collapse="true"}
+The strategy is to build an unnormalised stationary vector $\nu$ by counting visits to each state during a single excursion from $z$ back to $z$, then normalise it. This produces a stationary distribution $\pi$, which by uniqueness (@thm-ergodic-properties) must equal $p_\infty$.
+
+**Step 1: Finiteness of $\mu_z$.** Ergodic chains are inherently irreducible (as detailed in the criteria below), so start the trajectory at $x_0 = z$. By @lem-infinite-visits the trajectory returns to $z$ in finite time, so $M$ is finite almost surely. The same geometric tail bound used in that lemma's proof gives $\mathbb{P}(M > n) \le (1 - c)^{\lfloor n / t \rfloor}$ for some $c > 0$ and $t \ge 1$, which is summable. Hence $\mu_z = \sum_{n \ge 0} \mathbb{P}(M > n) < \infty$.
+
+**Step 2: An excursion-counting measure.** For each state $x$, define
+$$
+\nu(x) := \mathbb{E}\!\left[\sum_{n=1}^{M} \ivmark{x_n = x} \;\Bigm|\; x_0 = z\right] = \sum_{n=1}^{\infty} \mathbb{P}(x_n = x,\; n \le M \mid x_0 = z),
+$$
+the expected number of visits to $x$ during one excursion, counting the closing visit $x_M = z$ but not the opening $x_0 = z$. Two basic facts:
+
+- *Total mass.* Summing over $x$ counts every step from $1$ to $M$, so $\sum_{x} \nu(x) = \mathbb{E}[M \mid x_0 = z] = \mu_z$.
+- *Mass at $z$.* The only $n \in \{1, \dots, M\}$ with $x_n = z$ is $n = M$, so $\nu(z) = 1$.
+
+**Step 3: $\nu$ is a stationary vector.** We show $\nu \then k = \nu$. By the Markov property (@lem-trajectory),
+$$
+\mathbb{P}(x_n = x,\; x_{n+1} = x',\; n \le M \mid x_0 = z) = \mathbb{P}(x_n = x,\; n \le M \mid x_0 = z) \, k(x' \mid x),
+$$
+since the event $\{n \le M\}$ depends only on $x_1, \dots, x_n$. Substituting and summing over $x$,
+$$
+(\nu \then k)(x') = \sum_{n=1}^{\infty} \sum_{x} \mathbb{P}(x_n = x,\; x_{n+1} = x',\; n \le M) = \sum_{n=1}^{\infty} \mathbb{P}(x_{n+1} = x',\; n \le M).
+$$
+Re-indexing $m = n + 1$ rewrites this as a sum over the window $\{2, \dots, M+1\}$. Compared to $\nu(x')$, which is the same kind of sum over the window $\{1, \dots, M\}$, only the endpoints differ:
+$$
+(\nu \then k)(x') - \nu(x') = \mathbb{P}(x_{M+1} = x' \mid x_0 = z) - \mathbb{P}(x_1 = x' \mid x_0 = z).
+$$
+Since $x_M = z = x_0$, the strong Markov property at the stopping time $M$ gives $\mathbb{P}(x_{M+1} = x' \mid x_0 = z) = k(x' \mid z) = \mathbb{P}(x_1 = x' \mid x_0 = z)$. The difference vanishes, so $\nu \then k = \nu$.
+
+**Step 4: Conclusion.** Since $\sum_x \nu(x) = \mu_z < \infty$, the rescaling $\pi := \nu / \mu_z$ is a probability distribution and inherits stationarity from $\nu$. By the uniqueness of the stationary distribution for ergodic chains (@thm-ergodic-properties), we must have $\pi = p_\infty$. Reading off the value at $z$ and using $\nu(z) = 1$ gives $p_\infty(z) = \pi(z) = 1/\mu_z$.
+:::
+
+### Recognizing ergodic kernels
+
+The two structural obstructions to ergodicity discussed earlier — disconnected components and deterministic cycles — turn out to be the *only* obstructions on a finite state space. They correspond exactly to the failure of two simple conditions.
+
+::: {#def-irreducible-aperiodic}
+A kernel $k : X \kernel X$ is:
+
+- **Irreducible** if any state can eventually be reached from any other: for all $x, x' \in X$, there exists $t > 0$ with $k^t(x' \mid x) > 0$.
+- **Aperiodic** if it does not get stuck in deterministic loops: for every state $x$, the set of possible return times $R(x) = \{ t \ge 1 \mid k^t(x \mid x) > 0 \}$ has greatest common divisor $1$.
+:::
+
+::: {#lem-infinite-visits}
+**(Infinite visits lemma.)** Let $k$ be irreducible on a finite state space $X$. Then a trajectory starting at any state visits every state infinitely many times with probability $1$.
+:::
+
+::: {.proof}
+Fix a target $z$. Since $X$ is finite, at least one state $w$ is visited infinitely often along any trajectory. By irreducibility, there is a length $t$ with $c := k^t(z \mid w) > 0$. Let $\tau_1 < \tau_2 < \cdots$ be a sequence of visit times to $w$ spaced at least $t$ apart (take $\tau_{r+1}$ to be the first visit to $w$ after $\tau_r + t$; infinitely many such times exist since $w$ is visited infinitely often). Define indicators
+$$
+B_r := \ivmark{x_{\tau_r + t} = z}.
+$$
+By the strong Markov property at $\tau_r$ (@lem-trajectory),
+$$
+\mathbb{P}(B_r = 1 \mid x_0, \dots, x_{\tau_r}) = k^t(z \mid w) = c,
+$$
+regardless of the past. Hence
+$$
+\mathbb{P}(B_1 = 0, \dots, B_n = 0) = \mathbb{E}\!\left[\prod_{r=1}^n (1 - B_r)\right] = (1 - c)^n
+$$
+by iteratively conditioning on the past and pulling out factors of $1 - c$. Letting $n \to \infty$, the trajectory hits $z$ at some time $\tau_r + t$ with probability $1$.
+
+Once $z$ is reached, the strong Markov property gives a fresh start from $z$, so the same argument shows $z$ must be reached again from any visit. Iterating, $z$ is visited infinitely often with probability $1$.
+:::
+
+::: {#thm-ergodicity-criterion}
+A kernel $k : X \kernel X$ on a finite state space is ergodic if and only if it is irreducible and aperiodic.
+:::
+
+::: {.proof collapse="true"}
+The failures of irreducibility and aperiodicity prevent ergodicity, as discussed. We now show that these conditions are sufficient. The argument uses a **coupling**: we run two copies of the chain in parallel — one started arbitrarily, one already in stationarity — and show they meet in finite time. Once they meet, we glue them together, after which the arbitrary chain is automatically in stationarity too.
+
+**Step 1: Pick a stationary distribution.** The constructive proof of @prp-mean-return-times only relied on the fact that an ergodic kernel is inherently irreducible. That same step-by-step construction goes through using merely irreducibility, so irreducibility alone produces a stationary distribution $\pi$ for $k$. Our goal is to show $k^t(z \mid x) \to \pi(z)$ for every $x$ and $z$, which forces $k$ to be ergodic with $p_\infty = \pi$.
+
+**Step 2: The product chain is irreducible.** Run two independent copies $X_n, Y_n$ of the chain on the product space $X \times X$, with combined kernel
+$$
+\tilde k\bigl((x', y') \mid (x, y)\bigr) = k(x' \mid x) \, k(y' \mid y).
+$$
+Irreducibility plus aperiodicity of $k$ implies that for every $x, x' \in X$ we have $k^t(x' \mid x) > 0$ for all sufficiently large $t$ — a standard number-theoretic consequence of $\gcd R(x) = 1$. Choosing $t$ large enough to work simultaneously for the four pairs $(x, x'), (y, y'), (x, x), (y, y)$, we get $\tilde k^t\bigl((x', y') \mid (x, y)\bigr) > 0$, so $\tilde k$ is irreducible on $X \times X$. (This is the only place aperiodicity is used: without it the product chain can split into disjoint diagonal classes — e.g. for the two-state swap, the product stays on $\{(0,0), (1,1)\}$ or $\{(0,1), (1,0)\}$ forever.)
+
+**Step 3: The coupling time is finite.** Pick any state $s \in X$ and let $T := \min\{n \ge 0 : (X_n, Y_n) = (s, s)\}$. Since $\tilde k$ is irreducible on the finite state space $X \times X$, @lem-infinite-visits applies to the product chain, giving $T < \infty$ almost surely.
+
+**Step 4: Glue the chains.** Start $X_0 = x$ deterministically and $Y_0 \sim \pi$, so $Y_n \sim \pi$ for every $n$ by stationarity. Define a coupled process
+$$
+\widetilde X_n := \begin{cases} X_n & \text{if } n \le T, \\ Y_n & \text{if } n > T. \end{cases}
+$$
+By the strong Markov property at the stopping time $T$ (where $X_T = Y_T = s$), $\widetilde X_n$ is itself a copy of the chain started from $x$, so $\mathbb{P}(\widetilde X_n = z) = k^n(z \mid x)$. On the event $\{T \le n\}$ we have $\widetilde X_n = Y_n$, so $\widetilde X_n$ and $Y_n$ disagree only on $\{T > n\}$:
+$$
+|\, k^n(z \mid x) - \pi(z) \,| \;=\; |\, \mathbb{P}(\widetilde X_n = z) - \mathbb{P}(Y_n = z) \,| \;\le\; \mathbb{P}(T > n) \;\xrightarrow{n \to \infty}\; 0.
+$$
+The limit $\pi(z)$ is independent of the starting state $x$, so $k$ is ergodic and $p_\infty = \pi$.
+:::
+
+### The ergodic theorem
+
+The conceptual identification of time averages with spatial averages is made precise by the **ergodic theorem**. The result splits into two layers: the *temporal* claim that visit frequencies stabilise to reciprocals of mean return times needs only irreducibility; ergodicity is what lets us further identify those reciprocals with the stationary distribution.
+
+::: {#thm-ergodic-theorem}
+Let $k$ be an irreducible kernel on a finite state space, and let $x_1, x_2, \dots$ be a trajectory generated by $k$. For each state $z$ the empirical visit frequency converges almost surely to the reciprocal of the mean return time:
+$$
+\frac{1}{N} \sum_{t=1}^N \ivmark{x_t = z} \; \overset{\text{a.s.}}{\longrightarrow} \; \frac{1}{\mu_z}.
+$$
+By linearity, for any $f : X \to \mathbb{R}$,
+$$
+\frac{1}{N} \sum_{t=1}^N f(x_t) \; \overset{\text{a.s.}}{\longrightarrow} \; \sum_{z \in X} \frac{f(z)}{\mu_z}.
+$$
+*Moreover*, when $k$ is ergodic, @prp-mean-return-times gives $1/\mu_z = p_\infty(z)$, so the limit is $\mathbb{E}_{x \sim p_\infty}[f(x)]$.
+:::
+
+We prove the visit-frequency claim by sandwiching $N/V(N)$ between two ordinary i.i.d. averages of inter-visit times and applying the strong law of large numbers. The full statement then follows by writing $f$ as a linear combination of indicators.
+
+::: {.proof collapse="true"}
+**Visit frequencies.** Fix $z$ and write $V(N) := \sum_{t=1}^N \ivmark{x_t = z}$. By @lem-infinite-visits the trajectory hits $z$ in finite time and $V(N) \to \infty$ almost surely. Discarding the initial segment up to the first visit changes $N$ and $V(N)$ by finite amounts that do not affect the limit of $V(N)/N$, so by the Markov property (@lem-trajectory) we may assume $x_0 = z$.
+
+Let $M_1, M_2, \dots$ be the successive inter-visit times. By the Markov property the $M_r$ are i.i.d. with mean $\mu_z$ (which is finite by @prp-mean-return-times). The time of the $r$-th return to $z$ is $M_1 + \cdots + M_r$, so the $V(N)$-th return has happened by time $N$ but the next has not:
+$$
+M_1 + \cdots + M_{V(N) - 1} \;\le\; N \;<\; M_1 + \cdots + M_{V(N)}.
+$$
+Dividing by $V(N)$ and applying the strong law of large numbers along the random subsequence $V(N) \to \infty$ sends both bounds to $\mu_z$, so
+$$
+\frac{V(N)}{N} \overset{\text{a.s.}}{\longrightarrow} \frac{1}{\mu_z}.
+$$
+
+**Linear combinations.** Any $f : X \to \mathbb{R}$ on a finite state space is a finite linear combination of indicators, $f(x) = \sum_{z \in X} f(z) \, \ivmark{x = z}$. Linearity of the time average gives
+$$
+\frac{1}{N} \sum_{t=1}^N f(x_t) = \sum_{z \in X} f(z) \cdot \frac{V(N)}{N} \overset{\text{a.s.}}{\longrightarrow} \sum_{z \in X} \frac{f(z)}{\mu_z}.
+$$
+
+**The ergodic case.** When $k$ is ergodic, @prp-mean-return-times states that $p_\infty(z) = 1/\mu_z$. The limit becomes $\sum_{z} f(z) \, p_\infty(z) = \mathbb{E}_{x \sim p_\infty}[f(x)]$.
+::: 
+
+-->
+</section>
+<section id="bibliographic-notes" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="bibliographic-notes"><span class="header-section-number">6.7</span> Bibliographic notes</h2>
+<p>The standard reference for general Markov chains is the classic text by Meyn and Tweedie (<span class="citation" data-cites="MeynMCMC2009">Meyn, Tweedie, and Glynn (<a href="../references.html#ref-MeynMCMC2009" role="doc-biblioref">2009</a>)</span>) which covers the relevant limit theorems in detail. Comprehensive coverage of Monte Carlo methods including MCMC is given by the monograph by Robert and Casella (<span class="citation" data-cites="RobertMCBook2004">Robert and Casella (<a href="../references.html#ref-RobertMCBook2004" role="doc-biblioref">2004</a>)</span>). I find the presentation in <span class="citation" data-cites="TierneyMCMC1994">Tierney (<a href="../references.html#ref-TierneyMCMC1994" role="doc-biblioref">1994</a>)</span> much easier to follow. Hamiltonian Monte Carlo is reviewed in detail by <span class="citation" data-cites="BetancourtHMC2018">Betancourt (<a href="../references.html#ref-BetancourtHMC2018" role="doc-biblioref">2018</a>)</span>.</p>
+
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-BetancourtHMC2018" class="csl-entry" role="listitem">
+Betancourt, Michael. 2018. <span>“A <span>Conceptual</span> <span>Introduction</span> to <span>Hamiltonian</span> <span>Monte</span> <span>Carlo</span>.”</span> arXiv. <a href="https://doi.org/10.48550/arXiv.1701.02434">https://doi.org/10.48550/arXiv.1701.02434</a>.
+</div>
+<div id="ref-GelmanBDA2013" class="csl-entry" role="listitem">
+Gelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki Vehtari, and Donald B. Rubin. 2013. <em>Bayesian Data Analysis</em>. Chapman; Hall/CRC. <a href="https://doi.org/10.1201/b16018">https://doi.org/10.1201/b16018</a>.
+</div>
+<div id="ref-MeynMCMC2009" class="csl-entry" role="listitem">
+Meyn, Sean, Richard L. Tweedie, and Peter W. Glynn. 2009. <em>Markov <span>Chains</span> and <span>Stochastic</span> <span>Stability</span></em>. 2nd ed. Cambridge University Press. <a href="https://doi.org/10.1017/CBO9780511626630">https://doi.org/10.1017/CBO9780511626630</a>.
+</div>
+<div id="ref-RobertMCBook2004" class="csl-entry" role="listitem">
+Robert, Christian P., and George Casella. 2004. <em>Monte <span>Carlo</span> <span>Statistical</span> <span>Methods</span></em>. Springer <span>Texts</span> in <span>Statistics</span>. New York, NY: Springer New York. <a href="https://doi.org/10.1007/978-1-4757-4145-2">https://doi.org/10.1007/978-1-4757-4145-2</a>.
+</div>
+<div id="ref-TierneyMCMC1994" class="csl-entry" role="listitem">
+Tierney, Luke. 1994. <span>“Markov <span>Chains</span> for <span>Exploring</span> <span>Posterior</span> <span>Distributions</span>.”</span> <em>The Annals of Statistics</em> 22 (4). <a href="https://doi.org/10.1214/aos/1176325750">https://doi.org/10.1214/aos/1176325750</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/bayesian-data-analysis.html" class="pagination-link" aria-label="Bayesian Data Analysis">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Bayesian Data Analysis</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/practical.html" class="pagination-link" aria-label="Inference in practice">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inference in practice</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".proof").forEach(function (div) {
+    var details = document.createElement("details");
+    var summary = document.createElement("summary");
+    var titleSpan = div.querySelector(".proof-title");
+    if (titleSpan) {
+      summary.appendChild(titleSpan.cloneNode(true));
+      titleSpan.remove();
+    } else {
+      summary.innerHTML = "<em>Proof</em>.";
+    }
+    var isRemark = div.classList.contains("remark");
+    // Add QED square to summary (visible when collapsed)
+    if (!isRemark) {
+      var summaryQed = document.createElement("span");
+      summaryQed.className = "proof-qed-inline";
+      summaryQed.textContent = "\u25A0";
+      summary.appendChild(summaryQed);
+    }
+    details.appendChild(summary);
+    while (div.firstChild) {
+      details.appendChild(div.firstChild);
+    }
+    // Add QED square at end of proof body
+    if (!isRemark) {
+      var qed = document.createElement("span");
+      qed.className = "proof-qed";
+      qed.textContent = "\u25A0";
+      details.appendChild(qed);
+    }
+    div.appendChild(details);
+  });
+});
+</script>
+
+
+
+
+</body></html>
