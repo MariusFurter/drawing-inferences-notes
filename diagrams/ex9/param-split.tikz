@@ -1,0 +1,80 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=small box] (44) at (5.375, 1.5) {$\mid \bar a_i$};
+		\node [style=none] (45) at (4.25, 2.625) {};
+		\node [style=none] (46) at (4.25, 0.375) {};
+		\node [style=none] (47) at (6.5, 0.375) {};
+		\node [style=none] (48) at (6.5, 2.625) {};
+		\node [style=small box] (49) at (2.625, 1.5) {};
+		\node [style=none] (50) at (4.875, 1.5) {};
+		\node [style=small box] (51) at (5.375, -1.5) {$\mid \bar h_i$};
+		\node [style=none] (52) at (4.25, -0.375) {};
+		\node [style=none] (53) at (4.25, -2.625) {};
+		\node [style=none] (54) at (6.5, -2.625) {};
+		\node [style=none] (55) at (6.5, -0.375) {};
+		\node [style=small box] (56) at (2.625, -1.5) {};
+		\node [style=none] (57) at (4.875, -1.5) {};
+		\node [style=small box] (65) at (10.375, -1.5) {$\mid \bar d_i$};
+		\node [style=none] (66) at (9.25, -0.375) {};
+		\node [style=none] (67) at (9.25, -2.625) {};
+		\node [style=none] (68) at (11.5, -2.625) {};
+		\node [style=none] (69) at (11.5, -0.375) {};
+		\node [style=small box] (70) at (7.625, -1.5) {};
+		\node [style=none] (71) at (9.875, -1.5) {};
+		\node [style=small box] (79) at (10.375, 1.525) {$\mid \bar g_i$};
+		\node [style=none] (80) at (9.25, 2.65) {};
+		\node [style=none] (81) at (9.25, 0.4) {};
+		\node [style=none] (82) at (11.5, 0.4) {};
+		\node [style=none] (83) at (11.5, 2.65) {};
+		\node [style=small box] (84) at (7.625, 1.525) {};
+		\node [style=none] (85) at (9.875, 1.525) {};
+		\node [style=none] (86) at (0.25, 0) {$=$};
+		\node [style=none] (87) at (-12.5, 2.25) {};
+		\node [style=none] (88) at (-12.5, -2.25) {};
+		\node [style=none] (89) at (-1.5, -2.25) {};
+		\node [style=none] (90) at (-1.5, 2.25) {};
+		\node [style=small box] (91) at (-14.25, 0.25) {};
+		\node [style=small box] (92) at (-11.25, -3.25) {};
+		\node [style=small box] (93) at (-9.25, 3.5) {};
+		\node [style=small box] (94) at (-6.25, 3.5) {};
+		\node [style=none] (95) at (-12, 0.25) {};
+		\node [style=none] (96) at (-9.25, -1) {};
+		\node [style=none] (97) at (-3.75, 0.25) {};
+		\node [style=none] (98) at (-7, 0.25) {};
+		\node [style=small box] (99) at (-11.5, 0.25) {$\mid \bar a_i$};
+		\node [style=small box] (100) at (-9, -1) {$\mid \bar h_i$};
+		\node [style=small box] (101) at (-6.5, 0.25) {$\mid \bar g_i$};
+		\node [style=medium box] (102) at (-3.25, 0.25) {$\mid \bar d_i$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=double edge] (47.center) to (46.center);
+		\draw [style=double edge] (46.center) to (45.center);
+		\draw [style=double edge] (45.center) to (48.center);
+		\draw [style=double edge] (48.center) to (47.center);
+		\draw [style=dashed edge] (49) to (50.center);
+		\draw [style=double edge] (54.center) to (53.center);
+		\draw [style=double edge] (53.center) to (52.center);
+		\draw [style=double edge] (52.center) to (55.center);
+		\draw [style=double edge] (55.center) to (54.center);
+		\draw [style=dashed edge] (56) to (57.center);
+		\draw [style=double edge] (68.center) to (67.center);
+		\draw [style=double edge] (67.center) to (66.center);
+		\draw [style=double edge] (66.center) to (69.center);
+		\draw [style=double edge] (69.center) to (68.center);
+		\draw [style=dashed edge] (70) to (71.center);
+		\draw [style=double edge] (82.center) to (81.center);
+		\draw [style=double edge] (81.center) to (80.center);
+		\draw [style=double edge] (80.center) to (83.center);
+		\draw [style=double edge] (83.center) to (82.center);
+		\draw [style=dashed edge] (84) to (85.center);
+		\draw [style=double edge] (89.center)
+			 to (88.center)
+			 to (87.center)
+			 to (90.center)
+			 to cycle;
+		\draw [style=dashed edge] (91) to (95.center);
+		\draw [style=dashed edge, in=-180, out=0, looseness=1.25] (92) to (96.center);
+		\draw [style=dashed edge, in=-180, out=0, looseness=1.25] (93) to (98.center);
+		\draw [style=dashed edge, in=-180, out=0, looseness=1.50] (94) to (97.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

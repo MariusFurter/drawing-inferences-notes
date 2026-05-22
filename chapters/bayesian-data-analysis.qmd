@@ -5,7 +5,7 @@ $$
 $$
 :::
 
-# Bayesian Data Analysis {#sec-bayesian-data-analysis}
+# Bayesian data analysis {#sec-bayesian-data-analysis}
 
 In the preceding chapters we developed the theory of Bayesian inference: how to specify a prior and a likelihood, and how to condition on observed data to obtain a posterior distribution. In principle, this is all there is to it. In practice, applying Bayesian inference to a real problem requires much more than computing a posterior. We need to choose a model, check that it makes sense before and after seeing the data, diagnose whether the computation succeeded, and compare alternative models. These activities — model building, checking, and revision — together form what is called the *Bayesian workflow* [@GelmanBayesianWorkflow2020].
 

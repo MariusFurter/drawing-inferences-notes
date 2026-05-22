@@ -38,7 +38,7 @@ book:
         - exercises/6-swiss-health.qmd
         - exercises/7-robust-regression.qmd
         - exercises/8-multilevel-regression.qmd
-        #- exercises/9-stroke-2.0.qmd
+        - exercises/9-fit-hybrid.qmd
     - part: "Appendix"
       chapters:
         - appendix/parametric-kernels.qmd
