@@ -1,0 +1,291 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm]{geometry}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{amsmath}
+
+%% ---- Colours ----------------------------------------------------------------
+\definecolor{accent}{RGB}{25, 75, 140}
+\definecolor{notebg}{RGB}{252, 247, 235}
+\definecolor{noteborder}{RGB}{200, 140, 30}
+
+%% ---- Section headings -------------------------------------------------------
+\newcommand{\sectionrule}{\vspace{1pt}{\color{accent}\rule{\linewidth}{0.4pt}}}
+
+\titleformat{\section}
+  {\large\bfseries\color{accent}}
+  {\thesection.}{0.5em}{}[\sectionrule]
+
+\titleformat{\subsection}
+  {\normalsize\bfseries}
+  {Exercise~\thesubsection}{0.6em}{}
+
+\titlespacing*{\section}{0pt}{1.4ex plus 0.4ex minus 0.2ex}{0.6ex}
+\titlespacing*{\subsection}{0pt}{1ex plus 0.2ex}{0.3ex}
+
+%% ---- Not-examinable environment ---------------------------------------------
+\newmdenv[
+  backgroundcolor=notebg,
+  linecolor=noteborder,
+  linewidth=1.5pt,
+  topline=false,
+  rightline=false,
+  bottomline=false,
+  innerleftmargin=10pt,
+  innerrightmargin=8pt,
+  innertopmargin=5pt,
+  innerbottommargin=5pt,
+  skipabove=6pt,
+  skipbelow=2pt,
+]{notebox}
+
+\newcommand{\notexaminable}[1]{%
+  \begin{notebox}
+    \footnotesize\textbf{Not examinable:}\vspace{2pt}
+    \begin{itemize}[topsep=1pt, itemsep=1pt, leftmargin=1.2em]
+      #1
+    \end{itemize}
+  \end{notebox}%
+}
+
+%% ---- List style -------------------------------------------------------------
+\setlist[itemize,1]{
+  topsep=3pt, itemsep=2pt, parsep=0pt,
+  leftmargin=1.5em, label=\textbullet
+}
+
+%% ---- Hyperref ---------------------------------------------------------------
+\hypersetup{colorlinks=true, linkcolor=accent, urlcolor=accent}
+
+%% ---- Title ------------------------------------------------------------------
+\title{\LARGE\bfseries MAT892 Learning Goals}
+\author{}
+\date{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\maketitle
+
+%% ---------------------------------------------------------------------------
+\section{Introduction}
+
+\begin{itemize}
+  \item Know the axioms of discrete probability and the formal objects involved.
+  \item Understand the possible worlds interpretation of discrete probability.
+  \item Be able to explain how probability can be used to express beliefs.
+  \item Know the conditioning formula and understand how it relates to updating beliefs.
+  \item Understand the idea behind Bayesian inference (generative model + conditioning).
+  \item Be familiar with the bolded terms in Section~1.1.5.
+  \item Be able to perform Bayesian inference using forward simulation and rejection sampling.
+\end{itemize}
+
+%% ---------------------------------------------------------------------------
+\section{Discrete Graphical Models}
+
+\begin{itemize}
+  \item Know the definition of a discrete (probability) kernel.
+  \item Be able to interpret kernels.
+  \item Know the formulas for sequential, parallel and copy-composition of discrete kernels.
+  \item Be able to draw and interpret the elements of string diagrams (boxes, wires, bundling, crossing, copy, delete).
+  \item Understand the meaning of boxes with no inputs or outputs.
+  \item Know how to lift functions to deterministic kernels.
+  \item Be able to parse a given string diagram in at least one valid way.
+  \item Understand how the operations on kernels can be represented using tensors (2.2.3).
+  \item Be able to perform forward simulation from a string diagram of probability kernels.
+  \item Be able to estimate expectations and probabilities using the Law of Large Numbers (2.3.3).
+\end{itemize}
+
+%% ---------------------------------------------------------------------------
+\section{Conditioning}
+
+\begin{itemize}
+  \item Understand the graphical procedure for conditioning.
+  \item Be able to use the graphical test for conditional independence.
+  \item Understand how kernels can be factored using weights (3.3.1) and how this gives rise to importance sampling.
+  \item Know how to sample from diagrams of probability kernels and weights (3.3.3) and understand how the technique applies to Bayesian inference.
+\end{itemize}
+
+\newpage
+
+%% ---------------------------------------------------------------------------
+\section{Hybrid Models}
+
+\begin{itemize}
+  \item Know the definition of measurable spaces and measures.
+  \item Know the general definition of kernels (4.1.4).
+  \item Know the definition of density (4.1.5).
+  \item Understand how the definition given for discrete kernels relates to densities.
+  \item Know the formulas for sequential, parallel and copy-composition of kernels with densities.
+  \item Understand how the graphical conditioning procedure works on kernels with densities.
+  \item Understand the need for parametric kernels and how to construct them from base families and deterministic transforms.
+  \item Be familiar with the parametric forms of linear, logistic, and Poisson regression. Understand how they arise as a composition of base families and deterministic transforms.
+\end{itemize}
+
+%% ---------------------------------------------------------------------------
+\section{Bayesian Data Analysis}
+
+\begin{itemize}
+  \item Internalize the main stages of the Bayesian workflow and know why they are important.
+  \item Be able to read the synthetic notation for model specification
+        ($x \sim \text{Normal}(\ldots)$) and know how it translates to NumPyro.
+  \item Understand plate notation.
+  \item Know the basic NumPyro modelling constructs (\texttt{.sample} and \texttt{.deterministic}) and understand what they do.
+  \item Know what to consider when choosing a prior.
+  \item Know what NumPyro construct to use for prior predictive checks.
+  \item Understand the options you can set in NumPyro's MCMC
+        (\texttt{kernel}, \texttt{num\_warmup}, \texttt{num\_samples}, \texttt{num\_chains})
+        and what inference returns.
+  \item Be able to interpret the ArviZ summary output
+        (\texttt{mean}, \texttt{sd}, \texttt{ess}, \texttt{r\_hat}).
+  \item Understand how to interpret trace plots and know about the existence of rank plots.
+  \item Be able to interpret pair plots of the posterior (5.7.1).
+  \item Understand how to compute a derived quantity from posterior samples.
+  \item Understand the purpose of posterior predictive checks and how to generate posterior samples in NumPyro.
+  \item Understand how to use summary statistics for posterior predictive checks.
+  \item Know what sensitivity analysis is, how you would do it naively, and why it is important.
+  \item Know how to compare models using the expected log predictive density.
+  \item Understand the difference between out-of-sample prediction, cross-validation, and in-sample prediction.
+\end{itemize}
+
+\notexaminable{
+  \item The workings of power-scaling sensitivity analysis.
+  \item The PSIS method for model comparison.
+}
+
+%% ---------------------------------------------------------------------------
+\section{Mechanics of MCMC}
+
+\begin{itemize}
+  \item Understand the concepts of Markov chain, transition kernel and stationary distribution.
+  \item Understand the difference between spatial and time averages.
+  \item Understand the statement of the ergodic theorem.
+  \item Be able to name two obstructions to the ergodic theorem.
+  \item Be able to intuitively explain Harris recurrence and aperiodicity (exact definitions are not required, only what they convey).
+  \item Understand that Harris recurrence guarantees the ergodic theorem and that added aperiodicity guarantees convergence to the stationary distribution from any initial distribution.
+  \item Know the detailed balance condition and understand intuitively why it implies stationarity.
+  \item Know how to construct a Metropolis--Hastings kernel from a given proposal (including the acceptance formula).
+  \item Know the MH algorithm.
+  \item Understand how MH applies to the Bayesian inference problem.
+  \item Know sufficient conditions for the MH kernel to be aperiodic and Harris recurrent.
+  \item Understand the role played by the proposal in the performance of MCMC.
+  \item Know three types of proposal mechanisms (independent, random-walk, gradient-based) and understand their pros and cons.
+\end{itemize}
+
+\notexaminable{
+  \item Section 6.4.8 onwards (apart from the MH proposals).
+}
+
+%% ---------------------------------------------------------------------------
+\section{Inference in Practice}
+
+\begin{itemize}
+  \item Understand how to marginalize discrete latents.
+  \item Understand MAP and Laplace approximation, including when they are appropriate and their limitations.
+  \item Understand how to exploit conditioning to split models into independent parts, including empirical Bayes.
+  \item Know how to deal with missing data (both when missingness is informative and uninformative) and how this relates to imputation.
+\end{itemize}
+
+\notexaminable{
+  \item The details of conjugate distributions.
+  \item How to code models with missing data.
+}
+
+%% ---------------------------------------------------------------------------
+\section{Sequential Monte Carlo}
+
+\begin{itemize}
+  \item Know the definition of a state-space model.
+  \item Understand the filtering problem.
+  \item Understand how to derive a weighted sampling algorithm (8.3.1) from the SSM model.
+  \item Know the definition of ESS and why it is useful.
+  \item Understand what resampling is and why it is beneficial.
+  \item Understand how to extend SMC to any diagram of probability kernels and weights.
+  \item Know why sample impoverishment can occur in general models.
+  \item Understand how MCMC moves work and why they increase diversity.
+\end{itemize}
+
+%% ---------------------------------------------------------------------------
+\section{Variational Inference}
+
+\begin{itemize}
+  \item Understand the basic idea of VI and why it can be achieved by optimizing the ELBO.
+  \item Know at least two common variational families.
+  \item Understand the differences between MCMC and VI in (Num)Pyro (9.2).
+\end{itemize}
+
+%% ---------------------------------------------------------------------------
+\section*{Exercises}
+\addcontentsline{toc}{section}{Exercises}
+\setcounter{subsection}{0}
+\renewcommand{\thesubsection}{\arabic{subsection}}
+
+\subsection{}
+
+\begin{itemize}
+  \item Know how to estimate expectations using Monte Carlo simulation, including (conditional) probabilities.
+  \item Understand how this relates to rejection sampling.
+\end{itemize}
+
+\subsection{}
+
+\begin{itemize}
+  \item Understand the workflow of building and implementing a graphical model.
+  \item Know how to use the resulting program to estimate quantities of interest.
+\end{itemize}
+
+\subsection{}
+
+\begin{itemize}
+  \item Understand the naive Bayes model, why it is attractive computationally, and its limitations.
+\end{itemize}
+
+\subsection{}
+
+\begin{itemize}
+  \item Understand the forward algorithm for HMMs conceptually as composition.
+\end{itemize}
+
+\subsection{}
+
+\begin{itemize}
+  \item Be able to translate a generative model into a \texttt{WeightedSampling.torch} model using \texttt{sample}, \texttt{deterministic}, and \texttt{observe}.
+  \item Understand how these primitives relate to the weighted sampling procedure in the conditioning chapter.
+\end{itemize}
+
+\subsection{}
+
+\begin{itemize}
+  \item Understand the interpretation of linear regression coefficients.
+  \item Understand why logistic regression coefficients are not directly interpretable in the same way.
+  \item Know how to nonetheless probe the implications of a fitted model (posterior predictions).
+\end{itemize}
+
+\subsection{}
+
+\begin{itemize}
+  \item Know the basic workflow of MCMC in NumPyro. You do not need to know all code details, but you should be able to explain the basic steps you would take during coding.
+\end{itemize}
+
+\subsection{}
+
+\begin{itemize}
+  \item Understand the multilevel regression model.
+\end{itemize}
+
+\subsection{}
+
+\begin{itemize}
+  \item Understand how complete observations split models.
+  \item Understand how to fit discrete binary kernels using a closed-form formula (Task~2).
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,19 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {section}{\numberline {2}Discrete Graphical Models}{2}{section.2}%
+\contentsline {section}{\numberline {3}Conditioning}{2}{section.3}%
+\contentsline {section}{\numberline {4}Hybrid Models}{2}{section.4}%
+\contentsline {section}{\numberline {5}Bayesian Data Analysis}{3}{section.5}%
+\contentsline {section}{\numberline {6}Mechanics of MCMC}{3}{section.6}%
+\contentsline {section}{\numberline {7}Inference in Practice}{4}{section.7}%
+\contentsline {section}{\numberline {8}Sequential Monte Carlo}{4}{section.8}%
+\contentsline {section}{\numberline {9}Variational Inference}{4}{section.9}%
+\contentsline {section}{Exercises}{4}{section.9}%
+\contentsline {subsection}{\numberline {1}}{4}{subsection.9.1}%
+\contentsline {subsection}{\numberline {2}}{4}{subsection.9.2}%
+\contentsline {subsection}{\numberline {3}}{4}{subsection.9.3}%
+\contentsline {subsection}{\numberline {4}}{5}{subsection.9.4}%
+\contentsline {subsection}{\numberline {5}}{5}{subsection.9.5}%
+\contentsline {subsection}{\numberline {6}}{5}{subsection.9.6}%
+\contentsline {subsection}{\numberline {7}}{5}{subsection.9.7}%
+\contentsline {subsection}{\numberline {8}}{5}{subsection.9.8}%
+\contentsline {subsection}{\numberline {9}}{5}{subsection.9.9}%
