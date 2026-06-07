@@ -253,14 +253,14 @@ This means we can view any diagram with weights as a single factored kernel, and
 2. **Output** the total weight $w = \prod_j w_j(x_j)$ and the output values $y$.
 3. **Estimate** the expectation from $N$ runs: $\frac{1}{N} \sum_{k=1}^N w^{(k)} \, t(y^{(k)})$.
 
-**Using importance sampling for a conditioned model.** Now consider the situation after conditioning. Pre-conditioning a kernel $g : X \kernel Y \otimes Z$ on $Z = \bar z$ gives the unnormalized kernel $g_{\mid Z = \bar z}(y \mid x) = g(y, \bar z \mid x)$. The conditional expectation of a test function $t$ is:
+**Using importance sampling for a conditioned model.** Now consider the situation after conditioning. Pre-conditioning a kernel $g : X \kernel Y \otimes Z$ on $Z = \bar z$ gives the unnormalized kernel $g_{\mid Z = \bar z}(y \mid x) = g(y, \bar z \mid x)$. The normalized conditional is $g(y \mid \bar z, x) := \frac{g_{\mid Z = \bar z}(y \mid x)}{\sum_{y'} g_{\mid Z = \bar z}(y' \mid x)}$. Hence, the conditional expectation of a test function $t$ is:
 $$
 \mathbb{E}_{g(y \mid \bar z, x)}[ \, t(y) \,] = \sum_{y} t(y) \, g(y \mid \bar z, x) = \frac{\sum_y t(y) \, g_{\mid Z = \bar z}(y \mid x)}{\sum_{y'} g_{\mid Z = \bar z}(y' \mid x)} = \frac{\mathbb{E}_{g_{\mid Z = \bar z}}[\, t(y) \,]}{\mathbb{E}_{g_{\mid Z = \bar z}}[\, 1 \,]}.
 $$
 
 Each expectation can be estimated by importance sampling using the procedure above. Taking the ratio of the two estimates gives:
 $$
-\sum_{y} t(y) \, g(y \mid \bar z, x) \approx \frac{\sum_{i=1}^N w(y_i, x) \, t(y_i)}{\sum_{i=1}^N w(y_i, x)}.
+\mathbb{E}_{g(y \mid \bar z, x)}[ \, t(y) \,]  \approx \frac{\sum_{i=1}^N w(y_i, x) \, t(y_i)}{\sum_{i=1}^N w(y_i, x)}.
 $$
 
 In the context of Bayesian networks, this procedure is known as **likelihood weighting**.
