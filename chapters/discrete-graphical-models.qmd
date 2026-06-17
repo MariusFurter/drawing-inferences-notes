@@ -456,7 +456,7 @@ A kernel is copyable precisely when it always produces the same output for a giv
 The following proposition makes this precise.
 
 :::{#prp-copyable-kernel}
-A discrete kernel is copyable if and only if it arises from a deterministic function. In other words, $f : X \kernel Y$ is copyable if and only if there exists a function $g : X \to Y$ such that $f = \bar{g}$.
+A discrete probability kernel is copyable if and only if it arises from a deterministic function. In other words, $f : X \kernel Y$ is copyable if and only if there exists a function $g : X \to Y$ such that $f = \bar{g}$.
 :::
 
 :::{.proof}
@@ -472,7 +472,10 @@ $$
 
 First, suppose $f$ arises from a function. Then $f(y' \mid x) = \ivmark{y' = f(x)}$, so the left-hand side becomes $\ivmark{y' = y'' = f(x)}$ and the right-hand side becomes $\ivmark{y' = f(x)} \, \ivmark{y'' = f(x)}$, which are equal.
 
-Conversely, suppose $f$ is copyable, so that $f(y' \mid x) \, \ivmark{y' = y''} = f(y' \mid x) \, f(y'' \mid x)$ for all $x, y', y''$. Setting $y' = y''$ gives $f(y' \mid x) = f(y' \mid x)^2$, so $f(y' \mid x) \in \{0, 1\}$ for every $x$ and $y'$. Next, suppose for contradiction that there exist two distinct values $y' \neq y''$ with $f(y' \mid x) = f(y'' \mid x) = 1$ for some $x$. Then the left-hand side equals $1 \cdot \ivmark{y' = y''} = 0$, while the right-hand side equals $1 \cdot 1 = 1$, a contradiction. Hence for each $x$, there is at most one value $y$ with $f(y \mid x) = 1$. For each such $x$, we can define a function $g : X \to Y$ by setting $g(x)$ to be this unique $y$, giving $f(y \mid x) = \ivmark{y = g(x)} = \bar{g}(y \mid x)$.
+Conversely, suppose $f$ is copyable, so that $f(y' \mid x) \, \ivmark{y' = y''} = f(y' \mid x) \, f(y'' \mid x)$ for all $x, y', y''$. Setting $y' = y''$ gives $f(y' \mid x) = f(y' \mid x)^2$, so $f(y' \mid x) \in \{0, 1\}$ for every $x$ and $y'$. Next, suppose for contradiction that there exist two distinct values $y' \neq y''$ with $f(y' \mid x) = f(y'' \mid x) = 1$ for some $x$. Then the left-hand side equals $1 \cdot \ivmark{y' = y''} = 0$, while the right-hand side equals $1 \cdot 1 = 1$, a contradiction. Hence for each $x$, there is at most one value $y$ with $f(y \mid x) = 1$.
+
+On the other hand, since $f$ is a probability kernel, we have $\sum_{y} f(y \mid x) = 1$ for each $x$, so there must be at least one value $y$ with $f(y \mid x) = 1$. Combining these two facts, we conclude that for each $x$, there is a unique value $y$ with $f(y \mid x) = 1$.
+This defines a function $g : X \to Y$ by setting $g(x)$ to be this unique $y$, giving $f(y \mid x) = \ivmark{y = g(x)} = \bar{g}(y \mid x)$.
 :::
 
 
