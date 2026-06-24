@@ -520,7 +520,7 @@ plt.show()
 
 Several features stand out in @fig-posterior-pair. The marginals for $\rho_1$ and $\rho_2$ are roughly bell-shaped, reflecting well-identified rates. The marginal for $\tau$ is concentrated on a narrow band of years, indicating a fairly precise estimate of when the change occurred. The off-diagonal panels show whether any two parameters are correlated. Look for elongated clouds that signal correlations. 
 
-We see that $\rho_1$ and $\rho_2$ are nearly independent. There is a slight negative correlation between $\rho_1$ and $\tau$, meaning that a later switchpoint (more years in the early regime) is associated with a slightly lower early rate. This makes sense: if the switch is later, then more low accident years fall under rate $\rho_1$.
+We see that $\rho_1$ and $\rho_2$ are nearly uncorrelated. There is a slight negative correlation between $\rho_1$ and $\tau$, meaning that a later switchpoint (more years in the early regime) is associated with a slightly lower early rate. This makes sense: if the switch is later, then more low accident years fall under rate $\rho_1$.
 
 
 ### Posterior rate trajectory
